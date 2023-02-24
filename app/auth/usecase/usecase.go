@@ -21,7 +21,7 @@ func New(ar auth.Repo, uc _user.UseCase) auth.UseCase {
 	}
 }
 
-func (u *useCase) NewCookie(userId int) (*model.Cookie, error) {
+func (u *useCase) newCookie(userId int) (*model.Cookie, error) {
 	// TODO hash
 	cookie := model.Cookie{
 		UId:     userId,
@@ -36,7 +36,7 @@ func (u *useCase) NewCookie(userId int) (*model.Cookie, error) {
 	return &cookie, nil
 }
 
-func (u *useCase) GetCookie(uId int) (*model.Cookie, error) {
+func (u *useCase) getCookie(uId int) (*model.Cookie, error) {
 	cookie, err := u.authRepo.GetCookie(uId)
 	if err != nil {
 		return nil, fmt.Errorf("cant get cookie: %w", err)
@@ -45,7 +45,7 @@ func (u *useCase) GetCookie(uId int) (*model.Cookie, error) {
 	return cookie, nil
 }
 
-func (u *useCase) DeleteCookie(session string) error {
+func (u *useCase) deleteCookie(session string) error {
 	err := u.authRepo.DeleteCookie(session)
 	if err != nil {
 		return fmt.Errorf("cant delete cookie: %w", err)
@@ -63,9 +63,9 @@ func (u *useCase) SignIn(form model.FormAuth) (*model.User, *model.Cookie, error
 	if user.Password != form.Password {
 		return nil, nil, fmt.Errorf("invalid password")
 	}
-	cookie, err := u.GetCookie(user.Id)
+	cookie, err := u.getCookie(user.Id)
 	if err != nil {
-		cookie, err = u.NewCookie(user.Id)
+		cookie, err = u.newCookie(user.Id)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -87,10 +87,18 @@ func (u *useCase) SignUp(form model.FormReg) (*model.User, *model.Cookie, error)
 		return nil, nil, fmt.Errorf("cant create user: %w", err)
 	}
 
-	cookie, err := u.NewCookie(user.Id)
+	cookie, err := u.newCookie(user.Id)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return user, cookie, nil
+}
+
+func (u *useCase) Logout(session string) error {
+	err := u.deleteCookie(session)
+	if err != nil {
+		return fmt.Errorf("failed to logout: %w", err)
+	}
+	return nil
 }

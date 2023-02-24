@@ -99,7 +99,7 @@ func (h *handlers) Logout(c echo.Context) error {
 		return utils.SendError(c, http.StatusBadRequest, fmt.Sprintf("faliled to logout %v", err.Error()))
 	}
 
-	err = h.useCase.DeleteCookie(cookie.Value)
+	err = h.useCase.Logout(cookie.Value)
 	if err != nil {
 		c.Logger().Error(fmt.Errorf("faliled logout %w", err))
 		return utils.SendError(c, http.StatusUnauthorized, fmt.Sprintf("faliled to logout %v", err.Error()))
