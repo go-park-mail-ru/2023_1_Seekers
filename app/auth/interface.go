@@ -9,14 +9,14 @@ type UseCase interface {
 	SignIn(form model.FormAuth) (*model.User, *model.Cookie, error)
 	SignUp(form model.FormReg) (*model.User, *model.Cookie, error)
 	NewCookie(uId int) (*model.Cookie, error)
-	DeleteCookie(value string) error
-	GetCookie(value string) (*model.Cookie, error)
+	DeleteCookie(session string) error
+	GetCookie(session string) (*model.Cookie, error)
 }
 
 type Repo interface {
 	NewCookie(cookie model.Cookie) error
-	DeleteCookie(value string) error
-	GetCookie(value string) (*model.Cookie, error)
+	DeleteCookie(session string) error
+	GetCookie(session string) (*model.Cookie, error)
 }
 
 type Handlers interface {
