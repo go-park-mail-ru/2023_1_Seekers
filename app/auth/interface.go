@@ -14,7 +14,7 @@ type UseCase interface {
 }
 
 type Repo interface {
-	NewCookie(uId int) (*model.Cookie, error)
+	NewCookie(cookie model.Cookie) error
 	DeleteCookie(value string) error
 	GetCookie(value string) (*model.Cookie, error)
 }

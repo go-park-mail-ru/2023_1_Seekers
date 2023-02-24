@@ -38,19 +38,20 @@ func (u *UsersDB) GetByEmail(email string) (*model.User, error) {
 	return nil, fmt.Errorf("no user with email %v", email)
 }
 
-func (u *UsersDB) Create(user model.User) error {
+func (u *UsersDB) Create(user model.User) (*model.User, error) {
 	_, err := u.GetById(user.Id)
 	if err == nil {
-		return fmt.Errorf("such user exists")
+		return nil, fmt.Errorf("such user exists")
 	}
 	_, err = u.GetByEmail(user.Email)
 	if err == nil {
-		return fmt.Errorf("such user exists")
+		return nil, fmt.Errorf("such user exists")
 	}
 	//слой бд отвечает за присваивание id
+	// TODO hash pw
 	user.Id = len(u.Users) + 1
 	u.Users = append(u.Users, user)
-	return nil
+	return &user, nil
 }
 
 func (u *UsersDB) Delete(user model.User) error {
