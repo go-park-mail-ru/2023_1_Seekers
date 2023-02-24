@@ -22,7 +22,7 @@ func New() auth.Repo {
 }
 
 func (a *AuthDB) NewCookie(cookie model.Cookie) error {
-	if _, err := a.GetCookie(cookie.Session); err != nil {
+	if _, err := a.GetCookie(cookie.UId); err == nil {
 		return fmt.Errorf("cant create cookie: %w", err)
 	}
 	a.Cookies = append(a.Cookies, cookie)
@@ -39,11 +39,11 @@ func (a *AuthDB) DeleteCookie(session string) error {
 	return fmt.Errorf("cant delete cookie %s, not found", session)
 }
 
-func (a *AuthDB) GetCookie(session string) (*model.Cookie, error) {
+func (a *AuthDB) GetCookie(uId int) (*model.Cookie, error) {
 	for _, c := range a.Cookies {
-		if c.Session == session {
+		if c.UId == uId {
 			return &c, nil
 		}
 	}
-	return nil, fmt.Errorf("cant get cookie %s", session)
+	return nil, fmt.Errorf("cant get cookie %d", uId)
 }

@@ -14,12 +14,12 @@ func New(r user.Repo) user.UseCase {
 	return &useCase{repo: r}
 }
 
-func (u *useCase) Create(user model.User) error {
+func (u *useCase) Create(user model.User) (*model.User, error) {
 	if user.Email == "" {
-		return fmt.Errorf("cant create user, email is empty")
+		return nil, fmt.Errorf("cant create user, email is empty")
 	}
 	if user.Password == "" {
-		return fmt.Errorf("cant create user, email is empty")
+		return nil, fmt.Errorf("cant create user, email is empty")
 	}
 	return u.repo.Create(user)
 }
