@@ -1,8 +1,9 @@
 package router
 
 import (
-	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/app/auth/usecase"
+	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/session/repository/inmemory"
+	_sessionUcase "github.com/go-park-mail-ru/2023_1_Seekers/app/session/usecase"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/app/user/usecase"
 	//userHandler "github.com/go-park-mail-ru/2023_1_Seekers/app/user/delivery/http"
@@ -12,14 +13,16 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+// TODO перейти c echo на net/http
+
 func Register(e *echo.Echo) {
 	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
+	sessionRepo := _sessionRepo.New()
 
 	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
+	sessionUCase := _sessionUcase.New(sessionRepo)
+	authUCase := _authUCase.New(sessionUCase, usersUCase)
 
-	//userH := userHandler.
 	authH := _authHandler.New(authUCase)
 
 	api := e.Group("/api")

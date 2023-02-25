@@ -41,7 +41,7 @@ func (h *handlers) SignUp(c echo.Context) error {
 		c.Logger().Error(fmt.Errorf("faliled decode sign up form %w", err))
 		return utils.SendError(c, http.StatusBadRequest, "bad request")
 	}
-	_, cookie, err := h.useCase.SignUp(form)
+	_, session, err := h.useCase.SignUp(form)
 	if err != nil {
 		c.Logger().Error(fmt.Errorf("faliled to sign up %w", err))
 		return utils.SendError(c, http.StatusInternalServerError, fmt.Sprintf("faliled to sign up %v", err.Error()))
@@ -49,8 +49,8 @@ func (h *handlers) SignUp(c echo.Context) error {
 
 	http.SetCookie(c.Response(), &http.Cookie{
 		Name:    config.CookieName,
-		Value:   cookie.Session,
-		Expires: cookie.Expire,
+		Value:   session.SessionId,
+		Expires: time.Now().Add(config.CookieTTL),
 	})
 	c.Response().WriteHeader(http.StatusOK)
 	return nil
@@ -74,7 +74,7 @@ func (h *handlers) SignIn(c echo.Context) error {
 		c.Logger().Error(fmt.Errorf("faliled decode sign in form %w", err))
 		return utils.SendError(c, http.StatusBadRequest, "bad request")
 	}
-	_, cookie, err := h.useCase.SignIn(form)
+	_, session, err := h.useCase.SignIn(form)
 	if err != nil {
 		c.Logger().Error(fmt.Errorf("faliled to sign in %w", err))
 		return utils.SendError(c, http.StatusBadRequest, fmt.Sprintf("faliled to sign in %v", err.Error()))
@@ -82,8 +82,8 @@ func (h *handlers) SignIn(c echo.Context) error {
 
 	http.SetCookie(c.Response(), &http.Cookie{
 		Name:    config.CookieName,
-		Value:   cookie.Session,
-		Expires: cookie.Expire,
+		Value:   session.SessionId,
+		Expires: time.Now().Add(config.CookieTTL),
 	})
 	c.Response().WriteHeader(http.StatusOK)
 	return nil

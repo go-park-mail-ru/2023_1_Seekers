@@ -6,15 +6,9 @@ import (
 )
 
 type UseCase interface {
-	SignIn(form model.FormAuth) (*model.User, *model.Cookie, error)
-	SignUp(form model.FormReg) (*model.User, *model.Cookie, error)
-	Logout(session string) error
-}
-
-type Repo interface {
-	NewCookie(cookie model.Cookie) error
-	GetCookie(uId int) (*model.Cookie, error)
-	DeleteCookie(session string) error
+	SignIn(form model.FormAuth) (*model.User, *model.Session, error)
+	SignUp(form model.FormReg) (*model.User, *model.Session, error)
+	Logout(sessionId string) error
 }
 
 type Handlers interface {

@@ -7,6 +7,6 @@ import (
 func Run(port string) {
 	r := router.New()
 	router.Register(r)
-	r.Logger.Fatal(r.Start("127.0.0.1:" + port))
+	r.Logger.Fatal(r.Start(":" + port))
 	//TODO to config
 }

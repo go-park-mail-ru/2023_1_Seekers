@@ -1,7 +1,10 @@
 package main
 
-import "github.com/go-park-mail-ru/2023_1_Seekers/app/server"
+import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/app/server"
+	"github.com/go-park-mail-ru/2023_1_Seekers/config"
+)
 
 func main() {
-	server.Run("8001")
+	server.Run(config.Port)
 }
