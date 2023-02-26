@@ -19,7 +19,7 @@ func New() session.Repo {
 }
 
 func (sDb *sessionDB) Create(session model.Session) error {
-	if _, err := sDb.GetSession(session.UId); err == nil {
+	if _, err := sDb.GetSessionById(session.UId); err == nil {
 		return fmt.Errorf("cant create session: %w", err)
 	}
 	sDb.sessions = append(sDb.sessions, session)
@@ -36,7 +36,16 @@ func (sDb *sessionDB) Delete(sessionId string) error {
 	return fmt.Errorf("cant delete session: no session with id %s", sessionId)
 }
 
-func (sDb *sessionDB) GetSession(uId int) (*model.Session, error) {
+func (sDb *sessionDB) GetSession(sessionId string) (*model.Session, error) {
+	for _, s := range sDb.sessions {
+		if s.SessionId == sessionId {
+			return &s, nil
+		}
+	}
+	return nil, fmt.Errorf("no session %s", sessionId)
+}
+
+func (sDb *sessionDB) GetSessionById(uId int) (*model.Session, error) {
 	for _, s := range sDb.sessions {
 		if s.UId == uId {
 			return &s, nil

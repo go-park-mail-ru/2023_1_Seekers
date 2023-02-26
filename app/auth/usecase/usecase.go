@@ -29,7 +29,7 @@ func (u *useCase) SignIn(form model.FormAuth) (*model.User, *model.Session, erro
 	if user.Password != form.Password {
 		return nil, nil, fmt.Errorf("invalid password")
 	}
-	session, err := u.sessionUC.GetSession(user.Id)
+	session, err := u.sessionUC.GetSessionById(user.Id)
 	if err != nil {
 		session, err = u.sessionUC.Create(user.Id)
 		if err != nil {
@@ -65,6 +65,14 @@ func (u *useCase) Logout(sessionId string) error {
 	err := u.sessionUC.Delete(sessionId)
 	if err != nil {
 		return fmt.Errorf("failed to logout: %w", err)
+	}
+	return nil
+}
+
+func (u *useCase) Auth(sessionId string) error {
+	_, err := u.sessionUC.GetSession(sessionId)
+	if err != nil {
+		return fmt.Errorf("failed to auth: %w", err)
 	}
 	return nil
 }

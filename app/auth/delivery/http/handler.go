@@ -49,7 +49,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	user, session, err := h.useCase.SignUp(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign up %w", err))
-		utils.SendError(w, http.StatusInternalServerError, fmt.Errorf("faliled to sign up %v", err.Error()))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
 		return
 	}
 
@@ -123,6 +123,22 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 		Value:   "",
 		Expires: time.Now().AddDate(0, 0, -1),
 	})
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie(config.CookieName)
+	if err != nil {
+		log.Error(fmt.Errorf("faliled auth %w", err))
+		utils.SendError(w, http.StatusUnauthorized, fmt.Errorf("faliled auth %w", err))
+		return
+	}
+
+	err = h.useCase.Auth(cookie.Value)
+	if err != nil {
+		utils.SendError(w, http.StatusUnauthorized, err)
+	}
 
 	w.WriteHeader(http.StatusOK)
 }

@@ -46,8 +46,17 @@ func (u *useCase) Delete(sessionId string) error {
 	return nil
 }
 
-func (u *useCase) GetSession(uId int) (*model.Session, error) {
-	s, err := u.sessionRepo.GetSession(uId)
+func (u *useCase) GetSession(sessionId string) (*model.Session, error) {
+	s, err := u.sessionRepo.GetSession(sessionId)
+	if err != nil {
+		return nil, fmt.Errorf("cant get session %s : %w", sessionId, err)
+	}
+
+	return s, nil
+}
+
+func (u *useCase) GetSessionById(uId int) (*model.Session, error) {
+	s, err := u.sessionRepo.GetSessionById(uId)
 	if err != nil {
 		return nil, fmt.Errorf("cant get session by user %w", err)
 	}

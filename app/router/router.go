@@ -23,7 +23,7 @@ func Register(r *mux.Router) {
 	r.HandleFunc("/api/signin", authH.SignIn).Methods(http.MethodPost)
 	r.HandleFunc("/api/signup", authH.SignUp).Methods(http.MethodPost)
 	r.HandleFunc("/api/logout", authH.Logout).Methods(http.MethodGet)
-
+	r.HandleFunc("/api/auth", authH.Auth).Methods(http.MethodGet)
 }
 
 func New() *mux.Router {
