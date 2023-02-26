@@ -20,7 +20,7 @@ func New(sc _session.UseCase, uc _user.UseCase) auth.UseCase {
 	}
 }
 
-func (u *useCase) SignIn(form model.FormAuth) (*model.User, *model.Session, error) {
+func (u *useCase) SignIn(form model.FormLogin) (*model.User, *model.Session, error) {
 	user, err := u.userUC.GetByEmail(form.Email)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cant get user: %w", err)
@@ -40,7 +40,7 @@ func (u *useCase) SignIn(form model.FormAuth) (*model.User, *model.Session, erro
 	return user, session, nil
 }
 
-func (u *useCase) SignUp(form model.FormReg) (*model.User, *model.Session, error) {
+func (u *useCase) SignUp(form model.FormSignUp) (*model.User, *model.Session, error) {
 	if form.RepeatPw != form.Password {
 		return nil, nil, fmt.Errorf("passwords dont match")
 	}
@@ -52,6 +52,14 @@ func (u *useCase) SignUp(form model.FormReg) (*model.User, *model.Session, error
 	if err != nil {
 		return nil, nil, fmt.Errorf("cant create user: %w", err)
 	}
+	// TODO store profile
+	profile := model.Profile{
+		UId:       user.Id,
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+		BirthDate: form.BirthDate,
+	}
+	fmt.Println(profile)
 
 	session, err := u.sessionUC.Create(user.Id)
 	if err != nil {

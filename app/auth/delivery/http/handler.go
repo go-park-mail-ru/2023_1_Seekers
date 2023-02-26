@@ -38,9 +38,10 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 			log.Error("failed to close request: %w", err)
 		}
 	}(r.Body)
-	form := model.FormReg{}
 
+	form := model.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
+	fmt.Println(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled decode sign up form %w", err))
 		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
@@ -74,7 +75,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 			log.Error("failed to close request: %w", err)
 		}
 	}(r.Body)
-	form := model.FormAuth{}
+	form := model.FormLogin{}
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {

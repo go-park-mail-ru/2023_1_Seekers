@@ -6,8 +6,8 @@ import (
 )
 
 type UseCase interface {
-	SignIn(form model.FormAuth) (*model.User, *model.Session, error)
-	SignUp(form model.FormReg) (*model.User, *model.Session, error)
+	SignIn(form model.FormLogin) (*model.User, *model.Session, error)
+	SignUp(form model.FormSignUp) (*model.User, *model.Session, error)
 	Logout(sessionId string) error
 	Auth(sessionId string) error
 }
