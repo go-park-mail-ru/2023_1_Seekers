@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
-	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type UseCase interface {
@@ -12,7 +12,7 @@ type UseCase interface {
 }
 
 type Handlers interface {
-	SignUp(c echo.Context) error
-	SignIn(c echo.Context) error
-	Logout(c echo.Context) error
+	SignUp(w http.ResponseWriter, r *http.Request)
+	SignIn(w http.ResponseWriter, r *http.Request)
+	Logout(w http.ResponseWriter, r *http.Request)
 }

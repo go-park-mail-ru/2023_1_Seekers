@@ -1,21 +1,17 @@
 package router
 
 import (
+	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/app/auth/delivery/http"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/app/auth/usecase"
 	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/session/repository/inmemory"
 	_sessionUcase "github.com/go-park-mail-ru/2023_1_Seekers/app/session/usecase"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/app/user/usecase"
-	//userHandler "github.com/go-park-mail-ru/2023_1_Seekers/app/user/delivery/http"
-	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/app/auth/delivery/http"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
+	"github.com/gorilla/mux"
+	"net/http"
 )
 
-// TODO перейти c echo на net/http
-
-func Register(e *echo.Echo) {
+func Register(r *mux.Router) {
 	userRepo := _userRepo.New()
 	sessionRepo := _sessionRepo.New()
 
@@ -24,21 +20,14 @@ func Register(e *echo.Echo) {
 	authUCase := _authUCase.New(sessionUCase, usersUCase)
 
 	authH := _authHandler.New(authUCase)
+	r.HandleFunc("/api/signin", authH.SignIn).Methods(http.MethodPost)
+	r.HandleFunc("/api/signup", authH.SignUp).Methods(http.MethodPost)
+	r.HandleFunc("/api/logout", authH.Logout).Methods(http.MethodGet)
 
-	api := e.Group("/api")
-	api.POST("/signin", authH.SignIn)
-	api.POST("/signup", authH.SignUp)
-	api.GET("/logout", authH.Logout)
 }
 
-func New() *echo.Echo {
-	e := echo.New()
-	e.Logger.SetLevel(log.DEBUG)
-	e.Use(middleware.Logger())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
-	}))
-	// TODO ? e.Validator =
-	return e
+func New() *mux.Router {
+	r := mux.NewRouter()
+	// TODO корсы
+	return r
 }

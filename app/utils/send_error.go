@@ -1,9 +1,17 @@
 package utils
 
 import (
-	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
-func SendError(c echo.Context, status int, err string) error {
-	return c.JSON(status, err)
+// SendError пока возможно и не так надо
+func SendError(w http.ResponseWriter, status int, err error) {
+	//w.Header().Set("Content-Type", config.NetTypeJSON)
+	//w.WriteHeader(status)
+	//
+	//_, err = w.Write(dataJson)
+	//if err != nil {
+	//	return err
+	//}
+	SendJson(w, status, err)
 }
