@@ -9,7 +9,6 @@ import (
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/app/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/app/user/usecase"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func Register(r *mux.Router) {
@@ -22,10 +21,8 @@ func Register(r *mux.Router) {
 	authUCase := _authUCase.New(authRepo)
 
 	authH := _authHandler.New(authUCase, sessionUCase, usersUCase)
-	r.HandleFunc("/api/signin", authH.SignIn).Methods(http.MethodPost)
-	r.HandleFunc("/api/signup", authH.SignUp).Methods(http.MethodPost)
-	r.HandleFunc("/api/logout", authH.Logout).Methods(http.MethodGet)
-	r.HandleFunc("/api/auth", authH.Auth).Methods(http.MethodGet)
+
+	_authHandler.RegisterHTTPRoutes(r, authH)
 }
 
 func New() *mux.Router {
