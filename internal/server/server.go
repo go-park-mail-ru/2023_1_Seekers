@@ -14,10 +14,11 @@ func Run(port string) error {
 		Addr:    ":" + port,
 		Handler: mux,
 	}
+	log.Info("server started")
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Errorf("failed to run server %v", err)
-		return fmt.Errorf("failed to run server %v", err)
+		log.Errorf("server stopped %v", err)
+		return fmt.Errorf("server stopped %v", err)
 	}
 	return nil
 }

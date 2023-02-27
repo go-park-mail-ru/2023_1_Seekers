@@ -9,4 +9,6 @@ var (
 	ErrPwDontMatch       = errors.New("passwords dont match")
 	ErrUserNotFound      = errors.New("user not found")
 	ErrUserExists        = errors.New("user already exists")
+	ErrSessionNotFound   = errors.New("session not found")
+	ErrSessionExists     = errors.New("session exists")
 )

@@ -1,16 +1,19 @@
 package pkg
 
 import (
-	"math/rand"
-	"time"
+	"crypto/rand"
+	"math/big"
 )
 
-func String(length int) string {
+func String(length int) (string, error) {
 	charSet := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	randBytes := make([]byte, length)
 	for i := range randBytes {
-		randBytes[i] = charSet[r.Intn(len(charSet))]
+		res, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
+		if err != nil {
+			return "", err
+		}
+		randBytes[i] = charSet[res.Int64()]
 	}
-	return string(randBytes)
+	return string(randBytes), nil
 }

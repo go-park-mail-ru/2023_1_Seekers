@@ -16,11 +16,13 @@ type Profile struct {
 type FormSignUp struct {
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
-	RepeatPw  string `json:"repeat_pw,omitempty"`
+	RepeatPw  string `json:"repeat_pw,omitempty"` // ?
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
 	BirthDate string `json:"birth_date,omitempty"`
 }
+
+// ? omit
 
 type FormLogin struct {
 	Email     string `json:"email,omitempty"`
