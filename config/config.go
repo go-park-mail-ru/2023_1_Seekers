@@ -5,10 +5,9 @@ import "time"
 const (
 	Port = "8001"
 
-	CookieName    = "MailBoxSession"
-	CookieTTL     = time.Hour * 24 * 100 // 100 days
-	CookieLen     = 32
-	CookieCharSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	CookieName = "MailBoxSession"
+	CookieTTL  = time.Hour * 24 * 100 // 100 days
+	CookieLen  = 32
 
 	ContentTypeJSON = "application/json"
 	RouteSignin     = "/api/signin"
