@@ -41,13 +41,6 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cant create user: %w", err)
 	}
-	// TODO store profile
-	profile := model.Profile{
-		UId:       user.Id,
-		FirstName: form.FirstName,
-		LastName:  form.LastName,
-		BirthDate: form.BirthDate,
-	}
-	fmt.Println(profile)
+
 	return user, nil
 }

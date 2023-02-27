@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	auth "github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
+	"github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
 	_session "github.com/go-park-mail-ru/2023_1_Seekers/app/session"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/app/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/utils"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
 	"github.com/labstack/gommon/log"
@@ -18,12 +19,14 @@ import (
 type handlers struct {
 	authUC    auth.UseCase
 	sessionUC _session.UseCase
+	userUC    _user.UseCase
 }
 
-func New(aUC auth.UseCase, sUC _session.UseCase) auth.Handlers {
+func New(aUC auth.UseCase, sUC _session.UseCase, uUC _user.UseCase) auth.Handlers {
 	return &handlers{
 		authUC:    aUC,
 		sessionUC: sUC,
+		userUC:    uUC,
 	}
 }
 
@@ -57,11 +60,24 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	profile := model.Profile{
+		UId:       user.Id,
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+		BirthDate: form.BirthDate,
+	}
+	err = h.userUC.CreateProfile(profile)
+	if err != nil {
+		log.Error(fmt.Errorf("faliled to create profile %w", err))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to create profile %w", err))
+		return
+	}
+
 	session, err := h.sessionUC.Create(user.Id)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign up %w", err))
 		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
-
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -93,15 +109,16 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
 		return
 	}
+
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign in %w", err))
 		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %v", err.Error()))
 		return
 	}
+
 	// когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
 	err = h.sessionUC.DeleteByUId(user.Id)
-	fmt.Println(err)
 	session, err := h.sessionUC.Create(user.Id)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign in %w", err))

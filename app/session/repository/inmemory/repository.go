@@ -38,14 +38,12 @@ func (sDb *sessionDB) Delete(sessionId string) error {
 }
 
 func (sDb *sessionDB) DeleteByUId(uId int) error {
-	fmt.Println("BEFORE", sDb.sessions)
 	for i, s := range sDb.sessions {
 		if s.UId == uId {
 			sDb.sessions = append(sDb.sessions[:i], sDb.sessions[i+1:]...)
 			return nil
 		}
 	}
-	fmt.Println("AFTER", sDb.sessions)
 	return fmt.Errorf("cant delete session: no user with id %s", uId)
 }
 
