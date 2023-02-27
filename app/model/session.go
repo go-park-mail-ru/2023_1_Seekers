@@ -1,6 +1,6 @@
 package model
 
 type Session struct {
-	UId       int    `json:"user_id"`
+	UId       uint64 `json:"user_id"`
 	SessionId string `json:"session_id"`
 }

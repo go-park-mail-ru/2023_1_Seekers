@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
@@ -33,15 +32,15 @@ func New(aUC auth.UseCase, sUC _session.UseCase, uUC _user.UseCase) auth.Handler
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	if r.Method != http.MethodPost {
-		// TODO pretty logger
-		log.Error("sign up not post method error")
-		utils.SendError(w, http.StatusMethodNotAllowed, errors.New("sign up not post method error"))
+		log.Error(auth.ErrInvalidMethodPost)
+		utils.SendError(w, http.StatusMethodNotAllowed, auth.ErrInvalidMethodPost)
 		return
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Error("failed to close request: %w", err)
+			// ?
+			log.Error("failed to close request: ", err)
 		}
 	}(r.Body)
 
@@ -49,12 +48,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&form)
 	fmt.Println(form)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled decode sign up form %w", err))
-		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
+		log.Error(auth.ErrInvalidForm)
+		utils.SendError(w, http.StatusBadRequest, auth.ErrInvalidForm)
 		return
 	}
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
+		// ?
 		log.Error(fmt.Errorf("faliled to sign up %w", err))
 		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
 		return
@@ -76,7 +76,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	session, err := h.sessionUC.Create(user.Id)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign up %w", err))
-		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %w", err))
 		return
 	}
 
@@ -91,8 +91,8 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	if r.Method != http.MethodPost {
-		log.Error("sign in not post method error")
-		utils.SendError(w, http.StatusMethodNotAllowed, errors.New("sign in not post method error"))
+		log.Error(auth.ErrInvalidMethodPost)
+		utils.SendError(w, http.StatusMethodNotAllowed, auth.ErrInvalidMethodPost)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -106,14 +106,14 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled decode sign in form %w", err))
-		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled decode sign in form %w", err))
 		return
 	}
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign in %w", err))
-		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %v", err.Error()))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %w", err))
 		return
 	}
 

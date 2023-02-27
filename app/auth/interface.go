@@ -13,7 +13,7 @@ type UseCase interface {
 type Repo interface {
 	Create(user model.User) (*model.User, error)
 	Delete(user model.User) error
-	GetById(id int) (*model.User, error)
+	GetById(id uint64) (*model.User, error)
 	GetByEmail(email string) (*model.User, error)
 }
 

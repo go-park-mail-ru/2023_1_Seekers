@@ -1,7 +1,6 @@
 package inmemory
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/user"
 )
@@ -20,19 +19,19 @@ func New() user.Repo {
 	}
 }
 
-func (pDb *profileDB) GetProfileById(id int) (*model.Profile, error) {
+func (pDb *profileDB) GetProfileById(id uint64) (*model.Profile, error) {
 	for i, p := range pDb.profiles {
 		if p.UId == id {
 			return &pDb.profiles[i], nil
 		}
 	}
-	return nil, fmt.Errorf("no user with id %v", id)
+	return nil, user.ErrUserNotFound
 }
 
 func (pDb *profileDB) CreateProfile(profile model.Profile) error {
 	_, err := pDb.GetProfileById(profile.UId)
 	if err == nil {
-		return fmt.Errorf("such user exists")
+		return user.ErrUserExists
 	}
 	pDb.profiles = append(pDb.profiles, profile)
 	return nil

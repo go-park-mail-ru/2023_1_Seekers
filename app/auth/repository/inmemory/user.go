@@ -1,7 +1,6 @@
 package inmemory
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
 )
@@ -20,13 +19,13 @@ func New() auth.Repo {
 	}
 }
 
-func (uDb *usersDB) GetById(id int) (*model.User, error) {
+func (uDb *usersDB) GetById(id uint64) (*model.User, error) {
 	for i, u := range uDb.users {
 		if u.Id == id {
 			return &uDb.users[i], nil
 		}
 	}
-	return nil, fmt.Errorf("no user with id %v", id)
+	return nil, auth.ErrUserNotFound
 }
 
 func (uDb *usersDB) GetByEmail(email string) (*model.User, error) {
@@ -35,21 +34,21 @@ func (uDb *usersDB) GetByEmail(email string) (*model.User, error) {
 			return &uDb.users[i], nil
 		}
 	}
-	return nil, fmt.Errorf("no user with email %v", email)
+	return nil, auth.ErrUserNotFound
 }
 
 func (uDb *usersDB) Create(user model.User) (*model.User, error) {
 	_, err := uDb.GetById(user.Id)
 	if err == nil {
-		return nil, fmt.Errorf("such user exists")
+		return nil, auth.ErrUserExists
 	}
 	_, err = uDb.GetByEmail(user.Email)
 	if err == nil {
-		return nil, fmt.Errorf("such user exists")
+		return nil, auth.ErrUserExists
 	}
 	//слой бд отвечает за присваивание id
 	// TODO hash pw
-	user.Id = len(uDb.users) + 1
+	user.Id = uint64(len(uDb.users) + 1)
 	uDb.users = append(uDb.users, user)
 	return &user, nil
 }
@@ -61,5 +60,5 @@ func (uDb *usersDB) Delete(user model.User) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("no such user %v", user)
+	return auth.ErrUserNotFound
 }

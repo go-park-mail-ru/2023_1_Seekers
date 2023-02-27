@@ -23,7 +23,7 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
 	}
 
 	if user.Password != form.Password {
-		return nil, fmt.Errorf("invalid password")
+		return nil, auth.ErrInvalidPw
 	}
 
 	return user, nil
@@ -31,7 +31,7 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
 
 func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 	if form.RepeatPw != form.Password {
-		return nil, fmt.Errorf("passwords dont match")
+		return nil, auth.ErrPwDontMatch
 	}
 
 	user, err := u.authRepo.Create(model.User{

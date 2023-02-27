@@ -15,9 +15,10 @@ func New(uc user.UseCase) user.Handlers {
 	}
 }
 
+// TODO implement
 func (h *handlers) CreateProfile(profile model.Profile) error {
 	return nil
 }
-func (h *handlers) GetProfileById(id int) (*model.Profile, error) {
+func (h *handlers) GetProfileById(id uint64) (*model.Profile, error) {
 	return nil, nil
 }

@@ -14,8 +14,8 @@ func New(r user.Repo) user.UseCase {
 }
 
 func (u *useCase) CreateProfile(profile model.Profile) error {
-	return nil
+	return u.repo.CreateProfile(profile)
 }
-func (u *useCase) GetProfileById(id int) (*model.Profile, error) {
-	return nil, nil
+func (u *useCase) GetProfileById(id uint64) (*model.Profile, error) {
+	return u.repo.GetProfileById(id)
 }

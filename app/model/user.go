@@ -1,13 +1,13 @@
 package model
 
 type User struct {
-	Id       int    `json:"id"`
+	Id       uint64 `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type Profile struct {
-	UId       int    `json:"user_id"`
+	UId       uint64 `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	BirthDate string `json:"birth_date"`
