@@ -5,23 +5,22 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
 	_session "github.com/go-park-mail-ru/2023_1_Seekers/app/session"
-	_user "github.com/go-park-mail-ru/2023_1_Seekers/app/user"
 )
 
 type useCase struct {
 	sessionUC _session.UseCase
-	userUC    _user.UseCase
+	authRepo  auth.Repo
 }
 
-func New(sc _session.UseCase, uc _user.UseCase) auth.UseCase {
+func New(sc _session.UseCase, ar auth.Repo) auth.UseCase {
 	return &useCase{
 		sessionUC: sc,
-		userUC:    uc,
+		authRepo:  ar,
 	}
 }
 
-func (u *useCase) SignIn(form model.FormLogin) (*model.User, *model.Session, error) {
-	user, err := u.userUC.GetByEmail(form.Email)
+func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
+	user, err := u.authRepo.GetByEmail(form.Email)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cant get user: %w", err)
 	}
@@ -40,12 +39,12 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, *model.Session, err
 	return user, session, nil
 }
 
-func (u *useCase) SignUp(form model.FormSignUp) (*model.User, *model.Session, error) {
+func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 	if form.RepeatPw != form.Password {
 		return nil, nil, fmt.Errorf("passwords dont match")
 	}
 
-	user, err := u.userUC.Create(model.User{
+	user, err := u.authRepo.Create(model.User{
 		Email:    form.Email,
 		Password: form.Password,
 	})

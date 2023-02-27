@@ -6,10 +6,17 @@ import (
 )
 
 type UseCase interface {
-	SignIn(form model.FormLogin) (*model.User, *model.Session, error)
-	SignUp(form model.FormSignUp) (*model.User, *model.Session, error)
+	SignIn(form model.FormLogin) (*model.User, error)
+	SignUp(form model.FormSignUp) (*model.User, error)
 	Logout(sessionId string) error
 	Auth(sessionId string) error
+}
+
+type Repo interface {
+	Create(user model.User) (*model.User, error)
+	Delete(user model.User) error
+	GetById(id int) (*model.User, error)
+	GetByEmail(email string) (*model.User, error)
 }
 
 type Handlers interface {
