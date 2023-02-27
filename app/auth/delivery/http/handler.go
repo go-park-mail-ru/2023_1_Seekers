@@ -10,7 +10,7 @@ import (
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/app/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/utils"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"time"

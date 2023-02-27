@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
