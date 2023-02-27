@@ -14,7 +14,7 @@ func SendJson(w http.ResponseWriter, status int, dataStruct any) {
 		return
 	}
 
-	w.Header().Set("Content-Type", config.NetTypeJSON)
+	w.Header().Set("Content-Type", config.ContentTypeJSON)
 	w.WriteHeader(status)
 
 	_, err = w.Write(dataJson)
