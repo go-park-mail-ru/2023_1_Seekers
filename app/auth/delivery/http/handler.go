@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
+	auth "github.com/go-park-mail-ru/2023_1_Seekers/app/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/model"
+	_session "github.com/go-park-mail-ru/2023_1_Seekers/app/session"
 	"github.com/go-park-mail-ru/2023_1_Seekers/app/utils"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
 	"github.com/labstack/gommon/log"
@@ -15,12 +16,14 @@ import (
 )
 
 type handlers struct {
-	useCase auth.UseCase
+	authUC    auth.UseCase
+	sessionUC _session.UseCase
 }
 
-func New(aUC auth.UseCase) auth.Handlers {
+func New(aUC auth.UseCase, sUC _session.UseCase) auth.Handlers {
 	return &handlers{
-		useCase: aUC,
+		authUC:    aUC,
+		sessionUC: sUC,
 	}
 }
 
@@ -47,11 +50,18 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
 		return
 	}
-	user, session, err := h.useCase.SignUp(form)
+	user, err := h.authUC.SignUp(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign up %w", err))
 		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
 		return
+	}
+
+	session, err := h.sessionUC.Create(user.Id)
+	if err != nil {
+		log.Error(fmt.Errorf("faliled to sign up %w", err))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
+
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -83,10 +93,19 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, errors.New("bad request"))
 		return
 	}
-	user, session, err := h.useCase.SignIn(form)
+	user, err := h.authUC.SignIn(form)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled to sign in %w", err))
 		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %v", err.Error()))
+		return
+	}
+	// когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
+	err = h.sessionUC.DeleteByUId(user.Id)
+	fmt.Println(err)
+	session, err := h.sessionUC.Create(user.Id)
+	if err != nil {
+		log.Error(fmt.Errorf("faliled to sign in %w", err))
+		utils.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %w", err))
 		return
 	}
 
@@ -112,7 +131,7 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.useCase.Logout(cookie.Value)
+	err = h.sessionUC.Delete(cookie.Value)
 	if err != nil {
 		log.Error(fmt.Errorf("faliled logout %w", err))
 		utils.SendError(w, http.StatusUnauthorized, fmt.Errorf("faliled to logout %v", err.Error()))
@@ -136,9 +155,10 @@ func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.useCase.Auth(cookie.Value)
+	_, err = h.sessionUC.GetSession(cookie.Value)
 	if err != nil {
-		utils.SendError(w, http.StatusUnauthorized, err)
+		utils.SendError(w, http.StatusUnauthorized, fmt.Errorf("failed to auth: %w", err))
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

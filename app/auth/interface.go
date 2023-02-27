@@ -8,8 +8,6 @@ import (
 type UseCase interface {
 	SignIn(form model.FormLogin) (*model.User, error)
 	SignUp(form model.FormSignUp) (*model.User, error)
-	Logout(sessionId string) error
-	Auth(sessionId string) error
 }
 
 type Repo interface {
