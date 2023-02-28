@@ -29,23 +29,15 @@ func New(aUC auth.UseCase, uUC _user.UseCase) auth.Handlers {
 
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
-	if r.Method != http.MethodPost {
-		authErr := errors.New(auth.AuthErrors[auth.ErrInvalidMethodPost], auth.ErrInvalidMethodPost)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			// ?
 			log.Error("failed to close request: ", err)
 		}
 	}(r.Body)
 
 	form := model.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
-	fmt.Println(form)
 	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
 		log.Error(authErr)
@@ -54,6 +46,12 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
+		if err == auth.ErrPwDontMatch {
+			authErr := errors.New(auth.AuthErrors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
+			log.Error(authErr)
+			pkg.SendError(w, authErr)
+			return
+		}
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
@@ -92,12 +90,6 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
-	if r.Method != http.MethodPost {
-		authErr := errors.New(auth.AuthErrors[auth.ErrInvalidMethodPost], auth.ErrInvalidMethodPost)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {

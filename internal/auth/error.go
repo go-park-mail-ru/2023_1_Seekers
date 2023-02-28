@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	ErrInvalidMethodPost    = errors.New("invalid method, not post")
 	ErrInvalidForm          = errors.New("invalid form, cant decode")
 	ErrPwDontMatch          = errors.New("passwords dont match")
 	ErrUserNotFound         = errors.New("user not found")
@@ -25,7 +24,6 @@ var (
 )
 
 var AuthErrors = map[error]int{
-	ErrInvalidMethodPost:    http.StatusMethodNotAllowed,
 	ErrInvalidForm:          http.StatusForbidden,
 	ErrPwDontMatch:          http.StatusUnauthorized,
 	ErrUserNotFound:         http.StatusUnauthorized,
