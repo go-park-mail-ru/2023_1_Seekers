@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -29,8 +30,9 @@ func New(aUC auth.UseCase, uUC _user.UseCase) auth.Handlers {
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	if r.Method != http.MethodPost {
-		log.Error(auth.ErrInvalidMethodPost)
-		pkg.SendError(w, http.StatusMethodNotAllowed, auth.ErrInvalidMethodPost)
+		authErr := errors.New(auth.AuthErrors[auth.ErrInvalidMethodPost], auth.ErrInvalidMethodPost)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -45,15 +47,16 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&form)
 	fmt.Println(form)
 	if err != nil {
-		log.Error(auth.ErrInvalidForm)
-		pkg.SendError(w, http.StatusBadRequest, auth.ErrInvalidForm)
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
-		// ?
-		log.Error(fmt.Errorf("faliled to sign up %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %v", err.Error()))
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 
@@ -65,15 +68,17 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.userUC.CreateProfile(profile)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled to create profile %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to create profile %w", err))
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 
 	session, err := h.authUC.CreateSession(user.Id)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled to sign up %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign up %w", err))
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 
@@ -88,29 +93,32 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	if r.Method != http.MethodPost {
-		log.Error(auth.ErrInvalidMethodPost)
-		pkg.SendError(w, http.StatusMethodNotAllowed, auth.ErrInvalidMethodPost)
+		authErr := errors.New(auth.AuthErrors[auth.ErrInvalidMethodPost], auth.ErrInvalidMethodPost)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Error("failed to close request: %w", err)
+			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
 	form := model.FormLogin{}
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled decode sign in form %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled decode sign in form %w", err))
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled to sign in %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %w", err))
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 		return
 	}
 
@@ -118,9 +126,9 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err = h.authUC.DeleteSessionByUId(user.Id)
 	session, err := h.authUC.CreateSession(user.Id)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled to sign in %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to sign in %w", err))
-		return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -135,21 +143,20 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	cookie, err := r.Cookie(config.CookieName)
 	if err == http.ErrNoCookie {
-		log.Error(fmt.Errorf("faliled logout %w", err))
-		pkg.SendError(w, http.StatusUnauthorized, fmt.Errorf("faliled to logout %v", err.Error()))
-		return
-		//return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogoutNoCookie], auth.ErrFailedLogoutNoCookie.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	} else if err != nil {
-		log.Error(fmt.Errorf("faliled logout %w", err))
-		pkg.SendError(w, http.StatusBadRequest, fmt.Errorf("faliled to logout %v", err.Error()))
-		return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	}
 
 	err = h.authUC.DeleteSession(cookie.Value)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled logout %w", err))
-		pkg.SendError(w, http.StatusUnauthorized, fmt.Errorf("faliled to logout %v", err.Error()))
-		return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -164,15 +171,16 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(config.CookieName)
 	if err != nil {
-		log.Error(fmt.Errorf("faliled auth %w", err))
-		pkg.SendError(w, http.StatusUnauthorized, fmt.Errorf("faliled auth %w", err))
-		return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	}
 
 	_, err = h.authUC.GetSession(cookie.Value)
 	if err != nil {
-		pkg.SendError(w, http.StatusUnauthorized, fmt.Errorf("failed to auth: %w", err))
-		return
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
 	}
 
 	w.WriteHeader(http.StatusOK)

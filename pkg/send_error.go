@@ -1,10 +1,15 @@
 package pkg
 
 import (
+	"fmt"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"net/http"
 )
 
-// SendError пока возможно и не так надо
-func SendError(w http.ResponseWriter, status int, err error) {
-	SendJson(w, status, err.Error())
+func SendError(w http.ResponseWriter, error *errors.JsonErr) error {
+	err := SendJson(w, error.Code, error)
+	if err != nil {
+		return fmt.Errorf("cant send error %w", err)
+	}
+	return nil
 }

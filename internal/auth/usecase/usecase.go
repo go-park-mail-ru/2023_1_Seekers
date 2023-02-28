@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
@@ -25,7 +26,7 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
 	}
 
 	if user.Password != form.Password {
-		return nil, auth.ErrInvalidPw
+		return nil, errors.New("user not found")
 	}
 
 	return user, nil
