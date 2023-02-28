@@ -1,8 +1,10 @@
 #!/bin/bash
-mkdir -p scripts/sresult_cover
+
+res_dir="./scripts/result_cover"
+mkdir -p $res_dir
 pkgs=$(go list ./...)
-cov_result="./scripts/result_cover/coverage.out"
-cov_html="./scripts/result_cover/cover.html"
+cov_result="${res_dir}/coverage.out"
+cov_html="${res_dir}/cover.html"
 deps=`echo ${pkgs} | tr ' ' ","`
 echo "mode: atomic" > $cov_result
 

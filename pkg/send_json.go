@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_1_Seekers/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/build/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
