@@ -19,9 +19,9 @@ func New() user.Repo {
 	}
 }
 
-func (pDb *profileDB) GetProfileById(id uint64) (*model.Profile, error) {
+func (pDb *profileDB) GetProfileByID(id uint64) (*model.Profile, error) {
 	for i, p := range pDb.profiles {
-		if p.UId == id {
+		if p.UID == id {
 			return &pDb.profiles[i], nil
 		}
 	}
@@ -29,7 +29,7 @@ func (pDb *profileDB) GetProfileById(id uint64) (*model.Profile, error) {
 }
 
 func (pDb *profileDB) CreateProfile(profile model.Profile) error {
-	_, err := pDb.GetProfileById(profile.UId)
+	_, err := pDb.GetProfileByID(profile.UID)
 	if err == nil {
 		return user.ErrUserExists
 	}

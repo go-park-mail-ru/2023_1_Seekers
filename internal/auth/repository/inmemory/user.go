@@ -24,9 +24,9 @@ func New() auth.Repo {
 	}
 }
 
-func (uDb *useruDb) GetById(id uint64) (*model.User, error) {
+func (uDb *useruDb) GetByID(id uint64) (*model.User, error) {
 	for i, u := range uDb.users {
-		if u.Id == id {
+		if u.ID == id {
 			return &uDb.users[i], nil
 		}
 	}
@@ -43,7 +43,7 @@ func (uDb *useruDb) GetByEmail(email string) (*model.User, error) {
 }
 
 func (uDb *useruDb) Create(user model.User) (*model.User, error) {
-	_, err := uDb.GetById(user.Id)
+	_, err := uDb.GetByID(user.ID)
 	if err == nil {
 		return nil, auth.ErrUserExists
 	}
@@ -53,14 +53,14 @@ func (uDb *useruDb) Create(user model.User) (*model.User, error) {
 	}
 	//слой бд отвечает за присваивание id
 	// TODO hash pw
-	user.Id = uint64(len(uDb.users) + 1)
+	user.ID = uint64(len(uDb.users) + 1)
 	uDb.users = append(uDb.users, user)
 	return &user, nil
 }
 
 func (uDb *useruDb) Delete(user model.User) error {
 	for i, u := range uDb.users {
-		if u.Id == user.Id {
+		if u.ID == user.ID {
 			uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
 			return nil
 		}
@@ -69,16 +69,16 @@ func (uDb *useruDb) Delete(user model.User) error {
 }
 
 func (uDb *useruDb) CreateSession(s model.Session) error {
-	if _, err := uDb.GetSessionByUId(s.UId); err == nil {
+	if _, err := uDb.GetSessionByUID(s.UID); err == nil {
 		return auth.ErrSessionExists
 	}
 	uDb.sessions = append(uDb.sessions, s)
 	return nil
 }
 
-func (uDb *useruDb) DeleteSession(sessionId string) error {
+func (uDb *useruDb) DeleteSession(sessionID string) error {
 	for i, s := range uDb.sessions {
-		if s.SessionId == sessionId {
+		if s.SessionID == sessionID {
 			uDb.sessions = append(uDb.sessions[:i], uDb.sessions[i+1:]...)
 			return nil
 		}
@@ -87,9 +87,9 @@ func (uDb *useruDb) DeleteSession(sessionId string) error {
 	return auth.ErrSessionNotFound
 }
 
-func (uDb *useruDb) DeleteSessionByUId(uId uint64) error {
+func (uDb *useruDb) DeleteSessionByUID(uID uint64) error {
 	for i, s := range uDb.sessions {
-		if s.UId == uId {
+		if s.UID == uID {
 			uDb.sessions = append(uDb.sessions[:i], uDb.sessions[i+1:]...)
 			return nil
 		}
@@ -97,18 +97,18 @@ func (uDb *useruDb) DeleteSessionByUId(uId uint64) error {
 	return auth.ErrSessionNotFound
 }
 
-func (uDb *useruDb) GetSession(sessionId string) (*model.Session, error) {
+func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) {
 	for _, s := range uDb.sessions {
-		if s.SessionId == sessionId {
+		if s.SessionID == sessionID {
 			return &s, nil
 		}
 	}
 	return nil, auth.ErrSessionNotFound
 }
 
-func (uDb *useruDb) GetSessionByUId(uId uint64) (*model.Session, error) {
+func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) {
 	for _, s := range uDb.sessions {
-		if s.UId == uId {
+		if s.UID == uID {
 			return &s, nil
 		}
 	}

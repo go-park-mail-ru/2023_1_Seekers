@@ -19,6 +19,6 @@ func New(uc user.UseCase) user.Handlers {
 func (h *handlers) CreateProfile(profile model.Profile) error {
 	return nil
 }
-func (h *handlers) GetProfileById(id uint64) (*model.Profile, error) {
+func (h *handlers) GetProfileByID(id uint64) (*model.Profile, error) {
 	return nil, nil
 }

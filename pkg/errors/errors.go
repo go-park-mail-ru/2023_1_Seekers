@@ -1,23 +1,23 @@
 package errors
 
-type JsonErr struct {
+type JSONErr struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (err *JsonErr) Error() string {
+func (err *JSONErr) Error() string {
 	return err.Message
 }
 
-func New(code int, err error) *JsonErr {
-	return &JsonErr{
+func New(code int, err error) *JSONErr {
+	return &JSONErr{
 		Code:    code,
 		Message: err.Error(),
 	}
 }
 
-func NewWrappedErr(code int, message string, err error) *JsonErr {
-	return &JsonErr{
+func NewWrappedErr(code int, message string, err error) *JSONErr {
+	return &JSONErr{
 		Code:    code,
 		Message: message + " : " + err.Error(),
 	}

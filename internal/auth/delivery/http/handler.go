@@ -61,7 +61,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	profile := model.Profile{
-		UId:       user.Id,
+		UID:       user.ID,
 		FirstName: form.FirstName,
 		LastName:  form.LastName,
 		BirthDate: form.BirthDate,
@@ -74,7 +74,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := h.authUC.CreateSession(user.Id)
+	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
 		log.Error(authErr)
@@ -84,10 +84,10 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    config.CookieName,
-		Value:   session.SessionId,
+		Value:   session.SessionID,
 		Expires: time.Now().Add(config.CookieTTL),
 	})
-	pkg.SendJson(w, http.StatusOK, user)
+	pkg.SendJSON(w, http.StatusOK, user)
 }
 
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
@@ -123,8 +123,8 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
-	err = h.authUC.DeleteSessionByUId(user.Id)
-	session, err := h.authUC.CreateSession(user.Id)
+	err = h.authUC.DeleteSessionByUID(user.ID)
+	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
 		log.Error(authErr)
@@ -133,10 +133,10 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    config.CookieName,
-		Value:   session.SessionId,
+		Value:   session.SessionID,
 		Expires: time.Now().Add(config.CookieTTL),
 	})
-	pkg.SendJson(w, http.StatusOK, user)
+	pkg.SendJSON(w, http.StatusOK, user)
 }
 
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {

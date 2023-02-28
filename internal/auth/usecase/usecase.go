@@ -48,14 +48,14 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 	return user, nil
 }
 
-func (u *useCase) CreateSession(uId uint64) (*model.Session, error) {
+func (u *useCase) CreateSession(uID uint64) (*model.Session, error) {
 	value, err := pkg.String(config.CookieLen)
 	if err != nil {
 		return nil, fmt.Errorf("cant create session %w", err)
 	}
 	newSession := model.Session{
-		UId:       uId,
-		SessionId: value,
+		UID:       uID,
+		SessionID: value,
 	}
 
 	err = u.authRepo.CreateSession(newSession)
@@ -66,8 +66,8 @@ func (u *useCase) CreateSession(uId uint64) (*model.Session, error) {
 	return &newSession, nil
 }
 
-func (u *useCase) DeleteSession(sessionId string) error {
-	err := u.authRepo.DeleteSession(sessionId)
+func (u *useCase) DeleteSession(sessionID string) error {
+	err := u.authRepo.DeleteSession(sessionID)
 	if err != nil {
 		return fmt.Errorf("cant delete session %w", err)
 	}
@@ -75,8 +75,8 @@ func (u *useCase) DeleteSession(sessionId string) error {
 	return nil
 }
 
-func (u *useCase) DeleteSessionByUId(uId uint64) error {
-	err := u.authRepo.DeleteSessionByUId(uId)
+func (u *useCase) DeleteSessionByUID(uID uint64) error {
+	err := u.authRepo.DeleteSessionByUID(uID)
 	if err != nil {
 		return fmt.Errorf("cant delete session by id %w", err)
 	}
@@ -84,8 +84,8 @@ func (u *useCase) DeleteSessionByUId(uId uint64) error {
 	return nil
 }
 
-func (u *useCase) GetSession(sessionId string) (*model.Session, error) {
-	s, err := u.authRepo.GetSession(sessionId)
+func (u *useCase) GetSession(sessionID string) (*model.Session, error) {
+	s, err := u.authRepo.GetSession(sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("cant get session: %w", err)
 	}
@@ -93,8 +93,8 @@ func (u *useCase) GetSession(sessionId string) (*model.Session, error) {
 	return s, nil
 }
 
-func (u *useCase) GetSessionByUId(uId uint64) (*model.Session, error) {
-	s, err := u.authRepo.GetSessionByUId(uId)
+func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) {
+	s, err := u.authRepo.GetSessionByUID(uID)
 	if err != nil {
 		return nil, fmt.Errorf("cant get session by user %w", err)
 	}
