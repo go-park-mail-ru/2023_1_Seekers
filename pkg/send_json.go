@@ -2,17 +2,18 @@ package pkg
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func SendJson(w http.ResponseWriter, status int, dataStruct any) error {
+func SendJson(w http.ResponseWriter, status int, dataStruct any) {
 	dataJson, err := json.Marshal(dataStruct)
 	if err != nil {
 		log.Error("failed to marshal", err)
-		return fmt.Errorf("failed to marshal %w", err)
+		SendError(w, errors.NewWrappedErr(http.StatusInternalServerError, "failed to marshal", err))
+		return
 	}
 
 	w.Header().Set("Content-Type", config.ContentTypeJSON)
@@ -21,7 +22,7 @@ func SendJson(w http.ResponseWriter, status int, dataStruct any) error {
 	_, err = w.Write(dataJson)
 	if err != nil {
 		log.Error("failed to send", err)
-		return fmt.Errorf("failed to send json %w", err)
+		SendError(w, errors.NewWrappedErr(http.StatusInternalServerError, "failed to send", err))
+		return
 	}
-	return nil
 }

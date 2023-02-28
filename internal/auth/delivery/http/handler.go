@@ -146,10 +146,12 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogoutNoCookie], auth.ErrFailedLogoutNoCookie.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	} else if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	}
 
 	err = h.authUC.DeleteSession(cookie.Value)
