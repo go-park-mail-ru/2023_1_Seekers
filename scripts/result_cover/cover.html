@@ -55,13 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (55.8%)</option>
+				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (85.1%)</option>
 				
 				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/register.go (0.0%)</option>
 				
-				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory/user.go (71.1%)</option>
+				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory/user.go (73.8%)</option>
 				
-				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (70.3%)</option>
+				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (86.5%)</option>
 				
 				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory/repository.go (80.0%)</option>
 				
@@ -101,7 +101,7 @@
 import (
         "encoding/json"
         "fmt"
-        "github.com/go-park-mail-ru/2023_1_Seekers/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
@@ -136,7 +136,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
 
         <span class="cov8" title="1">form := model.FormSignUp{}
         err := json.NewDecoder(r.Body).Decode(&amp;form)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
@@ -150,7 +150,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
                         pkg.SendError(w, authErr)
                         return
                 }</span>
-                <span class="cov0" title="0">authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
+                <span class="cov8" title="1">authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return</span>
@@ -197,7 +197,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
         <span class="cov8" title="1">form := model.FormLogin{}
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
@@ -219,6 +219,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
+                return
         }</span>
 
         <span class="cov8" title="1">http.SetCookie(w, &amp;http.Cookie{
@@ -232,23 +233,19 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         log.Info(r.Host, r.Header, r.Body)
         cookie, err := r.Cookie(config.CookieName)
-        if err == http.ErrNoCookie </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogoutNoCookie], auth.ErrFailedLogoutNoCookie.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
-                return
-        }</span> else<span class="cov8" title="1"> if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
         }</span>
 
         <span class="cov8" title="1">err = h.authUC.DeleteSession(cookie.Value)
-        if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
+        if err != nil </span><span class="cov8" title="1">{
+                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedDeleteSession], auth.ErrFailedDeleteSession.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
+                return
         }</span>
 
         <span class="cov8" title="1">http.SetCookie(w, &amp;http.Cookie{
@@ -262,17 +259,18 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) <span class="c
 
 func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         cookie, err := r.Cookie(config.CookieName)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
+                return
         }</span>
-
         <span class="cov8" title="1">_, err = h.authUC.GetSession(cookie.Value)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
+                return
         }</span>
 
         <span class="cov8" title="1">w.WriteHeader(http.StatusOK)</span>
@@ -282,7 +280,7 @@ func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) <span class="cov
 		<pre class="file" id="file1" style="display: none">package http
 
 import (
-        "github.com/go-park-mail-ru/2023_1_Seekers/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/gorilla/mux"
         "net/http"
@@ -322,13 +320,13 @@ func New() auth.Repo <span class="cov8" title="1">{
         }
 }</span>
 
-func (uDb *useruDb) GetByID(id uint64) (*model.User, error) <span class="cov8" title="1">{
-        for i, u := range uDb.users </span><span class="cov8" title="1">{
+func (uDb *useruDb) GetByID(id uint64) (*model.User, error) <span class="cov0" title="0">{
+        for i, u := range uDb.users </span><span class="cov0" title="0">{
                 if u.ID == id </span><span class="cov0" title="0">{
                         return &amp;uDb.users[i], nil
                 }</span>
         }
-        <span class="cov8" title="1">return nil, auth.ErrUserNotFound</span>
+        <span class="cov0" title="0">return nil, auth.ErrUserNotFound</span>
 }
 
 func (uDb *useruDb) GetByEmail(email string) (*model.User, error) <span class="cov8" title="1">{
@@ -341,12 +339,8 @@ func (uDb *useruDb) GetByEmail(email string) (*model.User, error) <span class="c
 }
 
 func (uDb *useruDb) Create(user model.User) (*model.User, error) <span class="cov8" title="1">{
-        _, err := uDb.GetByID(user.ID)
-        if err == nil </span><span class="cov0" title="0">{
-                return nil, auth.ErrUserExists
-        }</span>
-        <span class="cov8" title="1">_, err = uDb.GetByEmail(user.Email)
-        if err == nil </span><span class="cov0" title="0">{
+        _, err := uDb.GetByEmail(user.Email)
+        if err == nil </span><span class="cov8" title="1">{
                 return nil, auth.ErrUserExists
         }</span>
         //слой бд отвечает за присваивание id
@@ -382,7 +376,7 @@ func (uDb *useruDb) DeleteSession(sessionID string) error <span class="cov8" tit
                 }</span>
         }
 
-        <span class="cov0" title="0">return auth.ErrSessionNotFound</span>
+        <span class="cov8" title="1">return auth.ErrSessionNotFound</span>
 }
 
 func (uDb *useruDb) DeleteSessionByUID(uID uint64) error <span class="cov8" title="1">{
@@ -401,12 +395,12 @@ func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) <span c
                         return &amp;s, nil
                 }</span>
         }
-        <span class="cov0" title="0">return nil, auth.ErrSessionNotFound</span>
+        <span class="cov8" title="1">return nil, auth.ErrSessionNotFound</span>
 }
 
 func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) <span class="cov8" title="1">{
         for _, s := range uDb.sessions </span><span class="cov8" title="1">{
-                if s.UID == uID </span><span class="cov0" title="0">{
+                if s.UID == uID </span><span class="cov8" title="1">{
                         return &amp;s, nil
                 }</span>
         }
@@ -419,7 +413,7 @@ func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) <span cl
 import (
         "errors"
         "fmt"
-        "github.com/go-park-mail-ru/2023_1_Seekers/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -437,11 +431,11 @@ func New(ar auth.Repo) auth.UseCase <span class="cov8" title="1">{
 
 func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) <span class="cov8" title="1">{
         user, err := u.authRepo.GetByEmail(form.Email)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("cant get user: %w", err)
         }</span>
 
-        <span class="cov8" title="1">if user.Password != form.Password </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">if user.Password != form.Password </span><span class="cov0" title="0">{
                 return nil, errors.New("user not found")
         }</span>
 
@@ -457,7 +451,7 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) <span class
                 Email:    form.Email,
                 Password: form.Password,
         })
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("cant create user: %w", err)
         }</span>
 
@@ -484,7 +478,7 @@ func (u *useCase) CreateSession(uID uint64) (*model.Session, error) <span class=
 
 func (u *useCase) DeleteSession(sessionID string) error <span class="cov8" title="1">{
         err := u.authRepo.DeleteSession(sessionID)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("cant delete session %w", err)
         }</span>
 
@@ -502,20 +496,20 @@ func (u *useCase) DeleteSessionByUID(uID uint64) error <span class="cov8" title=
 
 func (u *useCase) GetSession(sessionID string) (*model.Session, error) <span class="cov8" title="1">{
         s, err := u.authRepo.GetSession(sessionID)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("cant get session: %w", err)
         }</span>
 
         <span class="cov8" title="1">return s, nil</span>
 }
 
-func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) <span class="cov0" title="0">{
+func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) <span class="cov8" title="1">{
         s, err := u.authRepo.GetSessionByUID(uID)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("cant get session by user %w", err)
         }</span>
 
-        <span class="cov0" title="0">return s, nil</span>
+        <span class="cov8" title="1">return s, nil</span>
 }
 </pre>
 		
@@ -645,7 +639,7 @@ func SendError(w http.ResponseWriter, error *errors.JSONErr) <span class="cov8" 
 
 import (
         "encoding/json"
-        "github.com/go-park-mail-ru/2023_1_Seekers/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
         log "github.com/sirupsen/logrus"
         "net/http"

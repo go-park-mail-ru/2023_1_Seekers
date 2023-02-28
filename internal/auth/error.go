@@ -21,6 +21,7 @@ var (
 	ErrFailedLogoutSession  = errors.New("failed logout")
 	ErrFailedAuth           = errors.New("failed auth")
 	ErrFailedGetSession     = errors.New("failed get session")
+	ErrFailedDeleteSession  = errors.New("failed delete session")
 )
 
 var AuthErrors = map[error]int{
@@ -31,7 +32,7 @@ var AuthErrors = map[error]int{
 	ErrSessionNotFound:      http.StatusUnauthorized,
 	ErrSessionExists:        http.StatusConflict,
 	ErrFailedSignUp:         http.StatusConflict,
-	ErrFailedCreateProfile:  http.StatusBadRequest,
+	ErrFailedCreateProfile:  http.StatusInternalServerError,
 	ErrFailedCreateSession:  http.StatusUnauthorized,
 	ErrFailedSignIn:         http.StatusUnauthorized,
 	ErrFailedLogout:         http.StatusBadRequest,
@@ -39,4 +40,5 @@ var AuthErrors = map[error]int{
 	ErrFailedLogoutSession:  http.StatusUnauthorized,
 	ErrFailedAuth:           http.StatusUnauthorized,
 	ErrFailedGetSession:     http.StatusUnauthorized,
+	ErrFailedDeleteSession:  http.StatusUnauthorized,
 }

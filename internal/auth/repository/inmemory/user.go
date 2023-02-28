@@ -43,11 +43,7 @@ func (uDb *useruDb) GetByEmail(email string) (*model.User, error) {
 }
 
 func (uDb *useruDb) Create(user model.User) (*model.User, error) {
-	_, err := uDb.GetByID(user.ID)
-	if err == nil {
-		return nil, auth.ErrUserExists
-	}
-	_, err = uDb.GetByEmail(user.Email)
+	_, err := uDb.GetByEmail(user.Email)
 	if err == nil {
 		return nil, auth.ErrUserExists
 	}

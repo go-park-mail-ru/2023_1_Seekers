@@ -121,6 +121,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -134,13 +135,8 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	cookie, err := r.Cookie(config.CookieName)
-	if err == http.ErrNoCookie {
+	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogoutNoCookie], auth.ErrFailedLogoutNoCookie.Error(), err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	} else if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -148,9 +144,10 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 
 	err = h.authUC.DeleteSession(cookie.Value)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogout], auth.ErrFailedLogout.Error(), err)
+		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedDeleteSession], auth.ErrFailedDeleteSession.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -168,13 +165,14 @@ func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	}
-
 	_, err = h.authUC.GetSession(cookie.Value)
 	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
