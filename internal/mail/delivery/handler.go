@@ -44,6 +44,7 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
+		return
 	}
 
 	folders := del.uc.GetFolders(userID)
@@ -77,6 +78,7 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
+		return
 	}
 	folders := del.uc.GetFolders(userID)
 	messages, err := del.uc.GetOutgoingMessages(userID)
@@ -85,7 +87,6 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 		mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetOutboxMessages], mail.ErrFailedGetOutboxMessages.Error(), err)
 		log.Error(mailErr)
 		pkg.SendError(w, mailErr)
-
 		return
 	}
 
@@ -110,6 +111,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
+		return
 	}
 	vars := mux.Vars(r)
 	folderID, err := strconv.ParseUint(vars["id"], 10, 64)
@@ -128,7 +130,6 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 		mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetFolderMessages], mail.ErrFailedGetFolderMessages.Error(), err)
 		log.Error(mailErr)
 		pkg.SendError(w, mailErr)
-
 		return
 	}
 
