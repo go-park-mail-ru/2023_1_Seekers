@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/build/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
@@ -209,6 +210,7 @@ func TestHandlers_Logout(t *testing.T) {
 
 	usersUCase := _userUCase.New(userRepo)
 	authUCase := _authUCase.New(authRepo)
+	middleware := _middleware.New(authUCase)
 
 	authH := New(authUCase, usersUCase)
 
@@ -238,7 +240,7 @@ func TestHandlers_Logout(t *testing.T) {
 		}
 		w := httptest.NewRecorder()
 
-		authH.Logout(w, r)
+		middleware.CheckAuth(authH.Logout)(w, r)
 
 		if w.Code != test.outputCase.status {
 			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.status, w.Code)

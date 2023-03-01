@@ -18,8 +18,8 @@ func New() auth.Repo {
 			{3, "max@example.com", "1379"},
 		},
 		[]model.Session{
-			//уже есть сессия для Uid 1
-			{1, "randgeneratedcookie12334524524523542"},
+			{1, "randgeneratedcookie12334524524523542"}, //уже есть сессия для Uid 1
+
 		},
 	}
 }
