@@ -51,7 +51,7 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 func (u *useCase) CreateSession(uID uint64) (*model.Session, error) {
 	value, err := pkg.String(config.CookieLen)
 	if err != nil {
-		return nil, fmt.Errorf("cant create session %w", err)
+		return nil, fmt.Errorf("cant create session: %w", err)
 	}
 	newSession := model.Session{
 		UID:       uID,
@@ -60,7 +60,7 @@ func (u *useCase) CreateSession(uID uint64) (*model.Session, error) {
 
 	err = u.authRepo.CreateSession(newSession)
 	if err != nil {
-		return nil, fmt.Errorf("cant create session %w", err)
+		return nil, fmt.Errorf("cant create session: %w", err)
 	}
 
 	return &newSession, nil
@@ -69,7 +69,7 @@ func (u *useCase) CreateSession(uID uint64) (*model.Session, error) {
 func (u *useCase) DeleteSession(sessionID string) error {
 	err := u.authRepo.DeleteSession(sessionID)
 	if err != nil {
-		return fmt.Errorf("cant delete session %w", err)
+		return fmt.Errorf("cant delete session: %w", err)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func (u *useCase) DeleteSession(sessionID string) error {
 func (u *useCase) DeleteSessionByUID(uID uint64) error {
 	err := u.authRepo.DeleteSessionByUID(uID)
 	if err != nil {
-		return fmt.Errorf("cant delete session by id %w", err)
+		return fmt.Errorf("cant delete session by id: %w", err)
 	}
 
 	return nil
