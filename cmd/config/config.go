@@ -12,11 +12,11 @@ const (
 	ContextUser     = "user-ctx"
 	ContentTypeJSON = "application/json"
 
-	RouteSignin = "/api/signin"
-	RouteSignup = "/api/signup"
-	RouteLogout = "/api/logout"
+	RouteSignin = "/api/v1/signin"
+	RouteSignup = "/api/v1/signup"
+	RouteLogout = "/api/v1/logout"
 
-	RouteInboxMessages  = "/api/inbox/"
-	RouteOutboxMessages = "/api/outbox/"
-	RouteFolderMessages = "/api/folder/{id:[0-9]+}"
+	RouteInboxMessages  = "/api/v1/inbox/"
+	RouteOutboxMessages = "/api/v1/outbox/"
+	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
 )
