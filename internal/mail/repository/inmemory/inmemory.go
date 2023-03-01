@@ -2,7 +2,7 @@ package inmemory
 
 import (
 	"errors"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/reporsitory"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"golang.org/x/exp/slices"
 )
@@ -16,7 +16,7 @@ type MailRepository struct {
 	users      []models.User
 }
 
-func NewMailRepository() reporsitory.RepositoryI {
+func NewMailRepository() mail.RepositoryI {
 	return &MailRepository{
 		messages: []models.Message{
 			{1, 1, "2023-01-01", "Title1", "Text1"},

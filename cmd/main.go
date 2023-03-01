@@ -6,7 +6,7 @@ import (
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
 	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
-	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/reporsitory/inmemory"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"

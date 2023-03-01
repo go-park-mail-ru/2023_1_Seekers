@@ -13,17 +13,11 @@ import (
 	"strconv"
 )
 
-type DeliveryI interface {
-	GetInboxMessages(w http.ResponseWriter, r *http.Request)
-	GetOutboxMessages(w http.ResponseWriter, r *http.Request)
-	GetFolderMessages(w http.ResponseWriter, r *http.Request)
-}
-
 type delivery struct {
 	uc mail.UseCaseI
 }
 
-func New(uc mail.UseCaseI) DeliveryI {
+func New(uc mail.UseCaseI) mail.DeliveryI {
 	return &delivery{
 		uc: uc,
 	}

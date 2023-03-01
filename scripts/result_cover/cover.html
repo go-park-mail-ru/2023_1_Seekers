@@ -103,9 +103,9 @@
 import (
         "encoding/json"
         "fmt"
-        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -136,7 +136,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
                 }</span>
         }(r.Body)
 
-        <span class="cov8" title="1">form := model.FormSignUp{}
+        <span class="cov8" title="1">form := models.FormSignUp{}
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov8" title="1">{
                 authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
@@ -158,7 +158,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
                 return</span>
         }
 
-        <span class="cov8" title="1">profile := model.Profile{
+        <span class="cov8" title="1">profile := models.Profile{
                 UID:       user.ID,
                 FirstName: form.FirstName,
                 LastName:  form.LastName,
@@ -184,6 +184,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
                 Name:    config.CookieName,
                 Value:   session.SessionID,
                 Expires: time.Now().Add(config.CookieTTL),
+                Path:    config.CookiePath,
         })
         pkg.SendJSON(w, http.StatusOK, user)</span>
 }
@@ -196,7 +197,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
                         log.Error(fmt.Errorf("failed to close request: %w", err))
                 }</span>
         }(r.Body)
-        <span class="cov8" title="1">form := model.FormLogin{}
+        <span class="cov8" title="1">form := models.FormLogin{}
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov8" title="1">{
@@ -228,6 +229,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
                 Name:    config.CookieName,
                 Value:   session.SessionID,
                 Expires: time.Now().Add(config.CookieTTL),
+                Path:    config.CookiePath,
         })
         pkg.SendJSON(w, http.StatusOK, user)</span>
 }
@@ -239,6 +241,7 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) <span class="c
                 Name:    config.CookieName,
                 Value:   "",
                 Expires: time.Now().AddDate(0, 0, -1),
+                Path:    config.CookiePath,
         })
 
         w.WriteHeader(http.StatusOK)
@@ -248,7 +251,7 @@ func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) <span class="c
 		<pre class="file" id="file1" style="display: none">package http
 
 import (
-        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
         "github.com/gorilla/mux"
@@ -266,29 +269,29 @@ func RegisterHTTPRoutes(r *mux.Router, h auth.Handlers, m *middleware.Middleware
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 )
 
 type useruDb struct {
-        users    []model.User
-        sessions []model.Session
+        users    []models.User
+        sessions []models.Session
 }
 
 func New() auth.Repo <span class="cov10" title="2">{
         return &amp;useruDb{
-                []model.User{
+                []models.User{
                         {1, "test@example.com", "1234"},
                         {2, "gena@example.com", "4321"},
                         {3, "max@example.com", "1379"},
                 },
-                []model.Session{
+                []models.Session{
                         {1, "randgeneratedcookie12334524524523542"}, //уже есть сессия для Uid 1
 
                 },
         }
 }</span>
 
-func (uDb *useruDb) GetByID(id uint64) (*model.User, error) <span class="cov0" title="0">{
+func (uDb *useruDb) GetByID(id uint64) (*models.User, error) <span class="cov0" title="0">{
         for i, u := range uDb.users </span><span class="cov0" title="0">{
                 if u.ID == id </span><span class="cov0" title="0">{
                         return &amp;uDb.users[i], nil
@@ -297,7 +300,7 @@ func (uDb *useruDb) GetByID(id uint64) (*model.User, error) <span class="cov0" t
         <span class="cov0" title="0">return nil, auth.ErrUserNotFound</span>
 }
 
-func (uDb *useruDb) GetByEmail(email string) (*model.User, error) <span class="cov1" title="1">{
+func (uDb *useruDb) GetByEmail(email string) (*models.User, error) <span class="cov1" title="1">{
         for i, u := range uDb.users </span><span class="cov1" title="1">{
                 if u.Email == email </span><span class="cov1" title="1">{
                         return &amp;uDb.users[i], nil
@@ -306,7 +309,7 @@ func (uDb *useruDb) GetByEmail(email string) (*model.User, error) <span class="c
         <span class="cov1" title="1">return nil, auth.ErrUserNotFound</span>
 }
 
-func (uDb *useruDb) Create(user model.User) (*model.User, error) <span class="cov1" title="1">{
+func (uDb *useruDb) Create(user models.User) (*models.User, error) <span class="cov1" title="1">{
         _, err := uDb.GetByEmail(user.Email)
         if err == nil </span><span class="cov1" title="1">{
                 return nil, auth.ErrUserExists
@@ -318,7 +321,7 @@ func (uDb *useruDb) Create(user model.User) (*model.User, error) <span class="co
         return &amp;user, nil</span>
 }
 
-func (uDb *useruDb) Delete(user model.User) error <span class="cov0" title="0">{
+func (uDb *useruDb) Delete(user models.User) error <span class="cov0" title="0">{
         for i, u := range uDb.users </span><span class="cov0" title="0">{
                 if u.ID == user.ID </span><span class="cov0" title="0">{
                         uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
@@ -328,7 +331,7 @@ func (uDb *useruDb) Delete(user model.User) error <span class="cov0" title="0">{
         <span class="cov0" title="0">return auth.ErrUserNotFound</span>
 }
 
-func (uDb *useruDb) CreateSession(s model.Session) error <span class="cov1" title="1">{
+func (uDb *useruDb) CreateSession(s models.Session) error <span class="cov1" title="1">{
         if _, err := uDb.GetSessionByUID(s.UID); err == nil </span><span class="cov0" title="0">{
                 return auth.ErrSessionExists
         }</span>
@@ -357,7 +360,7 @@ func (uDb *useruDb) DeleteSessionByUID(uID uint64) error <span class="cov1" titl
         <span class="cov0" title="0">return auth.ErrSessionNotFound</span>
 }
 
-func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) <span class="cov10" title="2">{
+func (uDb *useruDb) GetSession(sessionID string) (*models.Session, error) <span class="cov10" title="2">{
         for _, s := range uDb.sessions </span><span class="cov10" title="2">{
                 if s.SessionID == sessionID </span><span class="cov10" title="2">{
                         return &amp;s, nil
@@ -366,7 +369,7 @@ func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) <span c
         <span class="cov10" title="2">return nil, auth.ErrSessionNotFound</span>
 }
 
-func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) <span class="cov1" title="1">{
+func (uDb *useruDb) GetSessionByUID(uID uint64) (*models.Session, error) <span class="cov1" title="1">{
         for _, s := range uDb.sessions </span><span class="cov1" title="1">{
                 if s.UID == uID </span><span class="cov1" title="1">{
                         return &amp;s, nil
@@ -381,9 +384,9 @@ func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) <span cl
 import (
         "errors"
         "fmt"
-        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 )
 
@@ -397,7 +400,7 @@ func New(ar auth.Repo) auth.UseCase <span class="cov10" title="2">{
         }
 }</span>
 
-func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) <span class="cov1" title="1">{
+func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) <span class="cov1" title="1">{
         user, err := u.authRepo.GetByEmail(form.Email)
         if err != nil </span><span class="cov1" title="1">{
                 return nil, fmt.Errorf("cant get user: %w", err)
@@ -410,12 +413,12 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) <span class=
         <span class="cov1" title="1">return user, nil</span>
 }
 
-func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) <span class="cov1" title="1">{
+func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) <span class="cov1" title="1">{
         if form.RepeatPw != form.Password </span><span class="cov1" title="1">{
                 return nil, auth.ErrPwDontMatch
         }</span>
 
-        <span class="cov1" title="1">user, err := u.authRepo.Create(model.User{
+        <span class="cov1" title="1">user, err := u.authRepo.Create(models.User{
                 Email:    form.Email,
                 Password: form.Password,
         })
@@ -426,12 +429,12 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) <span class
         <span class="cov1" title="1">return user, nil</span>
 }
 
-func (u *useCase) CreateSession(uID uint64) (*model.Session, error) <span class="cov1" title="1">{
+func (u *useCase) CreateSession(uID uint64) (*models.Session, error) <span class="cov1" title="1">{
         value, err := pkg.String(config.CookieLen)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("cant create session: %w", err)
         }</span>
-        <span class="cov1" title="1">newSession := model.Session{
+        <span class="cov1" title="1">newSession := models.Session{
                 UID:       uID,
                 SessionID: value,
         }
@@ -462,7 +465,7 @@ func (u *useCase) DeleteSessionByUID(uID uint64) error <span class="cov1" title=
         <span class="cov1" title="1">return nil</span>
 }
 
-func (u *useCase) GetSession(sessionID string) (*model.Session, error) <span class="cov10" title="2">{
+func (u *useCase) GetSession(sessionID string) (*models.Session, error) <span class="cov10" title="2">{
         s, err := u.authRepo.GetSession(sessionID)
         if err != nil </span><span class="cov10" title="2">{
                 return nil, fmt.Errorf("cant get session: %w", err)
@@ -471,7 +474,7 @@ func (u *useCase) GetSession(sessionID string) (*model.Session, error) <span cla
         <span class="cov10" title="2">return s, nil</span>
 }
 
-func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) <span class="cov1" title="1">{
+func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) <span class="cov1" title="1">{
         s, err := u.authRepo.GetSessionByUID(uID)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("cant get session by user %w", err)
@@ -484,7 +487,8 @@ func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) <span clas
 		<pre class="file" id="file4" style="display: none">package middleware
 
 import (
-        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+        "context"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -493,7 +497,7 @@ import (
 )
 
 type Middleware struct {
-        auth.UseCase
+        uc auth.UseCase
 }
 
 func New(aUc auth.UseCase) *Middleware <span class="cov10" title="2">{
@@ -509,14 +513,17 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class=
                         pkg.SendError(w, authErr)
                         return
                 }</span>
-                <span class="cov10" title="2">_, err = m.GetSession(cookie.Value)
+                <span class="cov10" title="2">session, err := m.uc.GetSession(cookie.Value)
                 if err != nil </span><span class="cov10" title="2">{
                         authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
                         log.Error(authErr)
                         pkg.SendError(w, authErr)
                         return
                 }</span>
-                <span class="cov10" title="2">h.ServeHTTP(w, r)</span>
+
+                <span class="cov10" title="2">r = r.WithContext(context.WithValue(r.Context(), config.ContextUser, session.UID))
+
+                h.ServeHTTP(w, r)</span>
         })
         <span class="cov10" title="2">return handler</span>
 }
@@ -525,17 +532,17 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class=
 		<pre class="file" id="file5" style="display: none">package inmemory
 
 import (
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 )
 
 type profileDB struct {
-        profiles []model.Profile
+        profiles []models.Profile
 }
 
 func New() user.Repo <span class="cov8" title="1">{
         return &amp;profileDB{
-                []model.Profile{
+                []models.Profile{
                         {1, "Michail", "Testov", "21.12.2001"},
                         {2, "Ivan", "Ivanov", "21.12.2001"},
                         {3, "Michail", "Sidorov", "21.12.2001"},
@@ -543,7 +550,7 @@ func New() user.Repo <span class="cov8" title="1">{
         }
 }</span>
 
-func (pDb *profileDB) GetProfileByID(id uint64) (*model.Profile, error) <span class="cov8" title="1">{
+func (pDb *profileDB) GetProfileByID(id uint64) (*models.Profile, error) <span class="cov8" title="1">{
         for i, p := range pDb.profiles </span><span class="cov8" title="1">{
                 if p.UID == id </span><span class="cov0" title="0">{
                         return &amp;pDb.profiles[i], nil
@@ -552,7 +559,7 @@ func (pDb *profileDB) GetProfileByID(id uint64) (*model.Profile, error) <span cl
         <span class="cov8" title="1">return nil, user.ErrUserNotFound</span>
 }
 
-func (pDb *profileDB) CreateProfile(profile model.Profile) error <span class="cov8" title="1">{
+func (pDb *profileDB) CreateProfile(profile models.Profile) error <span class="cov8" title="1">{
         _, err := pDb.GetProfileByID(profile.UID)
         if err == nil </span><span class="cov0" title="0">{
                 return user.ErrUserExists
@@ -565,7 +572,7 @@ func (pDb *profileDB) CreateProfile(profile model.Profile) error <span class="co
 		<pre class="file" id="file6" style="display: none">package usecase
 
 import (
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 )
 
@@ -577,34 +584,34 @@ func New(r user.Repo) user.UseCase <span class="cov8" title="1">{
         return &amp;useCase{repo: r}
 }</span>
 
-func (u *useCase) CreateProfile(profile model.Profile) error <span class="cov8" title="1">{
+func (u *useCase) CreateProfile(profile models.Profile) error <span class="cov8" title="1">{
         return u.repo.CreateProfile(profile)
 }</span>
-func (u *useCase) GetProfileByID(id uint64) (*model.Profile, error) <span class="cov0" title="0">{
+func (u *useCase) GetProfileByID(id uint64) (*models.Profile, error) <span class="cov0" title="0">{
         return u.repo.GetProfileByID(id)
 }</span>
 </pre>
 		
 		<pre class="file" id="file7" style="display: none">package errors
 
-type JSONErr struct {
+type JSONError struct {
         Code    int    `json:"code"`
         Message string `json:"message"`
 }
 
-func (err *JSONErr) Error() string <span class="cov10" title="2">{
+func (err *JSONError) Error() string <span class="cov10" title="2">{
         return err.Message
 }</span>
 
-func New(code int, err error) *JSONErr <span class="cov1" title="1">{
-        return &amp;JSONErr{
+func New(code int, err error) *JSONError <span class="cov1" title="1">{
+        return &amp;JSONError{
                 Code:    code,
                 Message: err.Error(),
         }
 }</span>
 
-func NewWrappedErr(code int, message string, err error) *JSONErr <span class="cov10" title="2">{
-        return &amp;JSONErr{
+func NewWrappedErr(code int, message string, err error) *JSONError <span class="cov10" title="2">{
+        return &amp;JSONError{
                 Code:    code,
                 Message: message + " : " + err.Error(),
         }
@@ -639,7 +646,7 @@ import (
         "net/http"
 )
 
-func SendError(w http.ResponseWriter, error *errors.JSONErr) <span class="cov10" title="2">{
+func SendError(w http.ResponseWriter, error *errors.JSONError) <span class="cov10" title="2">{
         SendJSON(w, error.Code, error)
 }</span>
 </pre>
@@ -648,7 +655,7 @@ func SendError(w http.ResponseWriter, error *errors.JSONErr) <span class="cov10"
 
 import (
         "encoding/json"
-        "github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
         log "github.com/sirupsen/logrus"
         "net/http"
