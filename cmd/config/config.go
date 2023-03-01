@@ -12,6 +12,5 @@ const (
 	ContentTypeJSON = "application/json"
 	RouteSignin     = "/api/signin"
 	RouteSignup     = "/api/signup"
-	RouteAuth       = "/api/auth"
 	RouteLogout     = "/api/logout"
 )
