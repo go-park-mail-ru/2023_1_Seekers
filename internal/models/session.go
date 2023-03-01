@@ -1,4 +1,4 @@
-package model
+package models
 
 type Session struct {
 	UID       uint64 `json:"user_id"`

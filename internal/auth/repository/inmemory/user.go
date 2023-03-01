@@ -2,29 +2,29 @@ package inmemory
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 )
 
 type useruDb struct {
-	users    []model.User
-	sessions []model.Session
+	users    []models.User
+	sessions []models.Session
 }
 
 func New() auth.Repo {
 	return &useruDb{
-		[]model.User{
+		[]models.User{
 			{1, "test@example.com", "1234"},
 			{2, "gena@example.com", "4321"},
 			{3, "max@example.com", "1379"},
 		},
-		[]model.Session{
+		[]models.Session{
 			{1, "randgeneratedcookie12334524524523542"}, //уже есть сессия для Uid 1
 
 		},
 	}
 }
 
-func (uDb *useruDb) GetByID(id uint64) (*model.User, error) {
+func (uDb *useruDb) GetByID(id uint64) (*models.User, error) {
 	for i, u := range uDb.users {
 		if u.ID == id {
 			return &uDb.users[i], nil
@@ -33,7 +33,7 @@ func (uDb *useruDb) GetByID(id uint64) (*model.User, error) {
 	return nil, auth.ErrUserNotFound
 }
 
-func (uDb *useruDb) GetByEmail(email string) (*model.User, error) {
+func (uDb *useruDb) GetByEmail(email string) (*models.User, error) {
 	for i, u := range uDb.users {
 		if u.Email == email {
 			return &uDb.users[i], nil
@@ -42,7 +42,7 @@ func (uDb *useruDb) GetByEmail(email string) (*model.User, error) {
 	return nil, auth.ErrUserNotFound
 }
 
-func (uDb *useruDb) Create(user model.User) (*model.User, error) {
+func (uDb *useruDb) Create(user models.User) (*models.User, error) {
 	_, err := uDb.GetByEmail(user.Email)
 	if err == nil {
 		return nil, auth.ErrUserExists
@@ -54,7 +54,7 @@ func (uDb *useruDb) Create(user model.User) (*model.User, error) {
 	return &user, nil
 }
 
-func (uDb *useruDb) Delete(user model.User) error {
+func (uDb *useruDb) Delete(user models.User) error {
 	for i, u := range uDb.users {
 		if u.ID == user.ID {
 			uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
@@ -64,7 +64,7 @@ func (uDb *useruDb) Delete(user model.User) error {
 	return auth.ErrUserNotFound
 }
 
-func (uDb *useruDb) CreateSession(s model.Session) error {
+func (uDb *useruDb) CreateSession(s models.Session) error {
 	if _, err := uDb.GetSessionByUID(s.UID); err == nil {
 		return auth.ErrSessionExists
 	}
@@ -93,7 +93,7 @@ func (uDb *useruDb) DeleteSessionByUID(uID uint64) error {
 	return auth.ErrSessionNotFound
 }
 
-func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) {
+func (uDb *useruDb) GetSession(sessionID string) (*models.Session, error) {
 	for _, s := range uDb.sessions {
 		if s.SessionID == sessionID {
 			return &s, nil
@@ -102,7 +102,7 @@ func (uDb *useruDb) GetSession(sessionID string) (*model.Session, error) {
 	return nil, auth.ErrSessionNotFound
 }
 
-func (uDb *useruDb) GetSessionByUID(uID uint64) (*model.Session, error) {
+func (uDb *useruDb) GetSessionByUID(uID uint64) (*models.Session, error) {
 	for _, s := range uDb.sessions {
 		if s.UID == uID {
 			return &s, nil

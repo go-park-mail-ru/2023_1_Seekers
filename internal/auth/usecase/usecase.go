@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 )
 
@@ -19,7 +19,7 @@ func New(ar auth.Repo) auth.UseCase {
 	}
 }
 
-func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
+func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
 	user, err := u.authRepo.GetByEmail(form.Email)
 	if err != nil {
 		return nil, fmt.Errorf("cant get user: %w", err)
@@ -32,12 +32,12 @@ func (u *useCase) SignIn(form model.FormLogin) (*model.User, error) {
 	return user, nil
 }
 
-func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
+func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
 	if form.RepeatPw != form.Password {
 		return nil, auth.ErrPwDontMatch
 	}
 
-	user, err := u.authRepo.Create(model.User{
+	user, err := u.authRepo.Create(models.User{
 		Email:    form.Email,
 		Password: form.Password,
 	})
@@ -48,12 +48,12 @@ func (u *useCase) SignUp(form model.FormSignUp) (*model.User, error) {
 	return user, nil
 }
 
-func (u *useCase) CreateSession(uID uint64) (*model.Session, error) {
+func (u *useCase) CreateSession(uID uint64) (*models.Session, error) {
 	value, err := pkg.String(config.CookieLen)
 	if err != nil {
 		return nil, fmt.Errorf("cant create session: %w", err)
 	}
-	newSession := model.Session{
+	newSession := models.Session{
 		UID:       uID,
 		SessionID: value,
 	}
@@ -84,7 +84,7 @@ func (u *useCase) DeleteSessionByUID(uID uint64) error {
 	return nil
 }
 
-func (u *useCase) GetSession(sessionID string) (*model.Session, error) {
+func (u *useCase) GetSession(sessionID string) (*models.Session, error) {
 	s, err := u.authRepo.GetSession(sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("cant get session: %w", err)
@@ -93,7 +93,7 @@ func (u *useCase) GetSession(sessionID string) (*model.Session, error) {
 	return s, nil
 }
 
-func (u *useCase) GetSessionByUID(uID uint64) (*model.Session, error) {
+func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) {
 	s, err := u.authRepo.GetSessionByUID(uID)
 	if err != nil {
 		return nil, fmt.Errorf("cant get session by user %w", err)

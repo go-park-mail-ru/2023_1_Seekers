@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -36,7 +36,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 
-	form := model.FormSignUp{}
+	form := models.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
@@ -58,7 +58,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile := model.Profile{
+	profile := models.Profile{
 		UID:       user.ID,
 		FirstName: form.FirstName,
 		LastName:  form.LastName,
@@ -96,7 +96,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := model.FormLogin{}
+	form := models.FormLogin{}
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -216,7 +216,7 @@ func TestHandlers_Logout(t *testing.T) {
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
-		var user model.User
+		var user models.User
 		if test.createSession && !test.noCookie {
 			signupReq := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.user))
 			w := httptest.NewRecorder()

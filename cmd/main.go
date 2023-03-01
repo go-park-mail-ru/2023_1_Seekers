@@ -5,6 +5,9 @@ import (
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/reporsitory/inmemory"
+	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
@@ -14,17 +17,23 @@ import (
 )
 
 func RegisterRoutes(r *mux.Router) {
+	mailRepo := _mailRepo.NewMailRepository()
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
 
 	usersUCase := _userUCase.New(userRepo)
 	authUCase := _authUCase.New(authRepo)
+	mailUC := _mailUCase.New(mailRepo)
 
 	middleware := _middleware.New(authUCase)
 
 	authH := _authHandler.New(authUCase, usersUCase)
+	mailH := _mailHandler.New(mailUC)
 
 	_authHandler.RegisterHTTPRoutes(r, authH, middleware)
+	r.HandleFunc("/inbox/", mailH.GetInboxMessages).Methods(http.MethodGet)
+	r.HandleFunc("/outbox/", mailH.GetOutboxMessages).Methods(http.MethodGet)
+	r.HandleFunc("/folder/{id:[0-9]+}", mailH.GetFolderMessages).Methods(http.MethodGet)
 }
 
 func main() {

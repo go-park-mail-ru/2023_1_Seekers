@@ -1,30 +1,30 @@
 package auth
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/model"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"net/http"
 )
 
 type UseCase interface {
-	SignIn(form model.FormLogin) (*model.User, error)
-	SignUp(form model.FormSignUp) (*model.User, error)
-	CreateSession(uID uint64) (*model.Session, error)
+	SignIn(form models.FormLogin) (*models.User, error)
+	SignUp(form models.FormSignUp) (*models.User, error)
+	CreateSession(uID uint64) (*models.Session, error)
 	DeleteSession(sessionID string) error
 	DeleteSessionByUID(uID uint64) error
-	GetSession(sessionID string) (*model.Session, error)
-	GetSessionByUID(uID uint64) (*model.Session, error)
+	GetSession(sessionID string) (*models.Session, error)
+	GetSessionByUID(uID uint64) (*models.Session, error)
 }
 
 type Repo interface {
-	Create(user model.User) (*model.User, error)
-	Delete(user model.User) error
-	GetByID(ID uint64) (*model.User, error)
-	GetByEmail(email string) (*model.User, error)
-	CreateSession(session model.Session) error
+	Create(user models.User) (*models.User, error)
+	Delete(user models.User) error
+	GetByID(ID uint64) (*models.User, error)
+	GetByEmail(email string) (*models.User, error)
+	CreateSession(session models.Session) error
 	DeleteSession(sessionID string) error
 	DeleteSessionByUID(uID uint64) error
-	GetSession(sessionID string) (*model.Session, error)
-	GetSessionByUID(uID uint64) (*model.Session, error)
+	GetSession(sessionID string) (*models.Session, error)
+	GetSessionByUID(uID uint64) (*models.Session, error)
 }
 
 type Handlers interface {
