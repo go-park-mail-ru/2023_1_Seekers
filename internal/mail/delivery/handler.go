@@ -2,8 +2,8 @@ package delivery
 
 import (
 	"errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
-	mailUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	pkgErrors "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -20,25 +20,30 @@ type DeliveryI interface {
 }
 
 type delivery struct {
-	uc mailUC.UseCaseI
+	uc mail.UseCaseI
 }
 
-func New(uc mailUC.UseCaseI) DeliveryI {
+func New(uc mail.UseCaseI) DeliveryI {
 	return &delivery{
 		uc: uc,
 	}
 }
 
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
-	var userID = uint64(2) // get from auth
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 
 	if r.Method != http.MethodGet {
-		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.HttpGetMethodError], mail.HttpGetMethodError.Error(), errors.New(r.Method+" request received"))
+		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
-
 		return
+	}
+
+	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	if !ok {
+		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
+		log.Error(methodErr)
+		pkg.SendError(w, methodErr)
 	}
 
 	folders := del.uc.GetFolders(userID)
@@ -48,7 +53,6 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 		mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetInboxMessages], mail.ErrFailedGetInboxMessages.Error(), err)
 		log.Error(mailErr)
 		pkg.SendError(w, mailErr)
-
 		return
 	}
 
@@ -59,17 +63,21 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
-	var userID = uint64(2) // get from auth
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 
 	if r.Method != http.MethodGet {
-		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.HttpGetMethodError], mail.HttpGetMethodError.Error(), errors.New(r.Method+" request received"))
+		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
-
 		return
 	}
 
+	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	if !ok {
+		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
+		log.Error(methodErr)
+		pkg.SendError(w, methodErr)
+	}
 	folders := del.uc.GetFolders(userID)
 	messages, err := del.uc.GetOutgoingMessages(userID)
 
@@ -88,25 +96,28 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
-	var userID = uint64(2) // get from auth
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 
 	if r.Method != http.MethodGet {
-		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.HttpGetMethodError], mail.HttpGetMethodError.Error(), errors.New(r.Method+" request received"))
+		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)
 		pkg.SendError(w, methodErr)
-
 		return
 	}
 
+	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	if !ok {
+		methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
+		log.Error(methodErr)
+		pkg.SendError(w, methodErr)
+	}
 	vars := mux.Vars(r)
 	folderID, err := strconv.ParseUint(vars["id"], 10, 64)
 
 	if err != nil {
-		mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.InvalidURL], mail.InvalidURL.Error(), err)
+		mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrInvalidURL], mail.ErrInvalidURL.Error(), err)
 		log.Error(mailErr)
 		pkg.SendError(w, mailErr)
-
 		return
 	}
 

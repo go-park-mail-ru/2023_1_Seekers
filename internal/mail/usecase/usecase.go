@@ -2,22 +2,15 @@ package usecase
 
 import (
 	"errors"
-	mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/reporsitory"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 )
 
-type UseCaseI interface {
-	GetIncomingMessages(userID uint64) ([]models.IncomingMessage, error)
-	GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error)
-	GetFolders(userID uint64) []models.Folder
-	GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error)
-}
-
 type UseCase struct {
-	repo mailRepo.RepositoryI
+	repo mail.RepositoryI
 }
 
-func New(rep mailRepo.RepositoryI) UseCaseI {
+func New(rep mail.RepositoryI) mail.UseCaseI {
 	return &UseCase{
 		repo: rep,
 	}

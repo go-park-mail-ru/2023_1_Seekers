@@ -31,9 +31,7 @@ func RegisterRoutes(r *mux.Router) {
 	mailH := _mailHandler.New(mailUC)
 
 	_authHandler.RegisterHTTPRoutes(r, authH, middleware)
-	r.HandleFunc("/inbox/", mailH.GetInboxMessages).Methods(http.MethodGet)
-	r.HandleFunc("/outbox/", mailH.GetOutboxMessages).Methods(http.MethodGet)
-	r.HandleFunc("/folder/{id:[0-9]+}", mailH.GetFolderMessages).Methods(http.MethodGet)
+	_mailHandler.RegisterHTTPRoutes(r, mailH, middleware)
 }
 
 func main() {

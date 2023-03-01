@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -26,13 +27,16 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 			pkg.SendError(w, authErr)
 			return
 		}
-		_, err = m.uc.GetSession(cookie.Value)
+		session, err := m.uc.GetSession(cookie.Value)
 		if err != nil {
 			authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
 			log.Error(authErr)
 			pkg.SendError(w, authErr)
 			return
 		}
+
+		r = r.WithContext(context.WithValue(r.Context(), config.ContextUser, session.UID))
+
 		h.ServeHTTP(w, r)
 	})
 	return handler
