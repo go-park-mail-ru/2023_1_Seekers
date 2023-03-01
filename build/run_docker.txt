@@ -1,1 +1,1 @@
-docker run -p 8001:8001 backend:v1
+sudo docker run -p 8001:8001 backend:v1
