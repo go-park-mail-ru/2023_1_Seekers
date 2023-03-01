@@ -3,7 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/gorilla/mux"

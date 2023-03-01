@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/build/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
