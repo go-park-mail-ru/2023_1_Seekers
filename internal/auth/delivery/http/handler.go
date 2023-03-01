@@ -134,46 +134,12 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
-	cookie, err := r.Cookie(config.CookieName)
-	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedLogoutNoCookie], auth.ErrFailedLogoutNoCookie.Error(), err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
-
-	err = h.authUC.DeleteSession(cookie.Value)
-	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedDeleteSession], auth.ErrFailedDeleteSession.Error(), err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    config.CookieName,
 		Value:   "",
 		Expires: time.Now().AddDate(0, 0, -1),
 	})
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func (h *handlers) Auth(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie(config.CookieName)
-	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
-	_, err = h.authUC.GetSession(cookie.Value)
-	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
 
 	w.WriteHeader(http.StatusOK)
 }

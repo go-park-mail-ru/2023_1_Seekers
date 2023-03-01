@@ -31,5 +31,4 @@ type Handlers interface {
 	SignUp(w http.ResponseWriter, r *http.Request)
 	SignIn(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
-	Auth(w http.ResponseWriter, r *http.Request) // del
 }
