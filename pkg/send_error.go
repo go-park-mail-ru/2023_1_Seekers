@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func SendError(w http.ResponseWriter, error *errors.JSONErr) {
+func SendError(w http.ResponseWriter, error *errors.JSONError) {
 	SendJSON(w, error.Code, error)
 }

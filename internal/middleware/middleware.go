@@ -10,7 +10,7 @@ import (
 )
 
 type Middleware struct {
-	auth.UseCase
+	uc auth.UseCase
 }
 
 func New(aUc auth.UseCase) *Middleware {
@@ -26,7 +26,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 			pkg.SendError(w, authErr)
 			return
 		}
-		_, err = m.GetSession(cookie.Value)
+		_, err = m.uc.GetSession(cookie.Value)
 		if err != nil {
 			authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
 			log.Error(authErr)
