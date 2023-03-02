@@ -53,6 +53,9 @@ func New(ur _user.RepoI) mail.RepoI {
 			{5, "Trash", 3},
 			{6, "Spam", 3},
 			{7, "My", 2},
+			{8, "Empty", 3},
+			{5, "Trash", 4},
+			{6, "Spam", 4},
 		},
 		boxes: []models.Box{
 			{7, 1},
