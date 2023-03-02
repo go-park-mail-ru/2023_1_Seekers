@@ -24,8 +24,6 @@ func New(uc mail.UseCaseI) mail.HandlersI {
 }
 
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)
@@ -58,8 +56,6 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)
@@ -91,8 +87,6 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
 		log.Error(methodErr)

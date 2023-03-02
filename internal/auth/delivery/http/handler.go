@@ -39,7 +39,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	form := models.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -47,12 +47,18 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
 		if err == auth.ErrPwDontMatch {
-			authErr := errors.New(auth.AuthErrors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
+			authErr := errors.New(auth.Errors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
 			log.Error(authErr)
 			pkg.SendError(w, authErr)
 			return
 		}
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
+		if err == _user.ErrTooShortPw {
+			authErr := errors.New(auth.Errors[_user.ErrTooShortPw], _user.ErrTooShortPw)
+			log.Error(authErr)
+			pkg.SendError(w, authErr)
+			return
+		}
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -66,7 +72,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.userUC.CreateProfile(profile)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -74,7 +80,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -101,7 +107,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -109,7 +115,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -119,7 +125,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err = h.authUC.DeleteSessionByUID(user.ID)
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return

@@ -1,19 +1,23 @@
 package usecase
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 )
 
 type useCase struct {
-	userRepo user.RepoI
+	userRepo _user.RepoI
 }
 
-func New(r user.RepoI) user.UseCaseI {
+func New(r _user.RepoI) _user.UseCaseI {
 	return &useCase{userRepo: r}
 }
 
 func (u *useCase) CreateUser(user models.User) (*models.User, error) {
+	if len(user.Password) < config.PasswordMinLen {
+		return nil, _user.ErrTooShortPw
+	}
 	return u.userRepo.CreateUser(user)
 }
 

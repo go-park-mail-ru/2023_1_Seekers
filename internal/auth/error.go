@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"net/http"
 )
 
@@ -24,7 +25,7 @@ var (
 	ErrFailedDeleteSession  = errors.New("failed delete session")
 )
 
-var AuthErrors = map[error]int{
+var Errors = map[error]int{
 	ErrInvalidForm:          http.StatusForbidden,
 	ErrPwDontMatch:          http.StatusUnauthorized,
 	ErrUserNotFound:         http.StatusUnauthorized,
@@ -41,4 +42,5 @@ var AuthErrors = map[error]int{
 	ErrFailedAuth:           http.StatusUnauthorized,
 	ErrFailedGetSession:     http.StatusUnauthorized,
 	ErrFailedDeleteSession:  http.StatusUnauthorized,
+	user.ErrTooShortPw:      http.StatusForbidden,
 }
