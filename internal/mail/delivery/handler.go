@@ -17,7 +17,7 @@ type delivery struct {
 	uc mail.UseCaseI
 }
 
-func New(uc mail.UseCaseI) mail.DeliveryI {
+func New(uc mail.UseCaseI) mail.HandlersI {
 	return &delivery{
 		uc: uc,
 	}

@@ -19,17 +19,17 @@ import (
 func main() {
 	router := mux.NewRouter()
 
-	mailRepo := _mailRepo.NewMailRepository()
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
+	mailRepo := _mailRepo.New(userRepo)
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo)
+	usersUC := _userUCase.New(userRepo)
+	authUC := _authUCase.New(authRepo, usersUC)
 	mailUC := _mailUCase.New(mailRepo)
 
-	middleware := _middleware.New(authUCase)
+	middleware := _middleware.New(authUC)
 
-	authH := _authHandler.New(authUCase, usersUCase)
+	authH := _authHandler.New(authUC, usersUC)
 	mailH := _mailHandler.New(mailUC)
 
 	_authHandler.RegisterHTTPRoutes(router, authH, middleware)

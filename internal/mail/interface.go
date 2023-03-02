@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type DeliveryI interface {
+type HandlersI interface {
 	GetInboxMessages(w http.ResponseWriter, r *http.Request)
 	GetOutboxMessages(w http.ResponseWriter, r *http.Request)
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
@@ -18,7 +18,7 @@ type UseCaseI interface {
 	GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error)
 }
 
-type RepositoryI interface {
+type RepoI interface {
 	SelectIncomingMessagesByUser(userID uint64) ([]models.IncomingMessage, error)
 	SelectOutgoingMessagesByUser(userID uint64) ([]models.OutgoingMessage, error)
 	SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error)

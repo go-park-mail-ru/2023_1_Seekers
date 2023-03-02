@@ -12,10 +12,10 @@ import (
 )
 
 type Middleware struct {
-	uc auth.UseCase
+	uc auth.UseCaseI
 }
 
-func New(aUc auth.UseCase) *Middleware {
+func New(aUc auth.UseCaseI) *Middleware {
 	return &Middleware{aUc}
 }
 

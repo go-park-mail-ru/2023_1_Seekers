@@ -4,33 +4,46 @@ import (
 	"errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"golang.org/x/exp/slices"
 )
 
-type MailRepository struct {
+type mailDB struct {
 	messages   []models.Message
 	recipients []models.Recipient
 	folders    []models.Folder
 	boxes      []models.Box
 	states     []models.State
-	users      []models.User
+	usersRepo  _user.RepoI
 }
 
-func NewMailRepository() mail.RepositoryI {
-	return &MailRepository{
+func New(ur _user.RepoI) mail.RepoI {
+	return &mailDB{
 		messages: []models.Message{
-			{1, 1, "2023-01-01", "Title1", "Text1"},
-			{2, 1, "2023-01-02", "Title2", "Text2"},
-			{3, 2, "2023-01-29", "Title3", "Text3"},
-			{4, 3, "2023-01-01", "Title4", "Text4"},
+			{1, 1, "2023-01-01", "Invitation", "Hello, we decided to invite you to our party, lets go it will be fine!"},
+			{2, 1, "2023-01-02", "Spam letter", "Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis"},
+			{3, 1, "2023-01-04", "Lorem", "Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus. "},
+			{4, 1, "2023-01-05", "Very interesting letter", "Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. "},
+			{5, 1, "2023-01-06", "Small text letter", "Hi! how are you?"},
+			{5, 1, "2023-01-06", "Title", "Open this letter please"},
+			{6, 1, "2023-01-07", "Advertisement", "Hi, visit our shop!"},
+			{7, 2, "2023-01-29", "Title2", "Text2"},
+			{8, 2, "2023-01-29", "Title3", "Text3"},
+			{9, 3, "2023-01-01", "Title4", "Text4"},
 			//{5, 2, "2023-03-01", "Title5", "Text5"},
 		},
 		recipients: []models.Recipient{
 			{1, 2},
 			{2, 3},
-			{3, 1},
+			{3, 2},
+			{4, 3},
 			{4, 2},
-			{4, 1},
+			{5, 2},
+			{5, 3},
+			{6, 2},
+			{7, 3},
+			{8, 1},
+			{9, 1},
 		},
 		folders: []models.Folder{
 			{1, "Trash", 1},
@@ -46,24 +59,38 @@ func NewMailRepository() mail.RepositoryI {
 		},
 		states: []models.State{
 			{2, 1, false, false, true},
+			{1, 1, true, false, true},
+			{3, 2, false, false, true},
+			{1, 2, true, false, true},
+			{2, 3, false, false, true},
+			{1, 3, true, false, true},
+			{3, 4, false, false, true},
+			{2, 4, false, false, true},
+			{1, 4, true, false, true},
+			{2, 5, false, false, true},
+			{3, 5, false, false, true},
+			{1, 5, true, false, true},
+			{2, 6, false, false, true},
+			{1, 6, true, false, true},
+			{3, 7, false, false, true},
+			{2, 7, true, false, true},
+			{1, 8, false, false, true},
+			{2, 8, true, false, true},
+			{1, 9, false, false, true},
+			{3, 9, true, false, true},
 			{3, 2, true, false, true},
 			{1, 3, false, false, true},
 			{2, 4, false, false, true},
 			{1, 4, false, false, true},
-			{1, 1, true, false, true},
 			{1, 2, true, false, true},
 			{2, 3, true, false, true},
 			{3, 4, true, false, true},
 		},
-		users: []models.User{
-			{1, "test@example.com", "1234"},
-			{2, "gena@example.com", "4321"},
-			{3, "max@example.com", "1379"},
-		},
+		usersRepo: ur,
 	}
 }
 
-func (db *MailRepository) messageHasFolder(userID uint64, messageID uint64) bool {
+func (db *mailDB) messageHasFolder(userID uint64, messageID uint64) bool {
 	for _, b := range db.boxes {
 		if b.MessageID == messageID {
 			idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool {
@@ -79,7 +106,7 @@ func (db *MailRepository) messageHasFolder(userID uint64, messageID uint64) bool
 	return false
 }
 
-func (db *MailRepository) findOriginalMessage(messageID uint64) (*models.Message, error) {
+func (db *mailDB) findOriginalMessage(messageID uint64) (*models.Message, error) {
 	idx := slices.IndexFunc(db.messages, func(message models.Message) bool {
 		return message.MessageID == messageID
 	})
@@ -91,19 +118,7 @@ func (db *MailRepository) findOriginalMessage(messageID uint64) (*models.Message
 	return &db.messages[idx], nil
 }
 
-func (db *MailRepository) findUser(userID uint64) (*models.User, error) {
-	idx := slices.IndexFunc(db.users, func(user models.User) bool {
-		return user.ID == userID
-	})
-
-	if idx == -1 {
-		return nil, errors.New("user not found")
-	}
-
-	return &db.users[idx], nil
-}
-
-func (db *MailRepository) findState(userID uint64, messageID uint64) (*models.State, error) {
+func (db *mailDB) findState(userID uint64, messageID uint64) (*models.State, error) {
 	idx := slices.IndexFunc(db.states, func(state models.State) bool {
 		return state.UserID == userID && state.MessageID == messageID
 	})
@@ -115,12 +130,12 @@ func (db *MailRepository) findState(userID uint64, messageID uint64) (*models.St
 	return &db.states[idx], nil
 }
 
-func (db *MailRepository) findRecipientsEmails(messageID uint64) ([]string, error) {
+func (db *mailDB) findRecipientsEmails(messageID uint64) ([]string, error) {
 	var recipientsEmails []string
 
 	for _, r := range db.recipients {
 		if r.MessageID == messageID {
-			user, err := db.findUser(r.UserID)
+			user, err := db.usersRepo.GetUserByID(r.UserID)
 
 			if err != nil {
 				return recipientsEmails, err
@@ -133,7 +148,7 @@ func (db *MailRepository) findRecipientsEmails(messageID uint64) ([]string, erro
 	return recipientsEmails, nil
 }
 
-func (db *MailRepository) SelectIncomingMessagesByUser(userID uint64) ([]models.IncomingMessage, error) {
+func (db *mailDB) SelectIncomingMessagesByUser(userID uint64) ([]models.IncomingMessage, error) {
 	var messages []models.IncomingMessage
 
 	for _, r := range db.recipients {
@@ -148,7 +163,7 @@ func (db *MailRepository) SelectIncomingMessagesByUser(userID uint64) ([]models.
 				return messages, err
 			}
 
-			fromUser, err := db.findUser(originalMessage.UserID)
+			fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
 
 			if err != nil {
 				return messages, err
@@ -177,7 +192,7 @@ func (db *MailRepository) SelectIncomingMessagesByUser(userID uint64) ([]models.
 	return messages, nil
 }
 
-func (db *MailRepository) SelectOutgoingMessagesByUser(userID uint64) ([]models.OutgoingMessage, error) {
+func (db *mailDB) SelectOutgoingMessagesByUser(userID uint64) ([]models.OutgoingMessage, error) {
 	var messages []models.OutgoingMessage
 
 	for _, m := range db.messages {
@@ -215,7 +230,7 @@ func (db *MailRepository) SelectOutgoingMessagesByUser(userID uint64) ([]models.
 	return messages, nil
 }
 
-func (db *MailRepository) SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error) {
+func (db *mailDB) SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error) {
 	idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool {
 		return folder.UserID == userID && folder.FolderID == folderID
 	})
@@ -227,7 +242,7 @@ func (db *MailRepository) SelectFolderByUserNFolder(userID uint64, folderID uint
 	return &db.folders[idx], nil
 }
 
-func (db *MailRepository) SelectFoldersByUser(userID uint64) []models.Folder {
+func (db *mailDB) SelectFoldersByUser(userID uint64) []models.Folder {
 	var folders []models.Folder
 
 	for _, f := range db.folders {
@@ -239,7 +254,7 @@ func (db *MailRepository) SelectFoldersByUser(userID uint64) []models.Folder {
 	return folders
 }
 
-func (db *MailRepository) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.IncomingMessage, error) {
+func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.IncomingMessage, error) {
 	var messages []models.IncomingMessage
 
 	for _, b := range db.boxes {
@@ -254,7 +269,7 @@ func (db *MailRepository) SelectMessagesByUserNFolder(userID uint64, folderID ui
 				return messages, err
 			}
 
-			fromUser, err := db.findUser(originalMessage.UserID)
+			fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
 
 			if err != nil {
 				return messages, err

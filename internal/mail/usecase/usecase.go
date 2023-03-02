@@ -7,10 +7,10 @@ import (
 )
 
 type UseCase struct {
-	repo mail.RepositoryI
+	repo mail.RepoI
 }
 
-func New(rep mail.RepositoryI) mail.UseCaseI {
+func New(rep mail.RepoI) mail.UseCaseI {
 	return &UseCase{
 		repo: rep,
 	}

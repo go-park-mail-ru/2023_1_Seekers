@@ -6,21 +6,24 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 )
 
 type useCase struct {
-	authRepo auth.Repo
+	authRepo auth.RepoI
+	userUC   _user.UseCaseI
 }
 
-func New(ar auth.Repo) auth.UseCase {
+func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI {
 	return &useCase{
 		authRepo: ar,
+		userUC:   uc,
 	}
 }
 
 func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
-	user, err := u.authRepo.GetByEmail(form.Email)
+	user, err := u.userUC.GetUserByEmail(form.Email)
 	if err != nil {
 		return nil, fmt.Errorf("cant get user: %w", err)
 	}
@@ -37,7 +40,7 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
 		return nil, auth.ErrPwDontMatch
 	}
 
-	user, err := u.authRepo.Create(models.User{
+	user, err := u.userUC.CreateUser(models.User{
 		Email:    form.Email,
 		Password: form.Password,
 	})

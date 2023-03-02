@@ -2,17 +2,20 @@ package user
 
 import "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 
-type UseCase interface {
+type UseCaseI interface {
+	CreateUser(user models.User) (*models.User, error)
+	DeleteUser(user models.User) error
+	GetUserByID(ID uint64) (*models.User, error)
+	GetUserByEmail(email string) (*models.User, error)
 	CreateProfile(profile models.Profile) error
 	GetProfileByID(id uint64) (*models.Profile, error)
 }
 
-type Repo interface {
-	CreateProfile(profile models.Profile) error
-	GetProfileByID(id uint64) (*models.Profile, error)
-}
-
-type Handlers interface {
+type RepoI interface {
+	CreateUser(user models.User) (*models.User, error)
+	DeleteUser(user models.User) error
+	GetUserByID(ID uint64) (*models.User, error)
+	GetUserByEmail(email string) (*models.User, error)
 	CreateProfile(profile models.Profile) error
 	GetProfileByID(id uint64) (*models.Profile, error)
 }

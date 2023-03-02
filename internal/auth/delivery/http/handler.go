@@ -16,11 +16,11 @@ import (
 )
 
 type handlers struct {
-	authUC auth.UseCase
-	userUC _user.UseCase
+	authUC auth.UseCaseI
+	userUC _user.UseCaseI
 }
 
-func New(aUC auth.UseCase, uUC _user.UseCase) auth.Handlers {
+func New(aUC auth.UseCaseI, uUC _user.UseCaseI) auth.HandlersI {
 	return &handlers{
 		authUC: aUC,
 		userUC: uUC,
