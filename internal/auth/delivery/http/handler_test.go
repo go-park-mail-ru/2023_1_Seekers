@@ -49,7 +49,7 @@ func TestHandlers_SignIn(t *testing.T) {
 	authRepo := _authRepo.New()
 
 	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo)
+	authUCase := _authUCase.New(authRepo, usersUCase)
 
 	authH := New(authUCase, usersUCase)
 	for _, test := range testCases {
@@ -124,7 +124,7 @@ func TestHandlers_SignUp(t *testing.T) {
 	authRepo := _authRepo.New()
 
 	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo)
+	authUCase := _authUCase.New(authRepo, usersUCase)
 
 	authH := New(authUCase, usersUCase)
 
@@ -209,7 +209,7 @@ func TestHandlers_Logout(t *testing.T) {
 	authRepo := _authRepo.New()
 
 	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo)
+	authUCase := _authUCase.New(authRepo, usersUCase)
 	middleware := _middleware.New(authUCase)
 
 	authH := New(authUCase, usersUCase)

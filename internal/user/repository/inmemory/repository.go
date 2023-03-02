@@ -17,6 +17,7 @@ func New() user.RepoI {
 			{1, "test@example.com", "1234"},
 			{2, "gena@example.com", "4321"},
 			{3, "max@example.com", "1379"},
+			{4, "valera@example.com", "123"},
 		},
 		[]models.Profile{
 			{1, "Michail", "Testov", "21.12.2001"},

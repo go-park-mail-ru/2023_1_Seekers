@@ -5,6 +5,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
+	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"net/http"
 	"net/http/httptest"
@@ -51,9 +53,10 @@ func TestHandlers_Auth(t *testing.T) {
 			"cookie not presented",
 		},
 	}
-
+	userRepo := _userRepo.New()
+	usersUCase := _userUCase.New(userRepo)
 	authRepo := _authRepo.New()
-	authUCase := _authUCase.New(authRepo)
+	authUCase := _authUCase.New(authRepo, usersUCase)
 	middleware := New(authUCase)
 
 	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
