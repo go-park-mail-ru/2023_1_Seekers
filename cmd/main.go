@@ -16,7 +16,9 @@ import (
 	"net/http"
 )
 
-func RegisterRoutes(r *mux.Router) {
+func main() {
+	router := mux.NewRouter()
+
 	mailRepo := _mailRepo.NewMailRepository()
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
@@ -30,17 +32,16 @@ func RegisterRoutes(r *mux.Router) {
 	authH := _authHandler.New(authUCase, usersUCase)
 	mailH := _mailHandler.New(mailUC)
 
-	_authHandler.RegisterHTTPRoutes(r, authH, middleware)
-	_mailHandler.RegisterHTTPRoutes(r, mailH, middleware)
-}
+	_authHandler.RegisterHTTPRoutes(router, authH, middleware)
+	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
 
-func main() {
-	router := mux.NewRouter()
-	RegisterRoutes(router)
+	corsRouter := middleware.Cors(router)
+
 	server := http.Server{
 		Addr:    ":" + config.Port,
-		Handler: router,
+		Handler: corsRouter,
 	}
+
 	log.Info("server started")
 	err := server.ListenAndServe()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -16,6 +17,15 @@ type Middleware struct {
 
 func New(aUc auth.UseCase) *Middleware {
 	return &Middleware{aUc}
+}
+
+func (m *Middleware) Cors(h http.Handler) http.Handler {
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            true,
+	})
+	return c.Handler(h)
 }
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
