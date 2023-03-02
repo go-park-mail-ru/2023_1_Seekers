@@ -9,6 +9,7 @@ type HandlersI interface {
 	GetInboxMessages(w http.ResponseWriter, r *http.Request)
 	GetOutboxMessages(w http.ResponseWriter, r *http.Request)
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
+	GetFolders(w http.ResponseWriter, r *http.Request)
 }
 
 type UseCaseI interface {

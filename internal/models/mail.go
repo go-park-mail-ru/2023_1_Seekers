@@ -66,13 +66,3 @@ type OutgoingMessage struct {
 	Read         bool     `json:"read"`
 	Favorite     bool     `json:"favorite"`
 }
-
-type InboxMessages struct {
-	Folders  []Folder          `json:"folders"`
-	Messages []IncomingMessage `json:"messages"`
-}
-
-type OutboxMessages struct {
-	Folders  []Folder          `json:"folders"`
-	Messages []OutgoingMessage `json:"messages"`
-}
