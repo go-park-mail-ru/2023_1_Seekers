@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (79.7%)</option>
+				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (75.7%)</option>
 				
 				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/register.go (0.0%)</option>
 				
@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (78.4%)</option>
 				
-				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (44.3%)</option>
+				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (42.1%)</option>
 				
 				<option value="file5">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/register.go (0.0%)</option>
 				
@@ -71,11 +71,11 @@
 				
 				<option value="file7">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/usecase.go (82.6%)</option>
 				
-				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (89.5%)</option>
+				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (70.8%)</option>
 				
 				<option value="file9">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory/repository.go (72.4%)</option>
 				
-				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (57.1%)</option>
+				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (55.6%)</option>
 				
 				<option value="file11">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/errors.go (100.0%)</option>
 				
@@ -147,7 +147,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         <span class="cov1" title="1">form := models.FormSignUp{}
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -155,12 +155,18 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         <span class="cov1" title="1">user, err := h.authUC.SignUp(form)
         if err != nil </span><span class="cov1" title="1">{
                 if err == auth.ErrPwDontMatch </span><span class="cov1" title="1">{
-                        authErr := errors.New(auth.AuthErrors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
+                        authErr := errors.New(auth.Errors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
                         log.Error(authErr)
                         pkg.SendError(w, authErr)
                         return
                 }</span>
-                <span class="cov1" title="1">authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
+                <span class="cov1" title="1">if err == _user.ErrTooShortPw </span><span class="cov0" title="0">{
+                        authErr := errors.New(auth.Errors[_user.ErrTooShortPw], _user.ErrTooShortPw)
+                        log.Error(authErr)
+                        pkg.SendError(w, authErr)
+                        return
+                }</span>
+                <span class="cov1" title="1">authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return</span>
@@ -174,7 +180,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         }
         err = h.userUC.CreateProfile(profile)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -182,7 +188,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
 
         <span class="cov1" title="1">session, err := h.authUC.CreateSession(user.ID)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -209,7 +215,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -217,7 +223,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
 
         <span class="cov10" title="2">user, err := h.authUC.SignIn(form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -227,7 +233,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
         <span class="cov10" title="2">err = h.authUC.DeleteSessionByUID(user.ID)
         session, err := h.authUC.CreateSession(user.ID)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
                 log.Error(authErr)
                 pkg.SendError(w, authErr)
                 return
@@ -473,8 +479,6 @@ func New(uc mail.UseCaseI) mail.HandlersI <span class="cov8" title="1">{
 }</span>
 
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        w.Header().Set("Access-Control-Allow-Methods", "GET")
-
         if r.Method != http.MethodGet </span><span class="cov0" title="0">{
                 methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
                 log.Error(methodErr)
@@ -504,8 +508,6 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) <s
 }
 
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        w.Header().Set("Access-Control-Allow-Methods", "GET")
-
         if r.Method != http.MethodGet </span><span class="cov0" title="0">{
                 methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
                 log.Error(methodErr)
@@ -535,8 +537,6 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) <
 }
 
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        w.Header().Set("Access-Control-Allow-Methods", "GET")
-
         if r.Method != http.MethodGet </span><span class="cov0" title="0">{
                 methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
                 log.Error(methodErr)
@@ -996,7 +996,6 @@ import (
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-        "github.com/rs/cors"
         log "github.com/sirupsen/logrus"
         "net/http"
 )
@@ -1010,26 +1009,35 @@ func New(aUc auth.UseCaseI) *Middleware <span class="cov10" title="3">{
 }</span>
 
 func (m *Middleware) Cors(h http.Handler) http.Handler <span class="cov0" title="0">{
-        c := cors.New(cors.Options{
-                AllowedOrigins:   []string{"*"},
-                AllowCredentials: true,
-                Debug:            true,
-        })
-        return c.Handler(h)
-}</span>
+        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                w.Header().Set("Access-Control-Allow-Origin", "*")
+                w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, X-CSRF-Token")
+                w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
+                w.Header().Set("Access-Control-Allow-Credentials", "true")
+                h.ServeHTTP(w, r)
+        }</span>)
+        <span class="cov0" title="0">return handler</span>
+
+        //c := cors.New(cors.Options{
+        //        AllowedOrigins:   []string{"http://localhost:8001"},
+        //        AllowCredentials: true,
+        //        Debug:            false,
+        //})
+        //return c.Handler(h)
+}
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class="cov10" title="3">{
         handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov10" title="3">{
                 cookie, err := r.Cookie(config.CookieName)
                 if err != nil </span><span class="cov6" title="2">{
-                        authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
+                        authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
                         log.Error(authErr)
                         pkg.SendError(w, authErr)
                         return
                 }</span>
                 <span class="cov10" title="3">session, err := m.uc.GetSession(cookie.Value)
                 if err != nil </span><span class="cov6" title="2">{
-                        authErr := errors.NewWrappedErr(auth.AuthErrors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
+                        authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
                         log.Error(authErr)
                         pkg.SendError(w, authErr)
                         return
@@ -1059,10 +1067,10 @@ type usersDB struct {
 func New() user.RepoI <span class="cov10" title="3">{
         return &amp;usersDB{
                 []models.User{
-                        {1, "test@example.com", "1234"},
-                        {2, "gena@example.com", "4321"},
-                        {3, "max@example.com", "1379"},
-                        {4, "valera@example.com", "123"},
+                        {1, "test@example.com", "12345"},
+                        {2, "gena@example.com", "54321"},
+                        {3, "max@example.com", "13795"},
+                        {4, "valera@example.com", "12345"},
                 },
                 []models.Profile{
                         {1, "Michail", "Testov", "21.12.2001"},
@@ -1134,21 +1142,25 @@ func (uDb *usersDB) CreateProfile(profile models.Profile) error <span class="cov
 		<pre class="file" id="file10" style="display: none">package usecase
 
 import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-        "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 )
 
 type useCase struct {
-        userRepo user.RepoI
+        userRepo _user.RepoI
 }
 
-func New(r user.RepoI) user.UseCaseI <span class="cov10" title="3">{
+func New(r _user.RepoI) _user.UseCaseI <span class="cov10" title="3">{
         return &amp;useCase{userRepo: r}
 }</span>
 
 func (u *useCase) CreateUser(user models.User) (*models.User, error) <span class="cov1" title="1">{
-        return u.userRepo.CreateUser(user)
-}</span>
+        if len(user.Password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
+                return nil, _user.ErrTooShortPw
+        }</span>
+        <span class="cov1" title="1">return u.userRepo.CreateUser(user)</span>
+}
 
 func (u *useCase) DeleteUser(user models.User) error <span class="cov0" title="0">{
         return u.userRepo.DeleteUser(user)

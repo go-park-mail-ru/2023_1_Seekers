@@ -10,7 +10,11 @@ type sessionsDB struct {
 }
 
 func New() auth.RepoI {
-	return &sessionsDB{}
+	return &sessionsDB{
+		[]models.Session{
+			{1, "randgeneratedcookie12334524524523542"}, //уже есть сессия для Uid 1
+		},
+	}
 }
 
 func (sDb *sessionsDB) CreateSession(s models.Session) error {

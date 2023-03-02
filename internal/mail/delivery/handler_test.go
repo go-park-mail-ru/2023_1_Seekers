@@ -37,10 +37,10 @@ type testCases struct {
 }
 
 var credentials = map[string][]byte{
-	"user1": []byte(`{"email": "test@example.com", "password": "1234"}`),
-	"user2": []byte(`{"email": "gena@example.com", "password": "4321"}`),
-	"user3": []byte(`{"email": "max@example.com", "password": "1379"}`),
-	"user4": []byte(`{"email": "valera@example.com", "password": "123"}`),
+	"user1": []byte(`{"email": "test@example.com", "password": "12345"}`),
+	"user2": []byte(`{"email": "gena@example.com", "password": "54321"}`),
+	"user3": []byte(`{"email": "max@example.com", "password": "13795"}`),
+	"user4": []byte(`{"email": "valera@example.com", "password": "12345"}`),
 }
 
 func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_middleware.Middleware, mail.HandlersI) {

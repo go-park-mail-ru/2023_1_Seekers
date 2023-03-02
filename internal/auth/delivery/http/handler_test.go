@@ -29,17 +29,17 @@ func TestHandlers_SignIn(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			[]byte(`{"email": "test@example.com", "password": "1234"}`),
+			[]byte(`{"email": "test@example.com", "password": "12345"}`),
 			outputCase{status: http.StatusOK},
 			"default success",
 		},
 		{
-			[]byte(`{"email": "test_signin1@example.com", "password": "4321"}`),
+			[]byte(`{"email": "test_signin1@example.com", "password": "43212"}`),
 			outputCase{status: http.StatusUnauthorized},
 			"default success",
 		},
 		{
-			[]byte(`{"email: test@example.com", "password": "1234"}`),
+			[]byte(`{"email: test@example.com", "password": "12334"}`),
 			outputCase{status: http.StatusForbidden},
 			"invalid form",
 		},
@@ -81,8 +81,8 @@ func TestHandlers_SignUp(t *testing.T) {
 	testCases := []testCase{
 		{
 			[]byte(`{"email":"` + randStr + `testing_signup1@example.com",
-						  "password":"4321",
-						  "repeat_pw":"4321",
+						  "password":"54321",
+						  "repeat_pw":"54321",
 						  "first_name":"Ivan",
 						  "last_name":"Ivanov",
 						  "birth_date":"29.01.2002"}`),
@@ -91,8 +91,8 @@ func TestHandlers_SignUp(t *testing.T) {
 		},
 		{
 			[]byte(`{"email":"` + randStr + `testing_signup2@example.com",
-                           "password":"4321",
-                           "repeat_pw":"1231",
+                           "password":"54321",
+                           "repeat_pw":"12311",
                            "first_name":"Ivan", 
                            "last_name":"Ivanov", 
                            "birth_date":"29.01.2002"}`),
@@ -101,8 +101,8 @@ func TestHandlers_SignUp(t *testing.T) {
 		},
 		{
 			[]byte(`{"email: + testing_signup2@example.com",
-                           "password:"4321",
-                           "repeat_pw":"1231",
+                           "password:"54321",
+                           "repeat_pw":"12313",
                            "first_name":"Ivan", 
                            "last_name":"Ivanov", 
                            "birth_date":"29.01.2002"}`),
@@ -111,8 +111,8 @@ func TestHandlers_SignUp(t *testing.T) {
 		},
 		{
 			[]byte(`{"email":"test@example.com",
-                           "password":"4321",
-                           "repeat_pw":"4321",
+                           "password":"54321",
+                           "repeat_pw":"54321",
                            "first_name":"Ivan", 
                            "last_name":"Ivanov", 
                            "birth_date":"29.01.2002"}`),
@@ -171,8 +171,8 @@ func TestHandlers_Logout(t *testing.T) {
 			// регистрируем пользователя и отправляем с ним куку
 			inputCase{[]byte(
 				`{"email":"` + randStr + `testing_auth1@example.com",
-				"password":  "4321",
-				"repeat_pw":  "4321",
+				"password":  "54321",
+				"repeat_pw":  "54321",
 				"first_name": "Ivan",
 				"last_name":  "Ivanov",
 				"birth_date": "29.01.1999"}`), true, false},
@@ -183,8 +183,8 @@ func TestHandlers_Logout(t *testing.T) {
 			// просто приходит кука которая ранее не была создана на сервере
 			inputCase{[]byte(
 				`{"email":"` + randStr + `testing_auth2@example.com",
-				"password":  "4321",
-				"repeat_pw":  "4321",
+				"password":  "54321",
+				"repeat_pw":  "54321",
 				"first_name": "Ivan",
 				"last_name":  "Ivanov",
 				"birth_date": "29.01.1999"}`), false, false},
@@ -195,8 +195,8 @@ func TestHandlers_Logout(t *testing.T) {
 			// если вообще нет куки с таким названием
 			inputCase{[]byte(
 				`{"email":"` + randStr + `testing_auth3@example.com",
-				"password":  "4321",
-				"repeat_pw":  "4321",
+				"password":  "54321",
+				"repeat_pw":  "54321",
 				"first_name": "Ivan",
 				"last_name":  "Ivanov",
 				"birth_date": "29.01.1999"}`), false, true},
