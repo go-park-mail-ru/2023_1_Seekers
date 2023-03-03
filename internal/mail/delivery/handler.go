@@ -22,6 +22,19 @@ func New(uc mail.UseCaseI) mail.HandlersI {
 	}
 }
 
+// GetInboxMessages godoc
+// @Summary      GetInboxMessages
+// @Description  List of incoming messages
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []models.IncomingMessage "success get list of incoming messages"
+// @Failure 400 {object} error "a get request was expected"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get inbox messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /inbox/ [get]
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
@@ -51,6 +64,19 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, http.StatusOK, messages)
 }
 
+// GetOutboxMessages godoc
+// @Summary      GetOutboxMessages
+// @Description  List of outgoing messages
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []models.OutgoingMessage "success get list of outgoing messages"
+// @Failure 400 {object} error "a get request was expected"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get outbox messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /outbox/ [get]
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
@@ -80,6 +106,21 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, http.StatusOK, messages)
 }
 
+// GetFolderMessages godoc
+// @Summary      GetFolderMessages
+// @Description  List of outgoing messages
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Param id path int true "FolderID"
+// @Success  200 {object} []models.IncomingMessage "success get list of outgoing messages"
+// @Failure 400 {object} error "a get request was expected"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get folder messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Failure 404 {object} error "invalid url address"
+// @Router   /folder/{id} [get]
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
@@ -117,6 +158,18 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, http.StatusOK, messages)
 }
 
+// GetFolders godoc
+// @Summary      GetFolders
+// @Description  List of outgoing messages
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []models.Folder "success get list of outgoing messages"
+// @Failure 400 {object} error "a get request was expected"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /folders/ [get]
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 
