@@ -30,7 +30,9 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 	//return handler
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET,POST,PUT,DELETE, OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
+		AllowedOrigins:   []string{"http://localhost:8002"},
 		AllowCredentials: true,
 		Debug:            false,
 	})
