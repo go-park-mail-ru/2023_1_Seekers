@@ -37,7 +37,7 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 	//	Debug:            false,
 	//})
 	//log.Info()
-	return c.Handler(h)
+	//return c.Handler(h)
 }
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
