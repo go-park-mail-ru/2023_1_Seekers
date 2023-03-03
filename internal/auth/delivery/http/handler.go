@@ -117,6 +117,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(config.CookieTTL),
 		Path:     config.CookiePath,
 		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	})
 	pkg.SendJSON(w, http.StatusOK, user)
 }

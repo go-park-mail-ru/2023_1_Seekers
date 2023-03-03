@@ -32,7 +32,7 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 	return handler
-	//
+
 	//c := cors.New(cors.Options{
 	//	AllowedMethods:   []string{"GET,POST,PUT,DELETE,OPTIONS"},
 	//	AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
