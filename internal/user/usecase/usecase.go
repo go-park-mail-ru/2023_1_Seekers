@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+	"github.com/go-playground/validator/v10"
 	"net/mail"
 )
 
@@ -24,6 +26,11 @@ func validMailAddress(email string) (string, bool) {
 }
 
 func (u *useCase) CreateUser(user models.User) (*models.User, error) {
+	validate := validator.New()
+	err := validate.Struct(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
 	if len(user.Password) < config.PasswordMinLen {
 		return nil, _user.ErrTooShortPw
 	}
@@ -46,6 +53,11 @@ func (u *useCase) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (u *useCase) CreateProfile(profile models.Profile) error {
+	validate := validator.New()
+	err := validate.Struct(profile)
+	if err != nil {
+		return fmt.Errorf("failed to create profile: %w", err)
+	}
 	return u.userRepo.CreateProfile(profile)
 }
 func (u *useCase) GetProfileByID(id uint64) (*models.Profile, error) {

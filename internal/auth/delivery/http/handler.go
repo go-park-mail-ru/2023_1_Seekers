@@ -9,6 +9,7 @@ import (
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -44,6 +45,16 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		pkg.SendError(w, authErr)
 		return
 	}
+
+	validate := validator.New()
+	err = validate.Struct(form)
+	if err != nil {
+		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
+		return
+	}
+
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
 		if err == auth.ErrPwDontMatch {
