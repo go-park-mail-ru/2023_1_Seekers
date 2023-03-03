@@ -25,12 +25,16 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, User-Agent, X-CSRF-Token")
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		h.ServeHTTP(w, r)
 	})
 	return handler
-
+	//
 	//c := cors.New(cors.Options{
-	//	AllowedMethods:   []string{"GET,POST,PUT,DELETE, OPTIONS"},
+	//	AllowedMethods:   []string{"GET,POST,PUT,DELETE,OPTIONS"},
 	//	AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
 	//	AllowedOrigins:   []string{"http://localhost:8002"},
 	//	AllowCredentials: true,
