@@ -16,9 +16,9 @@ type Recipient struct {
 }
 
 type Folder struct {
-	FolderID uint64
-	Name     string
-	UserID   uint64
+	FolderID uint64 `json:"folder_id"`
+	Name     string `json:"name"`
+	UserID   uint64 `json:"user_id"`
 }
 
 type Box struct {

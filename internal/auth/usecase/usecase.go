@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
@@ -25,11 +24,11 @@ func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI {
 func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
 	user, err := u.userUC.GetUserByEmail(form.Email)
 	if err != nil {
-		return nil, fmt.Errorf("cant get user: %w", err)
+		return nil, auth.ErrWrongPw
 	}
 
 	if user.Password != form.Password {
-		return nil, errors.New("user not found")
+		return nil, auth.ErrWrongPw
 	}
 
 	return user, nil

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
@@ -13,8 +14,14 @@ import (
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 )
+
+// @title MailBox Swagger API
+// @version 1.0
+// @host localhost:8001
+// @BasePath	/api/v1
 
 func main() {
 	router := mux.NewRouter()
@@ -32,6 +39,13 @@ func main() {
 	authH := _authHandler.New(authUC, usersUC)
 	mailH := _mailHandler.New(mailUC)
 
+	//router
+	//
+	//r.Get("/swagger/*", httpSwagger.Handler(
+	//	httpSwagger.URL("http://localhost:8001/swagger/doc.json"), //The url pointing to API definition
+	//))
+
+	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	_authHandler.RegisterHTTPRoutes(router, authH, middleware)
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
 

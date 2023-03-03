@@ -28,6 +28,21 @@ func New(aUC auth.UseCaseI, uUC _user.UseCaseI) auth.HandlersI {
 	}
 }
 
+// SignUp godoc
+// @Summary      SignUp
+// @Description  user sign up
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Param    user body models.FormSignUp true "user info"
+// @Success  200 {object} models.User "user created"
+// @Failure 401 {object} error "passwords dont match"
+// @Failure 403 {object} error "invalid form"
+// @Failure 403 {object} error "password too short"
+// @Failure 409 {object} error "failed to sign up"
+// @Failure 500 {object} error "failed to create profile"
+// @Failure 500 {object} error "failed to create session"
+// @Router   /signup [post]
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	defer func(Body io.ReadCloser) {
@@ -40,7 +55,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	form := models.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -49,7 +64,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err = validate.Struct(form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -69,7 +84,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 			pkg.SendError(w, authErr)
 			return
 		}
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrFailedSignUp], err)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -82,7 +97,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.userUC.CreateProfile(profile)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -90,7 +105,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -105,6 +120,18 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, http.StatusOK, user)
 }
 
+// SignIn godoc
+// @Summary      SignIn
+// @Description  user sign in
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Param    user body models.FormLogin true "user info"
+// @Success  200 {object} models.User "user created"
+// @Failure 401 {object} error "wrong password"
+// @Failure 403 {object} error "invalid form"
+// @Failure 500 {object} error "failed to create session"
+// @Router   /signin [post]
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 	defer func(Body io.ReadCloser) {
@@ -115,9 +142,11 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 	form := models.FormLogin{}
 
+	// TODO validate !!!
+
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -125,7 +154,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrWrongPw], auth.ErrWrongPw)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -135,7 +164,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err = h.authUC.DeleteSessionByUID(user.ID)
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
+		authErr := errors.New(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
@@ -150,6 +179,16 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, http.StatusOK, user)
 }
 
+// Logout godoc
+// @Summary      Logout
+// @Description  user log out
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 "success logout"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 

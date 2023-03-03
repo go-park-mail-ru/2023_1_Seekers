@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	ErrInvalidForm          = errors.New("invalid form, cant decode")
+	ErrInvalidForm          = errors.New("invalid form")
 	ErrPwDontMatch          = errors.New("passwords dont match")
-	ErrUserNotFound         = errors.New("user not found")
+	ErrWrongPw              = errors.New("wrong password")
 	ErrUserExists           = errors.New("user already exists")
 	ErrSessionNotFound      = errors.New("session not found")
 	ErrSessionExists        = errors.New("session exists")
@@ -23,18 +23,19 @@ var (
 	ErrFailedAuth           = errors.New("failed auth")
 	ErrFailedGetSession     = errors.New("failed get session")
 	ErrFailedDeleteSession  = errors.New("failed delete session")
+	ErrUserNotFound         = errors.New("user not found")
 )
 
 var Errors = map[error]int{
 	ErrInvalidForm:          http.StatusForbidden,
 	ErrPwDontMatch:          http.StatusUnauthorized,
-	ErrUserNotFound:         http.StatusUnauthorized,
+	ErrWrongPw:              http.StatusUnauthorized,
 	ErrUserExists:           http.StatusConflict,
 	ErrSessionNotFound:      http.StatusUnauthorized,
 	ErrSessionExists:        http.StatusConflict,
 	ErrFailedSignUp:         http.StatusConflict,
 	ErrFailedCreateProfile:  http.StatusInternalServerError,
-	ErrFailedCreateSession:  http.StatusUnauthorized,
+	ErrFailedCreateSession:  http.StatusInternalServerError,
 	ErrFailedSignIn:         http.StatusUnauthorized,
 	ErrFailedLogout:         http.StatusBadRequest,
 	ErrFailedLogoutNoCookie: http.StatusUnauthorized,
