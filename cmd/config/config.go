@@ -16,10 +16,10 @@ const (
 	RouteSignup = "/api/v1/signup"
 	RouteLogout = "/api/v1/logout"
 
-	RouteInboxMessages  = "/api/v1/inbox/"
-	RouteOutboxMessages = "/api/v1/outbox/"
+	RouteInboxMessages  = "/api/v1/inbox"
+	RouteOutboxMessages = "/api/v1/outbox"
 	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
-	RouteFolders        = "/api/v1/folders/"
+	RouteFolders        = "/api/v1/folders"
 
 	PasswordMinLen = 5
 )
