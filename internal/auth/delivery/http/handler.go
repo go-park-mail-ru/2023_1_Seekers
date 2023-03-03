@@ -115,10 +115,16 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		Name:     config.CookieName,
 		Value:    session.SessionID,
 		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
 		Path:     config.CookiePath,
-		Secure:   true,
-		SameSite: 0,
+		HttpOnly: true,
+		Domain:   "http://localhost:8002",
+		//Name:     config.CookieName,
+		//Value:    session.SessionID,
+		//Expires:  time.Now().Add(config.CookieTTL),
+		//HttpOnly: true,
+		//Path:     config.CookiePath,
+		//Secure:   true,
+		//SameSite: 0,
 	})
 	pkg.SendJSON(w, http.StatusOK, user)
 }
@@ -179,8 +185,9 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(config.CookieTTL),
 		Path:     config.CookiePath,
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: 0,
+		Domain:   "http://localhost:8002",
+		//Secure:   true,
+		//SameSite: http.Sa,
 	})
 	pkg.SendJSON(w, http.StatusOK, user)
 }
