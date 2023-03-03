@@ -21,7 +21,6 @@ type FormSignUp struct {
 }
 
 type FormLogin struct {
-	Email     string `json:"email" validate:"required"`
-	Password  string `json:"password" validate:"required"`
-	BirthDate string `json:"birth_date" validate:"required"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
