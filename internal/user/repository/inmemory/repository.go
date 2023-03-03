@@ -20,9 +20,9 @@ func New() user.RepoI {
 			{4, "valera@example.com", "12345"},
 		},
 		[]models.Profile{
-			{1, "Michail", "Testov", "21.12.2001"},
-			{2, "Ivan", "Ivanov", "21.12.2001"},
-			{3, "Michail", "Sidorov", "21.12.2001"},
+			{1, "Michail", "Testov"},
+			{2, "Ivan", "Ivanov"},
+			{3, "Michail", "Sidorov"},
 		},
 	}
 }

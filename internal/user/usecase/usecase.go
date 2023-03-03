@@ -4,6 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+	"net/mail"
 )
 
 type useCase struct {
@@ -14,9 +15,20 @@ func New(r _user.RepoI) _user.UseCaseI {
 	return &useCase{userRepo: r}
 }
 
+func validMailAddress(email string) (string, bool) {
+	addr, err := mail.ParseAddress(email)
+	if err != nil {
+		return "", false
+	}
+	return addr.Address, true
+}
+
 func (u *useCase) CreateUser(user models.User) (*models.User, error) {
 	if len(user.Password) < config.PasswordMinLen {
 		return nil, _user.ErrTooShortPw
+	}
+	if _, ok := validMailAddress(user.Email); !ok {
+		return nil, _user.ErrInvalidEmail
 	}
 	return u.userRepo.CreateUser(user)
 }
@@ -34,7 +46,6 @@ func (u *useCase) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (u *useCase) CreateProfile(profile models.Profile) error {
-	// TODO some profile validation
 	return u.userRepo.CreateProfile(profile)
 }
 func (u *useCase) GetProfileByID(id uint64) (*models.Profile, error) {

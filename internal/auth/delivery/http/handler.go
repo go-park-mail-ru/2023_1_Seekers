@@ -68,7 +68,6 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		UID:       user.ID,
 		FirstName: form.FirstName,
 		LastName:  form.LastName,
-		BirthDate: form.BirthDate,
 	}
 	err = h.userUC.CreateProfile(profile)
 	if err != nil {

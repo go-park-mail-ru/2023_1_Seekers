@@ -10,7 +10,6 @@ type Profile struct {
 	UID       uint64 `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	BirthDate string `json:"birth_date"`
 }
 
 type FormSignUp struct {

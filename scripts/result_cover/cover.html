@@ -75,7 +75,7 @@
 				
 				<option value="file9">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory/repository.go (72.4%)</option>
 				
-				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (55.6%)</option>
+				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (60.0%)</option>
 				
 				<option value="file11">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/errors.go (100.0%)</option>
 				
@@ -176,7 +176,6 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
                 UID:       user.ID,
                 FirstName: form.FirstName,
                 LastName:  form.LastName,
-                BirthDate: form.BirthDate,
         }
         err = h.userUC.CreateProfile(profile)
         if err != nil </span><span class="cov0" title="0">{
@@ -1073,9 +1072,9 @@ func New() user.RepoI <span class="cov10" title="3">{
                         {4, "valera@example.com", "12345"},
                 },
                 []models.Profile{
-                        {1, "Michail", "Testov", "21.12.2001"},
-                        {2, "Ivan", "Ivanov", "21.12.2001"},
-                        {3, "Michail", "Sidorov", "21.12.2001"},
+                        {1, "Michail", "Testov"},
+                        {2, "Ivan", "Ivanov"},
+                        {3, "Michail", "Sidorov"},
                 },
         }
 }</span>
@@ -1145,6 +1144,7 @@ import (
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "net/mail"
 )
 
 type useCase struct {
@@ -1155,9 +1155,20 @@ func New(r _user.RepoI) _user.UseCaseI <span class="cov10" title="3">{
         return &amp;useCase{userRepo: r}
 }</span>
 
+func validMailAddress(email string) (string, bool) <span class="cov1" title="1">{
+        addr, err := mail.ParseAddress(email)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", false
+        }</span>
+        <span class="cov1" title="1">return addr.Address, true</span>
+}
+
 func (u *useCase) CreateUser(user models.User) (*models.User, error) <span class="cov1" title="1">{
         if len(user.Password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
                 return nil, _user.ErrTooShortPw
+        }</span>
+        <span class="cov1" title="1">if _, ok := validMailAddress(user.Email); !ok </span><span class="cov0" title="0">{
+                return nil, _user.ErrInvalidEmail
         }</span>
         <span class="cov1" title="1">return u.userRepo.CreateUser(user)</span>
 }
@@ -1175,7 +1186,7 @@ func (u *useCase) GetUserByEmail(email string) (*models.User, error) <span class
 }</span>
 
 func (u *useCase) CreateProfile(profile models.Profile) error <span class="cov1" title="1">{
-        // TODO some profile validation
+
         return u.userRepo.CreateProfile(profile)
 }</span>
 func (u *useCase) GetProfileByID(id uint64) (*models.Profile, error) <span class="cov0" title="0">{
