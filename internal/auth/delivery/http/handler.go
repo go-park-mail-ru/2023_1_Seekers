@@ -39,7 +39,7 @@ func New(aUC auth.UseCaseI, uUC _user.UseCaseI) auth.HandlersI {
 // @Failure 401 {object} error "passwords dont match"
 // @Failure 403 {object} error "invalid form"
 // @Failure 403 {object} error "password too short"
-// @Failure 409 {object} error "failed to sign up"
+// @Failure 409 {object} error "user already exists"
 // @Failure 500 {object} error "failed to create profile"
 // @Failure 500 {object} error "failed to create session"
 // @Router   /signup [post]
@@ -84,7 +84,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 			pkg.SendError(w, authErr)
 			return
 		}
-		authErr := errors.New(auth.Errors[auth.ErrFailedSignUp], err)
+		authErr := errors.New(auth.Errors[auth.ErrUserExists], auth.ErrUserExists)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
 		return
