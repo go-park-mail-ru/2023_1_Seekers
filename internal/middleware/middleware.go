@@ -6,7 +6,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -20,22 +19,24 @@ func New(aUc auth.UseCaseI) *Middleware {
 }
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
-	//handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//	w.Header().Set("Access-Control-Allow-Origin", "*")
-	//	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, User-Agent, X-CSRF-Token")
-	//	w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE, OPTIONS")
-	//	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	//	h.ServeHTTP(w, r)
-	//})
-	//return handler
-
-	c := cors.New(cors.Options{
-		AllowedMethods:   []string{"GET,POST,PUT,DELETE, OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
-		AllowedOrigins:   []string{"http://localhost:8002"},
-		AllowCredentials: true,
-		Debug:            false,
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Info(r.Header, r.Host, r.Body)
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8002")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, User-Agent, X-CSRF-Token")
+		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		h.ServeHTTP(w, r)
 	})
+	return handler
+
+	//c := cors.New(cors.Options{
+	//	AllowedMethods:   []string{"GET,POST,PUT,DELETE, OPTIONS"},
+	//	AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
+	//	AllowedOrigins:   []string{"http://localhost:8002"},
+	//	AllowCredentials: true,
+	//	Debug:            false,
+	//})
+	//log.Info()
 	return c.Handler(h)
 }
 
