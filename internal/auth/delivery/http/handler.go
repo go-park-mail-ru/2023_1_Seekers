@@ -112,10 +112,11 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    config.CookieName,
-		Value:   session.SessionID,
-		Expires: time.Now().Add(config.CookieTTL),
-		Path:    config.CookiePath,
+		Name:     config.CookieName,
+		Value:    session.SessionID,
+		Expires:  time.Now().Add(config.CookieTTL),
+		Path:     config.CookiePath,
+		HttpOnly: true,
 	})
 	pkg.SendJSON(w, http.StatusOK, user)
 }
@@ -171,10 +172,11 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    config.CookieName,
-		Value:   session.SessionID,
-		Expires: time.Now().Add(config.CookieTTL),
-		Path:    config.CookiePath,
+		Name:     config.CookieName,
+		Value:    session.SessionID,
+		Expires:  time.Now().Add(config.CookieTTL),
+		Path:     config.CookiePath,
+		HttpOnly: true,
 	})
 	pkg.SendJSON(w, http.StatusOK, user)
 }
