@@ -112,17 +112,11 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		//Name:     config.CookieName,
-		//Value:    session.SessionID,
-		//Expires:  time.Now().Add(config.CookieTTL),
-		//Path:     config.CookiePath,
-		//HttpOnly: true,
-		//Domain:   "http://localhost:8002",
 		Name:     config.CookieName,
 		Value:    session.SessionID,
 		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
 		Path:     config.CookiePath,
+		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -180,17 +174,11 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		//Name:     config.CookieName,
-		//Value:    session.SessionID,
-		//Expires:  time.Now().Add(config.CookieTTL),
-		//Path:     config.CookiePath,
-		//HttpOnly: true,
-		//Domain:   "http://localhost:8002",
 		Name:     config.CookieName,
 		Value:    session.SessionID,
 		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
 		Path:     config.CookiePath,
+		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
