@@ -39,12 +39,6 @@ func main() {
 	authH := _authHandler.New(authUC, usersUC)
 	mailH := _mailHandler.New(mailUC)
 
-	//router
-	//
-	//r.Get("/swagger/*", httpSwagger.Handler(
-	//	httpSwagger.URL("http://localhost:8001/swagger/doc.json"), //The url pointing to API definition
-	//))
-
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	_authHandler.RegisterHTTPRoutes(router, authH, middleware)
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
