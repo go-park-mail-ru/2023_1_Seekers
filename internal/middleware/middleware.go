@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -19,19 +20,14 @@ func New(aUc auth.UseCaseI) *Middleware {
 }
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Info(r.Header, r.Host, r.Body)
-		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, User-Agent, X-CSRF-Token")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		h.ServeHTTP(w, r)
+	c := cors.New(cors.Options{
+		AllowedMethods:   []string{"POST", "GET", "PUT"},
+		AllowedOrigins:   []string{"http://localhost:8002"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
+		Debug:            true,
 	})
-	return handler
+	return c.Handler(h)
 }
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
