@@ -115,8 +115,8 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		Name:     config.CookieName,
 		Value:    session.SessionID,
 		Expires:  time.Now().Add(config.CookieTTL),
-		Path:     config.CookiePath,
 		HttpOnly: true,
+		Path:     config.CookiePath,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -177,8 +177,8 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		Name:     config.CookieName,
 		Value:    session.SessionID,
 		Expires:  time.Now().Add(config.CookieTTL),
-		Path:     config.CookiePath,
 		HttpOnly: true,
+		Path:     config.CookiePath,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
