@@ -57,7 +57,8 @@ func main() {
 	}
 
 	log.Info("server started")
-	err := server.ListenAndServeTLS("localhost.crt", "localhost.key")
+	err := server.ListenAndServe()
+	//err := server.ListenAndServeTLS("localhost.crt", "localhost.key")
 	if err != nil {
 		log.Errorf("server stopped %v", err)
 	}
