@@ -22,7 +22,7 @@ func New(aUc auth.UseCaseI) *Middleware {
 func (m *Middleware) Cors(h http.Handler) http.Handler {
 	c := cors.New(cors.Options{
 		AllowedMethods:   []string{"POST", "GET", "PUT"},
-		AllowedOrigins:   []string{"http://127.0.0.1:8002", "http://localhost:8002", "https://deploy-preview-2--papaya-gingersnap-c9306c.netlify.app"},
+		AllowedOrigins:   []string{"http://127.0.0.1:8002", "http://localhost:8002", "https://dev-task2-3--papaya-gingersnap-c9306c.netlify.app/", "https://deploy-preview-2--papaya-gingersnap-c9306c.netlify.app"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
 		Debug:            true,
