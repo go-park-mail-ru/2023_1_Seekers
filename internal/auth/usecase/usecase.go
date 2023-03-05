@@ -22,7 +22,7 @@ func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI {
 }
 
 func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
-	user, err := u.userUC.GetUserByEmail(form.Email)
+	user, err := u.userUC.GetUserByEmail(form.Login + "@" + config.PostDomain)
 	if err != nil {
 		return nil, auth.ErrWrongPw
 	}
@@ -40,7 +40,7 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
 	}
 
 	user, err := u.userUC.CreateUser(models.User{
-		Email:    form.Email,
+		Email:    form.Login + "@" + config.PostDomain,
 		Password: form.Password,
 	})
 	if err != nil {

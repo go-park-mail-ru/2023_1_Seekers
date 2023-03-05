@@ -21,10 +21,10 @@ func New(aUc auth.UseCaseI) *Middleware {
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
 	c := cors.New(cors.Options{
-		AllowedMethods:   []string{"POST", "GET", "PUT"},
-		AllowedOrigins:   []string{"http://localhost:8002", "http://89.208.197.150:8002"},
+		AllowedMethods:   config.AllowedMethods,
+		AllowedOrigins:   config.AllowedOrigins,
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"Content-Type", "Content-Length", "X-Csrf-Token"},
+		AllowedHeaders:   config.AllowedHeaders,
 		Debug:            true,
 	})
 	return c.Handler(h)

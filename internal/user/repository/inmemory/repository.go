@@ -15,10 +15,10 @@ func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
 			{0, "support@mailbox.ru", "very_difficult_pw"},
-			{1, "test@example.com", "12345"},
-			{2, "gena@example.com", "54321"},
-			{3, "max@example.com", "13795"},
-			{4, "valera@example.com", "12345"},
+			{1, "test@mailbox.ru", "12345"},
+			{2, "gena@mailbox.ru", "54321"},
+			{3, "max@mailbox.ru", "13795"},
+			{4, "valera@mailbox.ru", "12345"},
 		},
 		[]models.Profile{
 			{1, "Michail", "Testov"},
