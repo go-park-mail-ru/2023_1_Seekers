@@ -13,7 +13,7 @@ type Profile struct {
 }
 
 type FormSignUp struct {
-	Login     string `json:"email" validate:"required"`
+	Login     string `json:"login" validate:"required"`
 	Password  string `json:"password" validate:"required"`
 	RepeatPw  string `json:"repeat_pw" validate:"required"` // ?
 	FirstName string `json:"first_name" validate:"required"`
@@ -21,7 +21,7 @@ type FormSignUp struct {
 }
 
 type FormLogin struct {
-	Login    string `json:"email" validate:"required"`
+	Login    string `json:"login" validate:"required"`
 	Password string `json:"password" validate:"required"`
 	Remember bool   `json:"remember" validate:"required"`
 }
