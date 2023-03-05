@@ -23,10 +23,11 @@ type handlers struct {
 	mailUC mail.UseCaseI
 }
 
-func New(aUC auth.UseCaseI, uUC _user.UseCaseI) auth.HandlersI {
+func New(aUC auth.UseCaseI, uUC _user.UseCaseI, mUC mail.UseCaseI) auth.HandlersI {
 	return &handlers{
 		authUC: aUC,
 		userUC: uUC,
+		mailUC: mUC,
 	}
 }
 
@@ -113,13 +114,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//err = h.mailUC.CreateHelloMessage(user.ID)
-	//if err != nil {
-	//	authErr := errors.New(auth.Errors[auth.ErrInternalHelloMsg], auth.ErrInternalHelloMsg)
-	//	log.Error(authErr)
-	//	pkg.SendError(w, authErr)
-	//	return
-	//}
+	err = h.mailUC.CreateHelloMessage(user.ID)
+	if err != nil {
+		authErr := errors.New(auth.Errors[auth.ErrInternalHelloMsg], auth.ErrInternalHelloMsg)
+		log.Error(authErr)
+		pkg.SendError(w, authErr)
+		return
+	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     config.CookieName,

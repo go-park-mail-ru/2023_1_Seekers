@@ -36,7 +36,7 @@ func main() {
 
 	middleware := _middleware.New(authUC)
 
-	authH := _authHandler.New(authUC, usersUC)
+	authH := _authHandler.New(authUC, usersUC, mailUC)
 	mailH := _mailHandler.New(mailUC)
 
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
