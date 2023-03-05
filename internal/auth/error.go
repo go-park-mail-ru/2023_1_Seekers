@@ -9,6 +9,7 @@ import (
 var (
 	ErrInvalidForm          = errors.New("invalid form")
 	ErrPwDontMatch          = errors.New("passwords dont match")
+	ErrInvalidLogin         = errors.New("invalid login")
 	ErrWrongPw              = errors.New("wrong password")
 	ErrUserExists           = errors.New("user already exists")
 	ErrSessionNotFound      = errors.New("session not found")
@@ -30,6 +31,7 @@ var (
 var Errors = map[error]int{
 	ErrInvalidForm:          http.StatusForbidden,
 	ErrPwDontMatch:          http.StatusUnauthorized,
+	ErrInvalidLogin:         http.StatusUnauthorized,
 	ErrWrongPw:              http.StatusUnauthorized,
 	ErrUserExists:           http.StatusConflict,
 	ErrSessionNotFound:      http.StatusUnauthorized,

@@ -75,14 +75,8 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
-		if err == auth.ErrPwDontMatch {
-			authErr := errors.New(auth.Errors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
-			log.Error(authErr)
-			pkg.SendError(w, authErr)
-			return
-		}
-		if err == _user.ErrTooShortPw {
-			authErr := errors.New(auth.Errors[_user.ErrTooShortPw], _user.ErrTooShortPw)
+		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrPwDontMatch {
+			authErr := errors.New(auth.Errors[err], err)
 			log.Error(authErr)
 			pkg.SendError(w, authErr)
 			return
@@ -154,8 +148,6 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 	form := models.FormLogin{}
 
-	// TODO validate !!!
-
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm)
@@ -166,6 +158,12 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
+		if err == auth.ErrInvalidLogin {
+			authErr := errors.New(auth.Errors[err], err)
+			log.Error(authErr)
+			pkg.SendError(w, authErr)
+			return
+		}
 		authErr := errors.New(auth.Errors[auth.ErrWrongPw], auth.ErrWrongPw)
 		log.Error(authErr)
 		pkg.SendError(w, authErr)
