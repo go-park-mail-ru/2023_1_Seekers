@@ -332,3 +332,30 @@ func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([
 
 	return messages, nil
 }
+
+func (db *mailDB) CreateMessage(message models.Message, to ...uint64) error {
+	message.MessageID = uint64(len(db.messages) + 1)
+	db.messages = append(db.messages, message)
+	for _, uid := range to {
+		db.recipients = append(db.recipients, models.Recipient{
+			MessageID: message.MessageID,
+			UserID:    uid,
+		})
+		db.states = append(db.states, models.State{
+			UserID:    uid,
+			MessageID: message.MessageID,
+			Read:      false,
+			Favorite:  false,
+			Send:      true,
+		})
+	}
+	db.states = append(db.states, models.State{
+		UserID:    message.UserID,
+		MessageID: message.MessageID,
+		Read:      true,
+		Favorite:  false,
+		Send:      true,
+	})
+
+	return nil
+}

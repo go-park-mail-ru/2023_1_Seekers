@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"time"
 )
 
 type UseCase struct {
@@ -64,4 +65,19 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.I
 	}
 
 	return messages, nil
+}
+
+func (uc *UseCase) CreateHelloMessage(to uint64) error {
+	now := time.Now()
+	msg := models.Message{
+		UserID:       0,
+		CreatingDate: now.Format("2006-02-01"),
+		Title:        "Hello! Its your first mail",
+		Text:         "Support of mail box is glad to see You here! Have a nice day!",
+	}
+	return uc.CreateMessage(msg, to)
+}
+
+func (uc *UseCase) CreateMessage(message models.Message, to ...uint64) error {
+	return uc.repo.CreateMessage(message, to...)
 }

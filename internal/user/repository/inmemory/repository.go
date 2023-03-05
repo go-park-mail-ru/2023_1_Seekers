@@ -14,6 +14,7 @@ type usersDB struct {
 func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
+			{0, "support@mailbox.ru", "very_difficult_pw"},
 			{1, "test@example.com", "12345"},
 			{2, "gena@example.com", "54321"},
 			{3, "max@example.com", "13795"},

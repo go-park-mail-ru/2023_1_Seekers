@@ -17,6 +17,8 @@ type UseCaseI interface {
 	GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error)
 	GetFolders(userID uint64) []models.Folder
 	GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error)
+	CreateHelloMessage(to uint64) error
+	CreateMessage(message models.Message, to ...uint64) error
 }
 
 type RepoI interface {
@@ -25,4 +27,5 @@ type RepoI interface {
 	SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error)
 	SelectFoldersByUser(userID uint64) []models.Folder
 	SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.IncomingMessage, error)
+	CreateMessage(message models.Message, to ...uint64) error
 }

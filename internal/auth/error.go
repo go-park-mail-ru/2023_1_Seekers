@@ -24,6 +24,7 @@ var (
 	ErrFailedGetSession     = errors.New("failed get session")
 	ErrFailedDeleteSession  = errors.New("failed delete session")
 	ErrUserNotFound         = errors.New("user not found")
+	ErrInternalHelloMsg     = errors.New("failed to send hello message")
 )
 
 var Errors = map[error]int{
@@ -34,6 +35,7 @@ var Errors = map[error]int{
 	ErrSessionNotFound:      http.StatusUnauthorized,
 	ErrSessionExists:        http.StatusConflict,
 	ErrFailedSignUp:         http.StatusConflict,
+	ErrInternalHelloMsg:     http.StatusInternalServerError,
 	ErrFailedCreateProfile:  http.StatusInternalServerError,
 	ErrFailedCreateSession:  http.StatusInternalServerError,
 	ErrFailedSignIn:         http.StatusUnauthorized,
