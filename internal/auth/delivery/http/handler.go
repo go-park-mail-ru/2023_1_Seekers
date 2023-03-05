@@ -113,13 +113,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.mailUC.CreateHelloMessage(user.ID)
-	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrInternalHelloMsg], auth.ErrInternalHelloMsg)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
-		return
-	}
+	//err = h.mailUC.CreateHelloMessage(user.ID)
+	//if err != nil {
+	//	authErr := errors.New(auth.Errors[auth.ErrInternalHelloMsg], auth.ErrInternalHelloMsg)
+	//	log.Error(authErr)
+	//	pkg.SendError(w, authErr)
+	//	return
+	//}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     config.CookieName,

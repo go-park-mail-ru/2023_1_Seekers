@@ -29,12 +29,15 @@ func (u *useCase) CreateUser(user models.User) (*models.User, error) {
 	validate := validator.New()
 	err := validate.Struct(user)
 	if err != nil {
+		fmt.Println(5)
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 	if len(user.Password) < config.PasswordMinLen {
+		fmt.Println(6)
 		return nil, _user.ErrTooShortPw
 	}
 	if _, ok := validMailAddress(user.Email); !ok {
+		fmt.Println(7)
 		return nil, _user.ErrInvalidEmail
 	}
 	return u.userRepo.CreateUser(user)

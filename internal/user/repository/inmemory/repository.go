@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
@@ -38,8 +39,10 @@ func (uDb *usersDB) GetUserByID(id uint64) (*models.User, error) {
 }
 
 func (uDb *usersDB) GetUserByEmail(email string) (*models.User, error) {
+	fmt.Println(uDb.users)
 	for i, u := range uDb.users {
 		if u.Email == email {
+			fmt.Println("WTF", u.Email, email)
 			return &uDb.users[i], nil
 		}
 	}
@@ -49,6 +52,7 @@ func (uDb *usersDB) GetUserByEmail(email string) (*models.User, error) {
 func (uDb *usersDB) CreateUser(user models.User) (*models.User, error) {
 	_, err := uDb.GetUserByEmail(user.Email)
 	if err == nil {
+		fmt.Println(9)
 		return nil, auth.ErrUserExists
 	}
 	//слой бд отвечает за присваивание id
