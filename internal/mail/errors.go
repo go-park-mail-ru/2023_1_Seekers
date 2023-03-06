@@ -14,7 +14,7 @@ var (
 	ErrFailedGetUser           = errors.New("failed to get user")
 )
 
-var MailErrors = map[error]int{
+var Errors = map[error]int{
 	ErrHttpGetMethod:           http.StatusBadRequest,
 	ErrInvalidURL:              http.StatusNotFound,
 	ErrFailedGetInboxMessages:  http.StatusBadRequest,

@@ -9,7 +9,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -29,6 +28,10 @@ func New(aUC auth.UseCaseI, uUC _user.UseCaseI, mUC mail.UseCaseI) auth.Handlers
 		userUC: uUC,
 		mailUC: mUC,
 	}
+}
+
+func handleAuthErr(w http.ResponseWriter, err error) {
+	pkg.HandleError(w, auth.Errors[err], err)
 }
 
 // SignUp godoc
@@ -58,32 +61,24 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	form := models.FormSignUp{}
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrInvalidForm)
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(form)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], err)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrInvalidForm)
 		return
 	}
 
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
 		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrPwDontMatch {
-			authErr := errors.New(auth.Errors[err], err)
-			log.Error(authErr)
-			pkg.SendError(w, authErr)
+			handleAuthErr(w, err)
 			return
 		}
-		authErr := errors.New(auth.Errors[auth.ErrUserExists], auth.ErrUserExists)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrUserExists)
 		return
 	}
 
@@ -94,25 +89,19 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.userUC.CreateProfile(profile)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrFailedCreateProfile)
 		return
 	}
 
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrFailedCreateSession)
 		return
 	}
 
 	err = h.mailUC.CreateHelloMessage(user.ID)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrInternalHelloMsg], auth.ErrInternalHelloMsg)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrInternalHelloMsg)
 		return
 	}
 
@@ -150,23 +139,17 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrInvalidForm)
 		return
 	}
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
 		if err == auth.ErrInvalidLogin {
-			authErr := errors.New(auth.Errors[err], err)
-			log.Error(authErr)
-			pkg.SendError(w, authErr)
+			handleAuthErr(w, err)
 			return
 		}
-		authErr := errors.New(auth.Errors[auth.ErrWrongPw], auth.ErrWrongPw)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrWrongPw)
 		return
 	}
 
@@ -174,9 +157,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err = h.authUC.DeleteSessionByUID(user.ID)
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		authErr := errors.New(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession)
-		log.Error(authErr)
-		pkg.SendError(w, authErr)
+		handleAuthErr(w, auth.ErrFailedCreateSession)
 		return
 	}
 
