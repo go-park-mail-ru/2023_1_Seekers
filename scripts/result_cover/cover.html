@@ -55,35 +55,39 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (75.7%)</option>
+				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (78.8%)</option>
 				
 				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/register.go (0.0%)</option>
 				
 				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory/session.go (73.9%)</option>
 				
-				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (78.4%)</option>
+				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (76.7%)</option>
 				
-				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (42.1%)</option>
+				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (65.0%)</option>
 				
 				<option value="file5">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/register.go (0.0%)</option>
 				
-				<option value="file6">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory/inmemory.go (84.5%)</option>
+				<option value="file6">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory/inmemory.go (85.7%)</option>
 				
-				<option value="file7">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/usecase.go (82.6%)</option>
+				<option value="file7">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/usecase.go (85.2%)</option>
 				
-				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (70.8%)</option>
+				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (89.5%)</option>
 				
 				<option value="file9">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory/repository.go (72.4%)</option>
 				
-				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (60.0%)</option>
+				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (57.7%)</option>
 				
 				<option value="file11">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/errors.go (100.0%)</option>
 				
-				<option value="file12">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand.go (87.5%)</option>
+				<option value="file12">github.com/go-park-mail-ru/2023_1_Seekers/pkg/handle_error.go (100.0%)</option>
 				
-				<option value="file13">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_error.go (100.0%)</option>
+				<option value="file13">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand.go (87.5%)</option>
 				
-				<option value="file14">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_json.go (50.0%)</option>
+				<option value="file14">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_error.go (100.0%)</option>
+				
+				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_json.go (50.0%)</option>
+				
+				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation.go (77.8%)</option>
 				
 				</select>
 			</div>
@@ -113,10 +117,11 @@ import (
         "fmt"
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-playground/validator/v10"
         log "github.com/sirupsen/logrus"
         "io"
         "net/http"
@@ -126,15 +131,36 @@ import (
 type handlers struct {
         authUC auth.UseCaseI
         userUC _user.UseCaseI
+        mailUC mail.UseCaseI
 }
 
-func New(aUC auth.UseCaseI, uUC _user.UseCaseI) auth.HandlersI <span class="cov10" title="2">{
+func New(aUC auth.UseCaseI, uUC _user.UseCaseI, mUC mail.UseCaseI) auth.HandlersI <span class="cov10" title="2">{
         return &amp;handlers{
                 authUC: aUC,
                 userUC: uUC,
+                mailUC: mUC,
         }
 }</span>
 
+func handleAuthErr(w http.ResponseWriter, err error) <span class="cov1" title="1">{
+        pkg.HandleError(w, auth.Errors[err], err)
+}</span>
+
+// SignUp godoc
+// @Summary      SignUp
+// @Description  user sign up
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Param    user body models.FormSignUp true "user info"
+// @Success  200 {object} models.User "user created"
+// @Failure 401 {object} error "passwords dont match"
+// @Failure 403 {object} error "invalid form"
+// @Failure 403 {object} error "password too short"
+// @Failure 409 {object} error "user already exists"
+// @Failure 500 {object} error "failed to create profile"
+// @Failure 500 {object} error "failed to create session"
+// @Router   /signup [post]
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
         log.Info(r.Host, r.Header, r.Body)
         defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
@@ -147,28 +173,24 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         <span class="cov1" title="1">form := models.FormSignUp{}
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                handleAuthErr(w, auth.ErrInvalidForm)
                 return
         }</span>
+
+        <span class="cov1" title="1">validate := validator.New()
+        err = validate.Struct(form)
+        if err != nil </span><span class="cov0" title="0">{
+                handleAuthErr(w, auth.ErrInvalidForm)
+                return
+        }</span>
+
         <span class="cov1" title="1">user, err := h.authUC.SignUp(form)
         if err != nil </span><span class="cov1" title="1">{
-                if err == auth.ErrPwDontMatch </span><span class="cov1" title="1">{
-                        authErr := errors.New(auth.Errors[auth.ErrPwDontMatch], auth.ErrPwDontMatch)
-                        log.Error(authErr)
-                        pkg.SendError(w, authErr)
+                if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrPwDontMatch </span><span class="cov1" title="1">{
+                        handleAuthErr(w, err)
                         return
                 }</span>
-                <span class="cov1" title="1">if err == _user.ErrTooShortPw </span><span class="cov0" title="0">{
-                        authErr := errors.New(auth.Errors[_user.ErrTooShortPw], _user.ErrTooShortPw)
-                        log.Error(authErr)
-                        pkg.SendError(w, authErr)
-                        return
-                }</span>
-                <span class="cov1" title="1">authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignUp], auth.ErrFailedSignUp.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                <span class="cov1" title="1">handleAuthErr(w, auth.ErrUserExists)
                 return</span>
         }
 
@@ -179,29 +201,44 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         }
         err = h.userUC.CreateProfile(profile)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateProfile], auth.ErrFailedCreateProfile.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                handleAuthErr(w, auth.ErrFailedCreateProfile)
                 return
         }</span>
 
         <span class="cov1" title="1">session, err := h.authUC.CreateSession(user.ID)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                handleAuthErr(w, auth.ErrFailedCreateSession)
+                return
+        }</span>
+
+        <span class="cov1" title="1">err = h.mailUC.CreateHelloMessage(user.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                handleAuthErr(w, auth.ErrInternalHelloMsg)
                 return
         }</span>
 
         <span class="cov1" title="1">http.SetCookie(w, &amp;http.Cookie{
-                Name:    config.CookieName,
-                Value:   session.SessionID,
-                Expires: time.Now().Add(config.CookieTTL),
-                Path:    config.CookiePath,
+                Name:     config.CookieName,
+                Value:    session.SessionID,
+                Expires:  time.Now().Add(config.CookieTTL),
+                HttpOnly: true,
+                Path:     config.CookiePath,
         })
         pkg.SendJSON(w, http.StatusOK, user)</span>
 }
 
+// SignIn godoc
+// @Summary      SignIn
+// @Description  user sign in
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Param    user body models.FormLogin true "user info"
+// @Success  200 {object} models.User "user created"
+// @Failure 401 {object} error "wrong password"
+// @Failure 403 {object} error "invalid form"
+// @Failure 500 {object} error "failed to create session"
+// @Router   /signin [post]
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="cov10" title="2">{
         log.Info(r.Host, r.Header, r.Body)
         defer func(Body io.ReadCloser) </span><span class="cov10" title="2">{
@@ -214,39 +251,48 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrInvalidForm], auth.ErrInvalidForm.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                handleAuthErr(w, auth.ErrInvalidForm)
                 return
         }</span>
 
         <span class="cov10" title="2">user, err := h.authUC.SignIn(form)
         if err != nil </span><span class="cov1" title="1">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedSignIn], auth.ErrFailedSignIn.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
-                return
-        }</span>
+                if err == auth.ErrInvalidLogin </span><span class="cov0" title="0">{
+                        handleAuthErr(w, err)
+                        return
+                }</span>
+                <span class="cov1" title="1">handleAuthErr(w, auth.ErrWrongPw)
+                return</span>
+        }
 
         // когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
         <span class="cov10" title="2">err = h.authUC.DeleteSessionByUID(user.ID)
         session, err := h.authUC.CreateSession(user.ID)
         if err != nil </span><span class="cov0" title="0">{
-                authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedCreateSession], auth.ErrFailedCreateSession.Error(), err)
-                log.Error(authErr)
-                pkg.SendError(w, authErr)
+                handleAuthErr(w, auth.ErrFailedCreateSession)
                 return
         }</span>
 
         <span class="cov10" title="2">http.SetCookie(w, &amp;http.Cookie{
-                Name:    config.CookieName,
-                Value:   session.SessionID,
-                Expires: time.Now().Add(config.CookieTTL),
-                Path:    config.CookiePath,
+                Name:     config.CookieName,
+                Value:    session.SessionID,
+                Expires:  time.Now().Add(config.CookieTTL),
+                HttpOnly: true,
+                Path:     config.CookiePath,
         })
         pkg.SendJSON(w, http.StatusOK, user)</span>
 }
 
+// Logout godoc
+// @Summary      Logout
+// @Description  user log out
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 "success logout"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
         log.Info(r.Host, r.Header, r.Body)
 
@@ -348,7 +394,6 @@ func (sDb *sessionsDB) GetSessionByUID(uID uint64) (*models.Session, error) <spa
 		<pre class="file" id="file3" style="display: none">package usecase
 
 import (
-        "errors"
         "fmt"
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
@@ -370,13 +415,17 @@ func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI <span class="cov10" tit
 }</span>
 
 func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) <span class="cov6" title="2">{
-        user, err := u.userUC.GetUserByEmail(form.Email)
+        email, err := pkg.ValidateLogin(form.Login)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, auth.ErrInvalidLogin
+        }</span>
+        <span class="cov6" title="2">user, err := u.userUC.GetUserByEmail(email)
         if err != nil </span><span class="cov1" title="1">{
-                return nil, fmt.Errorf("cant get user: %w", err)
+                return nil, auth.ErrWrongPw
         }</span>
 
         <span class="cov6" title="2">if user.Password != form.Password </span><span class="cov0" title="0">{
-                return nil, errors.New("user not found")
+                return nil, auth.ErrWrongPw
         }</span>
 
         <span class="cov6" title="2">return user, nil</span>
@@ -387,8 +436,13 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) <span cla
                 return nil, auth.ErrPwDontMatch
         }</span>
 
+        <span class="cov1" title="1">email, err := pkg.ValidateLogin(form.Login)
+        if err != nil || len(form.Login) &gt; 30 || len(form.Login) &lt; 3 </span><span class="cov0" title="0">{
+                return nil, auth.ErrInvalidLogin
+        }</span>
+
         <span class="cov1" title="1">user, err := u.userUC.CreateUser(models.User{
-                Email:    form.Email,
+                Email:    email,
                 Password: form.Password,
         })
         if err != nil </span><span class="cov1" title="1">{
@@ -456,13 +510,10 @@ func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) <span cla
 		<pre class="file" id="file4" style="display: none">package delivery
 
 import (
-        "errors"
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-        pkgErrors "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
         "github.com/gorilla/mux"
-        log "github.com/sirupsen/logrus"
         "net/http"
         "strconv"
 )
@@ -477,117 +528,121 @@ func New(uc mail.UseCaseI) mail.HandlersI <span class="cov8" title="1">{
         }
 }</span>
 
-func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        if r.Method != http.MethodGet </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
-                return
-        }</span>
+func handleMailErr(w http.ResponseWriter, err error) <span class="cov8" title="1">{
+        pkg.HandleError(w, mail.Errors[err], err)
+}</span>
 
-        <span class="cov8" title="1">userID, ok := r.Context().Value(config.ContextUser).(uint64)
+// GetInboxMessages godoc
+// @Summary      GetInboxMessages
+// @Description  List of incoming messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 {object} []models.IncomingMessage "success get list of incoming messages"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get inbox messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /inbox/ [get]
+func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        userID, ok := r.Context().Value(config.ContextUser).(uint64)
 
         if !ok </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
+                handleMailErr(w, mail.ErrFailedGetUser)
                 return
         }</span>
 
         <span class="cov8" title="1">messages, err := del.uc.GetIncomingMessages(userID)
 
         if err != nil </span><span class="cov0" title="0">{
-                mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetInboxMessages], mail.ErrFailedGetInboxMessages.Error(), err)
-                log.Error(mailErr)
-                pkg.SendError(w, mailErr)
+                handleMailErr(w, mail.ErrFailedGetInboxMessages)
                 return
         }</span>
 
         <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, messages)</span>
 }
 
+// GetOutboxMessages godoc
+// @Summary      GetOutboxMessages
+// @Description  List of outgoing messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 {object} []models.OutgoingMessage "success get list of outgoing messages"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get outbox messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /outbox/ [get]
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        if r.Method != http.MethodGet </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
-                return
-        }</span>
-
-        <span class="cov8" title="1">userID, ok := r.Context().Value(config.ContextUser).(uint64)
-
+        userID, ok := r.Context().Value(config.ContextUser).(uint64)
         if !ok </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
+                handleMailErr(w, mail.ErrFailedGetUser)
                 return
         }</span>
 
         <span class="cov8" title="1">messages, err := del.uc.GetOutgoingMessages(userID)
-
         if err != nil </span><span class="cov0" title="0">{
-                mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetOutboxMessages], mail.ErrFailedGetOutboxMessages.Error(), err)
-                log.Error(mailErr)
-                pkg.SendError(w, mailErr)
+                handleMailErr(w, mail.ErrFailedGetOutboxMessages)
                 return
         }</span>
 
         <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, messages)</span>
 }
 
+// GetFolderMessages godoc
+// @Summary      GetFolderMessages
+// @Description  List of outgoing messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Param id path int true "FolderID"
+// @Success  200 {object} []models.IncomingMessage "success get list of outgoing messages"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 400 {object} error "failed to get folder messages"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Failure 404 {object} error "invalid url address"
+// @Router   /folder/{id} [get]
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        if r.Method != http.MethodGet </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
-                return
-        }</span>
-
-        <span class="cov8" title="1">userID, ok := r.Context().Value(config.ContextUser).(uint64)
+        userID, ok := r.Context().Value(config.ContextUser).(uint64)
         if !ok </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
+                handleMailErr(w, mail.ErrFailedGetUser)
                 return
         }</span>
         <span class="cov8" title="1">vars := mux.Vars(r)
         folderID, err := strconv.ParseUint(vars["id"], 10, 64)
 
         if err != nil </span><span class="cov0" title="0">{
-                mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrInvalidURL], mail.ErrInvalidURL.Error(), err)
-                log.Error(mailErr)
-                pkg.SendError(w, mailErr)
+                handleMailErr(w, mail.ErrInvalidURL)
                 return
         }</span>
 
         <span class="cov8" title="1">messages, err := del.uc.GetFolderMessages(userID, folderID)
 
         if err != nil </span><span class="cov8" title="1">{
-                mailErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrFailedGetFolderMessages], mail.ErrFailedGetFolderMessages.Error(), err)
-                log.Error(mailErr)
-                pkg.SendError(w, mailErr)
+                handleMailErr(w, mail.ErrFailedGetFolderMessages)
                 return
         }</span>
 
         <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, messages)</span>
 }
 
+// GetFolders godoc
+// @Summary      GetFolders
+// @Description  List of outgoing messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 {object} []models.Folder "success get list of outgoing messages"
+// @Failure 400 {object} error "failed to get user"
+// @Failure 401 {object} error "failed auth"
+// @Failure 401 {object} error "failed get session"
+// @Router   /folders/ [get]
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
-        w.Header().Set("Access-Control-Allow-Methods", "GET")
-
-        if r.Method != http.MethodGet </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.NewWrappedErr(mail.MailErrors[mail.ErrHttpGetMethod], mail.ErrHttpGetMethod.Error(), errors.New(r.Method+" request received"))
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
-                return
-        }</span>
-
-        <span class="cov8" title="1">userID, ok := r.Context().Value(config.ContextUser).(uint64)
-
+        userID, ok := r.Context().Value(config.ContextUser).(uint64)
         if !ok </span><span class="cov0" title="0">{
-                methodErr := pkgErrors.New(mail.MailErrors[mail.ErrFailedGetUser], mail.ErrFailedGetUser)
-                log.Error(methodErr)
-                pkg.SendError(w, methodErr)
+                handleMailErr(w, mail.ErrFailedGetUser)
                 return
         }</span>
 
@@ -633,33 +688,52 @@ type mailDB struct {
         usersRepo  _user.RepoI
 }
 
-func New(ur _user.RepoI) mail.RepoI <span class="cov8" title="1">{
+func New(ur _user.RepoI) mail.RepoI <span class="cov10" title="2">{
         return &amp;mailDB{
                 messages: []models.Message{
-                        {1, 1, "2023-01-01", "Invitation", "Hello, we decided to invite you to our party, lets go it will be fine!"},
-                        {2, 1, "2023-01-02", "Spam letter", "Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis"},
-                        {3, 1, "2023-01-04", "Lorem", "Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus. "},
-                        {4, 1, "2023-01-05", "Very interesting letter", "Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. "},
-                        {5, 1, "2023-01-06", "Small text letter", "Hi! how are you?"},
-                        {5, 1, "2023-01-06", "Title", "Open this letter please"},
-                        {6, 1, "2023-01-07", "Advertisement", "Hi, visit our shop!"},
-                        {7, 2, "2023-01-29", "Title2", "Text2"},
-                        {8, 2, "2023-01-29", "Title3", "Text3"},
-                        {9, 3, "2023-01-01", "Title4", "Text4"},
+                        {1, 2, "2023-01-01", "Invitation", "Hello, we decided to invite you to our party, lets go it will be fine!"},
+                        {2, 3, "2023-01-02", "Spam letter", "Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis"},
+                        {3, 2, "2023-01-04", "Lorem", "Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus. "},
+                        {4, 3, "2023-01-05", "Very interesting letter", "Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. "},
+                        {5, 2, "2023-01-06", "Small text letter", "Hi! how are you?"},
+                        {6, 3, "2023-01-06", "Title", "Open this letter please"},
+                        {7, 2, "2023-01-07", "Advertisement", "Hi, visit our shop!"},
+                        {8, 3, "2023-01-29", "Title2", "Text2"},
+                        {9, 1, "2023-01-29", "Title3", "Text3"},
+                        {10, 1, "2023-01-01", "Title4", "Text4"},
+                        {11, 1, "2023-01-01", "Invitation", "Hello, we decided to invite you to our party, lets go it will be fine!"},
+                        {12, 1, "2023-01-02", "Spam letter", "Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis"},
+                        {13, 1, "2023-01-04", "Lorem", "Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus. "},
+                        {14, 1, "2023-01-05", "Very interesting letter", "Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. "},
+                        {15, 1, "2023-01-06", "Small text letter", "Hi! how are you?"},
+                        {16, 1, "2023-01-06", "Title", "Open this letter please"},
+                        {17, 1, "2023-01-07", "Advertisement", "Hi, visit our shop!"},
+                        {18, 2, "2023-01-29", "Title2", "Text2"},
+                        {19, 2, "2023-01-29", "Title3", "Text3"},
+                        {20, 3, "2023-01-01", "Title4", "Text4"},
                         //{5, 2, "2023-03-01", "Title5", "Text5"},
                 },
                 recipients: []models.Recipient{
-                        {1, 2},
-                        {2, 3},
-                        {3, 2},
-                        {4, 3},
-                        {4, 2},
-                        {5, 2},
-                        {5, 3},
-                        {6, 2},
-                        {7, 3},
+                        {1, 1},
+                        {2, 1},
+                        {3, 1},
+                        {4, 1},
+                        {5, 1},
+                        {6, 1},
+                        {7, 1},
                         {8, 1},
-                        {9, 1},
+                        {9, 3},
+                        {10, 2},
+                        {11, 3},
+                        {12, 2},
+                        {13, 3},
+                        {14, 2},
+                        {15, 3},
+                        {16, 2},
+                        {17, 3},
+                        {18, 3},
+                        {19, 3},
+                        {20, 1},
                 },
                 folders: []models.Folder{
                         {1, "Trash", 1},
@@ -677,124 +751,137 @@ func New(ur _user.RepoI) mail.RepoI <span class="cov8" title="1">{
                         {7, 1},
                 },
                 states: []models.State{
-                        {2, 1, false, false, true},
-                        {1, 1, true, false, true},
-                        {3, 2, false, false, true},
-                        {1, 2, true, false, true},
-                        {2, 3, false, false, true},
-                        {1, 3, true, false, true},
-                        {3, 4, false, false, true},
-                        {2, 4, false, false, true},
-                        {1, 4, true, false, true},
-                        {2, 5, false, false, true},
-                        {3, 5, false, false, true},
-                        {1, 5, true, false, true},
-                        {2, 6, false, false, true},
-                        {1, 6, true, false, true},
-                        {3, 7, false, false, true},
-                        {2, 7, true, false, true},
-                        {1, 8, false, false, true},
-                        {2, 8, true, false, true},
-                        {1, 9, false, false, true},
-                        {3, 9, true, false, true},
+                        {1, 1, false, false, true},
+                        {2, 1, true, false, true},
+                        {1, 2, false, false, true},
                         {3, 2, true, false, true},
                         {1, 3, false, false, true},
-                        {2, 4, false, false, true},
-                        {1, 4, false, false, true},
-                        {1, 2, true, false, true},
                         {2, 3, true, false, true},
+                        {1, 4, false, false, true},
                         {3, 4, true, false, true},
+                        {1, 5, false, false, true},
+                        {2, 5, true, false, true},
+                        {1, 6, false, false, true},
+                        {3, 6, true, false, true},
+                        {1, 7, false, false, true},
+                        {2, 7, true, false, true},
+                        {1, 8, false, false, true},
+                        {3, 8, true, false, true},
+                        {3, 9, false, false, true},
+                        {1, 9, true, false, true},
+                        {2, 10, false, false, true},
+                        {1, 10, true, false, true},
+                        {3, 11, false, false, true},
+                        {1, 11, true, false, true},
+                        {2, 12, false, false, true},
+                        {1, 12, true, false, true},
+                        {3, 13, false, false, true},
+                        {1, 13, true, false, true},
+                        {2, 14, false, false, true},
+                        {1, 14, true, false, true},
+                        {3, 15, false, false, true},
+                        {1, 15, true, false, true},
+                        {2, 16, false, false, true},
+                        {1, 16, true, false, true},
+                        {3, 17, false, false, true},
+                        {1, 17, true, false, true},
+                        {3, 18, false, false, true},
+                        {2, 18, true, false, true},
+                        {3, 19, false, false, true},
+                        {2, 19, true, false, true},
+                        {1, 20, false, false, true},
+                        {3, 20, true, false, true},
                 },
                 usersRepo: ur,
         }
 }</span>
 
-func (db *mailDB) messageHasFolder(userID uint64, messageID uint64) bool <span class="cov8" title="1">{
-        for _, b := range db.boxes </span><span class="cov8" title="1">{
-                if b.MessageID == messageID </span><span class="cov8" title="1">{
-                        idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool </span><span class="cov8" title="1">{
+func (db *mailDB) messageHasFolder(userID uint64, messageID uint64) bool <span class="cov1" title="1">{
+        for _, b := range db.boxes </span><span class="cov1" title="1">{
+                if b.MessageID == messageID </span><span class="cov1" title="1">{
+                        idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool </span><span class="cov1" title="1">{
                                 return folder.FolderID == b.FolderID
                         }</span>)
 
-                        <span class="cov8" title="1">if idx != -1 &amp;&amp; db.folders[idx].UserID == userID </span><span class="cov8" title="1">{
+                        <span class="cov1" title="1">if idx != -1 &amp;&amp; db.folders[idx].UserID == userID </span><span class="cov1" title="1">{
                                 return true
                         }</span>
                 }
         }
 
-        <span class="cov8" title="1">return false</span>
+        <span class="cov1" title="1">return false</span>
 }
 
-func (db *mailDB) findOriginalMessage(messageID uint64) (*models.Message, error) <span class="cov8" title="1">{
-        idx := slices.IndexFunc(db.messages, func(message models.Message) bool </span><span class="cov8" title="1">{
+func (db *mailDB) findOriginalMessage(messageID uint64) (*models.Message, error) <span class="cov1" title="1">{
+        idx := slices.IndexFunc(db.messages, func(message models.Message) bool </span><span class="cov1" title="1">{
                 return message.MessageID == messageID
         }</span>)
 
-        <span class="cov8" title="1">if idx == -1 </span><span class="cov0" title="0">{
+        <span class="cov1" title="1">if idx == -1 </span><span class="cov0" title="0">{
                 return nil, errors.New("message not found")
         }</span>
 
-        <span class="cov8" title="1">return &amp;db.messages[idx], nil</span>
+        <span class="cov1" title="1">return &amp;db.messages[idx], nil</span>
 }
 
-func (db *mailDB) findState(userID uint64, messageID uint64) (*models.State, error) <span class="cov8" title="1">{
-        idx := slices.IndexFunc(db.states, func(state models.State) bool </span><span class="cov8" title="1">{
+func (db *mailDB) findState(userID uint64, messageID uint64) (*models.State, error) <span class="cov1" title="1">{
+        idx := slices.IndexFunc(db.states, func(state models.State) bool </span><span class="cov1" title="1">{
                 return state.UserID == userID &amp;&amp; state.MessageID == messageID
         }</span>)
 
-        <span class="cov8" title="1">if idx == -1 </span><span class="cov0" title="0">{
+        <span class="cov1" title="1">if idx == -1 </span><span class="cov0" title="0">{
                 return nil, errors.New("state not found")
         }</span>
 
-        <span class="cov8" title="1">return &amp;db.states[idx], nil</span>
+        <span class="cov1" title="1">return &amp;db.states[idx], nil</span>
 }
 
-func (db *mailDB) findRecipientsEmails(messageID uint64) ([]string, error) <span class="cov8" title="1">{
+func (db *mailDB) findRecipientsEmails(messageID uint64) ([]string, error) <span class="cov1" title="1">{
         var recipientsEmails []string
 
-        for _, r := range db.recipients </span><span class="cov8" title="1">{
-                if r.MessageID == messageID </span><span class="cov8" title="1">{
+        for _, r := range db.recipients </span><span class="cov1" title="1">{
+                if r.MessageID == messageID </span><span class="cov1" title="1">{
                         user, err := db.usersRepo.GetUserByID(r.UserID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return recipientsEmails, err
                         }</span>
 
-                        <span class="cov8" title="1">recipientsEmails = append(recipientsEmails, user.Email)</span>
+                        <span class="cov1" title="1">recipientsEmails = append(recipientsEmails, user.Email)</span>
                 }
         }
 
-        <span class="cov8" title="1">return recipientsEmails, nil</span>
+        <span class="cov1" title="1">return recipientsEmails, nil</span>
 }
 
-func (db *mailDB) SelectIncomingMessagesByUser(userID uint64) ([]models.IncomingMessage, error) <span class="cov8" title="1">{
+func (db *mailDB) SelectIncomingMessagesByUser(userID uint64) ([]models.IncomingMessage, error) <span class="cov1" title="1">{
         var messages []models.IncomingMessage
 
-        for _, r := range db.recipients </span><span class="cov8" title="1">{
-                if r.UserID == userID </span><span class="cov8" title="1">{
-                        if db.messageHasFolder(r.UserID, r.MessageID) </span><span class="cov8" title="1">{
+        for _, r := range db.recipients </span><span class="cov1" title="1">{
+                if r.UserID == userID </span><span class="cov1" title="1">{
+                        if db.messageHasFolder(r.UserID, r.MessageID) </span><span class="cov0" title="0">{
                                 continue</span>
                         }
 
-                        <span class="cov8" title="1">originalMessage, err := db.findOriginalMessage(r.MessageID)
+                        <span class="cov1" title="1">originalMessage, err := db.findOriginalMessage(r.MessageID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
+                        <span class="cov1" title="1">fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">state, err := db.findState(r.UserID, r.MessageID)
+                        <span class="cov1" title="1">state, err := db.findState(r.UserID, r.MessageID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">currentMessage := models.IncomingMessage{
+                        <span class="cov1" title="1">currentMessage := models.IncomingMessage{
                                 MessageID:    r.MessageID,
                                 FromUser:     fromUser.Email,
                                 CreatingDate: originalMessage.CreatingDate,
@@ -808,31 +895,31 @@ func (db *mailDB) SelectIncomingMessagesByUser(userID uint64) ([]models.Incoming
                 }
         }
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
 }
 
-func (db *mailDB) SelectOutgoingMessagesByUser(userID uint64) ([]models.OutgoingMessage, error) <span class="cov8" title="1">{
+func (db *mailDB) SelectOutgoingMessagesByUser(userID uint64) ([]models.OutgoingMessage, error) <span class="cov1" title="1">{
         var messages []models.OutgoingMessage
 
-        for _, m := range db.messages </span><span class="cov8" title="1">{
-                if m.UserID == userID </span><span class="cov8" title="1">{
-                        if db.messageHasFolder(userID, m.MessageID) </span><span class="cov0" title="0">{
+        for _, m := range db.messages </span><span class="cov1" title="1">{
+                if m.UserID == userID </span><span class="cov1" title="1">{
+                        if db.messageHasFolder(userID, m.MessageID) </span><span class="cov1" title="1">{
                                 continue</span>
                         }
 
-                        <span class="cov8" title="1">recipients, err := db.findRecipientsEmails(m.MessageID)
+                        <span class="cov1" title="1">recipients, err := db.findRecipientsEmails(m.MessageID)
 
                         if len(recipients) == 0 </span><span class="cov0" title="0">{
                                 continue</span>
                         }
 
-                        <span class="cov8" title="1">state, err := db.findState(userID, m.MessageID)
+                        <span class="cov1" title="1">state, err := db.findState(userID, m.MessageID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">currentMessage := models.OutgoingMessage{
+                        <span class="cov1" title="1">currentMessage := models.OutgoingMessage{
                                 MessageID:    m.MessageID,
                                 ToUsers:      recipients,
                                 CreatingDate: m.CreatingDate,
@@ -846,61 +933,61 @@ func (db *mailDB) SelectOutgoingMessagesByUser(userID uint64) ([]models.Outgoing
                 }
         }
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
 }
 
-func (db *mailDB) SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error) <span class="cov8" title="1">{
-        idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool </span><span class="cov8" title="1">{
+func (db *mailDB) SelectFolderByUserNFolder(userID uint64, folderID uint64) (*models.Folder, error) <span class="cov1" title="1">{
+        idx := slices.IndexFunc(db.folders, func(folder models.Folder) bool </span><span class="cov1" title="1">{
                 return folder.UserID == userID &amp;&amp; folder.FolderID == folderID
         }</span>)
 
-        <span class="cov8" title="1">if idx == -1 </span><span class="cov8" title="1">{
+        <span class="cov1" title="1">if idx == -1 </span><span class="cov1" title="1">{
                 return nil, errors.New("folder not found")
         }</span>
 
-        <span class="cov8" title="1">return &amp;db.folders[idx], nil</span>
+        <span class="cov1" title="1">return &amp;db.folders[idx], nil</span>
 }
 
-func (db *mailDB) SelectFoldersByUser(userID uint64) []models.Folder <span class="cov8" title="1">{
+func (db *mailDB) SelectFoldersByUser(userID uint64) []models.Folder <span class="cov1" title="1">{
         var folders []models.Folder
 
-        for _, f := range db.folders </span><span class="cov8" title="1">{
-                if f.UserID == userID </span><span class="cov8" title="1">{
+        for _, f := range db.folders </span><span class="cov1" title="1">{
+                if f.UserID == userID </span><span class="cov1" title="1">{
                         folders = append(folders, f)
                 }</span>
         }
 
-        <span class="cov8" title="1">return folders</span>
+        <span class="cov1" title="1">return folders</span>
 }
 
-func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.IncomingMessage, error) <span class="cov8" title="1">{
+func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.IncomingMessage, error) <span class="cov1" title="1">{
         var messages []models.IncomingMessage
 
-        for _, b := range db.boxes </span><span class="cov8" title="1">{
-                if b.FolderID == folderID </span><span class="cov8" title="1">{
+        for _, b := range db.boxes </span><span class="cov1" title="1">{
+                if b.FolderID == folderID </span><span class="cov1" title="1">{
                         originalMessage, err := db.findOriginalMessage(b.MessageID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                        <span class="cov1" title="1">if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
+                        <span class="cov1" title="1">fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">state, err := db.findState(userID, b.MessageID)
+                        <span class="cov1" title="1">state, err := db.findState(userID, b.MessageID)
 
                         if err != nil </span><span class="cov0" title="0">{
                                 return messages, err
                         }</span>
 
-                        <span class="cov8" title="1">currentMessage := models.IncomingMessage{
+                        <span class="cov1" title="1">currentMessage := models.IncomingMessage{
                                 MessageID:    b.MessageID,
                                 FromUser:     fromUser.Email,
                                 CreatingDate: originalMessage.CreatingDate,
@@ -914,7 +1001,34 @@ func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([
                 }
         }
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
+}
+
+func (db *mailDB) CreateMessage(message models.Message, to ...uint64) error <span class="cov1" title="1">{
+        message.MessageID = uint64(len(db.messages) + 1)
+        db.messages = append(db.messages, message)
+        for _, uid := range to </span><span class="cov1" title="1">{
+                db.recipients = append(db.recipients, models.Recipient{
+                        MessageID: message.MessageID,
+                        UserID:    uid,
+                })
+                db.states = append(db.states, models.State{
+                        UserID:    uid,
+                        MessageID: message.MessageID,
+                        Read:      false,
+                        Favorite:  false,
+                        Send:      true,
+                })
+        }</span>
+        <span class="cov1" title="1">db.states = append(db.states, models.State{
+                UserID:    message.UserID,
+                MessageID: message.MessageID,
+                Read:      true,
+                Favorite:  false,
+                Send:      true,
+        })
+
+        return nil</span>
 }
 </pre>
 		
@@ -924,25 +1038,26 @@ import (
         "errors"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "time"
 )
 
 type UseCase struct {
         repo mail.RepoI
 }
 
-func New(rep mail.RepoI) mail.UseCaseI <span class="cov8" title="1">{
+func New(rep mail.RepoI) mail.UseCaseI <span class="cov10" title="2">{
         return &amp;UseCase{
                 repo: rep,
         }
 }</span>
 
-func (uc *UseCase) GetFolders(userID uint64) []models.Folder <span class="cov8" title="1">{
+func (uc *UseCase) GetFolders(userID uint64) []models.Folder <span class="cov1" title="1">{
         folders := uc.repo.SelectFoldersByUser(userID)
 
         return folders
 }</span>
 
-func (uc *UseCase) GetIncomingMessages(userID uint64) ([]models.IncomingMessage, error) <span class="cov8" title="1">{
+func (uc *UseCase) GetIncomingMessages(userID uint64) ([]models.IncomingMessage, error) <span class="cov1" title="1">{
         var messages []models.IncomingMessage
         messages, err := uc.repo.SelectIncomingMessagesByUser(userID)
 
@@ -950,10 +1065,10 @@ func (uc *UseCase) GetIncomingMessages(userID uint64) ([]models.IncomingMessage,
                 return messages, err
         }</span>
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
 }
 
-func (uc *UseCase) GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error) <span class="cov8" title="1">{
+func (uc *UseCase) GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error) <span class="cov1" title="1">{
         var messages []models.OutgoingMessage
         messages, err := uc.repo.SelectOutgoingMessagesByUser(userID)
 
@@ -961,30 +1076,45 @@ func (uc *UseCase) GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage,
                 return messages, err
         }</span>
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
 }
 
-func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error) <span class="cov8" title="1">{
+func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error) <span class="cov1" title="1">{
         var messages []models.IncomingMessage
 
         folder, err := uc.repo.SelectFolderByUserNFolder(userID, folderID)
 
-        if err != nil </span><span class="cov8" title="1">{
+        if err != nil </span><span class="cov1" title="1">{
                 return messages, err
         }</span>
 
-        <span class="cov8" title="1">if folder == nil </span><span class="cov0" title="0">{
+        <span class="cov1" title="1">if folder == nil </span><span class="cov0" title="0">{
                 return messages, errors.New("folder not found")
         }</span>
 
-        <span class="cov8" title="1">messages, err = uc.repo.SelectMessagesByUserNFolder(userID, folderID)
+        <span class="cov1" title="1">messages, err = uc.repo.SelectMessagesByUserNFolder(userID, folderID)
 
         if err != nil </span><span class="cov0" title="0">{
                 return messages, err
         }</span>
 
-        <span class="cov8" title="1">return messages, nil</span>
+        <span class="cov1" title="1">return messages, nil</span>
 }
+
+func (uc *UseCase) CreateHelloMessage(to uint64) error <span class="cov1" title="1">{
+        now := time.Now()
+        msg := models.Message{
+                UserID:       0,
+                CreatingDate: now.Format("2006-02-01"),
+                Title:        "Hello! Its your first mail",
+                Text:         "Support of mail box is glad to see You here! Have a nice day!",
+        }
+        return uc.CreateMessage(msg, to)
+}</span>
+
+func (uc *UseCase) CreateMessage(message models.Message, to ...uint64) error <span class="cov1" title="1">{
+        return uc.repo.CreateMessage(message, to...)
+}</span>
 </pre>
 		
 		<pre class="file" id="file8" style="display: none">package middleware
@@ -995,6 +1125,7 @@ import (
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/rs/cors"
         log "github.com/sirupsen/logrus"
         "net/http"
 )
@@ -1008,22 +1139,15 @@ func New(aUc auth.UseCaseI) *Middleware <span class="cov10" title="3">{
 }</span>
 
 func (m *Middleware) Cors(h http.Handler) http.Handler <span class="cov0" title="0">{
-        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
-                w.Header().Set("Access-Control-Allow-Origin", "*")
-                w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers, Content-Length, X-CSRF-Token")
-                w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-                w.Header().Set("Access-Control-Allow-Credentials", "true")
-                h.ServeHTTP(w, r)
-        }</span>)
-        <span class="cov0" title="0">return handler</span>
-
-        //c := cors.New(cors.Options{
-        //        AllowedOrigins:   []string{"http://localhost:8001"},
-        //        AllowCredentials: true,
-        //        Debug:            false,
-        //})
-        //return c.Handler(h)
-}
+        c := cors.New(cors.Options{
+                AllowedMethods:   config.AllowedMethods,
+                AllowedOrigins:   config.AllowedOrigins,
+                AllowCredentials: true,
+                AllowedHeaders:   config.AllowedHeaders,
+                Debug:            true,
+        })
+        return c.Handler(h)
+}</span>
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class="cov10" title="3">{
         handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov10" title="3">{
@@ -1043,7 +1167,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class=
                 }</span>
 
                 <span class="cov10" title="3">r = r.WithContext(context.WithValue(r.Context(), config.ContextUser, session.UID))
-
+                //
                 h.ServeHTTP(w, r)</span>
         })
         <span class="cov10" title="3">return handler</span>
@@ -1066,10 +1190,11 @@ type usersDB struct {
 func New() user.RepoI <span class="cov10" title="3">{
         return &amp;usersDB{
                 []models.User{
-                        {1, "test@example.com", "12345"},
-                        {2, "gena@example.com", "54321"},
-                        {3, "max@example.com", "13795"},
-                        {4, "valera@example.com", "12345"},
+                        {0, "support@mailbox.ru", "very_difficult_pw"},
+                        {1, "test@mailbox.ru", "12345"},
+                        {2, "gena@mailbox.ru", "54321"},
+                        {3, "max@mailbox.ru", "13795"},
+                        {4, "valera@mailbox.ru", "12345"},
                 },
                 []models.Profile{
                         {1, "Michail", "Testov"},
@@ -1141,9 +1266,11 @@ func (uDb *usersDB) CreateProfile(profile models.Profile) error <span class="cov
 		<pre class="file" id="file10" style="display: none">package usecase
 
 import (
+        "fmt"
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-playground/validator/v10"
         "net/mail"
 )
 
@@ -1164,10 +1291,18 @@ func validMailAddress(email string) (string, bool) <span class="cov1" title="1">
 }
 
 func (u *useCase) CreateUser(user models.User) (*models.User, error) <span class="cov1" title="1">{
-        if len(user.Password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
+        validate := validator.New()
+        err := validate.Struct(user)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(5)
+                return nil, fmt.Errorf("failed to create user: %w", err)
+        }</span>
+        <span class="cov1" title="1">if len(user.Password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
+                fmt.Println(6)
                 return nil, _user.ErrTooShortPw
         }</span>
         <span class="cov1" title="1">if _, ok := validMailAddress(user.Email); !ok </span><span class="cov0" title="0">{
+                fmt.Println(7)
                 return nil, _user.ErrInvalidEmail
         }</span>
         <span class="cov1" title="1">return u.userRepo.CreateUser(user)</span>
@@ -1186,9 +1321,13 @@ func (u *useCase) GetUserByEmail(email string) (*models.User, error) <span class
 }</span>
 
 func (u *useCase) CreateProfile(profile models.Profile) error <span class="cov1" title="1">{
-
-        return u.userRepo.CreateProfile(profile)
-}</span>
+        validate := validator.New()
+        err := validate.Struct(profile)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create profile: %w", err)
+        }</span>
+        <span class="cov1" title="1">return u.userRepo.CreateProfile(profile)</span>
+}
 func (u *useCase) GetProfileByID(id uint64) (*models.Profile, error) <span class="cov0" title="0">{
         return u.userRepo.GetProfileByID(id)
 }</span>
@@ -1205,14 +1344,14 @@ func (err *JSONError) Error() string <span class="cov10" title="3">{
         return err.Message
 }</span>
 
-func New(code int, err error) *JSONError <span class="cov1" title="1">{
+func New(code int, err error) *JSONError <span class="cov6" title="2">{
         return &amp;JSONError{
                 Code:    code,
                 Message: err.Error(),
         }
 }</span>
 
-func NewWrappedErr(code int, message string, err error) *JSONError <span class="cov10" title="3">{
+func NewWrappedErr(code int, message string, err error) *JSONError <span class="cov6" title="2">{
         return &amp;JSONError{
                 Code:    code,
                 Message: message + " : " + err.Error(),
@@ -1221,6 +1360,21 @@ func NewWrappedErr(code int, message string, err error) *JSONError <span class="
 </pre>
 		
 		<pre class="file" id="file12" style="display: none">package pkg
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        log "github.com/sirupsen/logrus"
+        "net/http"
+)
+
+func HandleError(w http.ResponseWriter, status int, err error) <span class="cov10" title="2">{
+        customErr := errors.New(status, err)
+        log.Error(customErr)
+        SendError(w, customErr)
+}</span>
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package pkg
 
 import (
         "crypto/rand"
@@ -1241,7 +1395,7 @@ func String(length int) (string, error) <span class="cov10" title="3">{
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package pkg
+		<pre class="file" id="file14" style="display: none">package pkg
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -1253,7 +1407,7 @@ func SendError(w http.ResponseWriter, error *errors.JSONError) <span class="cov1
 }</span>
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package pkg
+		<pre class="file" id="file15" style="display: none">package pkg
 
 import (
         "encoding/json"
@@ -1280,6 +1434,33 @@ func SendJSON(w http.ResponseWriter, status int, dataStruct any) <span class="co
                 SendError(w, errors.NewWrappedErr(http.StatusInternalServerError, "failed to send", err))
                 return
         }</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package pkg
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "strings"
+)
+
+func ValidateLogin(login string) (string, error) <span class="cov10" title="2">{
+        email := login
+        if !strings.Contains(login, config.PostAtDomain) </span><span class="cov1" title="1">{
+                if strings.Contains(login, "@") || strings.Contains(login, ".") </span><span class="cov0" title="0">{
+                        return "", auth.ErrInvalidLogin
+                }</span> else<span class="cov1" title="1"> {
+                        email += config.PostAtDomain
+                }</span>
+        } else<span class="cov1" title="1"> {
+                idx := strings.Index(login, config.PostAtDomain)
+                if idx+len(config.PostAtDomain) &lt; len(login) ||
+                        strings.Index(login, "@") &lt; idx || strings.Index(login, ".") &lt; idx </span><span class="cov0" title="0">{
+                        return "", auth.ErrInvalidLogin
+                }</span>
+        }
+        <span class="cov10" title="2">return email, nil</span>
 }
 </pre>
 		

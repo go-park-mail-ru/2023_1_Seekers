@@ -37,10 +37,10 @@ type testCases struct {
 }
 
 var credentials = map[string][]byte{
-	"user1": []byte(`{"email": "test@example.com", "password": "12345"}`),
-	"user2": []byte(`{"email": "gena@example.com", "password": "54321"}`),
-	"user3": []byte(`{"email": "max@example.com", "password": "13795"}`),
-	"user4": []byte(`{"email": "valera@example.com", "password": "12345"}`),
+	"user1": []byte(`{"login": "test@mailbox.ru", "password": "12345"}`),
+	"user2": []byte(`{"login": "gena@mailbox.ru", "password": "54321"}`),
+	"user3": []byte(`{"login": "max@mailbox.ru", "password": "13795"}`),
+	"user4": []byte(`{"login": "valera@mailbox.ru", "password": "12345"}`),
 }
 
 func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_middleware.Middleware, mail.HandlersI) {
@@ -52,7 +52,7 @@ func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_m
 	authUCase := _authUCase.New(authRepo, usersUCase)
 	mailUCase := _mailUCase.New(mailRepo)
 
-	authH := _authHandler.New(authUCase, usersUCase)
+	authH := _authHandler.New(authUCase, usersUCase, mailUCase)
 	mailH := New(mailUCase)
 	middleware := _middleware.New(authUCase)
 

@@ -6,6 +6,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
+	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
@@ -29,17 +31,17 @@ func TestHandlers_SignIn(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			[]byte(`{"email": "test@example.com", "password": "12345"}`),
+			[]byte(`{"login": "test", "password": "12345"}`),
 			outputCase{status: http.StatusOK},
 			"default success",
 		},
 		{
-			[]byte(`{"email": "test_signin1@example.com", "password": "43212"}`),
+			[]byte(`{"login": "test_signin1", "password": "43212"}`),
 			outputCase{status: http.StatusUnauthorized},
-			"default success",
+			"no such user",
 		},
 		{
-			[]byte(`{"email: test@example.com", "password": "12334"}`),
+			[]byte(`{"login: test_signin", "password": "12334"}`),
 			outputCase{status: http.StatusForbidden},
 			"invalid form",
 		},
@@ -47,11 +49,13 @@ func TestHandlers_SignIn(t *testing.T) {
 
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
+	mailRepo := _mailRepo.New(userRepo)
 
 	usersUCase := _userUCase.New(userRepo)
 	authUCase := _authUCase.New(authRepo, usersUCase)
+	mailUCase := _mailUCase.New(mailRepo)
 
-	authH := New(authUCase, usersUCase)
+	authH := New(authUCase, usersUCase, mailUCase)
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(test.input))
 		w := httptest.NewRecorder()
@@ -80,7 +84,7 @@ func TestHandlers_SignUp(t *testing.T) {
 	}
 	testCases := []testCase{
 		{
-			[]byte(`{"email":"` + randStr + `testing_signup1@example.com",
+			[]byte(`{"login":"` + randStr + `testing_signup1",
 						  "password":"54321",
 						  "repeat_pw":"54321",
 						  "first_name":"Ivan",
@@ -90,7 +94,7 @@ func TestHandlers_SignUp(t *testing.T) {
 			"default success",
 		},
 		{
-			[]byte(`{"email":"` + randStr + `testing_signup2@example.com",
+			[]byte(`{"login":"` + randStr + `testing_signup2",
                            "password":"54321",
                            "repeat_pw":"12311",
                            "first_name":"Ivan", 
@@ -100,7 +104,7 @@ func TestHandlers_SignUp(t *testing.T) {
 			"passwords dont match",
 		},
 		{
-			[]byte(`{"email: + testing_signup2@example.com",
+			[]byte(`{"login: + testing_signup2",
                            "password:"54321",
                            "repeat_pw":"12313",
                            "first_name":"Ivan", 
@@ -110,23 +114,25 @@ func TestHandlers_SignUp(t *testing.T) {
 			"invalid form",
 		},
 		{
-			[]byte(`{"email":"test@example.com",
+			[]byte(`{"login":"test",
                            "password":"54321",
                            "repeat_pw":"54321",
                            "first_name":"Ivan", 
                            "last_name":"Ivanov", 
                            "birth_date":"29.01.2002"}`),
 			outputCase{status: http.StatusConflict},
-			"user with such email exists",
+			"user with such login exists",
 		},
 	}
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
+	mailRepo := _mailRepo.New(userRepo)
 
 	usersUCase := _userUCase.New(userRepo)
 	authUCase := _authUCase.New(authRepo, usersUCase)
+	mailUCase := _mailUCase.New(mailRepo)
 
-	authH := New(authUCase, usersUCase)
+	authH := New(authUCase, usersUCase, mailUCase)
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.input))
@@ -170,7 +176,7 @@ func TestHandlers_Logout(t *testing.T) {
 		{
 			// регистрируем пользователя и отправляем с ним куку
 			inputCase{[]byte(
-				`{"email":"` + randStr + `testing_auth1@example.com",
+				`{"login":"` + randStr + `testing_auth1",
 				"password":  "54321",
 				"repeat_pw":  "54321",
 				"first_name": "Ivan",
@@ -182,7 +188,7 @@ func TestHandlers_Logout(t *testing.T) {
 		{
 			// просто приходит кука которая ранее не была создана на сервере
 			inputCase{[]byte(
-				`{"email":"` + randStr + `testing_auth2@example.com",
+				`{"login":"` + randStr + `testing_auth2",
 				"password":  "54321",
 				"repeat_pw":  "54321",
 				"first_name": "Ivan",
@@ -194,7 +200,7 @@ func TestHandlers_Logout(t *testing.T) {
 		{
 			// если вообще нет куки с таким названием
 			inputCase{[]byte(
-				`{"email":"` + randStr + `testing_auth3@example.com",
+				`{"login":"` + randStr + `testing_auth3",
 				"password":  "54321",
 				"repeat_pw":  "54321",
 				"first_name": "Ivan",
@@ -207,12 +213,14 @@ func TestHandlers_Logout(t *testing.T) {
 
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
+	mailRepo := _mailRepo.New(userRepo)
 
 	usersUCase := _userUCase.New(userRepo)
 	authUCase := _authUCase.New(authRepo, usersUCase)
-	middleware := _middleware.New(authUCase)
+	mailUCase := _mailUCase.New(mailRepo)
 
-	authH := New(authUCase, usersUCase)
+	authH := New(authUCase, usersUCase, mailUCase)
+	middleware := _middleware.New(authUCase)
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
