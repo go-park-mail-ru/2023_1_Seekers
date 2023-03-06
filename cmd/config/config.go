@@ -24,6 +24,7 @@ const (
 
 	PasswordMinLen = 5
 	PostDomain     = "mailbox.ru"
+	PostAtDomain   = "@" + PostDomain
 )
 
 var (

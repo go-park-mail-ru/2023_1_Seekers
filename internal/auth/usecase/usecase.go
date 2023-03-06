@@ -7,7 +7,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-	"strings"
 )
 
 type useCase struct {
@@ -23,13 +22,9 @@ func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI {
 }
 
 func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
-	email := form.Login
-	if !strings.Contains(form.Login, "@mailbox.ru") {
-		if strings.Contains(form.Login, "@") || strings.Contains(form.Login, ".") {
-			return nil, auth.ErrInvalidLogin
-		} else {
-			email += "@" + config.PostDomain
-		}
+	email, err := pkg.ValidateLogin(form.Login)
+	if err != nil {
+		return nil, auth.ErrInvalidLogin
 	}
 	user, err := u.userUC.GetUserByEmail(email)
 	if err != nil {
@@ -48,12 +43,13 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
 		return nil, auth.ErrPwDontMatch
 	}
 
-	if len(form.Login) > 30 || len(form.Login) < 3 || strings.Contains(form.Login, "@") || strings.Contains(form.Login, ".") {
+	email, err := pkg.ValidateLogin(form.Login)
+	if err != nil || len(form.Login) > 30 || len(form.Login) < 3 {
 		return nil, auth.ErrInvalidLogin
 	}
 
 	user, err := u.userUC.CreateUser(models.User{
-		Email:    form.Login + "@" + config.PostDomain,
+		Email:    email,
 		Password: form.Password,
 	})
 	if err != nil {
