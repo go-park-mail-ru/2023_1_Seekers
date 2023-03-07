@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
@@ -12,10 +13,13 @@ import (
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
 // @title MailBox Swagger API
@@ -23,6 +27,8 @@ import (
 // @host localhost:8001
 // @BasePath	/api/v1
 func main() {
+	pkg.InitLogger()
+	logger := pkg.GetLogger()
 	router := mux.NewRouter()
 
 	userRepo := _userRepo.New()
@@ -33,7 +39,7 @@ func main() {
 	authUC := _authUCase.New(authRepo, usersUC)
 	mailUC := _mailUCase.New(mailRepo)
 
-	middleware := _middleware.New(authUC)
+	middleware := _middleware.New(authUC, logger)
 
 	authH := _authHandler.New(authUC, usersUC, mailUC)
 	mailH := _mailHandler.New(mailUC)
@@ -42,16 +48,33 @@ func main() {
 	_authHandler.RegisterHTTPRoutes(router, authH, middleware)
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
 
+	router.Use(middleware.HandlerLogger)
 	corsRouter := middleware.Cors(router)
 
 	server := http.Server{
-		Addr:    ":" + config.Port,
-		Handler: corsRouter,
+		Addr:         ":" + config.Port,
+		Handler:      corsRouter,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Info("server started")
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Errorf("server stopped %v", err)
+	go func() {
+		logger.Info("server started")
+		if err := server.ListenAndServe(); err != nil {
+			logger.Fatalf("server stopped %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, os.Interrupt)
+
+	<-quit
+
+	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdown()
+
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Errorf("failed to gracefully shutdown server")
 	}
+
 }

@@ -1,0 +1,6 @@
+[2023-03-08_00:46:08_MSK] [/cmd/main.go:62 @func1] [36m[INFO][0m  server started
+[2023-03-08_00:46:10_MSK] [/internal/middleware/middleware.go:38 @func1] [36m[INFO][0m [36m[method:GET] [0m[36m[url:/api/v1/logout] [0m new request
+[2023-03-08_00:46:10_MSK] [/pkg/http_error.go:19 @HandleError] [31m[ERROR][0m [31m[method:GET] [0m[31m[url:/api/v1/logout] [0m failed get session: cant get session: session not found
+[2023-03-08_00:46:12_MSK] [/internal/middleware/middleware.go:38 @func1] [36m[INFO][0m [36m[method:POST] [0m[36m[url:/api/v1/signin] [0m new request
+[2023-03-08_00:46:12_MSK] [/internal/middleware/middleware.go:38 @func1] [36m[INFO][0m [36m[method:GET] [0m[36m[url:/api/v1/inbox] [0m new request
+[2023-03-08_00:46:13_MSK] [/cmd/main.go:64 @func1] [31m[FATAL][0m  server stopped http: Server closed

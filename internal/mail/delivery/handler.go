@@ -18,8 +18,8 @@ func New(uc mail.UseCaseI) mail.HandlersI {
 	}
 }
 
-func handleMailErr(w http.ResponseWriter, err error) {
-	pkg.HandleError(w, mail.Errors[err], err)
+func handleMailErr(w http.ResponseWriter, r *http.Request, err error) {
+	pkg.HandleError(w, r, mail.Errors[err], err)
 }
 
 // GetInboxMessages godoc
@@ -38,14 +38,14 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 
 	if !ok {
-		handleMailErr(w, mail.ErrFailedGetUser)
+		handleMailErr(w, r, mail.ErrFailedGetUser)
 		return
 	}
 
 	messages, err := del.uc.GetIncomingMessages(userID)
 
 	if err != nil {
-		handleMailErr(w, mail.ErrFailedGetInboxMessages)
+		handleMailErr(w, r, mail.ErrFailedGetInboxMessages)
 		return
 	}
 
@@ -67,13 +67,13 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, mail.ErrFailedGetUser)
+		handleMailErr(w, r, mail.ErrFailedGetUser)
 		return
 	}
 
 	messages, err := del.uc.GetOutgoingMessages(userID)
 	if err != nil {
-		handleMailErr(w, mail.ErrFailedGetOutboxMessages)
+		handleMailErr(w, r, mail.ErrFailedGetOutboxMessages)
 		return
 	}
 
@@ -97,21 +97,21 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, mail.ErrFailedGetUser)
+		handleMailErr(w, r, mail.ErrFailedGetUser)
 		return
 	}
 	vars := mux.Vars(r)
 	folderID, err := strconv.ParseUint(vars["id"], 10, 64)
 
 	if err != nil {
-		handleMailErr(w, mail.ErrInvalidURL)
+		handleMailErr(w, r, mail.ErrInvalidURL)
 		return
 	}
 
 	messages, err := del.uc.GetFolderMessages(userID, folderID)
 
 	if err != nil {
-		handleMailErr(w, mail.ErrFailedGetFolderMessages)
+		handleMailErr(w, r, mail.ErrFailedGetFolderMessages)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, mail.ErrFailedGetUser)
+		handleMailErr(w, r, mail.ErrFailedGetUser)
 		return
 	}
 

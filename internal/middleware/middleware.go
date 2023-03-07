@@ -2,21 +2,21 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/rs/cors"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 type Middleware struct {
-	uc auth.UseCaseI
+	uc  auth.UseCaseI
+	log *pkg.Logger
 }
 
-func New(aUc auth.UseCaseI) *Middleware {
-	return &Middleware{aUc}
+func New(aUc auth.UseCaseI, l *pkg.Logger) *Middleware {
+	return &Middleware{aUc, l}
 }
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
@@ -25,25 +25,35 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 		AllowedOrigins:   config.AllowedOrigins,
 		AllowCredentials: true,
 		AllowedHeaders:   config.AllowedHeaders,
-		Debug:            true,
 	})
 	return c.Handler(h)
+}
+
+func (m *Middleware) HandlerLogger(h http.Handler) http.Handler {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlerLogger := m.log.LoggerWithFields(map[string]any{
+			"method": r.Method,
+			"url":    r.URL.Path,
+		})
+		handlerLogger.Info("new request")
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextHandlerLog, handlerLogger))
+		h.ServeHTTP(w, r)
+	})
+	return handler
 }
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(config.CookieName)
 		if err != nil {
-			authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedAuth], auth.ErrFailedAuth.Error(), err)
-			log.Error(authErr)
-			pkg.SendError(w, authErr)
+			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedAuth, err)
+			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedAuth], wrappedErr)
 			return
 		}
 		session, err := m.uc.GetSession(cookie.Value)
 		if err != nil {
-			authErr := errors.NewWrappedErr(auth.Errors[auth.ErrFailedGetSession], auth.ErrFailedGetSession.Error(), err)
-			log.Error(authErr)
-			pkg.SendError(w, authErr)
+			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedGetSession, err)
+			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedGetSession], wrappedErr)
 			return
 		}
 

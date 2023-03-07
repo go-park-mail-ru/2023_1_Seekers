@@ -3,7 +3,11 @@ package config
 import "time"
 
 const (
-	Port = "8001"
+	Port           = "8001"
+	ProjectBaseDir = "2023_1_Seekers"
+	LogsDir        = "logs/"
+	LogsFileName   = "server_"
+	LogsTimeFormat = "2006-01-02_15:04:05_MST"
 
 	CookieName = "MailBoxSession"
 	CookieTTL  = time.Hour * 24 * 100 // 100 days

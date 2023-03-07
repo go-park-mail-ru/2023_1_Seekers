@@ -30,8 +30,8 @@ func New(aUC auth.UseCaseI, uUC _user.UseCaseI, mUC mail.UseCaseI) auth.Handlers
 	}
 }
 
-func handleAuthErr(w http.ResponseWriter, err error) {
-	pkg.HandleError(w, auth.Errors[err], err)
+func handleAuthErr(w http.ResponseWriter, r *http.Request, err error) {
+	pkg.HandleError(w, r, auth.Errors[err], err)
 }
 
 func setNewCookie(w http.ResponseWriter, session *models.Session) {
@@ -69,7 +69,6 @@ func delCookie(w http.ResponseWriter) {
 // @Failure 500 {object} error "failed to create session"
 // @Router   /signup [post]
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
-	log.Info(r.Host, r.Header, r.Body)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -79,13 +78,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	form := models.FormSignUp{}
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		handleAuthErr(w, auth.ErrInvalidForm)
+		handleAuthErr(w, r, auth.ErrInvalidForm)
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		handleAuthErr(w, auth.ErrInvalidForm)
+		handleAuthErr(w, r, auth.ErrInvalidForm)
 		return
 	}
 
@@ -93,22 +92,22 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw ||
 			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile {
-			handleAuthErr(w, err)
+			handleAuthErr(w, r, err)
 			return
 		}
-		handleAuthErr(w, auth.ErrUserExists)
+		handleAuthErr(w, r, auth.ErrUserExists)
 		return
 	}
 
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		handleAuthErr(w, auth.ErrFailedCreateSession)
+		handleAuthErr(w, r, auth.ErrFailedCreateSession)
 		return
 	}
 
 	err = h.mailUC.CreateHelloMessage(user.ID)
 	if err != nil {
-		handleAuthErr(w, auth.ErrInternalHelloMsg)
+		handleAuthErr(w, r, auth.ErrInternalHelloMsg)
 		return
 	}
 
@@ -129,7 +128,6 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} error "failed to create session"
 // @Router   /signin [post]
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
-	log.Info(r.Host, r.Header, r.Body)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -140,17 +138,17 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handleAuthErr(w, auth.ErrInvalidForm)
+		handleAuthErr(w, r, auth.ErrInvalidForm)
 		return
 	}
 
 	user, err := h.authUC.SignIn(form)
 	if err != nil {
 		if err == auth.ErrInvalidLogin {
-			handleAuthErr(w, err)
+			handleAuthErr(w, r, err)
 			return
 		}
-		handleAuthErr(w, auth.ErrWrongPw)
+		handleAuthErr(w, r, auth.ErrWrongPw)
 		return
 	}
 
@@ -158,7 +156,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err = h.authUC.DeleteSessionByUID(user.ID)
 	session, err := h.authUC.CreateSession(user.ID)
 	if err != nil {
-		handleAuthErr(w, auth.ErrFailedCreateSession)
+		handleAuthErr(w, r, auth.ErrFailedCreateSession)
 		return
 	}
 
@@ -177,9 +175,6 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "failed get session"
 // @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
-	log.Info(r.Host, r.Header, r.Body)
-
 	delCookie(w)
-
 	w.WriteHeader(http.StatusOK)
 }
