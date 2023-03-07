@@ -10,9 +10,6 @@ const (
 	CookieLen  = 32
 	CookiePath = "/"
 
-	ContextUser     = "user-ctx"
-	ContentTypeJSON = "application/json"
-
 	RouteSignin = "/api/v1/signin"
 	RouteSignup = "/api/v1/signup"
 	RouteLogout = "/api/v1/logout"

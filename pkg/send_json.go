@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -16,7 +15,7 @@ func SendJSON(w http.ResponseWriter, status int, dataStruct any) {
 		return
 	}
 
-	w.Header().Set("Content-Type", config.ContentTypeJSON)
+	w.Header().Set("Content-Type", ContentTypeJSON)
 	w.WriteHeader(status)
 
 	_, err = w.Write(dataJSON)

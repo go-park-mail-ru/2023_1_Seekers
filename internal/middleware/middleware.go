@@ -47,8 +47,8 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		r = r.WithContext(context.WithValue(r.Context(), config.ContextUser, session.UID))
-		//
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, session.UID))
+
 		h.ServeHTTP(w, r)
 	})
 	return handler

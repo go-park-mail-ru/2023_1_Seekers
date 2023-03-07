@@ -22,7 +22,6 @@ import (
 // @version 1.0
 // @host localhost:8001
 // @BasePath	/api/v1
-
 func main() {
 	router := mux.NewRouter()
 

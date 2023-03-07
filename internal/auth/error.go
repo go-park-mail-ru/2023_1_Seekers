@@ -25,6 +25,7 @@ var (
 	ErrFailedGetSession     = errors.New("failed get session")
 	ErrFailedDeleteSession  = errors.New("failed delete session")
 	ErrUserNotFound         = errors.New("user not found")
+	ErrInternal             = errors.New("internal server error")
 	ErrInternalHelloMsg     = errors.New("failed to send hello message")
 )
 
@@ -47,5 +48,6 @@ var Errors = map[error]int{
 	ErrFailedAuth:           http.StatusUnauthorized,
 	ErrFailedGetSession:     http.StatusUnauthorized,
 	ErrFailedDeleteSession:  http.StatusUnauthorized,
+	ErrInternal:             http.StatusInternalServerError,
 	user.ErrTooShortPw:      http.StatusForbidden,
 }

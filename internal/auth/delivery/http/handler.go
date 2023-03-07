@@ -34,6 +34,25 @@ func handleAuthErr(w http.ResponseWriter, err error) {
 	pkg.HandleError(w, auth.Errors[err], err)
 }
 
+func setNewCookie(w http.ResponseWriter, session *models.Session) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     config.CookieName,
+		Value:    session.SessionID,
+		Expires:  time.Now().Add(config.CookieTTL),
+		HttpOnly: true,
+		Path:     config.CookiePath,
+	})
+}
+
+func delCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    config.CookieName,
+		Value:   "",
+		Expires: time.Now().AddDate(0, 0, -1),
+		Path:    config.CookiePath,
+	})
+}
+
 // SignUp godoc
 // @Summary      SignUp
 // @Description  user sign up
@@ -59,37 +78,25 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 
 	form := models.FormSignUp{}
-	err := json.NewDecoder(r.Body).Decode(&form)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
 		handleAuthErr(w, auth.ErrInvalidForm)
 		return
 	}
 
 	validate := validator.New()
-	err = validate.Struct(form)
-	if err != nil {
+	if err := validate.Struct(form); err != nil {
 		handleAuthErr(w, auth.ErrInvalidForm)
 		return
 	}
 
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrPwDontMatch {
+		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw ||
+			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile {
 			handleAuthErr(w, err)
 			return
 		}
 		handleAuthErr(w, auth.ErrUserExists)
-		return
-	}
-
-	profile := models.Profile{
-		UID:       user.ID,
-		FirstName: form.FirstName,
-		LastName:  form.LastName,
-	}
-	err = h.userUC.CreateProfile(profile)
-	if err != nil {
-		handleAuthErr(w, auth.ErrFailedCreateProfile)
 		return
 	}
 
@@ -105,13 +112,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     config.CookieName,
-		Value:    session.SessionID,
-		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
-		Path:     config.CookiePath,
-	})
+	setNewCookie(w, session)
 	pkg.SendJSON(w, http.StatusOK, user)
 }
 
@@ -161,13 +162,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     config.CookieName,
-		Value:    session.SessionID,
-		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
-		Path:     config.CookiePath,
-	})
+	setNewCookie(w, session)
 	pkg.SendJSON(w, http.StatusOK, user)
 }
 
@@ -184,12 +179,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	log.Info(r.Host, r.Header, r.Body)
 
-	http.SetCookie(w, &http.Cookie{
-		Name:    config.CookieName,
-		Value:   "",
-		Expires: time.Now().AddDate(0, 0, -1),
-		Path:    config.CookiePath,
-	})
+	delCookie(w)
 
 	w.WriteHeader(http.StatusOK)
 }

@@ -56,6 +56,19 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
 		return nil, fmt.Errorf("cant create user: %w", err)
 	}
 
+	err = u.userUC.CreateProfile(models.Profile{
+		UID:       user.ID,
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+	})
+	if err != nil {
+		if err = u.userUC.DeleteUser(*user); err == nil {
+			return nil, auth.ErrFailedCreateProfile
+		} else {
+			return nil, auth.ErrInternal
+		}
+	}
+
 	return user, nil
 }
 

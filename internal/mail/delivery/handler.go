@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
@@ -36,7 +35,7 @@ func handleMailErr(w http.ResponseWriter, err error) {
 // @Failure 401 {object} error "failed get session"
 // @Router   /inbox/ [get]
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 
 	if !ok {
 		handleMailErr(w, mail.ErrFailedGetUser)
@@ -66,7 +65,7 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "failed get session"
 // @Router   /outbox/ [get]
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
 		handleMailErr(w, mail.ErrFailedGetUser)
 		return
@@ -96,7 +95,7 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} error "invalid url address"
 // @Router   /folder/{id} [get]
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
 		handleMailErr(w, mail.ErrFailedGetUser)
 		return
@@ -131,7 +130,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "failed get session"
 // @Router   /folders/ [get]
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(config.ContextUser).(uint64)
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
 		handleMailErr(w, mail.ErrFailedGetUser)
 		return
