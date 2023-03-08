@@ -67,6 +67,21 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.I
 	return messages, nil
 }
 
+func (uc *UseCase) GetFolderInfo(userID uint64, folderID uint64) (*models.Folder, error) {
+
+	folder, err := uc.repo.SelectFolderByUserNFolder(userID, folderID)
+
+	if err != nil {
+		return folder, err
+	}
+
+	if folder == nil {
+		return folder, errors.New("folder not found")
+	}
+
+	return folder, nil
+}
+
 func (uc *UseCase) CreateHelloMessage(to uint64) error {
 	now := time.Now()
 	msg := models.Message{

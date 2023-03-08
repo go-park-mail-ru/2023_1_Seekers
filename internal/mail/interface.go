@@ -16,6 +16,7 @@ type UseCaseI interface {
 	GetIncomingMessages(userID uint64) ([]models.IncomingMessage, error)
 	GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error)
 	GetFolders(userID uint64) []models.Folder
+	GetFolderInfo(userID uint64, folderID uint64) (*models.Folder, error)
 	GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error)
 	CreateHelloMessage(to uint64) error
 	CreateMessage(message models.Message, to ...uint64) error

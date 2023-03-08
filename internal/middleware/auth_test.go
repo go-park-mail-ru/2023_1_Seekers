@@ -57,7 +57,8 @@ func TestHandlers_Auth(t *testing.T) {
 	usersUCase := _userUCase.New(userRepo)
 	authRepo := _authRepo.New()
 	authUCase := _authUCase.New(authRepo, usersUCase)
-	middleware := New(authUCase)
+	logger := pkg.GetLogger()
+	middleware := New(authUCase, logger)
 
 	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

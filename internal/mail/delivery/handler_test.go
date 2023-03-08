@@ -14,6 +14,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
@@ -54,7 +55,8 @@ func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_m
 
 	authH := _authHandler.New(authUCase, usersUCase, mailUCase)
 	mailH := New(mailUCase)
-	middleware := _middleware.New(authUCase)
+	logger := pkg.GetLogger()
+	middleware := _middleware.New(authUCase, logger)
 
 	signinReq := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(credentials[userCr]))
 	w := httptest.NewRecorder()

@@ -38,8 +38,8 @@ type State struct {
 
 //type MessageInfo struct {
 //	MessageID    uint64   `json:"message_id"`
-//	FromUserID   uint64   `json:"from_user_id"`
-//	ToUsersIDs   []uint64 `json:"to_users_ids"`
+//	FromUser     string   `json:"from_user"`
+//	ToUsers      []string `json:"to_users"`
 //	CreatingDate string   `json:"creating_date"`
 //	Title        string   `json:"title"`
 //	Text         string   `json:"text"`
@@ -65,4 +65,21 @@ type OutgoingMessage struct {
 	Text         string   `json:"text"`
 	Read         bool     `json:"read"`
 	Favorite     bool     `json:"favorite"`
+}
+
+type InboxResponse struct {
+	Messages []IncomingMessage `json:"messages"`
+}
+
+type OutboxResponse struct {
+	Messages []OutgoingMessage `json:"messages"`
+}
+
+type FolderResponse struct {
+	Folder   Folder            `json:"folder"`
+	Messages []IncomingMessage `json:"messages"`
+}
+
+type FoldersResponse struct {
+	Folders []Folder `json:"folders"`
 }

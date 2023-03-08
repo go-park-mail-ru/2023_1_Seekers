@@ -220,7 +220,8 @@ func TestHandlers_Logout(t *testing.T) {
 	mailUCase := _mailUCase.New(mailRepo)
 
 	authH := New(authUCase, usersUCase, mailUCase)
-	middleware := _middleware.New(authUCase)
+	logger := pkg.GetLogger()
+	middleware := _middleware.New(authUCase, logger)
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
