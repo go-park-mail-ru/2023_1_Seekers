@@ -10,6 +10,7 @@ type Profile struct {
 	UID       uint64 `json:"user_id" validate:"required"`
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
+	// TODO Avatar
 }
 
 type FormSignUp struct {

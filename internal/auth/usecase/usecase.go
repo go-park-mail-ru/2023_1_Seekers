@@ -125,3 +125,11 @@ func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) {
 
 	return s, nil
 }
+
+func (u *useCase) GetSessionByEmail(email string) (*models.Session, error) {
+	user, err := u.userUC.GetUserByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("cant get user by email")
+	}
+	return u.GetSessionByUID(user.ID)
+}

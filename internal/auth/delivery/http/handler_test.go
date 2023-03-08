@@ -225,14 +225,14 @@ func TestHandlers_Logout(t *testing.T) {
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
-		var user models.User
+		var user models.SignUpResponse
 		if test.createSession && !test.noCookie {
 			signupReq := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.user))
 			w := httptest.NewRecorder()
 
 			authH.SignUp(w, signupReq)
 			json.NewDecoder(w.Body).Decode(&user)
-			s, err := authUCase.GetSessionByUID(user.ID)
+			s, err := authUCase.GetSessionByEmail(user.Email)
 			if err != nil {
 				t.Errorf("failed to get session %v ", err)
 			}

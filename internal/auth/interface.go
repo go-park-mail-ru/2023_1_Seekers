@@ -19,6 +19,7 @@ type UseCaseI interface {
 	DeleteSessionByUID(uID uint64) error
 	GetSession(sessionID string) (*models.Session, error)
 	GetSessionByUID(uID uint64) (*models.Session, error)
+	GetSessionByEmail(email string) (*models.Session, error)
 }
 
 type RepoI interface {

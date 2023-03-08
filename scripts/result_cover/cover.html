@@ -61,7 +61,7 @@
 				
 				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory/session.go (73.9%)</option>
 				
-				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (72.9%)</option>
+				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/usecase.go (73.1%)</option>
 				
 				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (63.6%)</option>
 				
@@ -79,13 +79,13 @@
 				
 				<option value="file11">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/errors.go (33.3%)</option>
 				
-				<option value="file12">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http_error.go (85.7%)</option>
+				<option value="file12">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http_error.go (87.5%)</option>
 				
 				<option value="file13">github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger.go (1.1%)</option>
 				
 				<option value="file14">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand.go (87.5%)</option>
 				
-				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_json.go (50.0%)</option>
+				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/pkg/send_json.go (60.0%)</option>
 				
 				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation.go (77.8%)</option>
 				
@@ -172,7 +172,7 @@ func delCookie(w http.ResponseWriter) <span class="cov1" title="1">{
 // @Accept         application/json
 // @Produce  application/json
 // @Param    user body models.FormSignUp true "user info"
-// @Success  200 {object} models.User "user created"
+// @Success  200 {object} models.SignUpResponse "user created"
 // @Failure 401 {object} error "passwords dont match"
 // @Failure 403 {object} error "invalid form"
 // @Failure 403 {object} error "password too short"
@@ -224,7 +224,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
         }</span>
 
         <span class="cov1" title="1">setNewCookie(w, session)
-        pkg.SendJSON(w, http.StatusOK, user)</span>
+        pkg.SendJSON(w, r, http.StatusOK, models.SignUpResponse{Email: user.Email})</span>
 }
 
 // SignIn godoc
@@ -234,7 +234,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
 // @Accept         application/json
 // @Produce  application/json
 // @Param    user body models.FormLogin true "user info"
-// @Success  200 {object} models.User "user created"
+// @Success  200 {object} models.SignInResponse "user created"
 // @Failure 401 {object} error "wrong password"
 // @Failure 403 {object} error "invalid form"
 // @Failure 500 {object} error "failed to create session"
@@ -273,7 +273,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
         }</span>
 
         <span class="cov10" title="2">setNewCookie(w, session)
-        pkg.SendJSON(w, http.StatusOK, user)</span>
+        pkg.SendJSON(w, r, http.StatusOK, models.SignInResponse{Email: user.Email})</span>
 }
 
 // Logout godoc
@@ -503,6 +503,14 @@ func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) <span cla
 
         <span class="cov6" title="2">return s, nil</span>
 }
+
+func (u *useCase) GetSessionByEmail(email string) (*models.Session, error) <span class="cov6" title="2">{
+        user, err := u.userUC.GetUserByEmail(email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("cant get user by email")
+        }</span>
+        <span class="cov6" title="2">return u.GetSessionByUID(user.ID)</span>
+}
 </pre>
 		
 		<pre class="file" id="file4" style="display: none">package delivery
@@ -557,7 +565,7 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) <s
                 return
         }</span>
 
-        <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, models.InboxResponse{
+        <span class="cov8" title="1">pkg.SendJSON(w, r, http.StatusOK, models.InboxResponse{
                 Messages: messages,
         })</span>
 }
@@ -587,7 +595,7 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) <
                 return
         }</span>
 
-        <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, models.OutboxResponse{
+        <span class="cov8" title="1">pkg.SendJSON(w, r, http.StatusOK, models.OutboxResponse{
                 Messages: messages,
         })</span>
 }
@@ -634,7 +642,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) <
                 return
         }</span>
 
-        <span class="cov8" title="1">pkg.SendJSON(w, http.StatusOK, models.FolderResponse{
+        <span class="cov8" title="1">pkg.SendJSON(w, r, http.StatusOK, models.FolderResponse{
                 Folder:   *folder,
                 Messages: messages,
         })</span>
@@ -659,7 +667,7 @@ func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) <span cl
         }</span>
 
         <span class="cov8" title="1">folders := del.uc.GetFolders(userID)
-        pkg.SendJSON(w, http.StatusOK, models.FoldersResponse{
+        pkg.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
                 Folders: folders,
         })</span>
 }
@@ -1406,8 +1414,8 @@ import (
         "net/http"
 )
 
-func SendError(w http.ResponseWriter, error *errors.JSONError) <span class="cov10" title="3">{
-        SendJSON(w, error.Code, error)
+func SendError(w http.ResponseWriter, r *http.Request, error *errors.JSONError) <span class="cov10" title="3">{
+        SendJSON(w, r, error.Code, error)
 }</span>
 
 func HandleError(w http.ResponseWriter, r *http.Request, status int, err error) <span class="cov10" title="3">{
@@ -1415,10 +1423,11 @@ func HandleError(w http.ResponseWriter, r *http.Request, status int, err error) 
         logger, ok := r.Context().Value(ContextHandlerLog).(*Logger)
         if !ok </span><span class="cov10" title="3">{
                 log.Error("failed to get logger for handler", r.URL.Path)
+                log.Error(err)
         }</span> else<span class="cov0" title="0"> {
                 logger.Error(err)
         }</span>
-        <span class="cov10" title="3">SendError(w, customErr)</span>
+        <span class="cov10" title="3">SendError(w, r, customErr)</span>
 }
 </pre>
 		
@@ -1698,16 +1707,14 @@ func String(length int) (string, error) <span class="cov10" title="3">{
 
 import (
         "encoding/json"
-        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-        log "github.com/sirupsen/logrus"
+        "fmt"
         "net/http"
 )
 
-func SendJSON(w http.ResponseWriter, status int, dataStruct any) <span class="cov10" title="3">{
+func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any) <span class="cov10" title="3">{
         dataJSON, err := json.Marshal(dataStruct)
         if err != nil </span><span class="cov0" title="0">{
-                log.Error("failed to marshal", err)
-                SendError(w, errors.NewWrappedErr(http.StatusInternalServerError, "failed to marshal", err))
+                HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to marshal : %w", err))
                 return
         }</span>
 
@@ -1716,8 +1723,7 @@ func SendJSON(w http.ResponseWriter, status int, dataStruct any) <span class="co
 
         _, err = w.Write(dataJSON)
         if err != nil </span><span class="cov0" title="0">{
-                log.Error("failed to send", err)
-                SendError(w, errors.NewWrappedErr(http.StatusInternalServerError, "failed to send", err))
+                HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to send : %w", err))
                 return
         }</span>
 }

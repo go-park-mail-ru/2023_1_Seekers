@@ -60,7 +60,7 @@ func delCookie(w http.ResponseWriter) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body models.FormSignUp true "user info"
-// @Success  200 {object} models.User "user created"
+// @Success  200 {object} models.SignUpResponse "user created"
 // @Failure 401 {object} error "passwords dont match"
 // @Failure 403 {object} error "invalid form"
 // @Failure 403 {object} error "password too short"
@@ -112,7 +112,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setNewCookie(w, session)
-	pkg.SendJSON(w, http.StatusOK, user)
+	pkg.SendJSON(w, r, http.StatusOK, models.SignUpResponse{Email: user.Email})
 }
 
 // SignIn godoc
@@ -122,7 +122,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body models.FormLogin true "user info"
-// @Success  200 {object} models.User "user created"
+// @Success  200 {object} models.SignInResponse "user created"
 // @Failure 401 {object} error "wrong password"
 // @Failure 403 {object} error "invalid form"
 // @Failure 500 {object} error "failed to create session"
@@ -161,7 +161,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setNewCookie(w, session)
-	pkg.SendJSON(w, http.StatusOK, user)
+	pkg.SendJSON(w, r, http.StatusOK, models.SignInResponse{Email: user.Email})
 }
 
 // Logout godoc

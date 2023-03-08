@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-func SendError(w http.ResponseWriter, error *errors.JSONError) {
-	SendJSON(w, error.Code, error)
+func SendError(w http.ResponseWriter, r *http.Request, error *errors.JSONError) {
+	SendJSON(w, r, error.Code, error)
 }
 
 func HandleError(w http.ResponseWriter, r *http.Request, status int, err error) {
@@ -15,8 +15,9 @@ func HandleError(w http.ResponseWriter, r *http.Request, status int, err error) 
 	logger, ok := r.Context().Value(ContextHandlerLog).(*Logger)
 	if !ok {
 		log.Error("failed to get logger for handler", r.URL.Path)
+		log.Error(err)
 	} else {
 		logger.Error(err)
 	}
-	SendError(w, customErr)
+	SendError(w, r, customErr)
 }
