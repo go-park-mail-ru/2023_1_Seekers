@@ -41,10 +41,7 @@ const docTemplate = `{
                     "200": {
                         "description": "success get list of outgoing messages",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.IncomingMessage"
-                            }
+                            "$ref": "#/definitions/models.FolderResponse"
                         }
                     },
                     "400": {
@@ -79,10 +76,7 @@ const docTemplate = `{
                     "200": {
                         "description": "success get list of outgoing messages",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Folder"
-                            }
+                            "$ref": "#/definitions/models.FoldersResponse"
                         }
                     },
                     "400": {
@@ -113,10 +107,7 @@ const docTemplate = `{
                     "200": {
                         "description": "success get list of incoming messages",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.IncomingMessage"
-                            }
+                            "$ref": "#/definitions/models.InboxResponse"
                         }
                     },
                     "400": {
@@ -171,10 +162,7 @@ const docTemplate = `{
                     "200": {
                         "description": "success get list of outgoing messages",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.OutgoingMessage"
-                            }
+                            "$ref": "#/definitions/models.OutboxResponse"
                         }
                     },
                     "400": {
@@ -220,11 +208,15 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "failed to create session",
+                        "description": "wrong password",
                         "schema": {}
                     },
                     "403": {
-                        "description": "invalid form, cant decode",
+                        "description": "invalid form",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "failed to create session",
                         "schema": {}
                     }
                 }
@@ -270,11 +262,11 @@ const docTemplate = `{
                         "schema": {}
                     },
                     "409": {
-                        "description": "failed to sign up",
+                        "description": "user already exists",
                         "schema": {}
                     },
                     "500": {
-                        "description": "failed to create profile",
+                        "description": "failed to create session",
                         "schema": {}
                     }
                 }
@@ -296,33 +288,67 @@ const docTemplate = `{
                 }
             }
         },
-        "models.FormLogin": {
+        "models.FolderResponse": {
             "type": "object",
             "properties": {
-                "birth_date": {
-                    "type": "string"
+                "folder": {
+                    "$ref": "#/definitions/models.Folder"
                 },
-                "email": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IncomingMessage"
+                    }
+                }
+            }
+        },
+        "models.FoldersResponse": {
+            "type": "object",
+            "properties": {
+                "folders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Folder"
+                    }
+                }
+            }
+        },
+        "models.FormLogin": {
+            "type": "object",
+            "required": [
+                "login",
+                "password",
+                "remember"
+            ],
+            "properties": {
+                "login": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
+                },
+                "remember": {
+                    "type": "boolean"
                 }
             }
         },
         "models.FormSignUp": {
             "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "login",
+                "password",
+                "repeat_pw"
+            ],
             "properties": {
-                "birth_date": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
                 "first_name": {
                     "type": "string"
                 },
                 "last_name": {
+                    "type": "string"
+                },
+                "login": {
                     "type": "string"
                 },
                 "password": {
@@ -331,6 +357,17 @@ const docTemplate = `{
                 "repeat_pw": {
                     "description": "?",
                     "type": "string"
+                }
+            }
+        },
+        "models.InboxResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IncomingMessage"
+                    }
                 }
             }
         },
@@ -357,6 +394,17 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "models.OutboxResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OutgoingMessage"
+                    }
                 }
             }
         },
@@ -391,6 +439,10 @@ const docTemplate = `{
         },
         "models.User": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"

@@ -9,30 +9,61 @@ definitions:
       user_id:
         type: integer
     type: object
+  models.FolderResponse:
+    properties:
+      folder:
+        $ref: '#/definitions/models.Folder'
+      messages:
+        items:
+          $ref: '#/definitions/models.IncomingMessage'
+        type: array
+    type: object
+  models.FoldersResponse:
+    properties:
+      folders:
+        items:
+          $ref: '#/definitions/models.Folder'
+        type: array
+    type: object
   models.FormLogin:
     properties:
-      birth_date:
-        type: string
-      email:
+      login:
         type: string
       password:
         type: string
+      remember:
+        type: boolean
+    required:
+    - login
+    - password
+    - remember
     type: object
   models.FormSignUp:
     properties:
-      birth_date:
-        type: string
-      email:
-        type: string
       first_name:
         type: string
       last_name:
+        type: string
+      login:
         type: string
       password:
         type: string
       repeat_pw:
         description: '?'
         type: string
+    required:
+    - first_name
+    - last_name
+    - login
+    - password
+    - repeat_pw
+    type: object
+  models.InboxResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/models.IncomingMessage'
+        type: array
     type: object
   models.IncomingMessage:
     properties:
@@ -50,6 +81,13 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  models.OutboxResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/models.OutgoingMessage'
+        type: array
     type: object
   models.OutgoingMessage:
     properties:
@@ -78,6 +116,9 @@ definitions:
         type: integer
       password:
         type: string
+    required:
+    - email
+    - password
     type: object
 host: localhost:8001
 info:
@@ -102,9 +143,7 @@ paths:
         "200":
           description: success get list of outgoing messages
           schema:
-            items:
-              $ref: '#/definitions/models.IncomingMessage'
-            type: array
+            $ref: '#/definitions/models.FolderResponse'
         "400":
           description: failed to get folder messages
           schema: {}
@@ -128,9 +167,7 @@ paths:
         "200":
           description: success get list of outgoing messages
           schema:
-            items:
-              $ref: '#/definitions/models.Folder'
-            type: array
+            $ref: '#/definitions/models.FoldersResponse'
         "400":
           description: failed to get user
           schema: {}
@@ -151,9 +188,7 @@ paths:
         "200":
           description: success get list of incoming messages
           schema:
-            items:
-              $ref: '#/definitions/models.IncomingMessage'
-            type: array
+            $ref: '#/definitions/models.InboxResponse'
         "400":
           description: failed to get inbox messages
           schema: {}
@@ -190,9 +225,7 @@ paths:
         "200":
           description: success get list of outgoing messages
           schema:
-            items:
-              $ref: '#/definitions/models.OutgoingMessage'
-            type: array
+            $ref: '#/definitions/models.OutboxResponse'
         "400":
           description: failed to get outbox messages
           schema: {}
@@ -222,10 +255,13 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
         "401":
-          description: failed to create session
+          description: wrong password
           schema: {}
         "403":
-          description: invalid form, cant decode
+          description: invalid form
+          schema: {}
+        "500":
+          description: failed to create session
           schema: {}
       summary: SignIn
       tags:
@@ -256,10 +292,10 @@ paths:
           description: password too short
           schema: {}
         "409":
-          description: failed to sign up
+          description: user already exists
           schema: {}
         "500":
-          description: failed to create profile
+          description: failed to create session
           schema: {}
       summary: SignUp
       tags:
