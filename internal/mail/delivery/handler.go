@@ -50,7 +50,7 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pkg.SendJSON(w, http.StatusOK, models.InboxResponse{
+	pkg.SendJSON(w, r, http.StatusOK, models.InboxResponse{
 		Messages: messages,
 	})
 }
@@ -80,7 +80,7 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pkg.SendJSON(w, http.StatusOK, models.OutboxResponse{
+	pkg.SendJSON(w, r, http.StatusOK, models.OutboxResponse{
 		Messages: messages,
 	})
 }
@@ -127,7 +127,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pkg.SendJSON(w, http.StatusOK, models.FolderResponse{
+	pkg.SendJSON(w, r, http.StatusOK, models.FolderResponse{
 		Folder:   *folder,
 		Messages: messages,
 	})
@@ -152,7 +152,7 @@ func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	folders := del.uc.GetFolders(userID)
-	pkg.SendJSON(w, http.StatusOK, models.FoldersResponse{
+	pkg.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
 		Folders: folders,
 	})
 }

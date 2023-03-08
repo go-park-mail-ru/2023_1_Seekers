@@ -67,10 +67,10 @@ func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_m
 		t.Fatalf("Failed login for test \"%s\" with code %d", testName, w.Code)
 	}
 
-	var user models.User
+	var user models.SignInResponse
 	json.NewDecoder(w.Body).Decode(&user)
 
-	s, err := authUCase.GetSessionByUID(user.ID)
+	s, err := authUCase.GetSessionByEmail(user.Email)
 	if err != nil {
 		t.Fatalf("Failed to get session %v for test \"%s\"", err, testName)
 	}
