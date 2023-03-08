@@ -204,7 +204,7 @@ const docTemplate = `{
                     "200": {
                         "description": "user created",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.SignInResponse"
                         }
                     },
                     "401": {
@@ -250,7 +250,7 @@ const docTemplate = `{
                     "200": {
                         "description": "user created",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.SignUpResponse"
                         }
                     },
                     "401": {
@@ -437,20 +437,24 @@ const docTemplate = `{
                 }
             }
         },
-        "models.User": {
+        "models.SignInResponse": {
             "type": "object",
             "required": [
-                "email",
-                "password"
+                "email"
             ],
             "properties": {
                 "email": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "password": {
+                }
+            }
+        },
+        "models.SignUpResponse": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
                     "type": "string"
                 }
             }

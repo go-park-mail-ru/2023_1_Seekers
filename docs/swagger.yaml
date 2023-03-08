@@ -108,17 +108,19 @@ definitions:
           type: string
         type: array
     type: object
-  models.User:
+  models.SignInResponse:
     properties:
       email:
         type: string
-      id:
-        type: integer
-      password:
+    required:
+    - email
+    type: object
+  models.SignUpResponse:
+    properties:
+      email:
         type: string
     required:
     - email
-    - password
     type: object
 host: localhost:8001
 info:
@@ -253,7 +255,7 @@ paths:
         "200":
           description: user created
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/models.SignInResponse'
         "401":
           description: wrong password
           schema: {}
@@ -284,7 +286,7 @@ paths:
         "200":
           description: user created
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/models.SignUpResponse'
         "401":
           description: passwords dont match
           schema: {}
