@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  errors.JSONError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
   models.Folder:
     properties:
       folder_id:
@@ -148,13 +155,16 @@ paths:
             $ref: '#/definitions/models.FolderResponse'
         "400":
           description: failed to get folder messages
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "401":
           description: failed get session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "404":
           description: invalid url address
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: GetFolderMessages
       tags:
       - messages
@@ -172,10 +182,12 @@ paths:
             $ref: '#/definitions/models.FoldersResponse'
         "400":
           description: failed to get user
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "401":
           description: failed get session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: GetFolders
       tags:
       - messages
@@ -193,10 +205,12 @@ paths:
             $ref: '#/definitions/models.InboxResponse'
         "400":
           description: failed to get inbox messages
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "401":
           description: failed get session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: GetInboxMessages
       tags:
       - messages
@@ -212,7 +226,8 @@ paths:
           description: success logout
         "401":
           description: failed get session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: Logout
       tags:
       - users
@@ -230,10 +245,12 @@ paths:
             $ref: '#/definitions/models.OutboxResponse'
         "400":
           description: failed to get outbox messages
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "401":
           description: failed get session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: GetOutboxMessages
       tags:
       - messages
@@ -258,13 +275,16 @@ paths:
             $ref: '#/definitions/models.SignInResponse'
         "401":
           description: wrong password
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "403":
           description: invalid form
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "500":
           description: failed to create session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: SignIn
       tags:
       - users
@@ -289,16 +309,20 @@ paths:
             $ref: '#/definitions/models.SignUpResponse'
         "401":
           description: passwords dont match
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "403":
           description: password too short
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "409":
           description: user already exists
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
         "500":
           description: failed to create session
-          schema: {}
+          schema:
+            $ref: '#/definitions/errors.JSONError'
       summary: SignUp
       tags:
       - users

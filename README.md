@@ -3,6 +3,8 @@
 Проект Почта для 2 семестра проекта "VK образование" команды Seekers.
 
 ### [Фронтенд](https://github.com/frontend-park-mail-ru/2023_1_Seekers/)
+### [Деплой](http://89.208.197.150:8002/)
+### [Документация API](http://89.208.197.150:8001/swagger/index.html#/)
 
 ### Состав команды:
 - [Александр Вяткин](https://github.com/MoraPresence)

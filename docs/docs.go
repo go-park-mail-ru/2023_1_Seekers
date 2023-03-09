@@ -46,15 +46,21 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "failed to get folder messages",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "401": {
                         "description": "failed get session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "404": {
                         "description": "invalid url address",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -81,11 +87,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "failed to get user",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "401": {
                         "description": "failed get session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -112,11 +122,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "failed to get inbox messages",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "401": {
                         "description": "failed get session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -140,7 +154,9 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "failed get session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -167,11 +183,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "failed to get outbox messages",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "401": {
                         "description": "failed get session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -209,15 +229,21 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "wrong password",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "403": {
                         "description": "invalid form",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "500": {
                         "description": "failed to create session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
@@ -255,25 +281,44 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "passwords dont match",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "403": {
                         "description": "password too short",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "409": {
                         "description": "user already exists",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     },
                     "500": {
                         "description": "failed to create session",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "errors.JSONError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Folder": {
             "type": "object",
             "properties": {
