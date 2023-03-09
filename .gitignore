@@ -1,2 +1,4 @@
 .idea
 logs/
+cover.html
+coverage.out
