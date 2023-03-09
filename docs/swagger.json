@@ -1,0 +1,456 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "MailBox Swagger API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8001",
+    "basePath": "/api/v1",
+    "paths": {
+        "/folder/{id}": {
+            "get": {
+                "description": "List of outgoing messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetFolderMessages",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "FolderID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get list of outgoing messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.FolderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get folder messages",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "failed get session",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "invalid url address",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/folders/": {
+            "get": {
+                "description": "List of outgoing messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetFolders",
+                "responses": {
+                    "200": {
+                        "description": "success get list of outgoing messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.FoldersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "failed get session",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/inbox/": {
+            "get": {
+                "description": "List of incoming messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetInboxMessages",
+                "responses": {
+                    "200": {
+                        "description": "success get list of incoming messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.InboxResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get inbox messages",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "failed get session",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "description": "user log out",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Logout",
+                "responses": {
+                    "200": {
+                        "description": "success logout"
+                    },
+                    "401": {
+                        "description": "failed get session",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/outbox/": {
+            "get": {
+                "description": "List of outgoing messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetOutboxMessages",
+                "responses": {
+                    "200": {
+                        "description": "success get list of outgoing messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.OutboxResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get outbox messages",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "failed get session",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/signin": {
+            "post": {
+                "description": "user sign in",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "SignIn",
+                "parameters": [
+                    {
+                        "description": "user info",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FormLogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user created",
+                        "schema": {
+                            "$ref": "#/definitions/models.SignInResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "wrong password",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "failed to create session",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "user sign up",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "SignUp",
+                "parameters": [
+                    {
+                        "description": "user info",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FormSignUp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user created",
+                        "schema": {
+                            "$ref": "#/definitions/models.SignUpResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "passwords dont match",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "password too short",
+                        "schema": {}
+                    },
+                    "409": {
+                        "description": "user already exists",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "failed to create session",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Folder": {
+            "type": "object",
+            "properties": {
+                "folder_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.FolderResponse": {
+            "type": "object",
+            "properties": {
+                "folder": {
+                    "$ref": "#/definitions/models.Folder"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IncomingMessage"
+                    }
+                }
+            }
+        },
+        "models.FoldersResponse": {
+            "type": "object",
+            "properties": {
+                "folders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Folder"
+                    }
+                }
+            }
+        },
+        "models.FormLogin": {
+            "type": "object",
+            "required": [
+                "login",
+                "password",
+                "remember"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "remember": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.FormSignUp": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "login",
+                "password",
+                "repeat_pw"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "repeat_pw": {
+                    "description": "?",
+                    "type": "string"
+                }
+            }
+        },
+        "models.InboxResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IncomingMessage"
+                    }
+                }
+            }
+        },
+        "models.IncomingMessage": {
+            "type": "object",
+            "properties": {
+                "creating_date": {
+                    "type": "string"
+                },
+                "favorite": {
+                    "type": "boolean"
+                },
+                "from_user": {
+                    "type": "string"
+                },
+                "message_id": {
+                    "type": "integer"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.OutboxResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OutgoingMessage"
+                    }
+                }
+            }
+        },
+        "models.OutgoingMessage": {
+            "type": "object",
+            "properties": {
+                "creating_date": {
+                    "type": "string"
+                },
+                "favorite": {
+                    "type": "boolean"
+                },
+                "message_id": {
+                    "type": "integer"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "to_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.SignInResponse": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SignUpResponse": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
