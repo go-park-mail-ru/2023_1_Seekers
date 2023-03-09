@@ -300,10 +300,6 @@ func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([
 				return messages, err
 			}
 
-			if err != nil {
-				return messages, err
-			}
-
 			fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
 
 			if err != nil {

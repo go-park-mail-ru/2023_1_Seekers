@@ -4,6 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -30,10 +31,10 @@ func handleMailErr(w http.ResponseWriter, r *http.Request, err error) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 {object} models.InboxResponse "success get list of incoming messages"
-// @Failure 400 {object} error "failed to get user"
-// @Failure 400 {object} error "failed to get inbox messages"
-// @Failure 401 {object} error "failed auth"
-// @Failure 401 {object} error "failed get session"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "failed to get inbox messages"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Failure 401 {object} errors.JSONError "failed get session"
 // @Router   /inbox/ [get]
 func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
@@ -62,10 +63,10 @@ func (del *delivery) GetInboxMessages(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 {object} models.OutboxResponse "success get list of outgoing messages"
-// @Failure 400 {object} error "failed to get user"
-// @Failure 400 {object} error "failed to get outbox messages"
-// @Failure 401 {object} error "failed auth"
-// @Failure 401 {object} error "failed get session"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "failed to get outbox messages"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Failure 401 {object} errors.JSONError "failed get session"
 // @Router   /outbox/ [get]
 func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
@@ -93,11 +94,11 @@ func (del *delivery) GetOutboxMessages(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Param id path int true "FolderID"
 // @Success  200 {object} models.FolderResponse "success get list of outgoing messages"
-// @Failure 400 {object} error "failed to get user"
-// @Failure 400 {object} error "failed to get folder messages"
-// @Failure 401 {object} error "failed auth"
-// @Failure 401 {object} error "failed get session"
-// @Failure 404 {object} error "invalid url address"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "failed to get folder messages"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Failure 401 {object} errors.JSONError "failed get session"
+// @Failure 404 {object} errors.JSONError "invalid url address"
 // @Router   /folder/{id} [get]
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
@@ -140,9 +141,9 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 {object} models.FoldersResponse "success get list of outgoing messages"
-// @Failure 400 {object} error "failed to get user"
-// @Failure 401 {object} error "failed auth"
-// @Failure 401 {object} error "failed get session"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Failure 401 {object} errors.JSONError "failed get session"
 // @Router   /folders/ [get]
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)

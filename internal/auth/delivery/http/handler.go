@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -61,12 +62,12 @@ func delCookie(w http.ResponseWriter) {
 // @Produce  application/json
 // @Param    user body models.FormSignUp true "user info"
 // @Success  200 {object} models.SignUpResponse "user created"
-// @Failure 401 {object} error "passwords dont match"
-// @Failure 403 {object} error "invalid form"
-// @Failure 403 {object} error "password too short"
-// @Failure 409 {object} error "user already exists"
-// @Failure 500 {object} error "failed to create profile"
-// @Failure 500 {object} error "failed to create session"
+// @Failure 401 {object} errors.JSONError "passwords dont match"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 403 {object} errors.JSONError "password too short"
+// @Failure 409 {object} errors.JSONError "user already exists"
+// @Failure 500 {object} errors.JSONError "failed to create profile"
+// @Failure 500 {object} errors.JSONError "failed to create session"
 // @Router   /signup [post]
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -123,9 +124,9 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Param    user body models.FormLogin true "user info"
 // @Success  200 {object} models.SignInResponse "user created"
-// @Failure 401 {object} error "wrong password"
-// @Failure 403 {object} error "invalid form"
-// @Failure 500 {object} error "failed to create session"
+// @Failure 401 {object} errors.JSONError "wrong password"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 500 {object} errors.JSONError "failed to create session"
 // @Router   /signin [post]
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -171,8 +172,8 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 "success logout"
-// @Failure 401 {object} error "failed auth"
-// @Failure 401 {object} error "failed get session"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Failure 401 {object} errors.JSONError "failed get session"
 // @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	delCookie(w)
