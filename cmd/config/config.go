@@ -8,6 +8,11 @@ const (
 	LogsDir        = "logs/"
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
+	DBUser         = "postgres"
+	DBPassword     = "postgres"
+	DBHost         = "localhost"
+	DBPort         = "5432"
+	DBName         = "mail"
 
 	CookieName = "MailBoxSession"
 	CookieTTL  = time.Hour * 24 * 100 // 100 days

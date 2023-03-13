@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
@@ -16,10 +17,20 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+)
+
+var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+	config.DBUser,
+	config.DBPassword,
+	config.DBHost,
+	config.DBPort,
+	config.DBName,
 )
 
 // @title MailBox Swagger API
@@ -30,6 +41,12 @@ func main() {
 	pkg.InitLogger()
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
+
+	_, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{})
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+		return
+	}
 
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
