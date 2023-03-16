@@ -8,8 +8,8 @@ type User struct {
 
 type Profile struct {
 	UID       uint64 `json:"user_id" validate:"required"`
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
+	FirstName string `json:"firstName" validate:"required"`
+	LastName  string `json:"lastName" validate:"required"`
 	// TODO Avatar
 }
 
