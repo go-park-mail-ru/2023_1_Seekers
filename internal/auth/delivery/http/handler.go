@@ -91,7 +91,7 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authUC.SignUp(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw ||
+		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || //TODO: ErrInvalidLogin - login in signup?
 			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile {
 			handleAuthErr(w, r, err)
 			return
@@ -113,7 +113,18 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setNewCookie(w, session)
-	pkg.SendJSON(w, r, http.StatusOK, models.SignUpResponse{Email: user.Email})
+
+	profile, err := h.userUC.GetProfileByID(user.ID) // TODO: here i need to get profile, but should i handle the err?
+	if err != nil {
+		handleAuthErr(w, r, auth.ErrUserNotFound)
+		return
+	}
+
+	pkg.SendJSON(w, r, http.StatusOK, models.SignUpResponse{
+		Email:     user.Email,
+		FirstName: profile.FirstName,
+		LastName:  profile.LastName,
+	})
 }
 
 // SignIn godoc
@@ -162,7 +173,17 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setNewCookie(w, session)
-	pkg.SendJSON(w, r, http.StatusOK, models.SignInResponse{Email: user.Email})
+
+	profile, err := h.userUC.GetProfileByID(user.ID) // TODO: here i need to get profile, but should i handle the err?
+	if err != nil {
+		handleAuthErr(w, r, auth.ErrUserNotFound)
+		return
+	}
+	pkg.SendJSON(w, r, http.StatusOK, models.SignInResponse{
+		Email:     user.Email,
+		FirstName: profile.FirstName,
+		LastName:  profile.LastName,
+	})
 }
 
 // Logout godoc
