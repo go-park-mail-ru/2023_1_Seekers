@@ -7,8 +7,6 @@ type UseCaseI interface {
 	DeleteUser(user models.User) error
 	GetUserByID(ID uint64) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
-	CreateProfile(profile models.Profile) error
-	GetProfileByID(id uint64) (*models.Profile, error)
 }
 
 type RepoI interface {
@@ -16,6 +14,4 @@ type RepoI interface {
 	DeleteUser(user models.User) error
 	GetUserByID(ID uint64) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
-	CreateProfile(profile models.Profile) error
-	GetProfileByID(id uint64) (*models.Profile, error)
 }

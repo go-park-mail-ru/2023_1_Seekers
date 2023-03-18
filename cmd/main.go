@@ -7,6 +7,8 @@ import (
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
+	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
 	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
@@ -34,14 +36,16 @@ func main() {
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
 	mailRepo := _mailRepo.New(userRepo)
+	fStorageRepo := _fStorageRepo.New()
 
+	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo)
-	authUC := _authUCase.New(authRepo, usersUC)
 	mailUC := _mailUCase.New(mailRepo)
+	authUC := _authUCase.New(authRepo, usersUC, mailUC, fStorageUC)
 
 	middleware := _middleware.New(authUC, logger)
 
-	authH := _authHandler.New(authUC, usersUC, mailUC)
+	authH := _authHandler.New(authUC)
 	mailH := _mailHandler.New(mailUC)
 
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

@@ -3,6 +3,7 @@ module github.com/go-park-mail-ru/2023_1_Seekers
 go 1.20
 
 require (
+	github.com/aws/aws-sdk-go v1.44.224
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/cors v1.8.3
@@ -20,6 +21,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

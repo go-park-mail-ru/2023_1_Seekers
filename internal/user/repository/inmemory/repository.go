@@ -1,29 +1,24 @@
 package inmemory
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 )
 
 type usersDB struct {
-	users    []models.User
-	profiles []models.Profile
+	users []models.User
 }
 
 func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
-			{0, "support@mailbox.ru", "very_difficult_pw"},
-			{1, "test@mailbox.ru", "12345"},
-			{2, "gena@mailbox.ru", "54321"},
-			{3, "max@mailbox.ru", "13795"},
-			{4, "valera@mailbox.ru", "12345"},
-		},
-		[]models.Profile{
-			{1, "Michail", "Testov"},
-			{2, "Ivan", "Ivanov"},
-			{3, "Michail", "Sidorov"},
+			{0, "support@mailbox.ru", "very_difficult_pw", "Michail", "Testov", config.DefaultAvatar},
+			{1, "test@mailbox.ru", "12345", "Ivan", "Ivanov", config.DefaultAvatar},
+			{2, "gena@mailbox.ru", "54321", "Michail", "Sidorov", config.DefaultAvatar},
+			{3, "max@mailbox.ru", "13795", "Michail", "Testov", config.DefaultAvatar},
+			{4, "valera@mailbox.ru", "12345", "Michail", "Testov", config.DefaultAvatar},
 		},
 	}
 }
@@ -66,22 +61,4 @@ func (uDb *usersDB) DeleteUser(user models.User) error {
 		}
 	}
 	return auth.ErrUserNotFound
-}
-
-func (uDb *usersDB) GetProfileByID(id uint64) (*models.Profile, error) {
-	for i, p := range uDb.profiles {
-		if p.UID == id {
-			return &uDb.profiles[i], nil
-		}
-	}
-	return nil, user.ErrUserNotFound
-}
-
-func (uDb *usersDB) CreateProfile(profile models.Profile) error {
-	_, err := uDb.GetProfileByID(profile.UID)
-	if err == nil {
-		return user.ErrUserExists
-	}
-	uDb.profiles = append(uDb.profiles, profile)
-	return nil
 }

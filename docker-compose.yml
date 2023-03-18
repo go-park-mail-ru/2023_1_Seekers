@@ -1,6 +1,27 @@
 version: "3.8"
 
 services:
+  minio:
+    image: minio/minio:RELEASE.2021-03-17T02-33-02Z@sha256:d33b2e9559ee59acf7591cd83cb7238837158a316956e6140e6692a8e4e12fe9
+    volumes:
+      - ./minio_data:/export
+    command: server /export
+    environment:
+      MINIO_ACCESS_KEY: ACCESS_TO_ENV!
+      MINIO_SECRET_KEY: SECRET_TO_ENV!
+    ports:
+      - "9000:9000"
+
+  create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add minioClient http://minio:9000 ACCESS_TO_ENV! SECRET_TO_ENV!;
+      /usr/bin/mc mb minioClient/avatars; 
+      exit 0;
+      "
   app:
     build: ./
     command: ./main
@@ -8,3 +29,6 @@ services:
       - "8001:8001"
     environment:
       - ...
+    depends_on:
+      - minio
+      - create-bucket

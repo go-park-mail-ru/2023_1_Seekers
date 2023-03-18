@@ -12,8 +12,8 @@ type HandlersI interface {
 }
 
 type UseCaseI interface {
-	SignIn(form models.FormLogin) (*models.User, error)
-	SignUp(form models.FormSignUp) (*models.User, error)
+	SignIn(form models.FormLogin) (*models.SignInResponse, *models.Session, error)
+	SignUp(form models.FormSignUp) (*models.SignUpResponse, *models.Session, error)
 	CreateSession(uID uint64) (*models.Session, error)
 	DeleteSession(sessionID string) error
 	DeleteSessionByUID(uID uint64) error

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -12,64 +14,97 @@ import (
 type useCase struct {
 	authRepo auth.RepoI
 	userUC   _user.UseCaseI
+	mailUC   mail.UseCaseI
+	fileUC   file_storage.UseCaseI
 }
 
-func New(ar auth.RepoI, uc _user.UseCaseI) auth.UseCaseI {
+func New(ar auth.RepoI, uc _user.UseCaseI, mUC mail.UseCaseI, fUC file_storage.UseCaseI) auth.UseCaseI {
 	return &useCase{
 		authRepo: ar,
 		userUC:   uc,
+		mailUC:   mUC,
+		fileUC:   fUC,
 	}
 }
 
-func (u *useCase) SignIn(form models.FormLogin) (*models.User, error) {
+func (u *useCase) SignIn(form models.FormLogin) (*models.SignInResponse, *models.Session, error) {
 	email, err := pkg.ValidateLogin(form.Login)
 	if err != nil {
-		return nil, auth.ErrInvalidLogin
+		return nil, nil, auth.ErrInvalidLogin
 	}
 	user, err := u.userUC.GetUserByEmail(email)
 	if err != nil {
-		return nil, auth.ErrWrongPw
+		return nil, nil, auth.ErrWrongPw
 	}
 
 	if user.Password != form.Password {
-		return nil, auth.ErrWrongPw
+		return nil, nil, auth.ErrWrongPw
 	}
 
-	return user, nil
+	// когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
+	err = u.DeleteSessionByUID(user.ID)
+	session, err := u.CreateSession(user.ID)
+	if err != nil {
+		return nil, nil, auth.ErrFailedCreateSession
+	}
+
+	f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &models.SignInResponse{
+		Email: user.Email,
+		Image: models.Image{
+			Name: f.Name,
+			Data: f.Data,
+		},
+	}, session, nil
 }
 
-func (u *useCase) SignUp(form models.FormSignUp) (*models.User, error) {
+func (u *useCase) SignUp(form models.FormSignUp) (*models.SignUpResponse, *models.Session, error) {
 	if form.RepeatPw != form.Password {
-		return nil, auth.ErrPwDontMatch
+		return nil, nil, auth.ErrPwDontMatch
 	}
 
 	email, err := pkg.ValidateLogin(form.Login)
 	if err != nil || len(form.Login) > 30 || len(form.Login) < 3 {
-		return nil, auth.ErrInvalidLogin
+		return nil, nil, auth.ErrInvalidLogin
 	}
 
 	user, err := u.userUC.CreateUser(models.User{
-		Email:    email,
-		Password: form.Password,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("cant create user: %w", err)
-	}
-
-	err = u.userUC.CreateProfile(models.Profile{
-		UID:       user.ID,
+		Email:     email,
+		Password:  form.Password,
 		FirstName: form.FirstName,
 		LastName:  form.LastName,
+		Avatar:    config.DefaultAvatar,
 	})
 	if err != nil {
-		if err = u.userUC.DeleteUser(*user); err == nil {
-			return nil, auth.ErrFailedCreateProfile
-		} else {
-			return nil, auth.ErrInternal
-		}
+		return nil, nil, fmt.Errorf("cant create user: %w", err)
 	}
 
-	return user, nil
+	err = u.mailUC.CreateHelloMessage(user.ID)
+	if err != nil {
+		return nil, nil, auth.ErrInternalHelloMsg
+	}
+
+	session, err := u.CreateSession(user.ID)
+	if err != nil {
+		return nil, nil, auth.ErrFailedCreateSession
+	}
+
+	f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &models.SignUpResponse{
+		Email: user.Email,
+		Image: models.Image{
+			Name: f.Name,
+			Data: f.Data,
+		},
+	}, session, nil
 }
 
 func (u *useCase) CreateSession(uID uint64) (*models.Session, error) {

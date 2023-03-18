@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -19,15 +18,11 @@ import (
 
 type handlers struct {
 	authUC auth.UseCaseI
-	userUC _user.UseCaseI
-	mailUC mail.UseCaseI
 }
 
-func New(aUC auth.UseCaseI, uUC _user.UseCaseI, mUC mail.UseCaseI) auth.HandlersI {
+func New(aUC auth.UseCaseI) auth.HandlersI {
 	return &handlers{
 		authUC: aUC,
-		userUC: uUC,
-		mailUC: mUC,
 	}
 }
 
@@ -89,10 +84,10 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authUC.SignUp(form)
+	response, session, err := h.authUC.SignUp(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw ||
-			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile {
+		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrInternalHelloMsg ||
+			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile || err == auth.ErrFailedCreateSession {
 			handleAuthErr(w, r, err)
 			return
 		}
@@ -100,20 +95,8 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := h.authUC.CreateSession(user.ID)
-	if err != nil {
-		handleAuthErr(w, r, auth.ErrFailedCreateSession)
-		return
-	}
-
-	err = h.mailUC.CreateHelloMessage(user.ID)
-	if err != nil {
-		handleAuthErr(w, r, auth.ErrInternalHelloMsg)
-		return
-	}
-
 	setNewCookie(w, session)
-	pkg.SendJSON(w, r, http.StatusOK, models.SignUpResponse{Email: user.Email})
+	pkg.SendJSON(w, r, http.StatusOK, response)
 }
 
 // SignIn godoc
@@ -143,9 +126,9 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authUC.SignIn(form)
+	response, session, err := h.authUC.SignIn(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin {
+		if err == auth.ErrInvalidLogin || err == auth.ErrFailedCreateSession {
 			handleAuthErr(w, r, err)
 			return
 		}
@@ -153,16 +136,8 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// когда логинимся, то обновляем куку, если ранее была, то удалится и пересоздастся
-	err = h.authUC.DeleteSessionByUID(user.ID)
-	session, err := h.authUC.CreateSession(user.ID)
-	if err != nil {
-		handleAuthErr(w, r, auth.ErrFailedCreateSession)
-		return
-	}
-
 	setNewCookie(w, session)
-	pkg.SendJSON(w, r, http.StatusOK, models.SignInResponse{Email: user.Email})
+	pkg.SendJSON(w, r, http.StatusOK, response)
 }
 
 // Logout godoc
@@ -175,7 +150,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} errors.JSONError "failed auth"
 // @Failure 401 {object} errors.JSONError "failed get session"
 // @Router   /logout [post]
-func (h *handlers) Logout(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
 	w.WriteHeader(http.StatusOK)
 }

@@ -23,9 +23,17 @@ const (
 	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
 	RouteFolders        = "/api/v1/folders"
 
-	PasswordMinLen = 5
-	PostDomain     = "mailbox.ru"
-	PostAtDomain   = "@" + PostDomain
+	PasswordMinLen   = 5
+	DefaultAvatar    = "default_avatar.png"
+	DefaultAvatarDir = "./cmd/config/static/"
+	PostDomain       = "mailbox.ru"
+	PostAtDomain     = "@" + PostDomain
+
+	S3AccessKeyID     = "ACCESS_TO_ENV!"
+	S3AccessKeySecret = "SECRET_TO_ENV!"
+	S3Endpoint        = "http://localhost:9000"
+	S3Region          = "eu-west-2" // В случае с minio - не играет роли, нь указывается обязательно
+	S3AvatarBucket    = "avatars"
 )
 
 var (
