@@ -23,3 +23,11 @@ func ValidateLogin(login string) (string, error) {
 	}
 	return email, nil
 }
+
+func CheckImageContentType(contentType string) bool {
+	if contentType == ContentTypePNG || contentType == ContentTypeSVG ||
+		contentType == ContentTypeWEBP || contentType == ContentTypeJPEG {
+		return true
+	}
+	return false
+}

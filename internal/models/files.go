@@ -1,8 +1,8 @@
 package models
 
 type Image struct {
-	Name string `json:"name"`
-	Data []byte `json:"data"`
+	Name string
+	Data []byte
 }
 
 type S3File struct {

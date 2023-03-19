@@ -13,6 +13,7 @@ import (
 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
+	_userHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/delivery/http"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
@@ -39,18 +40,20 @@ func main() {
 	fStorageRepo := _fStorageRepo.New()
 
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
-	usersUC := _userUCase.New(userRepo)
+	usersUC := _userUCase.New(userRepo, fStorageUC)
 	mailUC := _mailUCase.New(mailRepo)
-	authUC := _authUCase.New(authRepo, usersUC, mailUC, fStorageUC)
+	authUC := _authUCase.New(authRepo, usersUC, mailUC)
 
 	middleware := _middleware.New(authUC, logger)
 
 	authH := _authHandler.New(authUC)
 	mailH := _mailHandler.New(mailUC)
+	userH := _userHandler.New(usersUC)
 
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	_authHandler.RegisterHTTPRoutes(router, authH, middleware)
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
+	_userHandler.RegisterHTTPRoutes(router, userH, middleware)
 
 	router.Use(middleware.HandlerLogger)
 	corsRouter := middleware.Cors(router)

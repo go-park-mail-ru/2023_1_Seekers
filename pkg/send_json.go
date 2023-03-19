@@ -22,3 +22,14 @@ func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any
 		return
 	}
 }
+
+func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) {
+	w.Header().Set("Content-Type", http.DetectContentType(data))
+	w.WriteHeader(status)
+
+	_, err := w.Write(data)
+	if err != nil {
+		HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}

@@ -23,7 +23,7 @@ func New() user.RepoI {
 	}
 }
 
-func (uDb *usersDB) GetUserByID(id uint64) (*models.User, error) {
+func (uDb *usersDB) GetByID(id uint64) (*models.User, error) {
 	for i, u := range uDb.users {
 		if u.ID == id {
 			return &uDb.users[i], nil
@@ -32,7 +32,7 @@ func (uDb *usersDB) GetUserByID(id uint64) (*models.User, error) {
 	return nil, auth.ErrUserNotFound
 }
 
-func (uDb *usersDB) GetUserByEmail(email string) (*models.User, error) {
+func (uDb *usersDB) GetByEmail(email string) (*models.User, error) {
 	for i, u := range uDb.users {
 		if u.Email == email {
 			return &uDb.users[i], nil
@@ -41,8 +41,8 @@ func (uDb *usersDB) GetUserByEmail(email string) (*models.User, error) {
 	return nil, auth.ErrUserNotFound
 }
 
-func (uDb *usersDB) CreateUser(user models.User) (*models.User, error) {
-	_, err := uDb.GetUserByEmail(user.Email)
+func (uDb *usersDB) Create(user models.User) (*models.User, error) {
+	_, err := uDb.GetByEmail(user.Email)
 	if err == nil {
 		return nil, auth.ErrUserExists
 	}
@@ -53,10 +53,23 @@ func (uDb *usersDB) CreateUser(user models.User) (*models.User, error) {
 	return &user, nil
 }
 
-func (uDb *usersDB) DeleteUser(user models.User) error {
+func (uDb *usersDB) Delete(user models.User) error {
 	for i, u := range uDb.users {
 		if u.ID == user.ID {
 			uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
+			return nil
+		}
+	}
+	return auth.ErrUserNotFound
+}
+
+func (uDb *usersDB) SetAvatar(uID uint64, avatar string) error {
+	for _, u := range uDb.users {
+		if u.ID == uID {
+			u.Avatar = avatar
+			//на слайсах криво обновляется скоро на pg переделаем
+			uDb.Delete(u)
+			uDb.users = append(uDb.users, u)
 			return nil
 		}
 	}

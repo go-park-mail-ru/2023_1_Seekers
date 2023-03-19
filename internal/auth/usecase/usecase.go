@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
@@ -15,15 +14,13 @@ type useCase struct {
 	authRepo auth.RepoI
 	userUC   _user.UseCaseI
 	mailUC   mail.UseCaseI
-	fileUC   file_storage.UseCaseI
 }
 
-func New(ar auth.RepoI, uc _user.UseCaseI, mUC mail.UseCaseI, fUC file_storage.UseCaseI) auth.UseCaseI {
+func New(ar auth.RepoI, uc _user.UseCaseI, mUC mail.UseCaseI) auth.UseCaseI {
 	return &useCase{
 		authRepo: ar,
 		userUC:   uc,
 		mailUC:   mUC,
-		fileUC:   fUC,
 	}
 }
 
@@ -32,7 +29,7 @@ func (u *useCase) SignIn(form models.FormLogin) (*models.AuthResponse, *models.S
 	if err != nil {
 		return nil, nil, auth.ErrInvalidLogin
 	}
-	user, err := u.userUC.GetUserByEmail(email)
+	user, err := u.userUC.GetByEmail(email)
 	if err != nil {
 		return nil, nil, auth.ErrWrongPw
 	}
@@ -48,19 +45,10 @@ func (u *useCase) SignIn(form models.FormLogin) (*models.AuthResponse, *models.S
 		return nil, nil, auth.ErrFailedCreateSession
 	}
 
-	f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	return &models.AuthResponse{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		Image: models.Image{
-			Name: f.Name,
-			Data: f.Data,
-		},
 	}, session, nil
 }
 
@@ -74,7 +62,7 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.
 		return nil, nil, auth.ErrInvalidLogin
 	}
 
-	user, err := u.userUC.CreateUser(models.User{
+	user, err := u.userUC.Create(models.User{
 		Email:     email,
 		Password:  form.Password,
 		FirstName: form.FirstName,
@@ -95,19 +83,10 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.
 		return nil, nil, auth.ErrFailedCreateSession
 	}
 
-	f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	return &models.AuthResponse{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		Image: models.Image{
-			Name: f.Name,
-			Data: f.Data,
-		},
 	}, session, nil
 }
 
@@ -166,7 +145,7 @@ func (u *useCase) GetSessionByUID(uID uint64) (*models.Session, error) {
 }
 
 func (u *useCase) GetSessionByEmail(email string) (*models.Session, error) {
-	user, err := u.userUC.GetUserByEmail(email)
+	user, err := u.userUC.GetByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("cant get user by email")
 	}

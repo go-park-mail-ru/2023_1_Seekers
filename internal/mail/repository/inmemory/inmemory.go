@@ -170,7 +170,7 @@ func (db *mailDB) findRecipientsEmails(messageID uint64) ([]string, error) {
 
 	for _, r := range db.recipients {
 		if r.MessageID == messageID {
-			user, err := db.usersRepo.GetUserByID(r.UserID)
+			user, err := db.usersRepo.GetByID(r.UserID)
 
 			if err != nil {
 				return recipientsEmails, err
@@ -198,7 +198,7 @@ func (db *mailDB) SelectIncomingMessagesByUser(userID uint64) ([]models.Incoming
 				return messages, err
 			}
 
-			fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
+			fromUser, err := db.usersRepo.GetByID(originalMessage.UserID)
 
 			if err != nil {
 				return messages, err
@@ -300,7 +300,7 @@ func (db *mailDB) SelectMessagesByUserNFolder(userID uint64, folderID uint64) ([
 				return messages, err
 			}
 
-			fromUser, err := db.usersRepo.GetUserByID(originalMessage.UserID)
+			fromUser, err := db.usersRepo.GetByID(originalMessage.UserID)
 
 			if err != nil {
 				return messages, err

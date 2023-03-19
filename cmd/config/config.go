@@ -23,6 +23,13 @@ const (
 	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
 	RouteFolders        = "/api/v1/folders"
 
+	RouteUser                    = "/api/v1/user"
+	RouteUserInfo                = "/api/v1/user/info"
+	RouteUserPw                  = "/api/v1/user/pw"
+	RouteUserAvatar              = "/api/v1/user/avatar"
+	RouteUserAvatarQueryEmail    = "email"
+	RouteUserAvatarFormNewAvatar = "newAvatar"
+
 	PasswordMinLen   = 5
 	DefaultAvatar    = "default_avatar.png"
 	DefaultAvatarDir = "./cmd/config/static/"
