@@ -1,11 +1,8 @@
 package models
 
-type SignUpResponse struct {
-	Email string `json:"email"`
-	Image Image  `json:"image"`
-}
-
-type SignInResponse struct {
-	Email string `json:"email"`
-	Image Image  `json:"image"`
+type AuthResponse struct {
+	Email     string `json:"email" validate:"required"`
+	FirstName string `json:"firstName" validate:"required"`
+	LastName  string `json:"lastName" validate:"required"`
+	Image     Image  `json:"image"`
 }

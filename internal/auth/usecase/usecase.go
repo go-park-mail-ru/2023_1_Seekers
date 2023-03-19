@@ -27,7 +27,7 @@ func New(ar auth.RepoI, uc _user.UseCaseI, mUC mail.UseCaseI, fUC file_storage.U
 	}
 }
 
-func (u *useCase) SignIn(form models.FormLogin) (*models.SignInResponse, *models.Session, error) {
+func (u *useCase) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Session, error) {
 	email, err := pkg.ValidateLogin(form.Login)
 	if err != nil {
 		return nil, nil, auth.ErrInvalidLogin
@@ -53,8 +53,10 @@ func (u *useCase) SignIn(form models.FormLogin) (*models.SignInResponse, *models
 		return nil, nil, err
 	}
 
-	return &models.SignInResponse{
-		Email: user.Email,
+	return &models.AuthResponse{
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 		Image: models.Image{
 			Name: f.Name,
 			Data: f.Data,
@@ -62,7 +64,7 @@ func (u *useCase) SignIn(form models.FormLogin) (*models.SignInResponse, *models
 	}, session, nil
 }
 
-func (u *useCase) SignUp(form models.FormSignUp) (*models.SignUpResponse, *models.Session, error) {
+func (u *useCase) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) {
 	if form.RepeatPw != form.Password {
 		return nil, nil, auth.ErrPwDontMatch
 	}
@@ -98,8 +100,10 @@ func (u *useCase) SignUp(form models.FormSignUp) (*models.SignUpResponse, *model
 		return nil, nil, err
 	}
 
-	return &models.SignUpResponse{
-		Email: user.Email,
+	return &models.AuthResponse{
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 		Image: models.Image{
 			Name: f.Name,
 			Data: f.Data,
