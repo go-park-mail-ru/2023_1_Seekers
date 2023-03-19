@@ -31,7 +31,7 @@ const (
 
 	S3AccessKeyID     = "ACCESS_TO_ENV!"
 	S3AccessKeySecret = "SECRET_TO_ENV!"
-	S3Endpoint        = "http://localhost:9000"
+	S3Endpoint        = "http://127.0.0.1:9000"
 	S3Region          = "eu-west-2" // В случае с minio - не играет роли, нь указывается обязательно
 	S3AvatarBucket    = "avatars"
 )
