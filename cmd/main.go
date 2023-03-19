@@ -9,7 +9,7 @@ import (
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
 	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
-	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/postgres"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
@@ -19,6 +19,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"net/http"
 	"os"
 	"os/signal"
@@ -42,7 +43,10 @@ func main() {
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
 
-	_, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{})
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+		TablePrefix:   config.DBSchemaName + ".",
+		SingularTable: false,
+	}})
 	if err != nil {
 		logger.Fatalf("db connection error %v", err)
 		return
@@ -50,11 +54,11 @@ func main() {
 
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	mailRepo := _mailRepo.New(db)
 
 	usersUC := _userUCase.New(userRepo)
 	authUC := _authUCase.New(authRepo, usersUC)
-	mailUC := _mailUCase.New(mailRepo)
+	mailUC := _mailUCase.New(mailRepo, userRepo)
 
 	middleware := _middleware.New(authUC, logger)
 

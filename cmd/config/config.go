@@ -12,7 +12,8 @@ const (
 	DBPassword     = "postgres"
 	DBHost         = "localhost"
 	DBPort         = "5432"
-	DBName         = "mail"
+	DBName         = "vk" //
+	DBSchemaName   = "mail"
 
 	CookieName = "MailBoxSession"
 	CookieTTL  = time.Hour * 24 * 100 // 100 days
@@ -23,9 +24,10 @@ const (
 	RouteSignup = "/api/v1/signup"
 	RouteLogout = "/api/v1/logout"
 
-	RouteInboxMessages  = "/api/v1/inbox"
-	RouteOutboxMessages = "/api/v1/outbox"
-	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
+	//RouteInboxMessages  = "/api/v1/inbox"
+	//RouteOutboxMessages = "/api/v1/outbox"
+	//RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
+	RouteFolderMessages = "/api/v1/folder/{slug}"
 	RouteFolders        = "/api/v1/folders"
 
 	PasswordMinLen = 5

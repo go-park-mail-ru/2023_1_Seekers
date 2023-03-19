@@ -18,4 +18,5 @@ type RepoI interface {
 	GetUserByEmail(email string) (*models.User, error)
 	CreateProfile(profile models.Profile) error
 	GetProfileByID(id uint64) (*models.Profile, error)
+	GetUserInfoByID(id uint64) (*models.UserInfo, error)
 }

@@ -10,7 +10,7 @@ import (
 
 type mailDB struct {
 	messages   []models.Message
-	recipients []models.Recipient
+	recipients []models.UserInfo
 	folders    []models.Folder
 	boxes      []models.Box
 	states     []models.State
@@ -42,7 +42,7 @@ func New(ur _user.RepoI) mail.RepoI {
 			{20, 3, "2023-01-01", "Scope", "it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia."},
 			//{5, 2, "2023-03-01", "Title5", "Text5"},
 		},
-		recipients: []models.Recipient{
+		recipients: []models.UserInfo{
 			{1, 1},
 			{2, 1},
 			{3, 1},
@@ -333,7 +333,7 @@ func (db *mailDB) CreateMessage(message models.Message, to ...uint64) error {
 	message.MessageID = uint64(len(db.messages) + 1)
 	db.messages = append(db.messages, message)
 	for _, uid := range to {
-		db.recipients = append(db.recipients, models.Recipient{
+		db.recipients = append(db.recipients, models.UserInfo{
 			MessageID: message.MessageID,
 			UserID:    uid,
 		})

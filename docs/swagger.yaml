@@ -11,6 +11,12 @@ definitions:
     properties:
       folder_id:
         type: integer
+      folder_slug:
+        type: string
+      messages_count:
+        type: integer
+      messages_unseen:
+        type: integer
       name:
         type: string
       user_id:
@@ -22,8 +28,12 @@ definitions:
         $ref: '#/definitions/models.Folder'
       messages:
         items:
-          $ref: '#/definitions/models.IncomingMessage'
+          $ref: '#/definitions/models.MessageInfo'
         type: array
+      messages_count:
+        type: integer
+      messages_unseen:
+        type: integer
     type: object
   models.FoldersResponse:
     properties:
@@ -65,55 +75,28 @@ definitions:
     - password
     - repeat_pw
     type: object
-  models.InboxResponse:
+  models.MessageInfo:
     properties:
-      messages:
-        items:
-          $ref: '#/definitions/models.IncomingMessage'
-        type: array
-    type: object
-  models.IncomingMessage:
-    properties:
-      creating_date:
+      created_at:
         type: string
+      deleted:
+        type: boolean
       favorite:
         type: boolean
-      from_user:
-        type: string
+      from_user_id:
+        $ref: '#/definitions/models.UserInfo'
       message_id:
         type: integer
-      read:
+      recipients:
+        items:
+          $ref: '#/definitions/models.UserInfo'
+        type: array
+      seen:
         type: boolean
       text:
         type: string
       title:
         type: string
-    type: object
-  models.OutboxResponse:
-    properties:
-      messages:
-        items:
-          $ref: '#/definitions/models.OutgoingMessage'
-        type: array
-    type: object
-  models.OutgoingMessage:
-    properties:
-      creating_date:
-        type: string
-      favorite:
-        type: boolean
-      message_id:
-        type: integer
-      read:
-        type: boolean
-      text:
-        type: string
-      title:
-        type: string
-      to_users:
-        items:
-          type: string
-        type: array
     type: object
   models.SignInResponse:
     properties:
@@ -129,28 +112,37 @@ definitions:
     required:
     - email
     type: object
+  models.UserInfo:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
 host: localhost:8001
 info:
   contact: {}
   title: MailBox Swagger API
   version: "1.0"
 paths:
-  /folder/{id}:
+  /folder/{slug}:
     get:
       consumes:
       - application/json
-      description: List of outgoing messages
+      description: List of folder messages
       parameters:
-      - description: FolderID
+      - description: FolderSlug
         in: path
-        name: id
+        name: slug
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: success get list of outgoing messages
+          description: success get list of folder messages
           schema:
             $ref: '#/definitions/models.FolderResponse'
         "400":
@@ -191,29 +183,6 @@ paths:
       summary: GetFolders
       tags:
       - messages
-  /inbox/:
-    get:
-      consumes:
-      - application/json
-      description: List of incoming messages
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success get list of incoming messages
-          schema:
-            $ref: '#/definitions/models.InboxResponse'
-        "400":
-          description: failed to get inbox messages
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-      summary: GetInboxMessages
-      tags:
-      - messages
   /logout:
     post:
       consumes:
@@ -231,29 +200,6 @@ paths:
       summary: Logout
       tags:
       - users
-  /outbox/:
-    get:
-      consumes:
-      - application/json
-      description: List of outgoing messages
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success get list of outgoing messages
-          schema:
-            $ref: '#/definitions/models.OutboxResponse'
-        "400":
-          description: failed to get outbox messages
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-      summary: GetOutboxMessages
-      tags:
-      - messages
   /signin:
     post:
       consumes:

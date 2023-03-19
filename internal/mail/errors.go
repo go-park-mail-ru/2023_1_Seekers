@@ -12,6 +12,8 @@ var (
 	ErrFailedGetOutboxMessages = errors.New("failed to get outbox messages")
 	ErrFailedGetFolderMessages = errors.New("failed to get folder messages")
 	ErrFailedGetUser           = errors.New("failed to get user")
+	ErrFailedGetFolders        = errors.New("failed to get folders")
+	ErrFailedGetFolder         = errors.New("failed to get folder")
 )
 
 var Errors = map[error]int{
@@ -20,5 +22,7 @@ var Errors = map[error]int{
 	ErrFailedGetInboxMessages:  http.StatusBadRequest,
 	ErrFailedGetOutboxMessages: http.StatusBadRequest,
 	ErrFailedGetFolderMessages: http.StatusBadRequest,
+	ErrFailedGetFolders:        http.StatusBadRequest,
+	ErrFailedGetFolder:         http.StatusBadRequest,
 	ErrFailedGetUser:           http.StatusBadRequest,
 }

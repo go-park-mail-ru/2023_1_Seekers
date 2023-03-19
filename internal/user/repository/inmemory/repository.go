@@ -85,3 +85,22 @@ func (uDb *usersDB) CreateProfile(profile models.Profile) error {
 	uDb.profiles = append(uDb.profiles, profile)
 	return nil
 }
+
+func (uDb *usersDB) GetUserInfoByID(id uint64) (*models.UserInfo, error) {
+	for _, p := range uDb.profiles {
+		if p.UID == id {
+			user, err := uDb.GetUserByID(id)
+
+			if err != nil {
+				return nil, err
+			}
+
+			return &models.UserInfo{
+				FirstName: p.FirstName,
+				LastName:  p.LastName,
+				Email:     user.Email,
+			}, nil
+		}
+	}
+	return nil, user.ErrUserNotFound
+}
