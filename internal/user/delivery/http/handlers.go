@@ -147,7 +147,8 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pkg.SendImage(w, r, http.StatusOK, img.Data)
+	//pkg.SendImage(w, r, http.StatusOK, img.Data)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
