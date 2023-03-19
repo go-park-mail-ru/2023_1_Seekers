@@ -16,20 +16,22 @@ type HandlersI interface {
 
 type UseCaseI interface {
 	Create(user models.User) (*models.User, error)
-	Delete(user models.User) error
+	Delete(ID uint64) error
 	GetByID(ID uint64) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
-	//TODO тут какая-то модель для изменения данных
-	EditInfo(user models.User) (*models.User, error)
-	EditPw(ID uint64, newPW string) (*models.User, error)
+	GetInfo(ID uint64) (*models.UserInfo, error)
+	EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error)
+	EditPw(ID uint64, password models.EditPassword) error
 	EditAvatar(ID uint64, newAvatar *models.Image) error
 	GetAvatar(email string) (*models.Image, error)
 }
 
 type RepoI interface {
 	Create(user models.User) (*models.User, error)
-	Delete(user models.User) error
+	EditInfo(ID uint64, info models.UserInfo) error
+	Delete(ID uint64) error
 	GetByID(ID uint64) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
-	SetAvatar(uID uint64, avatar string) error
+	SetAvatar(ID uint64, avatar string) error
+	EditPw(ID uint64, newPW string) error
 }

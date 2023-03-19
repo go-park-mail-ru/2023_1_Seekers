@@ -31,6 +31,7 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
+      sleep 5;
       /usr/bin/mc config host add minioClient http://minio:9000 ACCESS_TO_ENV! SECRET_TO_ENV!;
       /usr/bin/mc mb minioClient/avatars; 
       exit 0;

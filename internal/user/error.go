@@ -15,6 +15,9 @@ var (
 	ErrInternal         = errors.New("internal server error")
 	ErrEmptyContentType = errors.New("content type not presented")
 	ErrWrongContentType = errors.New("unsupported content type")
+	ErrFailedDelete     = errors.New("failed delete user")
+	ErrFailedEditInfo   = errors.New("failed edit info")
+	ErrFailedEditPw     = errors.New("failed edit password")
 )
 var Errors = map[error]int{
 	ErrInvalidForm:      http.StatusForbidden,
@@ -26,4 +29,7 @@ var Errors = map[error]int{
 	ErrInternal:         http.StatusInternalServerError,
 	ErrEmptyContentType: http.StatusForbidden,
 	ErrWrongContentType: http.StatusForbidden,
+	ErrFailedDelete:     http.StatusInternalServerError,
+	ErrFailedEditInfo:   http.StatusBadRequest,
+	ErrFailedEditPw:     http.StatusBadRequest,
 }

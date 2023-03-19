@@ -8,6 +8,7 @@ import (
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-playground/validator/v10"
 	"net/mail"
+	"path/filepath"
 )
 
 type useCase struct {
@@ -42,8 +43,20 @@ func (u *useCase) Create(user models.User) (*models.User, error) {
 	return u.userRepo.Create(user)
 }
 
-func (u *useCase) Delete(user models.User) error {
-	return u.userRepo.Delete(user)
+func (u *useCase) GetInfo(ID uint64) (*models.UserInfo, error) {
+	user, err := u.GetByID(ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed get user : %w", err)
+	}
+	return &models.UserInfo{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+	}, nil
+}
+
+func (u *useCase) Delete(ID uint64) error {
+	return u.userRepo.Delete(ID)
 }
 
 func (u *useCase) GetByID(ID uint64) (*models.User, error) {
@@ -54,13 +67,23 @@ func (u *useCase) GetByEmail(email string) (*models.User, error) {
 	return u.userRepo.GetByEmail(email)
 }
 
-func (u *useCase) EditInfo(user models.User) (*models.User, error) {
-	//TODO
-	return nil, nil
+func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error) {
+	user, err := u.GetByID(ID)
+	if err != nil || user.ID != ID {
+		return nil, fmt.Errorf("failed get user : %w", err)
+	}
+	err = u.userRepo.EditInfo(ID, info)
+	if err != nil {
+		return nil, fmt.Errorf("failed edit user : %w", err)
+	}
+	return &info, nil
 }
-func (u *useCase) EditPw(ID uint64, newPW string) (*models.User, error) {
-	//TODO
-	return nil, nil
+func (u *useCase) EditPw(ID uint64, pw models.EditPassword) error {
+	err := u.userRepo.EditPw(ID, pw.Password)
+	if err != nil {
+		return fmt.Errorf("failed edit password : %w", err)
+	}
+	return nil
 }
 
 func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
@@ -70,7 +93,7 @@ func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
 	}
 	f := models.S3File{
 		Bucket: config.S3AvatarBucket,
-		Name:   user.Email,
+		Name:   user.Email + filepath.Ext(newAvatar.Name),
 		Data:   newAvatar.Data,
 	}
 	err = u.fileUC.Upload(&f)

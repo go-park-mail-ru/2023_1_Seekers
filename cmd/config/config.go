@@ -36,6 +36,7 @@ const (
 	RouteUserPw               = "/api/v1/user/pw"
 	RouteUserAvatar           = "/api/v1/user/avatar"
 	RouteUserAvatarQueryEmail = "email"
+	RouteUserInfoQueryEmail
 
 	PasswordMinLen   = 5
 	DefaultAvatar    = "default_avatar.png"

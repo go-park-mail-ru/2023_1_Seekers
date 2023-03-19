@@ -22,3 +22,17 @@ type FormLogin struct {
 	Password string `json:"password" validate:"required"`
 	Remember bool   `json:"remember" validate:"required"`
 }
+
+type UserInfo struct {
+	FirstName string `json:"firstName" validate:"required"`
+	LastName  string `json:"lastName" validate:"required"`
+	Email     string `json:"email" validate:"required"`
+}
+
+type EditUserInfoResponse struct {
+	Email string `json:"email" validate:"required"`
+}
+
+type EditPassword struct {
+	Password string `json:"password" validate:"required"`
+}

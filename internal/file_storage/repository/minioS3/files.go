@@ -35,7 +35,6 @@ func New() file_storage.RepoI {
 			),
 		},
 	)
-
 	if err != nil {
 		logrus.Fatalf("Failed create S3 session : %v", err)
 	}
@@ -90,7 +89,7 @@ func (fDB *fileDB) Upload(file *models.S3File) error {
 		Key:         aws.String(file.Name),
 		Body:        bytes.NewReader(file.Data),
 		ContentType: aws.String(http.DetectContentType(file.Data)),
-		ACL:         aws.String("public-read"),
+		//ACL:         aws.String("public-read"),
 	}
 
 	_, err := fDB.uploaderS3.Upload(uInput)

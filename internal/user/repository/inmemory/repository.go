@@ -29,7 +29,7 @@ func (uDb *usersDB) GetByID(id uint64) (*models.User, error) {
 			return &uDb.users[i], nil
 		}
 	}
-	return nil, auth.ErrUserNotFound
+	return nil, user.ErrUserNotFound
 }
 
 func (uDb *usersDB) GetByEmail(email string) (*models.User, error) {
@@ -38,7 +38,7 @@ func (uDb *usersDB) GetByEmail(email string) (*models.User, error) {
 			return &uDb.users[i], nil
 		}
 	}
-	return nil, auth.ErrUserNotFound
+	return nil, user.ErrUserNotFound
 }
 
 func (uDb *usersDB) Create(user models.User) (*models.User, error) {
@@ -53,25 +53,52 @@ func (uDb *usersDB) Create(user models.User) (*models.User, error) {
 	return &user, nil
 }
 
-func (uDb *usersDB) Delete(user models.User) error {
+func (uDb *usersDB) Delete(ID uint64) error {
 	for i, u := range uDb.users {
-		if u.ID == user.ID {
+		if u.ID == ID {
 			uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
 			return nil
 		}
 	}
-	return auth.ErrUserNotFound
+	return user.ErrUserNotFound
 }
 
-func (uDb *usersDB) SetAvatar(uID uint64, avatar string) error {
+func (uDb *usersDB) SetAvatar(ID uint64, avatar string) error {
 	for _, u := range uDb.users {
-		if u.ID == uID {
+		if u.ID == ID {
 			u.Avatar = avatar
 			//на слайсах криво обновляется скоро на pg переделаем
-			uDb.Delete(u)
+			uDb.Delete(u.ID)
 			uDb.users = append(uDb.users, u)
 			return nil
 		}
 	}
-	return auth.ErrUserNotFound
+	return user.ErrUserNotFound
+}
+
+func (uDb *usersDB) EditInfo(ID uint64, info models.UserInfo) error {
+	for _, u := range uDb.users {
+		if u.ID == ID {
+			u.FirstName = info.FirstName
+			u.LastName = info.LastName
+			//на слайсах криво обновляется скоро на pg переделаем
+			uDb.Delete(u.ID)
+			uDb.users = append(uDb.users, u)
+			return nil
+		}
+	}
+	return user.ErrUserNotFound
+}
+
+func (uDb *usersDB) EditPw(ID uint64, newPW string) error {
+	for _, u := range uDb.users {
+		if u.ID == ID {
+			u.Password = newPW
+			//на слайсах криво обновляется скоро на pg переделаем
+			uDb.Delete(u.ID)
+			uDb.users = append(uDb.users, u)
+			return nil
+		}
+	}
+	return user.ErrUserNotFound
 }
