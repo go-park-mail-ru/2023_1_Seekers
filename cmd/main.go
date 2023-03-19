@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
@@ -10,7 +11,7 @@ import (
 	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
 	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
 	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
-	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/postgres"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/delivery/http"
@@ -19,10 +20,21 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+)
+
+var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+	config.DBUser,
+	config.DBPassword,
+	config.DBHost,
+	config.DBPort,
+	config.DBName,
 )
 
 // @title MailBox Swagger API
@@ -34,14 +46,23 @@ func main() {
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
 
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+		TablePrefix:   config.DBSchemaName + ".",
+		SingularTable: false,
+	}})
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+		return
+	}
+
 	userRepo := _userRepo.New()
 	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	mailRepo := _mailRepo.New(db)
 	fStorageRepo := _fStorageRepo.New()
 
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo, fStorageUC)
-	mailUC := _mailUCase.New(mailRepo)
+	mailUC := _mailUCase.New(mailRepo, usersUC)
 	authUC := _authUCase.New(authRepo, usersUC, mailUC)
 
 	middleware := _middleware.New(authUC, logger)

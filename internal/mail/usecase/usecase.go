@@ -4,52 +4,36 @@ import (
 	"errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"time"
 )
 
 type UseCase struct {
-	repo mail.RepoI
+	repoMail  mail.RepoI
+	userUCase user.UseCaseI
 }
 
-func New(rep mail.RepoI) mail.UseCaseI {
+func New(repoMail mail.RepoI, uUC user.UseCaseI) mail.UseCaseI {
 	return &UseCase{
-		repo: rep,
+		repoMail:  repoMail,
+		userUCase: uUC,
 	}
 }
 
-func (uc *UseCase) GetFolders(userID uint64) []models.Folder {
-	folders := uc.repo.SelectFoldersByUser(userID)
-
-	return folders
-}
-
-func (uc *UseCase) GetIncomingMessages(userID uint64) ([]models.IncomingMessage, error) {
-	var messages []models.IncomingMessage
-	messages, err := uc.repo.SelectIncomingMessagesByUser(userID)
+func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
+	folders, err := uc.repoMail.SelectFoldersByUser(userID)
 
 	if err != nil {
-		return messages, err
+		return folders, err
 	}
 
-	return messages, nil
+	return folders, nil
 }
 
-func (uc *UseCase) GetOutgoingMessages(userID uint64) ([]models.OutgoingMessage, error) {
-	var messages []models.OutgoingMessage
-	messages, err := uc.repo.SelectOutgoingMessagesByUser(userID)
+func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
+	var messages []models.MessageInfo
 
-	if err != nil {
-		return messages, err
-	}
-
-	return messages, nil
-}
-
-func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.IncomingMessage, error) {
-	var messages []models.IncomingMessage
-
-	folder, err := uc.repo.SelectFolderByUserNFolder(userID, folderID)
-
+	folder, err := uc.repoMail.SelectFolderByUserNFolder(userID, folderSlug)
 	if err != nil {
 		return messages, err
 	}
@@ -58,18 +42,41 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderID uint64) ([]models.I
 		return messages, errors.New("folder not found")
 	}
 
-	messages, err = uc.repo.SelectMessagesByUserNFolder(userID, folderID)
-
+	messages, err = uc.repoMail.SelectFolderMessagesByUserNFolder(userID, folder.FolderID)
 	if err != nil {
 		return messages, err
+	}
+
+	for i, message := range messages {
+		messageID := message.MessageID
+
+		fromUser, err := uc.userUCase.GetInfo(message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, err
+		}
+
+		messages[i].FromUser = *fromUser
+		recipientsIDs, err := uc.repoMail.SelectRecipientsByMessage(messageID, message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, err
+		}
+
+		for _, recipientsID := range recipientsIDs {
+			profile, err := uc.userUCase.GetInfo(recipientsID)
+			if err != nil {
+				return []models.MessageInfo{}, err
+			}
+
+			messages[i].Recipients = append(message.Recipients, *profile)
+		}
 	}
 
 	return messages, nil
 }
 
-func (uc *UseCase) GetFolderInfo(userID uint64, folderID uint64) (*models.Folder, error) {
+func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error) {
 
-	folder, err := uc.repo.SelectFolderByUserNFolder(userID, folderID)
+	folder, err := uc.repoMail.SelectFolderByUserNFolder(userID, folderSlug)
 
 	if err != nil {
 		return folder, err
@@ -84,15 +91,20 @@ func (uc *UseCase) GetFolderInfo(userID uint64, folderID uint64) (*models.Folder
 
 func (uc *UseCase) CreateHelloMessage(to uint64) error {
 	now := time.Now()
-	msg := models.Message{
-		UserID:       0,
-		CreatingDate: now.Format("2006-02-01"),
-		Title:        "Hello! Its your first mail",
-		Text:         "Support of mail box is glad to see You here! Have a nice day!",
+	msg := models.MessageInfo{
+		FromUser: models.UserInfo{
+			UserID:    1,
+			FirstName: "",
+			LastName:  "",
+			Email:     "",
+		},
+		CreatedAt: now.Format("2006-02-01"),
+		Title:     "Hello! Its your first mail",
+		Text:      "Support of mail box is glad to see You here! Have a nice day!",
 	}
 	return uc.CreateMessage(msg, to)
 }
 
-func (uc *UseCase) CreateMessage(message models.Message, to ...uint64) error {
-	return uc.repo.CreateMessage(message, to...)
+func (uc *UseCase) CreateMessage(message models.MessageInfo, to ...uint64) error {
+	return uc.repoMail.CreateMessage(message, to...)
 }

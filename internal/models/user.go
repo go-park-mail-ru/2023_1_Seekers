@@ -24,6 +24,7 @@ type FormLogin struct {
 }
 
 type UserInfo struct {
+	UserID    uint64 `json:"-"`
 	FirstName string `json:"firstName" validate:"required"`
 	LastName  string `json:"lastName" validate:"required"`
 	Email     string `json:"email" validate:"required"`

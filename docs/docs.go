@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/folder/{id}": {
+        "/folder/{slug}": {
             "get": {
-                "description": "List of outgoing messages",
+                "description": "List of folder messages",
                 "consumes": [
                     "application/json"
                 ],
@@ -30,16 +30,16 @@ const docTemplate = `{
                 "summary": "GetFolderMessages",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "FolderID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "FolderSlug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success get list of outgoing messages",
+                        "description": "success get list of folder messages",
                         "schema": {
                             "$ref": "#/definitions/models.FolderResponse"
                         }
@@ -100,41 +100,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/inbox/": {
-            "get": {
-                "description": "List of incoming messages",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "messages"
-                ],
-                "summary": "GetInboxMessages",
-                "responses": {
-                    "200": {
-                        "description": "success get list of incoming messages",
-                        "schema": {
-                            "$ref": "#/definitions/models.InboxResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "failed to get inbox messages",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    },
-                    "401": {
-                        "description": "failed get session",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    }
-                }
-            }
-        },
         "/logout": {
             "post": {
                 "description": "user log out",
@@ -151,41 +116,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "success logout"
-                    },
-                    "401": {
-                        "description": "failed get session",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    }
-                }
-            }
-        },
-        "/outbox/": {
-            "get": {
-                "description": "List of outgoing messages",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "messages"
-                ],
-                "summary": "GetOutboxMessages",
-                "responses": {
-                    "200": {
-                        "description": "success get list of outgoing messages",
-                        "schema": {
-                            "$ref": "#/definitions/models.OutboxResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "failed to get outbox messages",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
                     },
                     "401": {
                         "description": "failed get session",
@@ -325,6 +255,15 @@ const docTemplate = `{
                 "folder_id": {
                     "type": "integer"
                 },
+                "folder_slug": {
+                    "type": "string"
+                },
+                "messages_count": {
+                    "type": "integer"
+                },
+                "messages_unseen": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -342,8 +281,14 @@ const docTemplate = `{
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.IncomingMessage"
+                        "$ref": "#/definitions/models.MessageInfo"
                     }
+                },
+                "messages_count": {
+                    "type": "integer"
+                },
+                "messages_unseen": {
+                    "type": "integer"
                 }
             }
         },
@@ -405,33 +350,31 @@ const docTemplate = `{
                 }
             }
         },
-        "models.InboxResponse": {
+        "models.MessageInfo": {
             "type": "object",
             "properties": {
-                "messages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.IncomingMessage"
-                    }
-                }
-            }
-        },
-        "models.IncomingMessage": {
-            "type": "object",
-            "properties": {
-                "creating_date": {
+                "created_at": {
                     "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
                 },
                 "favorite": {
                     "type": "boolean"
                 },
-                "from_user": {
-                    "type": "string"
+                "from_user_id": {
+                    "$ref": "#/definitions/models.UserInfo"
                 },
                 "message_id": {
                     "type": "integer"
                 },
-                "read": {
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserInfo"
+                    }
+                },
+                "seen": {
                     "type": "boolean"
                 },
                 "text": {
@@ -439,46 +382,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                }
-            }
-        },
-        "models.OutboxResponse": {
-            "type": "object",
-            "properties": {
-                "messages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.OutgoingMessage"
-                    }
-                }
-            }
-        },
-        "models.OutgoingMessage": {
-            "type": "object",
-            "properties": {
-                "creating_date": {
-                    "type": "string"
-                },
-                "favorite": {
-                    "type": "boolean"
-                },
-                "message_id": {
-                    "type": "integer"
-                },
-                "read": {
-                    "type": "boolean"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "to_users": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -500,6 +403,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 }
             }

@@ -8,6 +8,12 @@ const (
 	LogsDir        = "logs/"
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
+	DBUser         = "postgres"
+	DBPassword     = "postgres"
+	DBHost         = "localhost"
+	DBPort         = "5432"
+	DBName         = "vk" //
+	DBSchemaName   = "mail"
 
 	// Sessions
 	CookieName = "MailBoxSession"
@@ -21,9 +27,7 @@ const (
 	RouteLogout = "/api/v1/logout"
 
 	// MailRoutes
-	RouteInboxMessages  = "/api/v1/inbox"
-	RouteOutboxMessages = "/api/v1/outbox"
-	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
+	RouteFolderMessages = "/api/v1/folder/{slug}"
 	RouteFolders        = "/api/v1/folders"
 
 	// UserService
