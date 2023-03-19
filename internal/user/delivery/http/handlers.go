@@ -47,13 +47,13 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseMultipartForm(32 << 20)
+	err := r.ParseMultipartForm(config.MaxImageSize)
 	if err != nil {
 		handleUserErr(w, r, user.ErrInvalidForm)
 		return
 	}
 
-	file, header, err := r.FormFile(config.RouteUserAvatarFormNewAvatar)
+	file, header, err := r.FormFile(config.UserFormNewAvatar)
 	if err != nil {
 		handleUserErr(w, r, user.ErrInvalidForm)
 		return
@@ -61,6 +61,7 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 
 	img := models.Image{
 		Data: make([]byte, header.Size),
+		Name: header.Filename,
 	}
 	_, err = io.ReadFull(file, img.Data)
 	if err != nil {
@@ -73,7 +74,6 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img.Name = header.Filename
 	err = h.userUC.EditAvatar(userID, &img)
 	if err != nil {
 		handleUserErr(w, r, user.ErrInternal)

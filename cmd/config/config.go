@@ -9,26 +9,33 @@ const (
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
 
+	// Sessions
 	CookieName = "MailBoxSession"
 	CookieTTL  = time.Hour * 24 * 100 // 100 days
 	CookieLen  = 32
 	CookiePath = "/"
 
+	//AuthRoutes
 	RouteSignin = "/api/v1/signin"
 	RouteSignup = "/api/v1/signup"
 	RouteLogout = "/api/v1/logout"
 
+	// MailRoutes
 	RouteInboxMessages  = "/api/v1/inbox"
 	RouteOutboxMessages = "/api/v1/outbox"
 	RouteFolderMessages = "/api/v1/folder/{id:[0-9]+}"
 	RouteFolders        = "/api/v1/folders"
 
-	RouteUser                    = "/api/v1/user"
-	RouteUserInfo                = "/api/v1/user/info"
-	RouteUserPw                  = "/api/v1/user/pw"
-	RouteUserAvatar              = "/api/v1/user/avatar"
-	RouteUserAvatarQueryEmail    = "email"
-	RouteUserAvatarFormNewAvatar = "newAvatar"
+	// UserService
+	MaxImageSize      = 32 << 20
+	UserFormNewAvatar = "newAvatar"
+
+	// UserRoutes
+	RouteUser                 = "/api/v1/user"
+	RouteUserInfo             = "/api/v1/user/info"
+	RouteUserPw               = "/api/v1/user/pw"
+	RouteUserAvatar           = "/api/v1/user/avatar"
+	RouteUserAvatarQueryEmail = "email"
 
 	PasswordMinLen   = 5
 	DefaultAvatar    = "default_avatar.png"
