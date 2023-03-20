@@ -6,7 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
-	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
+	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
 	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
 	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
@@ -19,6 +19,8 @@ import (
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
+	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -52,20 +54,30 @@ func main() {
 	}})
 	if err != nil {
 		logger.Fatalf("db connection error %v", err)
-		return
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "PASSWORD_TO_ENV!",
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed connect to redis : %v", err)
 	}
 
 	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
+	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
 	mailRepo := _mailRepo.New(db)
 	fStorageRepo := _fStorageRepo.New()
 
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo, fStorageUC)
 	mailUC := _mailUCase.New(mailRepo, usersUC)
-	authUC := _authUCase.New(authRepo, usersUC, mailUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+	authUC := _authUCase.NewAuthUC(sessionUC, usersUC, mailUC)
 
-	middleware := _middleware.New(authUC, logger)
+	middleware := _middleware.New(sessionUC, logger)
 
 	authH := _authHandler.New(authUC)
 	mailH := _mailHandler.New(mailUC)

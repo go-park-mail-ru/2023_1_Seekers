@@ -14,18 +14,16 @@ type HandlersI interface {
 type UseCaseI interface {
 	SignIn(form models.FormLogin) (*models.AuthResponse, *models.Session, error)
 	SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error)
-	CreateSession(uID uint64) (*models.Session, error)
-	DeleteSession(sessionID string) error
-	DeleteSessionByUID(uID uint64) error
-	GetSession(sessionID string) (*models.Session, error)
-	GetSessionByUID(uID uint64) (*models.Session, error)
-	GetSessionByEmail(email string) (*models.Session, error)
 }
 
-type RepoI interface {
-	CreateSession(session models.Session) error
+type SessionUseCaseI interface {
+	CreateSession(uID uint64) (*models.Session, error)
 	DeleteSession(sessionID string) error
-	DeleteSessionByUID(uID uint64) error
 	GetSession(sessionID string) (*models.Session, error)
-	GetSessionByUID(uID uint64) (*models.Session, error)
+}
+
+type SessionRepoI interface {
+	CreateSession(uID uint64) (*models.Session, error)
+	DeleteSession(sessionID string) error
+	GetSession(sessionID string) (*models.Session, error)
 }

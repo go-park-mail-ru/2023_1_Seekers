@@ -8,12 +8,13 @@ const (
 	LogsDir        = "logs/"
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
-	DBUser         = "postgres"
-	DBPassword     = "postgres"
-	DBHost         = "localhost"
-	DBPort         = "5432"
-	DBName         = "vk" //
-	DBSchemaName   = "mail"
+	// TODO to env!
+	DBUser       = "postgres"
+	DBPassword   = "41219"
+	DBHost       = "localhost"
+	DBPort       = "5432"
+	DBName       = "postgres" //
+	DBSchemaName = "mail"
 
 	// Sessions
 	CookieName = "MailBoxSession"

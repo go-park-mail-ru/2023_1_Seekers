@@ -11,12 +11,12 @@ import (
 )
 
 type Middleware struct {
-	uc  auth.UseCaseI
+	sUC auth.SessionUseCaseI
 	log *pkg.Logger
 }
 
-func New(aUc auth.UseCaseI, l *pkg.Logger) *Middleware {
-	return &Middleware{aUc, l}
+func New(sUC auth.SessionUseCaseI, l *pkg.Logger) *Middleware {
+	return &Middleware{sUC, l}
 }
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
@@ -50,7 +50,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedAuth], wrappedErr)
 			return
 		}
-		session, err := m.uc.GetSession(cookie.Value)
+		session, err := m.sUC.GetSession(cookie.Value)
 		if err != nil {
 			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedGetSession, err)
 			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedGetSession], wrappedErr)

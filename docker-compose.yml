@@ -8,7 +8,9 @@ services:
     build: ./
     network_mode: "host"
     environment:
-      - ...
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: PASSWORD_TO_ENV!
 
   minio:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
@@ -36,6 +38,21 @@ services:
       /usr/bin/mc mb minioClient/avatars; 
       exit 0;
       "
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass PASSWORD_TO_ENV!
+    volumes:
+      - cache:/data
+
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local
 
 networks:
   minio-net:
