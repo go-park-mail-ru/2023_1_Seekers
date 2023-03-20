@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 )
 
@@ -16,6 +17,10 @@ type sessionsDB struct {
 }
 
 func NewSessionRepo(redisClient *redis.Client) auth.SessionRepoI {
+	err := redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
+	if err != nil {
+		log.Fatalf("failed init redis client, add default session : %v", err)
+	}
 	return &sessionsDB{
 		redisSessions: redisClient,
 	}

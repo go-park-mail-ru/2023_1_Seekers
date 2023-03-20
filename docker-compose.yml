@@ -5,6 +5,7 @@ services:
     depends_on:
       - minio
       - create-bucket
+      - cache
     build: ./
     network_mode: "host"
     environment:

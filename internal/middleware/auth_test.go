@@ -2,12 +2,18 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
+	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
+	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
+	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
+
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -53,12 +59,32 @@ func TestHandlers_Auth(t *testing.T) {
 			"cookie not presented",
 		},
 	}
-	userRepo := _userRepo.New()
-	usersUCase := _userUCase.New(userRepo)
-	authRepo := _authRepo.New()
-	authUCase := _authUCase.New(authRepo, usersUCase)
+
+	pkg.InitLogger()
 	logger := pkg.GetLogger()
-	middleware := New(authUCase, logger)
+
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPassword,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed connect to redis : %v", err)
+	}
+	userRepo := _userRepo.New()
+	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
+	fStorageRepo := _fStorageRepo.New()
+
+	fStorageUC := _fStorageUCase.New(fStorageRepo)
+	usersUC := _userUCase.New(userRepo, fStorageUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+
+	middleware := New(sessionUC, logger)
 
 	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

@@ -21,7 +21,7 @@ type UseCaseI interface {
 	GetByEmail(email string) (*models.User, error)
 	GetInfo(ID uint64) (*models.UserInfo, error)
 	EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error)
-	EditPw(ID uint64, password models.EditPassword) error
+	EditPw(ID uint64, password models.EditPasswordRequest) error
 	EditAvatar(ID uint64, newAvatar *models.Image) error
 	GetAvatar(email string) (*models.Image, error)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,7 @@ type Box struct {
 }
 
 func (Box) TableName() string {
-	return config.DBSchemaName + ".boxes"
+	return config.DBSchemaName + ".box"
 }
 
 type Message struct {
@@ -94,5 +95,6 @@ func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID u
 
 func (m mailRepository) CreateMessage(message models.MessageInfo, to ...uint64) error {
 	//TODO implement me
-	panic("implement me")
+	log.Warn("Now not creating hello meassage , NOT IMPLEMENTED")
+	return nil
 }

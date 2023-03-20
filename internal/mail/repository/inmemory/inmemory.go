@@ -1,5 +1,6 @@
 package inmemory
 
+//
 //import (
 //	"errors"
 //	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
@@ -352,6 +353,6 @@ package inmemory
 //		Favorite:  false,
 //		Send:      true,
 //	})
-//
-//	return nil
-//}
+////
+////	return nil
+////}

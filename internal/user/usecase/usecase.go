@@ -49,6 +49,7 @@ func (u *useCase) GetInfo(ID uint64) (*models.UserInfo, error) {
 		return nil, fmt.Errorf("failed get user : %w", err)
 	}
 	return &models.UserInfo{
+		UserID:    user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -78,7 +79,7 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 	}
 	return &info, nil
 }
-func (u *useCase) EditPw(ID uint64, pw models.EditPassword) error {
+func (u *useCase) EditPw(ID uint64, pw models.EditPasswordRequest) error {
 	err := u.userRepo.EditPw(ID, pw.Password)
 	if err != nil {
 		return fmt.Errorf("failed edit password : %w", err)

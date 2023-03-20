@@ -96,7 +96,7 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := models.EditPassword{}
+	form := models.EditPasswordRequest{}
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {

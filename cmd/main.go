@@ -57,8 +57,8 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "PASSWORD_TO_ENV!",
+		Addr:     config.RedisAddr,
+		Password: config.RedisPassword,
 	})
 
 	_, err = rdb.Ping(context.Background()).Result()

@@ -34,6 +34,6 @@ type EditUserInfoResponse struct {
 	Email string `json:"email" validate:"required"`
 }
 
-type EditPassword struct {
+type EditPasswordRequest struct {
 	Password string `json:"password" validate:"required"`
 }

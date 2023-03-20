@@ -9,12 +9,16 @@ const (
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
 	// TODO to env!
+	// Postgres
 	DBUser       = "postgres"
 	DBPassword   = "41219"
 	DBHost       = "localhost"
 	DBPort       = "5432"
 	DBName       = "postgres" //
 	DBSchemaName = "mail"
+	// Redis
+	RedisAddr     = "localhost:6379"
+	RedisPassword = "PASSWORD_TO_ENV!"
 
 	// Sessions
 	CookieName = "MailBoxSession"
@@ -41,7 +45,7 @@ const (
 	RouteUserPw               = "/api/v1/user/pw"
 	RouteUserAvatar           = "/api/v1/user/avatar"
 	RouteUserAvatarQueryEmail = "email"
-	RouteUserInfoQueryEmail
+	RouteUserInfoQueryEmail   = "email"
 
 	PasswordMinLen   = 5
 	DefaultAvatar    = "default_avatar.png"

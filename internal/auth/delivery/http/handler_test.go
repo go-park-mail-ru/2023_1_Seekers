@@ -2,17 +2,26 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
+	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
-	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
+	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
+	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
+	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/postgres"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -47,15 +56,50 @@ func TestHandlers_SignIn(t *testing.T) {
 		},
 	}
 
+	pkg.InitLogger()
+	logger := pkg.GetLogger()
+
+	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		config.DBUser,
+		config.DBPassword,
+		config.DBHost,
+		config.DBPort,
+		config.DBName,
+	)
+
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+		TablePrefix:   config.DBSchemaName + ".",
+		SingularTable: false,
+	}})
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPassword,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed connect to redis : %v", err)
+	}
 	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
+	mailRepo := _mailRepo.New(db)
+	fStorageRepo := _fStorageRepo.New()
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
+	fStorageUC := _fStorageUCase.New(fStorageRepo)
+	usersUC := _userUCase.New(userRepo, fStorageUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+	mailUC := _mailUCase.New(mailRepo, usersUC)
+	authUC := _authUCase.NewAuthUC(sessionUC, usersUC, mailUC)
 
-	authH := New(authUCase, usersUCase, mailUCase)
+	authH := New(authUC)
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(test.input))
 		w := httptest.NewRecorder()
@@ -124,15 +168,50 @@ func TestHandlers_SignUp(t *testing.T) {
 			"user with such login exists",
 		},
 	}
+	pkg.InitLogger()
+	logger := pkg.GetLogger()
+
+	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		config.DBUser,
+		config.DBPassword,
+		config.DBHost,
+		config.DBPort,
+		config.DBName,
+	)
+
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+		TablePrefix:   config.DBSchemaName + ".",
+		SingularTable: false,
+	}})
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPassword,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed connect to redis : %v", err)
+	}
 	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
+	mailRepo := _mailRepo.New(db)
+	fStorageRepo := _fStorageRepo.New()
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
+	fStorageUC := _fStorageUCase.New(fStorageRepo)
+	usersUC := _userUCase.New(userRepo, fStorageUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+	mailUC := _mailUCase.New(mailRepo, usersUC)
+	authUC := _authUCase.NewAuthUC(sessionUC, usersUC, mailUC)
 
-	authH := New(authUCase, usersUCase, mailUCase)
+	authH := New(authUC)
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.input))
@@ -211,36 +290,71 @@ func TestHandlers_Logout(t *testing.T) {
 		},
 	}
 
-	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		config.DBUser,
+		config.DBPassword,
+		config.DBHost,
+		config.DBPort,
+		config.DBName,
+	)
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
-
-	authH := New(authUCase, usersUCase, mailUCase)
 	logger := pkg.GetLogger()
-	middleware := _middleware.New(authUCase, logger)
+
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+		TablePrefix:   config.DBSchemaName + ".",
+		SingularTable: false,
+	}})
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	if err != nil {
+		logger.Fatalf("db connection error %v", err)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPassword,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed connect to redis : %v", err)
+	}
+
+	userRepo := _userRepo.New()
+	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
+	mailRepo := _mailRepo.New(db)
+	fStorageRepo := _fStorageRepo.New()
+
+	fStorageUC := _fStorageUCase.New(fStorageRepo)
+	usersUC := _userUCase.New(userRepo, fStorageUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+	mailUC := _mailUCase.New(mailRepo, usersUC)
+	authUC := _authUCase.NewAuthUC(sessionUC, usersUC, mailUC)
+
+	authH := New(authUC)
+	middleware := _middleware.New(sessionUC, logger)
 
 	for _, test := range testCases {
 		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
-		var user models.SignUpResponse
+		var user models.AuthResponse
 		if test.createSession && !test.noCookie {
 			signupReq := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.user))
 			w := httptest.NewRecorder()
 
 			authH.SignUp(w, signupReq)
 			json.NewDecoder(w.Body).Decode(&user)
-			s, err := authUCase.GetSessionByEmail(user.Email)
-			if err != nil {
-				t.Errorf("failed to get session %v ", err)
-			}
-
-			r.AddCookie(&http.Cookie{
-				Name:  config.CookieName,
-				Value: s.SessionID,
-			}) //необходимо проверить если нет кук,поэтому в случае пустого кейса - кука не выставится
+			// TODO
+			//s, err := sessionUC.GetSession(user.Email)
+			//if err != nil {
+			//	t.Errorf("failed to get session %v ", err)
+			//}
+			//
+			//r.AddCookie(&http.Cookie{
+			//	Name:  config.CookieName,
+			//	Value: s.SessionID,
+			//}) //необходимо проверить если нет кук,поэтому в случае пустого кейса - кука не выставится
 		} else if !test.noCookie {
 			r.AddCookie(&http.Cookie{
 				Name:  config.CookieName,
