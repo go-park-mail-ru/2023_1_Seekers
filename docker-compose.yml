@@ -6,12 +6,30 @@ services:
       - minio
       - create-bucket
       - cache
+      - postgres
     build: ./
     network_mode: "host"
     environment:
       REDIS_HOST: cache
       REDIS_PORT: 6379
       REDIS_PASSWORD: PASSWORD_TO_ENV!
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      # DB_PORT: ${DB_PORT}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 41219
+      POSTGRES_DB: postgres
+      # PGDATA: ${PGDATA}
+    networks:
+      - pg-net
+    ports:
+      - 5432:5432
+    volumes:
+      - ./scripts/sql:/docker-entrypoint-initdb.d
+      - ./logs/postgres:/logs
 
   minio:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
@@ -59,4 +77,8 @@ networks:
   minio-net:
     driver: bridge
     name: minio-net
+    external: false
+  pg-net:
+    driver: bridge
+    name: pg-net
     external: false

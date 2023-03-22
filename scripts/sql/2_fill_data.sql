@@ -1,0 +1,102 @@
+insert into mail.users(is_deleted, email, password) values
+(false, 'support@mailbox.ru', 'very_difficult_pw', 'Support', 'Testov'),
+(false, 'test@mailbox.ru', '12345', 'Michail', 'Testov'),
+(false, 'gena@mailbox.ru', '54321', 'Ivan', 'Ivanov'),
+(false, 'max@mailbox.ru', '13795', 'Michail', 'Sidorov'),
+(false, 'valera@mailbox.ru', '12345', 'Valera', 'Testov');
+
+select * from mail.users;
+
+insert into mail.folders(user_id, local_name, name) values 
+(1, 'inbox', 'Входящие'),
+(1, 'outbox', 'Отправленные'),
+(1, 'trash', 'Корзина'),
+(1, 'drafts', 'Черновики'),
+(1, 'spam', 'Спам'),
+(2, 'inbox', 'Входящие'),
+(2, 'outbox', 'Отправленные'),
+(2, 'trash', 'Корзина'),
+(2, 'drafts', 'Черновики'),
+(2, 'spam', 'Спам'),
+(3, 'inbox', 'Входящие'),
+(3, 'outbox', 'Отправленные'),
+(3, 'trash', 'Корзина'),
+(3, 'drafts', 'Черновики'),
+(3, 'spam', 'Спам'),
+(4, 'inbox', 'Входящие'),
+(4, 'outbox', 'Отправленные'),
+(4, 'trash', 'Корзина'),
+(4, 'drafts', 'Черновики'),
+(4, 'spam', 'Спам'),
+(2, '1', 'My'),
+(3, '1', 'Empty');
+
+select * from mail.folders;
+
+insert into mail.messages(from_user_id, size, title, created_at, text) values 
+(2, 100, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
+(3, 100, 'Spam letter', '2023-01-02', 'Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis'),
+(2, 100, 'Lorem', '2023-01-04', 'Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus.'),
+(3, 100, 'Very interesting letter', '2023-01-05', 'Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'),
+(2, 100, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
+(3, 100, 'Do you like to read books?', '2023-01-06', 'We have a lot of new books that may interest you'),
+(2, 100, 'Advertisement', '2023-01-07', 'Hi, visit our shop!'),
+(3, 100, 'Let’s get acquainted', '2023-01-29', 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout'),
+(1, 100, 'Not spam', '2023-01-29', 'Open this letter please'),
+(1, 100, 'Vacancy', '2023-01-01', 'We will be glad to offer you this job'),
+(1, 100, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
+(1, 100, 'Spam letter', '2023-01-02', 'Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis'),
+(1, 100, 'Lorem', '2023-01-04', 'Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus.'),
+(1, 100, 'Very interesting letter', '2023-01-05', 'Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'),
+(1, 100, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
+(1, 100, 'Not spam', '2023-01-06', 'Open this letter please'),
+(1, 100, 'Advertisement', '2023-01-07', 'Hi, visit our shop!'),
+(2, 100, 'Donate', '2023-01-29', 'There are many variations of passages of Lorem Ipsum available, but the majority.'),
+(2, 100, 'Standart', '2023-01-29', 'All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary.'),
+(3, 100, 'Scope', '2023-01-01', 'it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia.');
+
+select * from mail.messages;
+
+insert into mail.box(user_id, message_id, folder_id, seen) values
+(2, 1, 21, true),
+(3, 2, 12, true),
+(2, 3, 7, true),
+(3, 4, 12, true),
+(2, 5, 7, true),
+(3, 6, 12, true),
+(2, 7, 7, true),
+(3, 8, 12, true),
+(1, 9, 2, true),
+(1, 10, 2, true),
+(1, 11, 2, true),
+(1, 12, 2, true),
+(1, 13, 2, true),
+(1, 14, 2, true),
+(1, 15, 2, true),
+(1, 16, 2, true),
+(1, 17, 2, true),
+(2, 18, 7, true),
+(2, 19, 7, true),
+(3, 20, 12, true),
+(1, 1, 1, false),
+(1, 2, 1, false),
+(1, 3, 1, false),
+(1, 4, 1, false),
+(1, 5, 1, false),
+(1, 6, 1, false),
+(1, 7, 1, false),
+(1, 8, 1, false),
+(3, 9, 11, false),
+(2, 10, 6, false),
+(3, 11, 11, false),
+(2, 12, 6, false),
+(3, 13, 11, false),
+(2, 14, 6, false),
+(3, 15, 11, false),
+(2, 16, 6, false),
+(3, 17, 11, false),
+(3, 18, 11, false),
+(3, 19, 11, false),
+(1, 20, 1, false);
+
+select * from mail.box;
