@@ -18,15 +18,20 @@ services:
     container_name: postgres
     image: postgres:latest
     environment:
-      # DB_PORT: ${DB_PORT}
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 41219
       POSTGRES_DB: postgres
-      # PGDATA: ${PGDATA}
     networks:
       - pg-net
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped  
     volumes:
       - ./scripts/sql:/docker-entrypoint-initdb.d
       - ./logs/postgres:/logs
@@ -52,9 +57,10 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      sleep 5;
+      sleep 3;
       /usr/bin/mc config host add minioClient http://minio:9000 ACCESS_TO_ENV! SECRET_TO_ENV!;
       /usr/bin/mc mb minioClient/avatars; 
+      sleep 3;
       exit 0;
       "
 
