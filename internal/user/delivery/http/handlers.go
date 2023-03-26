@@ -47,7 +47,7 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 		handleUserErr(w, r, user.ErrFailedGetUser)
 		return
 	}
-	info, err := h.userUC.GetInfo(u.ID)
+	info, err := h.userUC.GetInfo(u.UserID)
 	if err != nil {
 		handleUserErr(w, r, user.ErrInternal)
 		return

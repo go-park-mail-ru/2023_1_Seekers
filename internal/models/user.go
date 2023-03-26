@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID        uint64    `json:"id" gorm:"column:user_id"`
+	UserID    uint64    `json:"id" gorm:"primaryKey"`
 	HereSince time.Time `json:"hereSince" gorm:"column:here_since"`
 	IsDeleted bool      `json:"isDeleted" gorm:"column:is_deleted"`
 	Email     string    `json:"email" validate:"required" gorm:"column:email"`

@@ -22,6 +22,7 @@ func (uDB *userDB) Create(user models.User) (*models.User, error) {
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database [users]")
 	}
+
 	return &user, nil
 }
 

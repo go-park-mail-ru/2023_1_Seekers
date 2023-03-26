@@ -14,18 +14,18 @@ type usersDB struct {
 func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
-			{ID: 0, Email: "support@mailbox.ru", Password: "very_difficult_pw", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
-			{ID: 1, Email: "test@mailbox.ru", Password: "12345", FirstName: "Ivan", LastName: "Ivanov", Avatar: config.DefaultAvatar},
-			{ID: 2, Email: "gena@mailbox.ru", Password: "54321", FirstName: "Michail", LastName: "Sidorov", Avatar: config.DefaultAvatar},
-			{ID: 3, Email: "max@mailbox.ru", Password: "13795", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
-			{ID: 4, Email: "valera@mailbox.ru", Password: "12345", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
+			{UserID: 0, Email: "support@mailbox.ru", Password: "very_difficult_pw", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
+			{UserID: 1, Email: "test@mailbox.ru", Password: "12345", FirstName: "Ivan", LastName: "Ivanov", Avatar: config.DefaultAvatar},
+			{UserID: 2, Email: "gena@mailbox.ru", Password: "54321", FirstName: "Michail", LastName: "Sidorov", Avatar: config.DefaultAvatar},
+			{UserID: 3, Email: "max@mailbox.ru", Password: "13795", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
+			{UserID: 4, Email: "valera@mailbox.ru", Password: "12345", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
 		},
 	}
 }
 
 func (uDb *usersDB) GetByID(id uint64) (*models.User, error) {
 	for i, u := range uDb.users {
-		if u.ID == id {
+		if u.UserID == id {
 			return &uDb.users[i], nil
 		}
 	}
@@ -48,14 +48,14 @@ func (uDb *usersDB) Create(user models.User) (*models.User, error) {
 	}
 	//слой бд отвечает за присваивание id
 	// TODO hash pw
-	user.ID = uint64(len(uDb.users) + 1)
+	user.UserID = uint64(len(uDb.users) + 1)
 	uDb.users = append(uDb.users, user)
 	return &user, nil
 }
 
 func (uDb *usersDB) Delete(ID uint64) error {
 	for i, u := range uDb.users {
-		if u.ID == ID {
+		if u.UserID == ID {
 			uDb.users = append(uDb.users[:i], uDb.users[i+1:]...)
 			return nil
 		}
@@ -65,10 +65,10 @@ func (uDb *usersDB) Delete(ID uint64) error {
 
 func (uDb *usersDB) SetAvatar(ID uint64, avatar string) error {
 	for _, u := range uDb.users {
-		if u.ID == ID {
+		if u.UserID == ID {
 			u.Avatar = avatar
 			//на слайсах криво обновляется скоро на pg переделаем
-			uDb.Delete(u.ID)
+			uDb.Delete(u.UserID)
 			uDb.users = append(uDb.users, u)
 			return nil
 		}
@@ -78,11 +78,11 @@ func (uDb *usersDB) SetAvatar(ID uint64, avatar string) error {
 
 func (uDb *usersDB) EditInfo(ID uint64, info models.UserInfo) error {
 	for _, u := range uDb.users {
-		if u.ID == ID {
+		if u.UserID == ID {
 			u.FirstName = info.FirstName
 			u.LastName = info.LastName
 			//на слайсах криво обновляется скоро на pg переделаем
-			uDb.Delete(u.ID)
+			uDb.Delete(u.UserID)
 			uDb.users = append(uDb.users, u)
 			return nil
 		}
@@ -92,10 +92,10 @@ func (uDb *usersDB) EditInfo(ID uint64, info models.UserInfo) error {
 
 func (uDb *usersDB) EditPw(ID uint64, newPW string) error {
 	for _, u := range uDb.users {
-		if u.ID == ID {
+		if u.UserID == ID {
 			u.Password = newPW
 			//на слайсах криво обновляется скоро на pg переделаем
-			uDb.Delete(u.ID)
+			uDb.Delete(u.UserID)
 			uDb.users = append(uDb.users, u)
 			return nil
 		}

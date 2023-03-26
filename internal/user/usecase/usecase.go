@@ -49,7 +49,7 @@ func (u *useCase) GetInfo(ID uint64) (*models.UserInfo, error) {
 		return nil, fmt.Errorf("failed get user : %w", err)
 	}
 	return &models.UserInfo{
-		UserID:    user.ID,
+		UserID:    user.UserID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -70,7 +70,7 @@ func (u *useCase) GetByEmail(email string) (*models.User, error) {
 
 func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error) {
 	user, err := u.GetByID(ID)
-	if err != nil || user.ID != ID {
+	if err != nil || user.UserID != ID {
 		return nil, fmt.Errorf("failed get user : %w", err)
 	}
 	err = u.userRepo.EditInfo(ID, info)

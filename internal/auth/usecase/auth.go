@@ -38,7 +38,7 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 		return nil, nil, auth.ErrWrongPw
 	}
 
-	session, err := u.sessionUC.CreateSession(user.ID)
+	session, err := u.sessionUC.CreateSession(user.UserID)
 	if err != nil {
 		return nil, nil, auth.ErrFailedCreateSession
 	}
@@ -71,12 +71,12 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		return nil, nil, fmt.Errorf("cant create user: %w", err)
 	}
 
-	err = u.mailUC.CreateHelloMessage(user.ID)
+	err = u.mailUC.CreateHelloMessage(user.UserID)
 	if err != nil {
 		return nil, nil, auth.ErrInternalHelloMsg
 	}
 
-	session, err := u.sessionUC.CreateSession(user.ID)
+	session, err := u.sessionUC.CreateSession(user.UserID)
 	if err != nil {
 		return nil, nil, auth.ErrFailedCreateSession
 	}
