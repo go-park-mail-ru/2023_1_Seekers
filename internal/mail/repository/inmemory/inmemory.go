@@ -330,7 +330,7 @@ package inmemory
 //	return messages, nil
 //}
 //
-//func (db *mailDB) CreateMessage(message models.Message, to ...uint64) error {
+//func (db *mailDB) createMessage(message models.Message, to ...uint64) error {
 //	message.MessageID = uint64(len(db.messages) + 1)
 //	db.messages = append(db.messages, message)
 //	for _, uid := range to {

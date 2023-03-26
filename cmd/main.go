@@ -73,7 +73,7 @@ func main() {
 
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo, fStorageUC)
-	mailUC := _mailUCase.New(mailRepo, usersUC)
+	mailUC := _mailUCase.New(mailRepo, userRepo)
 	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
 	authUC := _authUCase.NewAuthUC(sessionUC, usersUC, mailUC)
 

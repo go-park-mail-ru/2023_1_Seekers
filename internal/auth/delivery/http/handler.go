@@ -27,7 +27,7 @@ func New(aUC auth.UseCaseI) auth.HandlersI {
 }
 
 func handleAuthErr(w http.ResponseWriter, r *http.Request, err error) {
-	pkg.HandleError(w, r, auth.Errors[err], err)
+	pkg.HandleError(w, r, auth.Errors[err], err, err)
 }
 
 func setNewCookie(w http.ResponseWriter, session *models.Session) {

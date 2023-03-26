@@ -11,10 +11,10 @@ const (
 	// TODO to env!
 	// Postgres
 	DBUser       = "postgres"
-	DBPassword   = "41219"
+	DBPassword   = "postgres"
 	DBHost       = "localhost"
 	DBPort       = "5432"
-	DBName       = "postgres" //
+	DBName       = "mail"
 	DBSchemaName = "mail"
 	// Redis
 	RedisAddr     = "localhost:6379"
@@ -32,8 +32,12 @@ const (
 	RouteLogout = "/api/v1/logout"
 
 	// MailRoutes
-	RouteFolderMessages = "/api/v1/folder/{slug}"
-	RouteFolders        = "/api/v1/folders"
+	RouteGetFolderMessages = "/api/v1/folder/{slug}"
+	RouteGetFolders        = "/api/v1/folders"
+	RouteGetMessage        = "/api/v1/message/{id:[0-9]+}"
+	RouteSendMessage       = "/api/v1/message/send"
+	RouteReadMessage       = "/api/v1/message/{id:[0-9]+}/read"
+	RouteUnreadMessage     = "/api/v1/message/{id:[0-9]+}/unread"
 
 	// UserService
 	MaxImageSize      = 32 << 20

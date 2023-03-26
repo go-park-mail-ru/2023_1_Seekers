@@ -34,4 +34,6 @@ type RepoI interface {
 	GetByEmail(email string) (*models.User, error)
 	SetAvatar(ID uint64, avatar string) error
 	EditPw(ID uint64, newPW string) error
+	GetInfoByID(ID uint64) (*models.UserInfo, error)
+	GetInfoByEmail(email string) (*models.UserInfo, error)
 }

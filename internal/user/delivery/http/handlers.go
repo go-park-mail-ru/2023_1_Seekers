@@ -23,7 +23,7 @@ func New(uUC user.UseCaseI) user.HandlersI {
 }
 
 func handleUserErr(w http.ResponseWriter, r *http.Request, err error) {
-	pkg.HandleError(w, r, user.Errors[err], err)
+	pkg.HandleError(w, r, user.Errors[err], err, err)
 }
 
 func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {

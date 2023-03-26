@@ -71,7 +71,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		return nil, nil, fmt.Errorf("cant create user: %w", err)
 	}
 
-	err = u.mailUC.CreateHelloMessage(user.ID)
+	err = u.mailUC.SendWelcomeMessage(user.Email)
 	if err != nil {
 		return nil, nil, auth.ErrInternalHelloMsg
 	}

@@ -14,11 +14,11 @@ type usersDB struct {
 func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
-			{0, "support@mailbox.ru", "very_difficult_pw", "Michail", "Testov", config.DefaultAvatar},
-			{1, "test@mailbox.ru", "12345", "Ivan", "Ivanov", config.DefaultAvatar},
-			{2, "gena@mailbox.ru", "54321", "Michail", "Sidorov", config.DefaultAvatar},
-			{3, "max@mailbox.ru", "13795", "Michail", "Testov", config.DefaultAvatar},
-			{4, "valera@mailbox.ru", "12345", "Michail", "Testov", config.DefaultAvatar},
+			{1, "valera@mailbox.ru", "very_difficult_pw", "Michail", "Testov", config.DefaultAvatar},
+			{2, "test@mailbox.ru", "12345", "Ivan", "Ivanov", config.DefaultAvatar},
+			{3, "gena@mailbox.ru", "54321", "Michail", "Sidorov", config.DefaultAvatar},
+			{4, "max@mailbox.ru", "13795", "Michail", "Testov", config.DefaultAvatar},
+			{5, "support@mailbox.ru", "12345", "Michail", "Testov", config.DefaultAvatar},
 		},
 	}
 }
@@ -101,4 +101,34 @@ func (uDb *usersDB) EditPw(ID uint64, newPW string) error {
 		}
 	}
 	return user.ErrUserNotFound
+}
+
+func (uDb *usersDB) GetInfoByID(ID uint64) (*models.UserInfo, error) {
+	for _, user := range uDb.users {
+		if user.ID == ID {
+			return &models.UserInfo{
+				UserID:    user.ID,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
+				Email:     user.Email,
+			}, nil
+		}
+	}
+
+	return nil, user.ErrUserNotFound
+}
+
+func (uDb *usersDB) GetInfoByEmail(email string) (*models.UserInfo, error) {
+	for _, user := range uDb.users {
+		if user.Email == email {
+			return &models.UserInfo{
+				UserID:    user.ID,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
+				Email:     user.Email,
+			}, nil
+		}
+	}
+
+	return nil, user.ErrUserNotFound
 }

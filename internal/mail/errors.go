@@ -6,23 +6,28 @@ import (
 )
 
 var (
-	ErrHttpGetMethod           = errors.New("a get request was expected")
-	ErrInvalidURL              = errors.New("invalid url address")
-	ErrFailedGetInboxMessages  = errors.New("failed to get inbox messages")
-	ErrFailedGetOutboxMessages = errors.New("failed to get outbox messages")
-	ErrFailedGetFolderMessages = errors.New("failed to get folder messages")
-	ErrFailedGetUser           = errors.New("failed to get user")
-	ErrFailedGetFolders        = errors.New("failed to get folders")
-	ErrFailedGetFolder         = errors.New("failed to get folder")
+	ErrInvalidURL         = errors.New("invalid url address")
+	ErrFailedGetUser      = errors.New("failed to get user")
+	ErrInvalidMessageForm = errors.New("invalid message form")
+	ErrFolderNotFound     = errors.New("folder not found")
+	ErrMessageNotFound    = errors.New("message not found")
+	ErrNoValidEmails      = errors.New("no valid emails")
 )
 
-var Errors = map[error]int{
-	ErrHttpGetMethod:           http.StatusBadRequest,
-	ErrInvalidURL:              http.StatusNotFound,
-	ErrFailedGetInboxMessages:  http.StatusBadRequest,
-	ErrFailedGetOutboxMessages: http.StatusBadRequest,
-	ErrFailedGetFolderMessages: http.StatusBadRequest,
-	ErrFailedGetFolders:        http.StatusBadRequest,
-	ErrFailedGetFolder:         http.StatusBadRequest,
-	ErrFailedGetUser:           http.StatusBadRequest,
+var mailErrors = map[error]int{
+	ErrInvalidURL:         http.StatusBadRequest,
+	ErrFailedGetUser:      http.StatusBadRequest,
+	ErrInvalidMessageForm: http.StatusBadRequest,
+	ErrFolderNotFound:     http.StatusNotFound,
+	ErrMessageNotFound:    http.StatusNotFound,
+	ErrNoValidEmails:      http.StatusBadRequest,
+}
+
+func GetStatusForError(err error) int {
+	status := mailErrors[err]
+	if status == 0 {
+		return http.StatusInternalServerError
+	}
+
+	return status
 }
