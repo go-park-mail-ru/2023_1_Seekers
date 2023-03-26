@@ -15,7 +15,7 @@ import (
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	_userHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/delivery/http"
-	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
+	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
@@ -32,11 +32,11 @@ import (
 )
 
 var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-	config.DBUser,
-	config.DBPassword,
-	config.DBHost,
-	config.DBPort,
-	config.DBName,
+	os.Getenv(config.DBUserEnv),
+	os.Getenv(config.DBPasswordEnv),
+	os.Getenv(config.DBHostEnv),
+	os.Getenv(config.DBPortEnv),
+	os.Getenv(config.DBNameEnv),
 )
 
 // @title MailBox Swagger API
@@ -49,7 +49,7 @@ func main() {
 	router := mux.NewRouter()
 
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
-		TablePrefix:   config.DBSchemaName + ".",
+		TablePrefix:   os.Getenv(config.DBSchemaNameEnv) + ".",
 		SingularTable: false,
 	}})
 	if err != nil {
@@ -57,8 +57,8 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.RedisAddr,
-		Password: config.RedisPassword,
+		Addr:     os.Getenv(config.RedisHostEnv) + ":" + os.Getenv(config.RedisPortEnv),
+		Password: os.Getenv(config.RedisPasswordEnv),
 	})
 
 	_, err = rdb.Ping(context.Background()).Result()
@@ -66,7 +66,7 @@ func main() {
 		log.Fatalf("failed connect to redis : %v", err)
 	}
 
-	userRepo := _userRepo.New()
+	userRepo := _userRepo.New(db)
 	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
 	mailRepo := _mailRepo.New(db)
 	fStorageRepo := _fStorageRepo.New()

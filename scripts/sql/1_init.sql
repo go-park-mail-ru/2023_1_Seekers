@@ -1,27 +1,26 @@
 CREATE SCHEMA mail;
 
-
 CREATE TABLE mail.users
 (
-    user_id        bigserial                  NOT NULL,
-    here_since  timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    is_deleted  boolean                  NOT NULL DEFAULT false,
-    email       text                     NOT NULL,
-    password    text                     NOT NULL,
-    first_name  text                     NOT NULL,
-    second_name text                     NOT NULL,
-    avatar      text                     NOT NULL
+    user_id    bigserial                NOT NULL,
+    here_since timestamp with time zone NOT NULL DEFAULT current_timestamp,
+    is_deleted boolean                  NOT NULL DEFAULT false,
+    email      text                     NOT NULL,
+    password   text                     NOT NULL,
+    first_name text                     NOT NULL,
+    last_name  text                     NOT NULL,
+    avatar     text                     NOT NULL,
     CONSTRAINT pk_users PRIMARY KEY (user_id)
 );
 
 CREATE TABLE mail.folders
 (
-  folder_id             bigserial               NOT NULL,
-    user_id             bigint                  NOT NULL,
-    local_name      text           NOT NULL,
-    name            text                     NOT NULL,
-    messages_unseen integer                  NOT NULL DEFAULT 0,
-    messages_count  integer                  NOT NULL DEFAULT 0,
+    folder_id       bigserial NOT NULL,
+    user_id         bigint    NOT NULL,
+    local_name      text      NOT NULL,
+    name            text      NOT NULL,
+    messages_unseen integer   NOT NULL DEFAULT 0,
+    messages_count  integer   NOT NULL DEFAULT 0,
 
     CONSTRAINT check_message_count CHECK (
                 messages_count >= 0 AND
@@ -39,31 +38,31 @@ CREATE TABLE mail.folders
 );
 
 CREATE TYPE mail.recipient AS
-(
-    name  text,
+    (
+    name text,
     email text
-);
+    );
 
 CREATE TYPE mail.attach AS
-(
-    type     text,
+    (
+    type text,
     filename text,
-    size     integer,
+    size integer,
     raw_data bytea
-);
+    );
 
 CREATE TABLE mail.messages
 (
-  message_id        bigserial  NOT NULL,
-    from_user_id        bigint  NOT NULL,
-    size       integer NOT NULL,
+    message_id   bigserial NOT NULL,
+    from_user_id bigint    NOT NULL,
+    size         integer   NOT NULL,
 
-    title    text,
-    reply_to bigint default null ,
+    title        text,
+    reply_to     bigint default null,
 
-    created_at  timestamp with time zone, -- дата редактирования или отправки (финально)
-    text    text,
-    
+    created_at   timestamp with time zone, -- дата редактирования или отправки (финально)
+    text         text,
+
 
     CONSTRAINT pk_messages PRIMARY KEY (message_id),
     CONSTRAINT check_size CHECK (
@@ -78,12 +77,12 @@ CREATE TABLE mail.messages
 
 CREATE TABLE mail.box
 (
-    user_id           bigint                   NOT NULL,
-    message_id           bigint                   NOT NULL,
-    folder_id           bigint                  NOT NULL,
-    seen          boolean                  NOT null,
-    favourite     boolean                  NOT null default false,
-    deleted       boolean                  NOT null default false,
+    user_id    bigint  NOT NULL,
+    message_id bigint  NOT NULL,
+    folder_id  bigint  NOT NULL,
+    seen       boolean NOT null,
+    favourite  boolean NOT null default false,
+    deleted    boolean NOT null default false,
 
     CONSTRAINT pk_box PRIMARY KEY (user_id, message_id),
 --    CONSTRAINT uk_box_id UNIQUE (user_id, folder_id),

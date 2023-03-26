@@ -29,8 +29,8 @@ func New() file_storage.RepoI {
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 			Credentials: credentials.NewStaticCredentials(
-				config.S3AccessKeyID,
-				config.S3AccessKeySecret,
+				os.Getenv(config.S3AccessKeyEnv),
+				os.Getenv(config.S3ASecretKeyEnv),
 				"",
 			),
 		},

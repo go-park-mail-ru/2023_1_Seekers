@@ -1,9 +1,9 @@
-insert into mail.users(is_deleted, email, password) values
-(false, 'support@mailbox.ru', 'very_difficult_pw', 'Support', 'Testov'),
-(false, 'test@mailbox.ru', '12345', 'Michail', 'Testov'),
-(false, 'gena@mailbox.ru', '54321', 'Ivan', 'Ivanov'),
-(false, 'max@mailbox.ru', '13795', 'Michail', 'Sidorov'),
-(false, 'valera@mailbox.ru', '12345', 'Valera', 'Testov');
+insert into mail.users(is_deleted, email, password, first_name, last_name, avatar) values
+(false, 'support@mailbox.ru', 'very_difficult_pw', 'Support', 'Testov', 'default_avatar.png'),
+(false, 'test@mailbox.ru', '12345', 'Michail', 'Testov', 'default_avatar.png'),
+(false, 'gena@mailbox.ru', '54321', 'Ivan', 'Ivanov', 'default_avatar.png'),
+(false, 'max@mailbox.ru', '13795', 'Michail', 'Sidorov', 'default_avatar.png'),
+(false, 'valera@mailbox.ru', '12345', 'Valera', 'Testov', 'default_avatar.png');
 
 select * from mail.users;
 

@@ -1,22 +1,8 @@
-.PHONY: build run cov test clean
-
-MAIN_TARGET = cmd/main.go
-EXECUTABLE = main
-COVERAGE = scripts/coverage.sh
-
-all: build test cov run clean
+#export_env:
+#	./scripts/export_env.sh
+include .env
 
 build:
-	go build ${MAIN_TARGET}
-
-run:
-	./${EXECUTABLE}
-
-cov:
-	./${COVERAGE}
-
-test:
-	go test ./...
-
-clean:
-	rm ${EXECUTABLE}
+	./scripts/export_env.sh && docker-compose up -d --build
+prune:
+	docker system prune

@@ -8,17 +8,26 @@ const (
 	LogsDir        = "logs/"
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
-	// TODO to env!
+
 	// Postgres
-	DBUser       = "postgres"
-	DBPassword   = "41219"
-	DBHost       = "localhost"
-	DBPort       = "5432"
-	DBName       = "postgres" //
-	DBSchemaName = "mail"
+	DBUserEnv       = "POSTGRES_USER"
+	DBPasswordEnv   = "POSTGRES_PASSWORD"
+	DBHostEnv       = "POSTGRES_HOST"
+	DBPortEnv       = "POSTGRES_PORT"
+	DBNameEnv       = "POSTGRES_DB" //
+	DBSchemaNameEnv = "POSTGRES_SCHEMA"
+
 	// Redis
-	RedisAddr     = "localhost:6379"
-	RedisPassword = "PASSWORD_TO_ENV!"
+	RedisHostEnv     = "REDIS_HOST"
+	RedisPortEnv     = "REDIS_PORT"
+	RedisPasswordEnv = "REDIS_PASSWORD"
+
+	//MINIO S3
+	S3AccessKeyEnv  = "MINIO_ACCESS_KEY"
+	S3ASecretKeyEnv = "MINIO_SECRET_KEY"
+	S3Endpoint      = "http://127.0.0.1:9000"
+	S3Region        = "eu-west-2" // В случае с minio - не играет роли, нь указывается обязательно
+	S3AvatarBucket  = "avatars"
 
 	// Sessions
 	CookieName = "MailBoxSession"
@@ -52,12 +61,6 @@ const (
 	DefaultAvatarDir = "./cmd/config/static/"
 	PostDomain       = "mailbox.ru"
 	PostAtDomain     = "@" + PostDomain
-
-	S3AccessKeyID     = "ACCESS_TO_ENV!"
-	S3AccessKeySecret = "SECRET_TO_ENV!"
-	S3Endpoint        = "http://127.0.0.1:9000"
-	S3Region          = "eu-west-2" // В случае с minio - не играет роли, нь указывается обязательно
-	S3AvatarBucket    = "avatars"
 )
 
 var (

@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"os"
 )
 
 type mailRepository struct {
@@ -22,7 +23,7 @@ type Box struct {
 }
 
 func (Box) TableName() string {
-	return config.DBSchemaName + ".box"
+	return os.Getenv(config.DBSchemaNameEnv) + ".box"
 }
 
 type Message struct {
@@ -36,7 +37,7 @@ type Message struct {
 }
 
 func (Message) TableName() string {
-	return config.DBSchemaName + ".messages"
+	return os.Getenv(config.DBSchemaNameEnv) + ".messages"
 }
 
 func New(db *gorm.DB) mail.RepoI {

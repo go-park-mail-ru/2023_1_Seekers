@@ -3,38 +3,63 @@ version: "3.8"
 services:
   app:
     depends_on:
-      - minio
-      - create-bucket
-      - cache
-      - postgres
+      db:
+        condition: service_healthy
+      create-bucket:
+        condition: service_started
+      minio:
+        condition: service_started
+      cache:
+        condition: service_started
+    volumes:
+      - $GOPATH/pkg/mod:/go/pkg/mod
     build: ./
     network_mode: "host"
     environment:
-      REDIS_HOST: cache
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: PASSWORD_TO_ENV!
-
-  postgres:
-    container_name: postgres
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 41219
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - pg-net
     ports:
       - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
       timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped  
+      retries: 3
+    restart: always
     volumes:
+      # - TODO DATA
       - ./scripts/sql:/docker-entrypoint-initdb.d
       - ./logs/postgres:/logs
+
+  admin_db:
+    networks:
+      - pg-net
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 
   minio:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
@@ -44,8 +69,8 @@ services:
       - ./minio_data:/export
     command: server /export
     environment:
-      MINIO_ACCESS_KEY: ACCESS_TO_ENV!
-      MINIO_SECRET_KEY: SECRET_TO_ENV!
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
     ports:
       - "9000:9000"
 
@@ -55,10 +80,13 @@ services:
       - minio-net
     depends_on:
       - minio
+    environment:
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
     entrypoint: >
       /bin/sh -c "
       sleep 3;
-      /usr/bin/mc config host add minioClient http://minio:9000 ACCESS_TO_ENV! SECRET_TO_ENV!;
+      /usr/bin/mc config host add minioClient http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       /usr/bin/mc mb minioClient/avatars; 
       sleep 3;
       exit 0;
@@ -69,7 +97,9 @@ services:
     restart: always
     ports:
       - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning --requirepass PASSWORD_TO_ENV!
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
     volumes:
       - cache:/data
 

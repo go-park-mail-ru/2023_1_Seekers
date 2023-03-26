@@ -14,11 +14,11 @@ type usersDB struct {
 func New() user.RepoI {
 	return &usersDB{
 		[]models.User{
-			{0, "support@mailbox.ru", "very_difficult_pw", "Michail", "Testov", config.DefaultAvatar},
-			{1, "test@mailbox.ru", "12345", "Ivan", "Ivanov", config.DefaultAvatar},
-			{2, "gena@mailbox.ru", "54321", "Michail", "Sidorov", config.DefaultAvatar},
-			{3, "max@mailbox.ru", "13795", "Michail", "Testov", config.DefaultAvatar},
-			{4, "valera@mailbox.ru", "12345", "Michail", "Testov", config.DefaultAvatar},
+			{ID: 0, Email: "support@mailbox.ru", Password: "very_difficult_pw", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
+			{ID: 1, Email: "test@mailbox.ru", Password: "12345", FirstName: "Ivan", LastName: "Ivanov", Avatar: config.DefaultAvatar},
+			{ID: 2, Email: "gena@mailbox.ru", Password: "54321", FirstName: "Michail", LastName: "Sidorov", Avatar: config.DefaultAvatar},
+			{ID: 3, Email: "max@mailbox.ru", Password: "13795", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
+			{ID: 4, Email: "valera@mailbox.ru", Password: "12345", FirstName: "Michail", LastName: "Testov", Avatar: config.DefaultAvatar},
 		},
 	}
 }
