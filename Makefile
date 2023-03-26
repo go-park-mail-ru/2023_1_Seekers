@@ -1,8 +1,8 @@
-#export_env:
-#	./scripts/export_env.sh
-include .env
-
 build:
-	./scripts/export_env.sh && docker-compose up -d --build
+	docker-compose up --build
+
 prune:
 	docker system prune
+
+cov:
+	./scripts/coverage.sh

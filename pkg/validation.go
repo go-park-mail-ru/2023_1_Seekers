@@ -24,6 +24,22 @@ func ValidateLogin(login string) (string, error) {
 	return email, nil
 }
 
+//func ValidateMessage(message *models.FormMessage) error {
+//	if len(message.Recipients) == 0 {
+//		return mail.ErrInvalidRecipient
+//	}
+//
+//	for _, login := range message.Recipients {
+//		_, err := ValidateLogin(login)
+//
+//		if err != nil {
+//			return mail.ErrInvalidRecipient
+//		}
+//	}
+//
+//	return nil
+//}
+
 func CheckImageContentType(contentType string) bool {
 	if contentType == ContentTypePNG || contentType == ContentTypeSVG ||
 		contentType == ContentTypeWEBP || contentType == ContentTypeJPEG {

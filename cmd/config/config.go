@@ -41,8 +41,12 @@ const (
 	RouteLogout = "/api/v1/logout"
 
 	// MailRoutes
-	RouteFolderMessages = "/api/v1/folder/{slug}"
-	RouteFolders        = "/api/v1/folders"
+	RouteGetFolderMessages = "/api/v1/folder/{slug}"
+	RouteGetFolders        = "/api/v1/folders"
+	RouteGetMessage        = "/api/v1/message/{id:[0-9]+}"
+	RouteSendMessage       = "/api/v1/message/send"
+	RouteReadMessage       = "/api/v1/message/{id:[0-9]+}/read"
+	RouteUnreadMessage     = "/api/v1/message/{id:[0-9]+}/unread"
 
 	// UserService
 	MaxImageSize      = 32 << 20

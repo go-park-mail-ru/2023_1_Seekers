@@ -10,14 +10,14 @@ func SendError(w http.ResponseWriter, r *http.Request, error *errors.JSONError) 
 	SendJSON(w, r, error.Code, error)
 }
 
-func HandleError(w http.ResponseWriter, r *http.Request, status int, err error) {
-	customErr := errors.New(status, err)
+func HandleError(w http.ResponseWriter, r *http.Request, status int, logErr error, UnwrappedErr error) {
+	customErr := errors.New(status, UnwrappedErr)
 	logger, ok := r.Context().Value(ContextHandlerLog).(*Logger)
 	if !ok {
 		log.Error("failed to get logger for handler", r.URL.Path)
-		log.Error(err)
+		log.Error(logErr)
 	} else {
-		logger.Error(err)
+		logger.Error(logErr)
 	}
 	SendError(w, r, customErr)
 }

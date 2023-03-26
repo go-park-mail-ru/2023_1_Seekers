@@ -47,13 +47,13 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 		cookie, err := r.Cookie(config.CookieName)
 		if err != nil {
 			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedAuth, err)
-			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedAuth], wrappedErr)
+			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedAuth], err, wrappedErr)
 			return
 		}
 		session, err := m.sUC.GetSession(cookie.Value)
 		if err != nil {
 			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedGetSession, err)
-			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedGetSession], wrappedErr)
+			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedGetSession], err, wrappedErr)
 			return
 		}
 

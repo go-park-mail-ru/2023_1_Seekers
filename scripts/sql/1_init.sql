@@ -55,33 +55,33 @@ CREATE TABLE mail.messages
 (
     message_id   bigserial NOT NULL,
     from_user_id bigint    NOT NULL,
-    size         integer   NOT NULL,
+    size         integer,    --NOT NULL,
 
     title        text,
-    reply_to     bigint default null,
+    reply_to_message_id     bigint default null,
 
     created_at   timestamp with time zone, -- дата редактирования или отправки (финально)
     text         text,
 
 
     CONSTRAINT pk_messages PRIMARY KEY (message_id),
-    CONSTRAINT check_size CHECK (
-        size >= 0
-        ),
+--     CONSTRAINT check_size CHECK (
+--         size >= 0
+--         ),
     CONSTRAINT fk_messages_users_user_id FOREIGN KEY (from_user_id)
         REFERENCES mail.users ON DELETE restrict,
-    constraint fk_reply_to_message_message_id FOREIGN KEY (reply_to)
+    constraint fk_reply_to_message_message_id FOREIGN KEY (reply_to_message_id)
         REFERENCES mail.messages ON DELETE restrict
 );
 
 
-CREATE TABLE mail.box
+CREATE TABLE mail.boxes
 (
     user_id    bigint  NOT NULL,
     message_id bigint  NOT NULL,
     folder_id  bigint  NOT NULL,
     seen       boolean NOT null,
-    favourite  boolean NOT null default false,
+    favorite  boolean NOT null default false,
     deleted    boolean NOT null default false,
 
     CONSTRAINT pk_box PRIMARY KEY (user_id, message_id),

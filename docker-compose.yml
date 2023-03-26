@@ -42,7 +42,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-    restart: always
+#    restart: always
     volumes:
       # - TODO DATA
       - ./scripts/sql:/docker-entrypoint-initdb.d

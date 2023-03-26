@@ -12,15 +12,24 @@ type Folder struct {
 }
 
 type MessageInfo struct {
-	MessageID  uint64     `json:"message_id"`
-	FromUser   UserInfo   `json:"from_user_id" gorm:"embedded;embeddedPrefix:;embeddedPrefix:from_"`
-	Recipients []UserInfo `json:"recipients" gorm:"-"`
-	Title      string     `json:"title"`
-	CreatedAt  string     `json:"created_at"`
-	Text       string     `json:"text"`
-	Seen       bool       `json:"seen"`
-	Favorite   bool       `json:"favorite"`
-	Deleted    bool       `json:"deleted"`
+	MessageID        uint64       `json:"message_id"`
+	FromUser         UserInfo     `json:"from_user_id" gorm:"embedded;embeddedPrefix:from_"`
+	Recipients       []UserInfo   `json:"recipients" gorm:"-"`
+	Title            string       `json:"title"`
+	CreatedAt        string       `json:"created_at"`
+	Text             string       `json:"text"`
+	ReplyToMessageID *uint64      `json:"-" gorm:"null"`
+	ReplyTo          *MessageInfo `json:"reply_to" gorm:"-"`
+	Seen             bool         `json:"seen"`
+	Favorite         bool         `json:"favorite"`
+	Deleted          bool         `json:"deleted"`
+}
+
+type FormMessage struct {
+	Recipients       []string `json:"recipients" validate:"required"`
+	Title            string   `json:"title" validate:"required"`
+	Text             string   `json:"text" validate:"required"`
+	ReplyToMessageID *uint64  `json:"reply_to"`
 }
 
 //type IncomingMessage struct {
@@ -44,12 +53,15 @@ type MessageInfo struct {
 //}
 
 type FolderResponse struct {
-	Folder         Folder        `json:"folder"`
-	Messages       []MessageInfo `json:"messages"`
-	MessagesUnseen int           `json:"messages_unseen"`
-	MessagesCount  int           `json:"messages_count"`
+	Folder   Folder        `json:"folder"`
+	Messages []MessageInfo `json:"messages"`
 }
 
 type FoldersResponse struct {
 	Folders []Folder `json:"folders"`
+	Count   int      `json:"count"`
+}
+
+type MessageResponse struct {
+	Message MessageInfo `json:"message"`
 }

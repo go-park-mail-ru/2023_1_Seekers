@@ -18,7 +18,7 @@ func New(db *gorm.DB) user.RepoI {
 }
 
 func (uDB *userDB) Create(user models.User) (*models.User, error) {
-	tx := uDB.db.Create(user)
+	tx := uDB.db.Create(&user)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database [users]")
 	}
@@ -81,4 +81,24 @@ func (uDB *userDB) EditPw(ID uint64, newPW string) error {
 	}
 
 	return nil
+}
+
+func (uDB *userDB) GetInfoByID(ID uint64) (*models.UserInfo, error) {
+	userInfo := models.UserInfo{}
+	tx := uDB.db.Where("user_id = ?", ID).Take(&userInfo)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database [users]")
+	}
+
+	return &userInfo, nil
+}
+
+func (uDB *userDB) GetInfoByEmail(email string) (*models.UserInfo, error) {
+	userInfo := models.UserInfo{}
+	tx := uDB.db.Where("email = ?", email).Take(&userInfo)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database [users]")
+	}
+
+	return &userInfo, nil
 }

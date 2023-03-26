@@ -1,5 +1,9 @@
 package errors
 
+import (
+	"errors"
+)
+
 type JSONError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -21,4 +25,12 @@ func NewWrappedErr(code int, message string, err error) *JSONError {
 		Code:    code,
 		Message: message + " : " + err.Error(),
 	}
+}
+
+func UnwrapError(err error) error {
+	for errors.Unwrap(err) != nil {
+		err = errors.Unwrap(err)
+	}
+
+	return err
 }
