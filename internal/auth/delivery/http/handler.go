@@ -83,12 +83,6 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	response, session, err := h.authUC.SignUp(form)
 	if err != nil {
-		//if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrInternalHelloMsg ||
-		//	err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile || err == auth.ErrFailedCreateSession {
-		//	handleAuthErr(w, r, err)
-		//	return
-		//}
-		//handleAuthErr(w, r, auth.ErrUserExists)
 		pkg.HandleError(w, r, err)
 		return
 	}

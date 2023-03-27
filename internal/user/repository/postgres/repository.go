@@ -31,7 +31,7 @@ func (uDB *userDB) Create(user models.User) (*models.User, error) {
 }
 
 func (uDB *userDB) EditInfo(ID uint64, info models.UserInfo) error {
-	tx := uDB.db.Omit("user_id", "email", "password").Where("user_id = ?", ID).Updates(info)
+	tx := uDB.db.Omit("user_id", "email", "password").Where("user_id = ?", ID).Updates(&info)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
@@ -42,7 +42,7 @@ func (uDB *userDB) EditInfo(ID uint64, info models.UserInfo) error {
 }
 
 func (uDB *userDB) Delete(ID uint64) error {
-	tx := uDB.db.Table("mail.users").Where("user_id = ?", ID).Delete(models.User{})
+	tx := uDB.db.Where("user_id = ?", ID).Delete(models.User{})
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
@@ -56,7 +56,7 @@ func (uDB *userDB) Delete(ID uint64) error {
 func (uDB *userDB) GetByID(ID uint64) (*models.User, error) {
 	usr := models.User{}
 
-	tx := uDB.db.Table("mail.users").Where("user_id = ?", ID).Take(&usr)
+	tx := uDB.db.Where("user_id = ?", ID).Take(&usr)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
@@ -94,7 +94,7 @@ func (uDB *userDB) SetAvatar(ID uint64, avatar string) error {
 }
 
 func (uDB *userDB) EditPw(ID uint64, newPW string) error {
-	tx := uDB.db.Omit("user_id", "email").Where("user_id = ?", ID).Update("password", newPW)
+	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).Update("password", newPW)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
