@@ -53,15 +53,15 @@ CREATE TYPE mail.attach AS
 
 CREATE TABLE mail.messages
 (
-    message_id   bigserial NOT NULL,
-    from_user_id bigint    NOT NULL,
-    size         integer,    --NOT NULL,
+    message_id          bigserial NOT NULL,
+    from_user_id        bigint    NOT NULL,
+    size                integer,                  --NOT NULL,
 
-    title        text,
-    reply_to_message_id     bigint default null,
+    title               text,
+    reply_to_message_id bigint default null,
 
-    created_at   timestamp with time zone, -- дата редактирования или отправки (финально)
-    text         text,
+    created_at          timestamp with time zone, -- дата редактирования или отправки (финально)
+    text                text,
 
 
     CONSTRAINT pk_messages PRIMARY KEY (message_id),
@@ -81,7 +81,7 @@ CREATE TABLE mail.boxes
     message_id bigint  NOT NULL,
     folder_id  bigint  NOT NULL,
     seen       boolean NOT null,
-    favorite  boolean NOT null default false,
+    favorite   boolean NOT null default false,
     deleted    boolean NOT null default false,
 
     CONSTRAINT pk_box PRIMARY KEY (user_id, message_id),
