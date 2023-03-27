@@ -4,6 +4,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 	"gorm.io/gorm"
 	"os"
 )
@@ -48,8 +50,11 @@ func (m mailRepository) SelectFolderByUserNFolder(userID uint64, folderSlug stri
 	var folder models.Folder
 
 	tx := m.db.Where("user_id = ? AND local_name = ?", userID, folderSlug).First(&folder)
-	if tx.Error != nil {
-		return nil, tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, err.Error())
+		}
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return &folder, nil
@@ -59,8 +64,11 @@ func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, err
 	var folders []models.Folder
 
 	tx := m.db.Where("user_id = ?", userID).Find(&folders)
-	if tx.Error != nil {
-		return folders, tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, err.Error())
+		}
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return folders, nil
@@ -71,8 +79,11 @@ func (m mailRepository) SelectFolderMessagesByUserNFolder(userID uint64, folderI
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
 		Where("user_id = ? AND folder_id = ?", userID, folderID).Scan(&messages)
-	if tx.Error != nil {
-		return messages, tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
+		}
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return messages, nil
@@ -83,8 +94,11 @@ func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID u
 
 	tx := m.db.Model(Box{}).Select("user_id").Where("message_id = ? AND user_id != ?", messageID, fromUserID).
 		Scan(&recipientsIDs)
-	if tx.Error != nil {
-		return recipientsIDs, tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
+		}
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return recipientsIDs, nil
@@ -95,8 +109,11 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
 		Where("user_id = ? AND message_id = ?", userID, messageID).Scan(&message)
-	if tx.Error != nil {
-		return nil, tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
+		}
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return message, nil
@@ -106,8 +123,8 @@ func (m mailRepository) InsertMessageToMessages(message *models.MessageInfo) (ui
 	convMsg := convertToMessageDB(message)
 
 	tx := m.db.Select("from_user_id", "title", "text", "created_at", "reply_to_message_id").Create(&convMsg)
-	if tx.Error != nil {
-		return 0, tx.Error
+	if err := tx.Error; err != nil {
+		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return convMsg.MessageID, nil
@@ -142,5 +159,11 @@ func convertToBoxDB(userID uint64, folderID uint64, message *models.MessageInfo)
 
 func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error {
 	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update(stateName, stateValue)
-	return tx.Error
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
+		}
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+	return nil
 }

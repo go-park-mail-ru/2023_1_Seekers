@@ -7,6 +7,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -22,19 +24,15 @@ func New(uUC user.UseCaseI) user.HandlersI {
 	}
 }
 
-func handleUserErr(w http.ResponseWriter, r *http.Request, err error) {
-	pkg.HandleError(w, r, user.Errors[err], err, err)
-}
-
 func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleUserErr(w, r, user.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	err := h.userUC.Delete(userID)
 	if err != nil {
-		handleUserErr(w, r, user.ErrFailedDelete)
+		pkg.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -44,12 +42,12 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get(config.RouteUserInfoQueryEmail)
 	u, err := h.userUC.GetByEmail(email)
 	if err != nil {
-		handleUserErr(w, r, user.ErrFailedGetUser)
+		pkg.HandleError(w, r, err)
 		return
 	}
 	info, err := h.userUC.GetInfo(u.UserID)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInternal)
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -60,7 +58,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 	// тут пока что просто из body - в будущем на form data
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleUserErr(w, r, user.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -73,12 +71,12 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 	info, err := h.userUC.EditInfo(userID, form)
 	if err != nil {
-		handleUserErr(w, r, user.ErrFailedEditInfo)
+		pkg.HandleError(w, r, err)
 		return
 	}
 	pkg.SendJSON(w, r, http.StatusOK, models.EditUserInfoResponse{Email: info.Email})
@@ -87,7 +85,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleUserErr(w, r, user.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -100,13 +98,13 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	err = h.userUC.EditPw(userID, form)
 	if err != nil {
-		handleUserErr(w, r, user.ErrFailedEditPw)
+		pkg.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -115,35 +113,31 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleUserErr(w, r, user.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	err := r.ParseMultipartForm(config.MaxImageSize)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	file, header, err := r.FormFile(config.UserFormNewAvatar)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	img, err := pkg.ReadImage(file, header)
 	if err != nil {
-		if err == user.ErrInvalidForm || err == user.ErrWrongContentType {
-			handleUserErr(w, r, err)
-		} else {
-			handleUserErr(w, r, user.ErrInternal)
-		}
+		pkg.HandleError(w, r, err)
 		return
 	}
 
 	err = h.userUC.EditAvatar(userID, img)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInternal)
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -155,7 +149,7 @@ func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get(config.RouteUserAvatarQueryEmail)
 	img, err := h.userUC.GetAvatar(email)
 	if err != nil {
-		handleUserErr(w, r, user.ErrInternal)
+		pkg.HandleError(w, r, err)
 		return
 	}
 

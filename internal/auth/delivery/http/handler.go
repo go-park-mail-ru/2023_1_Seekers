@@ -6,10 +6,11 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-playground/validator/v10"
+	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -24,10 +25,6 @@ func New(aUC auth.UseCaseI) auth.HandlersI {
 	return &handlers{
 		authUC: aUC,
 	}
-}
-
-func handleAuthErr(w http.ResponseWriter, r *http.Request, err error) {
-	pkg.HandleError(w, r, auth.Errors[err], err, err)
 }
 
 func setNewCookie(w http.ResponseWriter, session *models.Session) {
@@ -74,24 +71,25 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	form := models.FormSignUp{}
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		handleAuthErr(w, r, auth.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		handleAuthErr(w, r, auth.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	response, session, err := h.authUC.SignUp(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrInternalHelloMsg ||
-			err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile || err == auth.ErrFailedCreateSession {
-			handleAuthErr(w, r, err)
-			return
-		}
-		handleAuthErr(w, r, auth.ErrUserExists)
+		//if err == auth.ErrInvalidLogin || err == _user.ErrTooShortPw || err == auth.ErrInternalHelloMsg ||
+		//	err == auth.ErrPwDontMatch || err == auth.ErrFailedCreateProfile || err == auth.ErrFailedCreateSession {
+		//	handleAuthErr(w, r, err)
+		//	return
+		//}
+		//handleAuthErr(w, r, auth.ErrUserExists)
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -122,17 +120,13 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handleAuthErr(w, r, auth.ErrInvalidForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	response, session, err := h.authUC.SignIn(form)
 	if err != nil {
-		if err == auth.ErrInvalidLogin || err == auth.ErrFailedCreateSession {
-			handleAuthErr(w, r, err)
-			return
-		}
-		handleAuthErr(w, r, auth.ErrWrongPw)
+		pkg.HandleError(w, r, err)
 		return
 	}
 

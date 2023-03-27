@@ -9,7 +9,7 @@ import (
 func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any) {
 	dataJSON, err := json.Marshal(dataStruct)
 	if err != nil {
-		HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to marshal : %w", err), err)
+		HandleError(w, r, fmt.Errorf("failed to marshal : %w", err))
 		return
 	}
 
@@ -18,7 +18,7 @@ func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any
 
 	_, err = w.Write(dataJSON)
 	if err != nil {
-		HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to send : %w", err), err)
+		HandleError(w, r, fmt.Errorf("failed to send : %w", err))
 		return
 	}
 }
@@ -29,7 +29,7 @@ func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) 
 
 	_, err := w.Write(data)
 	if err != nil {
-		HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("failed to send : %w", err), err)
+		HandleError(w, r, fmt.Errorf("failed to send : %w", err))
 		return
 	}
 }

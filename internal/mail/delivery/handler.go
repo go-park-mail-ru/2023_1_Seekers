@@ -2,13 +2,13 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-	_errors "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	pkgErrors "github.com/pkg/errors"
 	"net/http"
 	"strconv"
 )
@@ -21,11 +21,6 @@ func New(uc mail.UseCaseI) mail.HandlersI {
 	return &delivery{
 		uc: uc,
 	}
-}
-
-func handleMailErr(w http.ResponseWriter, r *http.Request, err error) {
-	unwrappedErr := _errors.UnwrapError(err)
-	pkg.HandleError(w, r, mail.GetStatusForError(unwrappedErr), err, unwrappedErr)
 }
 
 // GetFolderMessages godoc
@@ -43,26 +38,26 @@ func handleMailErr(w http.ResponseWriter, r *http.Request, err error) {
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	vars := mux.Vars(r)
 	folderSlug, ok := vars["slug"]
 	if !ok {
-		handleMailErr(w, r, mail.ErrInvalidURL)
+		pkg.HandleError(w, r, errors.ErrInvalidURL)
 		return
 	}
 
 	folder, err := del.uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("GetFolderInfo usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
 	messages, err := del.uc.GetFolderMessages(userID, folderSlug)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("GetFolderMessages usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -85,13 +80,13 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	folders, err := del.uc.GetFolders(userID)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("GetFolders usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -116,20 +111,20 @@ func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) GetMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	vars := mux.Vars(r)
 	messageID, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
-		handleMailErr(w, r, mail.ErrInvalidURL)
+		pkg.HandleError(w, r, errors.ErrInvalidURL)
 		return
 	}
 
 	message, err := del.uc.GetMessage(userID, messageID)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("GetMessage usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -141,19 +136,19 @@ func (del *delivery) GetMessage(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	form := models.FormMessage{}
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		handleMailErr(w, r, mail.ErrInvalidMessageForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		handleMailErr(w, r, mail.ErrInvalidMessageForm)
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
@@ -162,7 +157,7 @@ func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 
 	message, err := del.uc.SendMessage(userID, form)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("SendMessage usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -170,7 +165,7 @@ func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 		err = del.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
 
 		if err != nil {
-			handleMailErr(w, r, fmt.Errorf("SendFailedSendingMessage usecase error: %w", err))
+			pkg.HandleError(w, r, err)
 			return
 		}
 	}
@@ -183,20 +178,20 @@ func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) ReadMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	vars := mux.Vars(r)
 	messageID, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
-		handleMailErr(w, r, mail.ErrInvalidURL)
+		pkg.HandleError(w, r, errors.ErrInvalidURL)
 		return
 	}
 
 	message, err := del.uc.MarkMessageAsSeen(userID, messageID)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("MarkMessageAsSeen usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 
@@ -208,20 +203,20 @@ func (del *delivery) ReadMessage(w http.ResponseWriter, r *http.Request) {
 func (del *delivery) UnreadMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		handleMailErr(w, r, mail.ErrFailedGetUser)
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	vars := mux.Vars(r)
 	messageID, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
-		handleMailErr(w, r, mail.ErrInvalidURL)
+		pkg.HandleError(w, r, errors.ErrInvalidURL)
 		return
 	}
 
 	message, err := del.uc.MarkMessageAsUnseen(userID, messageID)
 	if err != nil {
-		handleMailErr(w, r, fmt.Errorf("MarkMessageAsUnseen usecase error: %w", err))
+		pkg.HandleError(w, r, err)
 		return
 	}
 

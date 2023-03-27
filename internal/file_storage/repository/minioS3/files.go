@@ -2,8 +2,8 @@ package minioS3
 
 import (
 	"bytes"
-	"errors"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsS3 "github.com/aws/aws-sdk-go/service/s3"
@@ -11,6 +11,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -70,10 +72,22 @@ func (fDB *fileDB) Get(bName, fName string) (*models.S3File, error) {
 	buf := &aws.WriteAtBuffer{}
 	numBytes, err := fDB.downloaderS3.Download(buf, objInput)
 	if err != nil {
-		return nil, err
+		var awsErr awserr.Error
+		if pkgErrors.As(err, &awsErr) {
+			switch awsErr.Code() {
+			case awsS3.ErrCodeNoSuchBucket:
+				return nil, pkgErrors.WithMessagef(errors.ErrNoBucket,
+					"bucket [%s], key [%s], error [%s]", bName, fName, err.Error())
+			case awsS3.ErrCodeNoSuchKey:
+				return nil, pkgErrors.WithMessagef(errors.ErrNoKey,
+					"bucket [%s], key [%s], error [%s]", bName, fName, err.Error())
+			}
+		}
+		return nil, pkgErrors.WithMessagef(errors.ErrGetFile, err.Error())
 	}
 	if numBytes < 1 {
-		return nil, errors.New("written empty file")
+		return nil, pkgErrors.WithMessagef(errors.ErrGetFile,
+			"empty file : bucket [%s], key [%s], error [%s]", bName, fName, err.Error())
 	}
 
 	return &models.S3File{
@@ -94,7 +108,8 @@ func (fDB *fileDB) Upload(file *models.S3File) error {
 
 	_, err := fDB.uploaderS3.Upload(uInput)
 	if err != nil {
-		return err
+		return pkgErrors.WithMessagef(errors.ErrInternal,
+			"upload file: bucket [%s], key [%s], error [%s]", file.Bucket, file.Name, err)
 	}
 
 	return nil

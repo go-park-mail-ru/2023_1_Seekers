@@ -1,13 +1,14 @@
 package usecase
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 )
 
 type authUC struct {
@@ -27,20 +28,20 @@ func NewAuthUC(sUC auth.SessionUseCaseI, uc _user.UseCaseI, mUC mail.UseCaseI) a
 func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Session, error) {
 	email, err := pkg.ValidateLogin(form.Login)
 	if err != nil {
-		return nil, nil, auth.ErrInvalidLogin
+		return nil, nil, errors.ErrInvalidLogin
 	}
 	user, err := u.userUC.GetByEmail(email)
 	if err != nil {
-		return nil, nil, auth.ErrWrongPw
+		return nil, nil, errors.ErrWrongPw
 	}
 
 	if user.Password != form.Password {
-		return nil, nil, auth.ErrWrongPw
+		return nil, nil, errors.ErrWrongPw
 	}
 
 	session, err := u.sessionUC.CreateSession(user.UserID)
 	if err != nil {
-		return nil, nil, auth.ErrFailedCreateSession
+		return nil, nil, pkgErrors.Wrap(err, "sign in")
 	}
 
 	return &models.AuthResponse{
@@ -52,12 +53,12 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 
 func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) {
 	if form.RepeatPw != form.Password {
-		return nil, nil, auth.ErrPwDontMatch
+		return nil, nil, errors.ErrPwDontMatch
 	}
 
 	email, err := pkg.ValidateLogin(form.Login)
 	if err != nil || len(form.Login) > 30 || len(form.Login) < 3 {
-		return nil, nil, auth.ErrInvalidLogin
+		return nil, nil, errors.ErrInvalidLogin
 	}
 
 	user, err := u.userUC.Create(models.User{
@@ -68,7 +69,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		Avatar:    config.DefaultAvatar,
 	})
 	if err != nil {
-		return nil, nil, fmt.Errorf("cant create user: %w", err)
+		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
 
 	// TODO update mail!!!
@@ -79,7 +80,8 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 
 	session, err := u.sessionUC.CreateSession(user.UserID)
 	if err != nil {
-		return nil, nil, auth.ErrFailedCreateSession
+		//надо ли тут откатить прошлое ?
+		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
 
 	return &models.AuthResponse{

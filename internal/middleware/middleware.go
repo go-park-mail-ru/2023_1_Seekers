@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
 	"net/http"
 )
@@ -46,14 +47,12 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(config.CookieName)
 		if err != nil {
-			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedAuth, err)
-			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedAuth], err, wrappedErr)
+			pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 			return
 		}
 		session, err := m.sUC.GetSession(cookie.Value)
 		if err != nil {
-			wrappedErr := fmt.Errorf("%v: %w", auth.ErrFailedGetSession, err)
-			pkg.HandleError(w, r, auth.Errors[auth.ErrFailedGetSession], err, wrappedErr)
+			pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedGetSession, err.Error()))
 			return
 		}
 

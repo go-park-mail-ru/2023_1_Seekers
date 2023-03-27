@@ -2,13 +2,13 @@ package redis
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
-	log "github.com/sirupsen/logrus"
 	"strconv"
 )
 
@@ -17,10 +17,7 @@ type sessionsDB struct {
 }
 
 func NewSessionRepo(redisClient *redis.Client) auth.SessionRepoI {
-	err := redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
-	if err != nil {
-		log.Fatalf("failed init redis client, add default session : %v", err)
-	}
+	redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
 	return &sessionsDB{
 		redisSessions: redisClient,
 	}
@@ -29,11 +26,11 @@ func NewSessionRepo(redisClient *redis.Client) auth.SessionRepoI {
 func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
 	value, err := pkg.String(config.CookieLen)
 	if err != nil {
-		return nil, fmt.Errorf("cant create session: %w", err)
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, "cant generate cookie")
 	}
 	err = sDb.redisSessions.Set(context.Background(), value, uID, config.CookieTTL).Err()
 	if err != nil {
-		return nil, err
+		return nil, pkgErrors.WithMessagef(errors.ErrInternal, "cant set cookie : %v", err.Error())
 	}
 
 	return &models.Session{
@@ -45,7 +42,7 @@ func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
 func (sDb *sessionsDB) DeleteSession(sessionID string) error {
 	err := sDb.redisSessions.Del(context.Background(), sessionID).Err()
 	if err != nil {
-		return err
+		return pkgErrors.WithMessagef(errors.ErrFailedDeleteSession, "delete cookie %v", err.Error())
 	}
 
 	return nil
@@ -54,11 +51,11 @@ func (sDb *sessionsDB) DeleteSession(sessionID string) error {
 func (sDb *sessionsDB) GetSession(sessionID string) (*models.Session, error) {
 	uIDstr, err := sDb.redisSessions.Get(context.Background(), sessionID).Result()
 	if err != nil {
-		return nil, err
+		return nil, pkgErrors.WithMessagef(errors.ErrFailedGetSession, "get cookie %v", err.Error())
 	}
 	uID, err := strconv.Atoi(uIDstr)
 	if err != nil {
-		return nil, err
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return &models.Session{
