@@ -41,7 +41,7 @@ var Codes = map[error]int{
 	ErrInternal:            http.StatusInternalServerError,
 	ErrTooShortPw:          http.StatusForbidden,
 	ErrInvalidEmail:        http.StatusUnauthorized,
-	ErrUserNotFound:        http.StatusUnauthorized,
+	ErrUserNotFound:        http.StatusNotFound,
 	ErrFailedGetUser:       http.StatusUnauthorized,
 	ErrGetFile:             http.StatusBadRequest,
 	ErrNoKey:               http.StatusBadRequest,
@@ -52,7 +52,7 @@ var Codes = map[error]int{
 	ErrFolderNotFound:      http.StatusNotFound,
 	ErrMessageNotFound:     http.StatusNotFound,
 	ErrNoValidEmails:       http.StatusBadRequest,
-	ErrWrongContentType:    http.StatusForbidden,
+	ErrWrongContentType:    http.StatusBadRequest,
 	ErrFailedAuth:          http.StatusUnauthorized,
 }
 

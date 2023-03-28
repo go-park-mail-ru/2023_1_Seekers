@@ -1,10 +1,8 @@
 package models
 
-//db
-
 type Folder struct {
-	FolderID       uint64 `json:"folder_id"`
-	UserID         uint64 `json:"user_id"`
+	FolderID       uint64 `json:"folder_id" gorm:"primaryKey"`
+	UserID         uint64 `json:"-"`
 	LocalName      string `json:"folder_slug"`
 	Name           string `json:"name"`
 	MessagesUnseen int    `json:"messages_unseen"`
@@ -31,26 +29,6 @@ type FormMessage struct {
 	Text             string   `json:"text" validate:"required"`
 	ReplyToMessageID *uint64  `json:"reply_to"`
 }
-
-//type IncomingMessage struct {
-//	MessageID    uint64 `json:"message_id"`
-//	FromUser     string `json:"from_user"`
-//	CreatingDate string `json:"creating_date"`
-//	Title        string `json:"title"`
-//	Text         string `json:"text"`
-//	Read         bool   `json:"read"`
-//	Favorite     bool   `json:"favorite"`
-//}
-//
-//type OutgoingMessage struct {
-//	MessageID    uint64   `json:"message_id"`
-//	ToUsers      []string `json:"to_users"`
-//	CreatingDate string   `json:"creating_date"`
-//	Title        string   `json:"title"`
-//	Text         string   `json:"text"`
-//	Read         bool     `json:"read"`
-//	Favorite     bool     `json:"favorite"`
-//}
 
 type FolderResponse struct {
 	Folder   Folder        `json:"folder"`
