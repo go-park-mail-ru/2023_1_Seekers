@@ -22,6 +22,14 @@ func New(repoMail mail.RepoI, repoUser user.RepoI) mail.UseCaseI {
 	}
 }
 
+var defaultFolderNames = map[string]string{
+	"inbox":  "Входящие",
+	"outbox": "Исходящие",
+	"trash":  "Корзина",
+	"drafts": "Черновики",
+	"spam":   "Спам",
+}
+
 func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
 	folders, err := uc.repoMail.SelectFoldersByUser(userID)
 	if err != nil {
@@ -81,6 +89,23 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models
 	}
 
 	return messages, nil
+}
+
+func (uc *UseCase) CreateDefaultFolders(userID uint64) ([]models.Folder, error) {
+	for key, value := range defaultFolderNames {
+		currentFolder := models.Folder{
+			UserID:    userID,
+			LocalName: key,
+			Name:      value,
+		}
+
+		_, err := uc.repoMail.InsertFolder(&currentFolder)
+		if err != nil {
+			return []models.Folder{}, pkgErrors.Wrap(err, "create default folders")
+		}
+	}
+
+	return uc.GetFolders(userID)
 }
 
 func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
@@ -235,9 +260,9 @@ func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error {
 }
 
 func (uc *UseCase) insertMessageToFolder(userID uint64, folderSlug string, message *models.MessageInfo) error {
-	folder, err := uc.repoMail.SelectFolderByUserNFolder(userID, folderSlug)
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
-		return pkgErrors.Wrap(err, "insert message to folder : get folder by Uid and Fid")
+		return pkgErrors.Wrap(err, "insert message to folder")
 	}
 
 	return uc.repoMail.InsertMessageToBoxes(userID, folder.FolderID, message)

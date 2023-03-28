@@ -65,9 +65,6 @@ func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, err
 
 	tx := m.db.Where("user_id = ?", userID).Find(&folders)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -95,9 +92,6 @@ func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID u
 	tx := m.db.Model(Box{}).Select("user_id").Where("message_id = ? AND user_id != ?", messageID, fromUserID).
 		Scan(&recipientsIDs)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -143,7 +137,12 @@ func convertToMessageDB(message *models.MessageInfo) Message {
 func (m mailRepository) InsertMessageToBoxes(userID uint64, folderID uint64, message *models.MessageInfo) error {
 	convMsg := convertToBoxDB(userID, folderID, message)
 	tx := m.db.Create(&convMsg)
-	return tx.Error
+
+	if err := tx.Error; err != nil {
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
 }
 
 func convertToBoxDB(userID uint64, folderID uint64, message *models.MessageInfo) Box {
@@ -155,6 +154,16 @@ func convertToBoxDB(userID uint64, folderID uint64, message *models.MessageInfo)
 		Favorite:  message.Favorite,
 		Deleted:   message.Deleted,
 	}
+}
+
+func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) {
+	tx := m.db.Create(&folder)
+
+	if err := tx.Error; err != nil {
+		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return folder.FolderID, nil
 }
 
 func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error {

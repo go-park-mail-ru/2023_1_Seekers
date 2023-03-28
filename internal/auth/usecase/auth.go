@@ -72,11 +72,15 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
 
-	// TODO update mail!!!
-	//err = u.mailUC.SendWelcomeMessage(user.Email)
-	//if err != nil {
-	//	return nil, nil, auth.ErrInternalHelloMsg
-	//}
+	_, err = u.mailUC.CreateDefaultFolders(user.UserID)
+	if err != nil {
+		return nil, nil, pkgErrors.Wrap(err, "sign up")
+	}
+
+	err = u.mailUC.SendWelcomeMessage(user.Email)
+	if err != nil {
+		return nil, nil, pkgErrors.Wrap(err, "sign up")
+	}
 
 	session, err := u.sessionUC.CreateSession(user.UserID)
 	if err != nil {

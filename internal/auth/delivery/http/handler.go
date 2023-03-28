@@ -49,17 +49,17 @@ func delCookie(w http.ResponseWriter) {
 // SignUp godoc
 // @Summary      SignUp
 // @Description  user sign up
-// @Tags     users
+// @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body models.FormSignUp true "user info"
-// @Success  200 {object} models.SignUpResponse "user created"
-// @Failure 401 {object} errors.JSONError "passwords dont match"
+// @Success  200 {object} models.AuthResponse "user created"
+// @Failure 401 {object} errors.JSONError "passwords don`t match"
+// @Failure 401 {object} errors.JSONError "invalid login"
 // @Failure 403 {object} errors.JSONError "invalid form"
 // @Failure 403 {object} errors.JSONError "password too short"
 // @Failure 409 {object} errors.JSONError "user already exists"
-// @Failure 500 {object} errors.JSONError "failed to create profile"
-// @Failure 500 {object} errors.JSONError "failed to create session"
+// @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /signup [post]
 func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -94,14 +94,15 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 // SignIn godoc
 // @Summary      SignIn
 // @Description  user sign in
-// @Tags     users
+// @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body models.FormLogin true "user info"
-// @Success  200 {object} models.SignInResponse "user created"
+// @Success  200 {object} models.AuthResponse "success sign in"
+// @Failure 401 {object} errors.JSONError "invalid login"
 // @Failure 401 {object} errors.JSONError "wrong password"
 // @Failure 403 {object} errors.JSONError "invalid form"
-// @Failure 500 {object} errors.JSONError "failed to create session"
+// @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /signin [post]
 func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -131,12 +132,11 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // Logout godoc
 // @Summary      Logout
 // @Description  user log out
-// @Tags     users
+// @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 "success logout"
-// @Failure 401 {object} errors.JSONError "failed auth"
-// @Failure 401 {object} errors.JSONError "failed get session"
+// @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
