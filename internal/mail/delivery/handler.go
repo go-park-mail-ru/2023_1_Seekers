@@ -32,8 +32,9 @@ func New(uc mail.UseCaseI) mail.HandlersI {
 // @Param slug path string true "FolderSlug"
 // @Success  200 {object} models.FolderResponse "success get list of folder messages"
 // @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
 // @Failure 404 {object} errors.JSONError "folder not found"
-// @Failure 404 {object} errors.JSONError "invalid url address"
+// @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /folder/{slug} [get]
 func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
@@ -75,7 +76,7 @@ func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Success  200 {object} models.FoldersResponse "success get list of outgoing messages"
 // @Failure 400 {object} errors.JSONError "failed to get user"
-// @Failure 404 {object} errors.JSONError "folder not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /folders/ [get]
 func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
@@ -103,11 +104,12 @@ func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Param id path int true "id"
-// @Success  200 {object} models.FolderResponse "success get list of folder messages"
+// @Success  200 {object} models.MessageResponse "success get messages"
 // @Failure 400 {object} errors.JSONError "failed to get user"
-// @Failure 404 {object} errors.JSONError "folder not found"
-// @Failure 404 {object} errors.JSONError "invalid url address"
-// @Router   /folder/{slug} [get]
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id} [get]
 func (del *delivery) GetMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -133,6 +135,20 @@ func (del *delivery) GetMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// SendMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success send message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "no valid emails"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "folder not found"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/send [post]
 func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -175,6 +191,19 @@ func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ReadMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Param id path int true "id"
+// @Success  200 {object} models.MessageResponse "success read message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/read [post]
 func (del *delivery) ReadMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -200,6 +229,19 @@ func (del *delivery) ReadMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UnreadMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Param id path int true "id"
+// @Success  200 {object} models.MessageResponse "success unread message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/unread [post]
 func (del *delivery) UnreadMessage(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
