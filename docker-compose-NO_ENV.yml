@@ -14,7 +14,13 @@ services:
     volumes:
       - $GOPATH/pkg/mod:/go/pkg/mod
     build: ./
-    network_mode: "host"
+    networks:
+      - minio-net
+      - pg-net
+      - cache-net
+#    network_mode: "host"
+    ports:
+      - "8001:8001"
     environment:
       REDIS_HOST: "localhost"
       REDIS_PORT: "6379"
@@ -36,8 +42,10 @@ services:
       POSTGRES_DB: "postgres"
     networks:
       - pg-net
+      - minio-net
+      - cache-net
     ports:
-      - 5432:5432
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
@@ -98,6 +106,8 @@ services:
     #    restart: always
     ports:
       - '6379:6379'
+    networks:
+      - cache-net
     environment:
       REDIS_PASSWORD: "no_env_pw"
     command: redis-server --requirepass "no_env_pw"
@@ -116,6 +126,10 @@ networks:
     name: minio-net
     external: false
   pg-net:
+    driver: bridge
+    name: pg-net
+    external: false
+  cache-net:
     driver: bridge
     name: pg-net
     external: false
