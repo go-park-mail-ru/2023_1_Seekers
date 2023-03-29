@@ -89,7 +89,6 @@ services:
       sleep 3;
       /usr/bin/mc config host add minioClient http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       /usr/bin/mc mb minioClient/avatars; 
-      sleep 3;
       exit 0;
       "
   cache:
@@ -110,9 +109,8 @@ volumes:
     driver: local
 
 networks:
-  minio-net:
-    driver: bridge
-    name: minio-net
-  pg-net:
-    driver: bridge
-    name: pg-net
+  my_network:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
