@@ -1,10 +1,9 @@
-package minioS3
+package repository
 
 import (
 	"bytes"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsS3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -23,24 +22,7 @@ type fileDB struct {
 	downloaderS3 *s3manager.Downloader
 }
 
-func New() file_storage.RepoI {
-	s, err := session.NewSession(
-		&aws.Config{
-			Endpoint:         aws.String(config.S3Endpoint),
-			Region:           aws.String(config.S3Region),
-			DisableSSL:       aws.Bool(true),
-			S3ForcePathStyle: aws.Bool(true),
-			Credentials: credentials.NewStaticCredentials(
-				os.Getenv(config.S3AccessKeyEnv),
-				os.Getenv(config.S3ASecretKeyEnv),
-				"",
-			),
-		},
-	)
-	if err != nil {
-		logrus.Fatalf("Failed create S3 session : %v", err)
-	}
-
+func New(s *session.Session) file_storage.RepoI {
 	db := &fileDB{
 		s3manager.NewUploader(s),
 		s3manager.NewDownloader(s),

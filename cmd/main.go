@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
 	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
-	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository/minioS3"
+	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository"
 	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
 	_mailHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery"
 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/postgres"
@@ -66,10 +69,27 @@ func main() {
 		log.Fatalf("failed connect to redis : %v", err)
 	}
 
+	s3Session, err := session.NewSession(
+		&aws.Config{
+			Endpoint:         aws.String(config.S3Endpoint),
+			Region:           aws.String(config.S3Region),
+			DisableSSL:       aws.Bool(true),
+			S3ForcePathStyle: aws.Bool(true),
+			Credentials: credentials.NewStaticCredentials(
+				os.Getenv(config.S3AccessKeyEnv),
+				os.Getenv(config.S3ASecretKeyEnv),
+				"",
+			),
+		},
+	)
+	if err != nil {
+		log.Fatalf("Failed create S3 session : %v", err)
+	}
+
 	userRepo := _userRepo.New(db)
 	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
 	mailRepo := _mailRepo.New(db)
-	fStorageRepo := _fStorageRepo.New()
+	fStorageRepo := _fStorageRepo.New(s3Session)
 
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo, fStorageUC)

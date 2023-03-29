@@ -9,3 +9,6 @@ prune:
 
 cov:
 	./scripts/coverage.sh
+	
+clean_logs:
+	sudo rm -rf logs/
