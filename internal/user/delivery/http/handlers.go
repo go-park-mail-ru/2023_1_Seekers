@@ -76,6 +76,27 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, r, http.StatusOK, info)
 }
 
+func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	if !ok {
+		pkg.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	u, err := h.userUC.GetByID(userID)
+	if err != nil {
+		pkg.HandleError(w, r, err)
+		return
+	}
+	info, err := h.userUC.GetInfo(u.UserID)
+	if err != nil {
+		pkg.HandleError(w, r, err)
+		return
+	}
+
+	pkg.SendJSON(w, r, http.StatusOK, info)
+}
+
 // EditInfo godoc
 // @Summary      EditInfo
 // @Description  edit info about user

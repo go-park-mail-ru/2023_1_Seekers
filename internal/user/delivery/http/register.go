@@ -17,4 +17,5 @@ func RegisterHTTPRoutes(r *mux.Router, h user.HandlersI, m *middleware.Middlewar
 		Methods(http.MethodGet).Queries(config.RouteUserAvatarQueryEmail, "{email}")
 	r.HandleFunc(config.RouteUserInfo, h.GetInfo).
 		Methods(http.MethodGet).Queries(config.RouteUserInfoQueryEmail, "{email}")
+	r.HandleFunc(config.RouteUserInfo, m.CheckAuth(h.GetPersonalInfo)).Methods(http.MethodGet)
 }

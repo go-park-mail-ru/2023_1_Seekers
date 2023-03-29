@@ -8,6 +8,7 @@ import (
 type HandlersI interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	GetInfo(w http.ResponseWriter, r *http.Request)
+	GetPersonalInfo(w http.ResponseWriter, r *http.Request)
 	EditInfo(w http.ResponseWriter, r *http.Request)
 	EditPw(w http.ResponseWriter, r *http.Request)
 	EditAvatar(w http.ResponseWriter, r *http.Request)
