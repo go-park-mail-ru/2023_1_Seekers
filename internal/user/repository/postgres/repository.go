@@ -18,7 +18,7 @@ func New(db *gorm.DB) user.RepoI {
 	}
 }
 
-func (uDB *userDB) Create(user models.User) (*models.User, error) {
+func (uDB *userDB) Create(user *models.User) (*models.User, error) {
 	tx := uDB.db.Create(&user)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrDuplicatedKey) {
@@ -27,7 +27,7 @@ func (uDB *userDB) Create(user models.User) (*models.User, error) {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (uDB *userDB) EditInfo(ID uint64, info models.UserInfo) error {

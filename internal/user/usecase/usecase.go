@@ -30,7 +30,7 @@ func validMailAddress(email string) (string, bool) {
 	return addr.Address, true
 }
 
-func (u *useCase) Create(user models.User) (*models.User, error) {
+func (u *useCase) Create(user *models.User) (*models.User, error) {
 	validate := validator.New()
 	err := validate.Struct(user)
 	if err != nil {

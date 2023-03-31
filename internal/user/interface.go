@@ -16,7 +16,7 @@ type HandlersI interface {
 }
 
 type UseCaseI interface {
-	Create(user models.User) (*models.User, error)
+	Create(user *models.User) (*models.User, error)
 	Delete(ID uint64) error
 	GetByID(ID uint64) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
@@ -28,7 +28,7 @@ type UseCaseI interface {
 }
 
 type RepoI interface {
-	Create(user models.User) (*models.User, error)
+	Create(user *models.User) (*models.User, error)
 	EditInfo(ID uint64, info models.UserInfo) error
 	Delete(ID uint64) error
 	GetByID(ID uint64) (*models.User, error)

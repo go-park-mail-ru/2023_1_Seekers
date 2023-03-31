@@ -61,7 +61,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		return nil, nil, errors.ErrInvalidLogin
 	}
 
-	user, err := u.userUC.Create(models.User{
+	user, err := u.userUC.Create(&models.User{
 		Email:     email,
 		Password:  form.Password,
 		FirstName: form.FirstName,
