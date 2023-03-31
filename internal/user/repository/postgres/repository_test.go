@@ -68,3 +68,88 @@ func TestRepositoryCreateUser(t *testing.T) {
 	err = mock.ExpectationsWereMet()
 	assert.NoError(t, err)
 }
+
+func TestRepositoryEditInfo(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if db == nil {
+		t.Fatal("mock db is null")
+	}
+
+	if mock == nil {
+		t.Fatal("sqlmock is null")
+	}
+	defer db.Close()
+
+	dial := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_test_db",
+		DriverName:           "postgres",
+		Conn:                 db,
+		PreferSimpleProtocol: true,
+	})
+	gdb, err := gorm.Open(dial, &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gdb == nil {
+		t.Fatal("gorm db is nil")
+	}
+
+	gdb.Logger.LogMode(logger.Info)
+	mockUser := models.User{
+		Email:     "test@test.com",
+		Password:  "123456",
+		FirstName: "test",
+		LastName:  "test",
+		Avatar:    "default_avatar",
+	}
+	mock.ExpectBegin()
+
+	mock.ExpectQuery(regexp.QuoteMeta(
+		`INSERT INTO "mail"."users" ("email","password","first_name","last_name","avatar") VALUES ($1,$2,$3,$4,$5) RETURNING "user_id"`)).
+		WithArgs(mockUser.Email, mockUser.Password, mockUser.FirstName, mockUser.LastName, mockUser.Avatar).
+		WillReturnRows(sqlmock.NewRows([]string{"user_id"}).AddRow(1))
+
+	mock.ExpectCommit()
+
+	pgRepo := New(gdb)
+
+	usr, err := pgRepo.Create(&mockUser)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, usr, &mockUser)
+	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
+
+func TestRepositoryDelete(t *testing.T) {
+
+}
+
+func TestRepositoryGetByID(t *testing.T) {
+
+}
+
+func TestRepositoryGetByEmail(t *testing.T) {
+
+}
+
+func TestRepositorySetAvatar(t *testing.T) {
+
+}
+
+func TestRepositoryEditPw(t *testing.T) {
+
+}
+
+func TestRepositoryGetInfoByID(t *testing.T) {
+
+}
+
+func TestRepositoryGetInfoByEmail(t *testing.T) {
+
+}
