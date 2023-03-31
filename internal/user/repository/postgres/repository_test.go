@@ -41,7 +41,7 @@ func TestRepositoryCreateUser(t *testing.T) {
 	}
 
 	gdb.Logger.LogMode(logger.Info)
-	user := models.User{
+	mockUser := models.User{
 		Email:     "test@test.com",
 		Password:  "123456",
 		FirstName: "test",
@@ -52,19 +52,19 @@ func TestRepositoryCreateUser(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(
 		`INSERT INTO "mail"."users" ("email","password","first_name","last_name","avatar") VALUES ($1,$2,$3,$4,$5) RETURNING "user_id"`)).
-		WithArgs(user.Email, user.Password, user.FirstName, user.LastName, user.Avatar).
+		WithArgs(mockUser.Email, mockUser.Password, mockUser.FirstName, mockUser.LastName, mockUser.Avatar).
 		WillReturnRows(sqlmock.NewRows([]string{"user_id"}).AddRow(1))
 
 	mock.ExpectCommit()
 
 	pgRepo := New(gdb)
 
-	usr, err := pgRepo.Create(&user)
+	usr, err := pgRepo.Create(&mockUser)
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, usr, user)
+	assert.Equal(t, usr, &mockUser)
 	err = mock.ExpectationsWereMet()
 	assert.NoError(t, err)
 }
