@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/gorilla/mux"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -61,7 +62,8 @@ func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/info [get]
 func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get(config.RouteUserInfoQueryEmail)
+	vars := mux.Vars(r)
+	email := vars[config.RouteUserInfoQueryEmail]
 	u, err := h.userUC.GetByEmail(email)
 	if err != nil {
 		pkg.HandleError(w, r, err)

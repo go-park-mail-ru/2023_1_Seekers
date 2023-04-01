@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/aws/aws-sdk-go v1.44.224
-	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/go-playground/validator/v10 v10.11.2
+	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.2
