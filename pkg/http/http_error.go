@@ -1,6 +1,7 @@
-package pkg
+package http
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErr "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -8,7 +9,7 @@ import (
 )
 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
-	logger, ok := r.Context().Value(ContextHandlerLog).(*Logger)
+	logger, ok := r.Context().Value(pkg.ContextHandlerLog).(*pkg.Logger)
 	if !ok {
 		log.Error("failed to get logger for handler", r.URL.Path)
 		log.Error(err)

@@ -45,6 +45,7 @@ const (
 	RouteSignup = "/api/v1/signup"
 	RouteLogout = "/api/v1/logout"
 	RouteCSRF   = "/api/v1/csrf"
+	RoutePw     = "/api/v1/user/pw"
 
 	// MailRoutes
 	RouteGetFolderMessages = "/api/v1/folder/{slug}"
@@ -61,12 +62,12 @@ const (
 	// UserRoutes
 	RouteUser                 = "/api/v1/user"
 	RouteUserInfo             = "/api/v1/user/info"
-	RouteUserPw               = "/api/v1/user/pw"
 	RouteUserAvatar           = "/api/v1/user/avatar"
 	RouteUserAvatarQueryEmail = "email"
 	RouteUserInfoQueryEmail   = "email"
 
 	PasswordMinLen   = 5
+	PasswordSaltLen  = 10
 	DefaultAvatar    = "default_avatar.png"
 	DefaultAvatarDir = "./cmd/config/static/"
 	PostDomain       = "mailbox.ru"

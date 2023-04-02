@@ -28,7 +28,7 @@ services:
     image: postgres:latest
     command: ["postgres",
               "-c", "log_directory=/var/log/postgresql",
-              "-c", "logging_collector=on",
+#              "-c", "logging_collector=on",
               "-c", "log_statement=all"]
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

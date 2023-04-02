@@ -5,8 +5,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"strconv"
@@ -24,7 +24,7 @@ func NewSessionRepo(redisClient *redis.Client) auth.SessionRepoI {
 }
 
 func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
-	value, err := pkg.String(config.CookieLen)
+	value, err := rand.String(config.CookieLen)
 	if err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, "cant generate cookie")
 	}

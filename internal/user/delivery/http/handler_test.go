@@ -75,10 +75,6 @@ func TestHandlers_EditInfo(t *testing.T) {
 
 }
 
-func TestHandlers_EditPw(t *testing.T) {
-
-}
-
 func TestHandlers_GetAvatar(t *testing.T) {
 
 }

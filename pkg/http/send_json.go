@@ -1,8 +1,9 @@
-package pkg
+package http
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"net/http"
 )
 
@@ -13,7 +14,7 @@ func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any
 		return
 	}
 
-	w.Header().Set("Content-Type", ContentTypeJSON)
+	w.Header().Set("Content-Type", pkg.ContentTypeJSON)
 	w.WriteHeader(status)
 
 	_, err = w.Write(dataJSON)

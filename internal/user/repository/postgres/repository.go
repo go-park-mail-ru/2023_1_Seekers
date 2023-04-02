@@ -19,11 +19,13 @@ func New(db *gorm.DB) user.RepoI {
 }
 
 func (uDB *userDB) Create(user *models.User) (*models.User, error) {
+	_, err := uDB.GetByEmail(user.Email)
+	if err == nil {
+		return nil, errors.ErrUserExists
+	}
+
 	tx := uDB.db.Create(&user)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrDuplicatedKey) {
-			return nil, pkgErrors.WithMessage(errors.ErrUserExists, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
 	"net/http"
@@ -47,12 +48,12 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(config.CookieName)
 		if err != nil {
-			pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+			http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 			return
 		}
 		session, err := m.sUC.GetSession(cookie.Value)
 		if err != nil {
-			pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedGetSession, err.Error()))
+			http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedGetSession, err.Error()))
 			return
 		}
 
@@ -67,18 +68,18 @@ func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(config.CookieName)
 		if err != nil {
-			pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+			http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 			return
 		}
 		csrfToken := r.Header.Get(config.CSRFHeader)
 		if csrfToken == "" {
-			pkg.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
+			http2.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
 			return
 		}
 
 		err = pkg.CheckCSRF(cookie.Value, csrfToken)
 		if err != nil {
-			pkg.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
+			http2.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
 			return
 		}
 		h.ServeHTTP(w, r)

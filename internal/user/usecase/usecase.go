@@ -7,6 +7,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
 	"net/mail"
@@ -36,16 +37,14 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	if err != nil {
 		return nil, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()) //fmt.Errorf("failed to create user: %w", err)
 	}
-	if len(user.Password) < config.PasswordMinLen {
-		return nil, errors.ErrTooShortPw
+	if err = validation.Password(user.Password); err != nil {
+		return nil, pkgErrors.Wrap(err, "create")
 	}
+
 	if _, ok := validMailAddress(user.Email); !ok {
 		return nil, errors.ErrInvalidEmail
 	}
-	_, err = u.GetByEmail(user.Email)
-	if err == nil {
-		return nil, errors.ErrUserExists
-	}
+
 	return u.userRepo.Create(user)
 }
 
@@ -97,13 +96,6 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 		return nil, pkgErrors.Wrap(err, "edit info")
 	}
 	return &info, nil
-}
-func (u *useCase) EditPw(ID uint64, pw models.EditPasswordRequest) error {
-	err := u.userRepo.EditPw(ID, pw.Password)
-	if err != nil {
-		return pkgErrors.Wrap(err, "edit password")
-	}
-	return nil
 }
 
 func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {

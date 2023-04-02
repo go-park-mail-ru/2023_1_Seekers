@@ -6,7 +6,7 @@ CREATE TABLE mail.users
     here_since timestamp with time zone NOT NULL DEFAULT current_timestamp,
     is_deleted boolean                  NOT NULL DEFAULT false,
     email      text                     NOT NULL,
-    password   text                     NOT NULL,
+    password   bytea                     NOT NULL,
     first_name text                     NOT NULL,
     last_name  text                     NOT NULL,
     avatar     text                     NOT NULL,

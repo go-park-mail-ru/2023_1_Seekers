@@ -1,4 +1,4 @@
-package pkg
+package image
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
