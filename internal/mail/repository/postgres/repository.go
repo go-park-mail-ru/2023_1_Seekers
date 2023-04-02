@@ -113,10 +113,10 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 	return message, nil
 }
 
-func (m mailRepository) InsertMessageToMessages(message *models.MessageInfo) (uint64, error) {
-	convMsg := convertToMessageDB(message)
+func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *models.MessageInfo, tx *gorm.DB) (uint64, error) {
+	convMsg := convertToMessageDB(fromUserID, message)
 
-	tx := m.db.Select("from_user_id", "title", "text", "created_at", "reply_to_message_id").Create(&convMsg)
+	tx = tx.Select("from_user_id", "title", "text", "created_at", "reply_to_message_id").Create(&convMsg)
 	if err := tx.Error; err != nil {
 		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -124,9 +124,9 @@ func (m mailRepository) InsertMessageToMessages(message *models.MessageInfo) (ui
 	return convMsg.MessageID, nil
 }
 
-func convertToMessageDB(message *models.MessageInfo) Message {
+func convertToMessageDB(fromUserID uint64, message *models.MessageInfo) Message {
 	return Message{
-		FromUserID:       message.FromUser.UserID,
+		FromUserID:       fromUserID,
 		Title:            message.Title,
 		Text:             message.Text,
 		CreatedAt:        message.CreatedAt,
@@ -134,15 +134,37 @@ func convertToMessageDB(message *models.MessageInfo) Message {
 	}
 }
 
-func (m mailRepository) InsertMessageToBoxes(userID uint64, folderID uint64, message *models.MessageInfo) error {
+func (m mailRepository) insertMessageToBoxes(userID uint64, folderID uint64, message *models.MessageInfo, tx *gorm.DB) error {
 	convMsg := convertToBoxDB(userID, folderID, message)
-	tx := m.db.Create(&convMsg)
 
+	tx = tx.Create(&convMsg)
 	if err := tx.Error; err != nil {
-		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+		return pkgErrors.WithMessage(errors.ErrInternal, tx.Error.Error())
 	}
 
 	return nil
+}
+
+func (m mailRepository) InsertMessage(fromUserID uint64, message *models.MessageInfo, user2folder []models.User2Folder) error {
+	return m.db.Transaction(func(tx *gorm.DB) error {
+		messageID, err := m.insertMessageToMessages(fromUserID, message, tx)
+		if err != nil {
+			return pkgErrors.Wrap(err, "insert message : insert to messages")
+		}
+
+		message.MessageID = messageID
+		message.Seen = true
+		for _, elem := range user2folder {
+			err = m.insertMessageToBoxes(elem.UserID, elem.FolderID, message, tx)
+			if err != nil {
+				return pkgErrors.Wrap(err, "insert message : insert to boxes")
+			}
+
+			message.Seen = false
+		}
+
+		return nil
+	})
 }
 
 func convertToBoxDB(userID uint64, folderID uint64, message *models.MessageInfo) Box {

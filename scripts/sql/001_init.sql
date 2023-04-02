@@ -93,3 +93,52 @@ CREATE TABLE mail.boxes
     CONSTRAINT fk_box_messages_folder_id FOREIGN KEY (folder_id)
         REFERENCES mail.folders ON DELETE RESTRICT INITIALLY DEFERRED
 );
+
+-- триггер на увеличение непрочитанного и общего числа сообщений
+CREATE OR REPLACE FUNCTION increment_count_messages()
+RETURNS TRIGGER 
+AS 
+$BODY$ 
+	BEGIN
+		UPDATE mail.folders
+		SET messages_count = messages_count + 1,
+			messages_unseen = 
+				CASE 
+				WHEN local_name != 'outbox' THEN messages_unseen + 1
+				ELSE messages_unseen
+				END
+		WHERE folders.folder_id = NEW.folder_id;	
+		RETURN NEW;
+	END;
+$BODY$ LANGUAGE plpgsql;
+
+-- срабатывает после вставки записей в boxes
+CREATE TRIGGER inc_cnt_after_ins_box
+AFTER INSERT ON boxes 
+FOR EACH ROW 
+EXECUTE PROCEDURE increment_count_messages();
+
+
+-- триггер на изменение (+1 или -1) количества непрочитанных сообщений
+CREATE OR REPLACE FUNCTION update_count_messages()
+RETURNS TRIGGER 
+AS 
+$BODY$ 
+	BEGIN
+		UPDATE mail.folders
+		SET	messages_unseen = 
+				CASE 
+				WHEN NEW.seen = true THEN messages_unseen - 1
+				ELSE messages_unseen + 1
+				END
+		WHERE folders.folder_id = NEW.folder_id;	
+		RETURN NEW;
+	END;
+$BODY$ LANGUAGE plpgsql;
+
+-- срабатывает после обновления столбца seen и boxes
+CREATE TRIGGER update_cnt_after_update_seen
+AFTER UPDATE ON boxes 
+FOR EACH ROW 
+WHEN (OLD.seen IS DISTINCT FROM NEW.seen)
+EXECUTE PROCEDURE update_count_messages();
