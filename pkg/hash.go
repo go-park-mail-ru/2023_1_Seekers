@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
 	pkgErr "github.com/pkg/errors"
@@ -32,7 +33,10 @@ func HashPw(password string) (string, error) {
 }
 
 func ComparePw2Hash(password, hash string) bool {
+	if len(hash) < config.PasswordSaltLen {
+		return false
+	}
 	salt := hash[0:config.PasswordSaltLen]
 	newHash := Hash([]byte(salt), password)
-	return password == string(newHash)
+	return bytes.Equal(newHash, []byte(hash))
 }

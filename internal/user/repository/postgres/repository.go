@@ -30,6 +30,7 @@ func (uDB *userDB) Create(user *models.User) (*models.User, error) {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
+	user.UserID = dbUser.UserID
 	return user, nil
 }
 

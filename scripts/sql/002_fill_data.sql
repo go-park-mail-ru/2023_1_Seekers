@@ -1,9 +1,9 @@
 insert into mail.users(is_deleted, email, password, first_name, last_name, avatar) values
-(false, 'support@mailbox.ru', 'very_difficult_pw', 'Support', 'Testov', 'default_avatar.png'),
-(false, 'test@mailbox.ru', '12345', 'Michail', 'Testov', 'default_avatar.png'),
-(false, 'gena@mailbox.ru', '54321', 'Ivan', 'Ivanov', 'default_avatar.png'),
-(false, 'max@mailbox.ru', '13795', 'Michail', 'Sidorov', 'default_avatar.png'),
-(false, 'valera@mailbox.ru', '12345', 'Valera', 'Testov', 'default_avatar.png');
+(false, 'support@mailbox.ru', '\x344b4f7968757548475a905c4afcff00a583d73bd6e98e612225a74563da5478eb10b08dcfff4280bf13'::bytea, 'Support', 'Testov', 'default_avatar.png'),
+(false, 'test@mailbox.ru', '\x344b4f7968757548475af7b7075ce8720f3ddb16b80c6603b8c46d91d410479219489f516038b514bdf7'::bytea, 'Michail', 'Testov', 'default_avatar.png'),
+(false, 'gena@mailbox.ru', '\x344b4f7968757548475a16d5a64e9ef192f45a78239b7429fb886e468a6c01e94f238f884d29986f8fa5'::bytea, 'Ivan', 'Ivanov', 'default_avatar.png'),
+(false, 'max@mailbox.ru', '\x344b4f7968757548475afb7a9c8404720c9f041fe049f1cf6db37d269d06e15be8c3fee26e60ec1fd204'::bytea, 'Michail', 'Sidorov', 'default_avatar.png'),
+(false, 'valera@mailbox.ru', '\x344b4f7968757548475af7b7075ce8720f3ddb16b80c6603b8c46d91d410479219489f516038b514bdf7'::bytea, 'Valera', 'Testov', 'default_avatar.png');
 
 select * from mail.users;
 
