@@ -9,6 +9,7 @@ type HandlersI interface {
 	SignUp(w http.ResponseWriter, r *http.Request)
 	SignIn(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
+	GetCSRF(w http.ResponseWriter, r *http.Request)
 }
 
 type UseCaseI interface {

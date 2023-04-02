@@ -42,7 +42,6 @@ func CreateCSRF(cookie string) (string, error) {
 		return "", err
 	}
 	token := hex.EncodeToString(mac) + "." + strconv.FormatInt(csrfExpire, 10)
-	fmt.Println(token)
 	return token, nil
 }
 
@@ -63,6 +62,7 @@ func CheckCSRF(cookie string, csrfToken string) error {
 	if err != nil {
 		return err
 	}
+
 	if hmac.Equal(mac, tokenMAC) {
 		return nil
 	}
