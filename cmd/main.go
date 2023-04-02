@@ -108,7 +108,9 @@ func main() {
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
 	_userHandler.RegisterHTTPRoutes(router, userH, middleware)
 
-	router.Use(middleware.HandlerLogger)
+	router.Use(
+		//middleware.CheckCSRF,
+		middleware.HandlerLogger)
 	corsRouter := middleware.Cors(router)
 
 	server := http.Server{

@@ -168,6 +168,8 @@ func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	form.Sanitize()
+
 	validEmails, invalidEmails := del.uc.ValidateRecipients(form.Recipients)
 	form.Recipients = validEmails
 

@@ -1,5 +1,7 @@
 package models
 
+import "html"
+
 type Folder struct {
 	FolderID       uint64 `json:"folder_id" gorm:"primaryKey"`
 	UserID         uint64 `json:"-"`
@@ -28,6 +30,14 @@ type FormMessage struct {
 	Title            string   `json:"title" validate:"required"`
 	Text             string   `json:"text" validate:"required"`
 	ReplyToMessageID *uint64  `json:"reply_to"`
+}
+
+func (form *FormMessage) Sanitize() {
+	form.Title = html.EscapeString(form.Title)
+	form.Text = html.EscapeString(form.Text)
+	for i, s := range form.Recipients {
+		form.Recipients[i] = html.EscapeString(s)
+	}
 }
 
 type FolderResponse struct {

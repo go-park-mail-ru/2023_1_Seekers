@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -78,6 +79,17 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	pkg.SendJSON(w, r, http.StatusOK, info)
 }
 
+// GetPersonalInfo godoc
+// @Summary      GetPersonalInfo
+// @Description  get info about request creator
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Success 200 {object} models.UserInfo "success get user info"
+// @Failure 401 {object} errors.JSONError "failed get user"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/info [get]
 func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -106,7 +118,7 @@ func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success 200 {object} models.EditUserInfoResponse "success edit user info"
-// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 401 {object} errors.JSONError "failed to get user"
 // @Failure 403 {object} errors.JSONError "invalid form"
 // @Failure 404 {object} errors.JSONError "user not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
@@ -131,6 +143,9 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
+
+	form.Sanitize()
+
 	info, err := h.userUC.EditInfo(userID, form)
 	if err != nil {
 		pkg.HandleError(w, r, err)
@@ -170,6 +185,8 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
+
+	form.Sanitize()
 
 	err = h.userUC.EditPw(userID, form)
 	if err != nil {
@@ -242,8 +259,9 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/avatar [get]
 func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
+	sanitizer := bluemonday.UGCPolicy()
 	email := r.URL.Query().Get(config.RouteUserAvatarQueryEmail)
-	img, err := h.userUC.GetAvatar(email)
+	img, err := h.userUC.GetAvatar(sanitizer.Sanitize(email))
 	if err != nil {
 		pkg.HandleError(w, r, err)
 		return

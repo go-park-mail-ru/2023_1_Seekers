@@ -22,12 +22,12 @@ var (
 	ErrNoKey               = errors.New("no key")
 	ErrNoBucket            = errors.New("no bucket")
 	ErrInvalidURL          = errors.New("invalid url address")
-	ErrInvalidMessageForm  = errors.New("invalid message form")
 	ErrFolderNotFound      = errors.New("folder not found")
 	ErrMessageNotFound     = errors.New("message not found")
 	ErrNoValidEmails       = errors.New("no valid emails")
 	ErrWrongContentType    = errors.New("unsupported content type")
 	ErrFailedAuth          = errors.New("failed auth")
+	ErrWrongCSRF           = errors.New("wrong csrf token")
 )
 
 var Codes = map[error]int{
@@ -47,13 +47,12 @@ var Codes = map[error]int{
 	ErrNoKey:               http.StatusBadRequest,
 	ErrNoBucket:            http.StatusBadRequest,
 	ErrInvalidURL:          http.StatusBadRequest,
-	ErrFailedGetUser:       http.StatusBadRequest,
-	ErrInvalidMessageForm:  http.StatusBadRequest,
 	ErrFolderNotFound:      http.StatusNotFound,
 	ErrMessageNotFound:     http.StatusNotFound,
 	ErrNoValidEmails:       http.StatusBadRequest,
 	ErrWrongContentType:    http.StatusBadRequest,
 	ErrFailedAuth:          http.StatusUnauthorized,
+	ErrWrongCSRF:           http.StatusBadRequest,
 }
 
 func Code(err error) int {

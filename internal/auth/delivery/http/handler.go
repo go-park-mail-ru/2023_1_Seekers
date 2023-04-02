@@ -81,6 +81,8 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	form.Sanitize()
+
 	response, session, err := h.authUC.SignUp(form)
 	if err != nil {
 		pkg.HandleError(w, r, err)
@@ -140,5 +142,29 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Router   /logout [post]
 func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
+	w.WriteHeader(http.StatusOK)
+}
+
+// GetCSRF godoc
+// @Summary      GetCSRF
+// @Description  Get CSRF token
+// @Tags         auth
+// @Success      200    "success create csrf"
+// @Failure 401 {object} errors.JSONError "failed get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router /create_csrf [post]
+func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie(config.CookieName)
+	if err != nil {
+		pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+		return
+	}
+
+	csrfToken, err := pkg.CreateCSRF(cookie.Value)
+	if err != nil {
+		pkg.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set(config.CSRFHeader, csrfToken)
 	w.WriteHeader(http.StatusOK)
 }

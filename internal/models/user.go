@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"html"
 	"os"
 )
 
@@ -24,6 +25,14 @@ type FormSignUp struct {
 	LastName  string `json:"lastName" validate:"required"`
 }
 
+func (form *FormSignUp) Sanitize() {
+	form.Login = html.EscapeString(form.Login)
+	form.Password = html.EscapeString(form.Password)
+	form.RepeatPw = html.EscapeString(form.RepeatPw)
+	form.FirstName = html.EscapeString(form.FirstName)
+	form.LastName = html.EscapeString(form.LastName)
+}
+
 type FormLogin struct {
 	Login    string `json:"login" validate:"required"`
 	Password string `json:"password" validate:"required"`
@@ -37,6 +46,12 @@ type UserInfo struct {
 	Email     string `json:"email" validate:"required" gorm:"column:email"`
 }
 
+func (form *UserInfo) Sanitize() {
+	form.FirstName = html.EscapeString(form.FirstName)
+	form.LastName = html.EscapeString(form.LastName)
+	form.Email = html.EscapeString(form.Email)
+}
+
 type EditUserInfoResponse struct {
 	Email string `json:"email" validate:"required"`
 }
@@ -45,9 +60,13 @@ type EditPasswordRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
-func (User) TableName() string {
+func (form *EditPasswordRequest) Sanitize() {
+	form.Password = html.EscapeString(form.Password)
+}
+
+func (*User) TableName() string {
 	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }
-func (UserInfo) TableName() string {
+func (*UserInfo) TableName() string {
 	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }

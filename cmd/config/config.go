@@ -38,6 +38,7 @@ const (
 	CookieTTL  = time.Hour * 24 * 100 // 100 days
 	CookieLen  = 32
 	CookiePath = "/"
+	CSRFHeader = "CSRF-TOKEN"
 
 	//AuthRoutes
 	RouteSignin = "/api/v1/signin"

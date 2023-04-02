@@ -62,3 +62,28 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 	})
 	return handler
 }
+
+func (m *Middleware) CheckCSRF(h http.Handler) http.Handler {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "PUT" || r.Method == "POST" {
+			cookie, err := r.Cookie(config.CookieName)
+			if err != nil {
+				pkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+				return
+			}
+			csrfToken := r.Header.Get(config.CSRFHeader)
+			if csrfToken == "" {
+				pkg.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
+				return
+			}
+
+			err = pkg.CheckCSRF(cookie.Value, csrfToken)
+			if err != nil {
+				pkg.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
+				return
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
+	return handler
+}
