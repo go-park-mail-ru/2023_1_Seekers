@@ -23,8 +23,9 @@ func (uDB *userDB) Create(user *models.User) (*models.User, error) {
 	if err == nil {
 		return nil, errors.ErrUserExists
 	}
-
-	tx := uDB.db.Create(&user)
+	dbUser := User{}
+	dbUser.FromModel(user)
+	tx := uDB.db.Create(&dbUser)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -96,7 +97,7 @@ func (uDB *userDB) SetAvatar(ID uint64, avatar string) error {
 }
 
 func (uDB *userDB) EditPw(ID uint64, newPW string) error {
-	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).Update("password", newPW)
+	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).Update("password", []byte(newPW))
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())

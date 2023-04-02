@@ -67,6 +67,7 @@ func (form *EditPasswordRequest) Sanitize() {
 func (*User) TableName() string {
 	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }
+
 func (*UserInfo) TableName() string {
 	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }
