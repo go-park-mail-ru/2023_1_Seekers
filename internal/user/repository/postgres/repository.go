@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:generate mockgen -destination=mocks/repository.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user RepoI
+
 type userDB struct {
 	db *gorm.DB
 }
