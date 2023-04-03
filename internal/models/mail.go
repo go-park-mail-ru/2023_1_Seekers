@@ -1,6 +1,9 @@
 package models
 
-import "html"
+import (
+	"github.com/microcosm-cc/bluemonday"
+	"html"
+)
 
 type Folder struct {
 	FolderID       uint64 `json:"folder_id" gorm:"primaryKey"`
@@ -34,7 +37,8 @@ type FormMessage struct {
 
 func (form *FormMessage) Sanitize() {
 	form.Title = html.EscapeString(form.Title)
-	form.Text = html.EscapeString(form.Text)
+	sanitizer := bluemonday.UGCPolicy()
+	form.Text = sanitizer.Sanitize(form.Text)
 	for i, s := range form.Recipients {
 		form.Recipients[i] = html.EscapeString(s)
 	}
