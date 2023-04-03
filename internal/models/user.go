@@ -56,14 +56,6 @@ type EditUserInfoResponse struct {
 	Email string `json:"email" validate:"required"`
 }
 
-type EditPasswordRequest struct {
-	Password string `json:"password" validate:"required"`
-}
-
-func (form *EditPasswordRequest) Sanitize() {
-	form.Password = html.EscapeString(form.Password)
-}
-
 func (*User) TableName() string {
 	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }

@@ -2,10 +2,11 @@
 
 res_dir="./scripts/result_cover"
 mkdir -p $res_dir
-pkgs=$(go list ./...)
+pkgs=$(go list ./... | grep -v "mocks")
 cov_result="${res_dir}/coverage.out"
 cov_html="${res_dir}/cover.html"
 deps=`echo ${pkgs} | tr ' ' ","`
+echo deps
 echo "mode: atomic" > $cov_result
 
 for pkg in $pkgs; do

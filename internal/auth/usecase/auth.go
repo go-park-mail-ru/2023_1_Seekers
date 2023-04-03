@@ -102,11 +102,20 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	}, session, nil
 }
 
-func (u *authUC) EditPw(ID uint64, pw models.EditPasswordRequest) error {
-	if err := validation.Password(pw.Password); err != nil {
+func (u *authUC) EditPw(ID uint64, form models.EditPasswordRequest) error {
+	if form.RepeatPw != form.Password {
+		return errors.ErrPwDontMatch
+	}
+
+	user, err := u.userRepo.GetByID(ID)
+	if !pkg.ComparePw2Hash(form.PasswordOld, user.Password) {
+		return errors.ErrWrongPw
+	}
+
+	if err := validation.Password(form.Password); err != nil {
 		return pkgErrors.Wrap(err, "create")
 	}
-	hashPw, err := pkg.HashPw(pw.Password)
+	hashPw, err := pkg.HashPw(form.Password)
 	if err != nil {
 		return pkgErrors.Wrap(err, "edit password")
 	}
