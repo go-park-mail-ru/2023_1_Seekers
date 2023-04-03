@@ -30,7 +30,7 @@ const (
 	//S3Endpoint     = "https://hb.bizmrg.com"
 	//S3AvatarBucket = "avatars"
 	//-----MinioS3------------
-	S3Endpoint     = "http://127.0.0.1:9000"
+	S3Endpoint     = "http://172.28.0.5:9000"
 	S3AvatarBucket = "avatars"
 
 	// Sessions
