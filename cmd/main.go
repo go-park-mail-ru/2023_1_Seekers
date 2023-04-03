@@ -22,7 +22,6 @@ import (
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -40,11 +39,6 @@ import (
 // @host localhost:8001
 // @BasePath	/api/v1
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	pkg.InitLogger()
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
