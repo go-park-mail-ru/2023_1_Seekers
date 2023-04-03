@@ -97,7 +97,7 @@ services:
       /bin/sh -c "
       sleep 3;
       /usr/bin/mc config host add minioClient http://172.28.0.5:9000 "no_env_access_key" "no_env_secret_key";
-      /usr/bin/mc mb minioClient/avatars_mailbox_vkcloud; 
+      /usr/bin/mc mb minioClient/avatars; 
       sleep 3;
       exit 0;
       "
