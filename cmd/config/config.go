@@ -57,7 +57,7 @@ const (
 
 	// UserService
 	MaxImageSize      = 32 << 20
-	UserFormNewAvatar = "newAvatar"
+	UserFormNewAvatar = "avatar"
 
 	// UserRoutes
 	RouteUser                 = "/api/v1/user"
