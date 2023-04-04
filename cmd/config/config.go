@@ -77,5 +77,5 @@ const (
 var (
 	AllowedHeaders = []string{"Content-Type", "Content-Length", "X-Csrf-Token"}
 	AllowedOrigins = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://89.208.197.150:8002"}
-	AllowedMethods = []string{"POST", "GET", "PUT"}
+	AllowedMethods = []string{"POST", "GET", "PUT", "DELETE"}
 )
