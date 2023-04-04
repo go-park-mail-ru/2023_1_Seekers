@@ -168,7 +168,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 403 {object} errors.JSONError "invalid form"
 // @Failure 404 {object} errors.JSONError "user not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /user/avatar [post]
+// @Router   /user/avatar [put]
 func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -176,11 +176,11 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseMultipartForm(config.MaxImageSize)
-	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
-		return
-	}
+	//err := r.ParseMultipartForm(config.MaxImageSize)
+	//if err != nil {
+	//	http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+	//	return
+	//}
 
 	file, header, err := r.FormFile(config.UserFormNewAvatar)
 	if err != nil {
