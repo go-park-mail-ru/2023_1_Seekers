@@ -17,7 +17,6 @@ services:
     networks:
       my_network:
         ipv4_address: 172.28.0.2
-    #    network_mode: "host"
     ports:
       - "8001:8001"
     environment:
@@ -96,8 +95,8 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 3;
-      /usr/bin/mc config host add minioClient http://172.28.0.5:9000 "no_env_access_key" "no_env_secret_key";
-      /usr/bin/mc mb minioClient/avatars_mailbox_vkcloud; 
+      /usr/bin/mc config host add minioClient http://127.0.0.1:9000 "no_env_access_key" "no_env_secret_key";
+      /usr/bin/mc mb minioClient/avatars; 
       sleep 3;
       exit 0;
       "
