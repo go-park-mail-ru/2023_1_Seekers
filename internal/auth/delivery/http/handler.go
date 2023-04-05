@@ -139,9 +139,22 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 "success logout"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Router   /auth [get]
+func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+// Auth godoc
+// @Summary      Logout
+// @Description  check is user authorised
+// @Tags     auth
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 "success auth"
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /logout [post]
-func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
+func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
 	w.WriteHeader(http.StatusOK)
 }

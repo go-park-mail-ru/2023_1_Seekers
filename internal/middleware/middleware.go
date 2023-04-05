@@ -53,7 +53,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 		}
 		session, err := m.sUC.GetSession(cookie.Value)
 		if err != nil {
-			http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedGetSession, err.Error()))
+			http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 			return
 		}
 
