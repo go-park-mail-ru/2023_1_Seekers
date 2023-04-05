@@ -132,29 +132,29 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	http2.SendJSON(w, r, http.StatusOK, response)
 }
 
-// Logout godoc
-// @Summary      Logout
-// @Description  user log out
+// Auth godoc
+// @Summary      Auth
+// @Description  check is user authorised
 // @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
 // @Success  200 "success logout"
 // @Failure 401 {object} errors.JSONError "failed auth"
 // @Router   /auth [get]
-func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
+func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// Auth godoc
+// Logout godoc
 // @Summary      Logout
 // @Description  check is user authorised
 // @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 "success auth"
+// @Success  200 "success logout"
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /logout [post]
-func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) {
+func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
 	w.WriteHeader(http.StatusOK)
 }
