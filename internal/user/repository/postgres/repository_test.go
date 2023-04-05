@@ -40,13 +40,19 @@ func TestRepositoryCreateUser(t *testing.T) {
 	}
 
 	gdb.Logger.LogMode(logger.Info)
-	mockUser := models.User{
+	user := models.User{
 		Email:     "test@test.com",
 		Password:  "123456",
 		FirstName: "test",
 		LastName:  "test",
 		Avatar:    "default_avatar",
 	}
+	var mockUser User
+	mockUser.FromModel(&user)
+
+	mock.ExpectQuery(regexp.QuoteMeta(
+		`SELECT * FROM "mail"."users" WHERE email = $1 LIMIT 1`)).WithArgs(mockUser.Email)
+
 	mock.ExpectBegin()
 
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -58,7 +64,7 @@ func TestRepositoryCreateUser(t *testing.T) {
 
 	pgRepo := New(gdb)
 
-	usr, err := pgRepo.Create(&mockUser)
+	usr, err := pgRepo.Create(&user)
 	if err != nil {
 		t.Error(err)
 	}
