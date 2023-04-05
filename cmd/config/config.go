@@ -27,11 +27,11 @@ const (
 	S3ASecretKeyEnv = "S3_SECRET_KEY"
 	S3Region        = "eu-west-2"
 	//-----VK cloud solutions--------
-	//S3Endpoint     = "https://hb.bizmrg.com"
-	//S3AvatarBucket = "avatars_mailbox_vkcloud"
+	S3Endpoint     = "https://hb.bizmrg.com"
+	S3AvatarBucket = "avatars_mailbox_vkcloud"
 	//-----MinioS3------------
-	S3Endpoint     = "http://172.28.0.5:9000"
-	S3AvatarBucket = "avatars"
+	//S3Endpoint     = "http://172.28.0.5:9000"
+	//S3AvatarBucket = "avatars"
 
 	// Sessions
 	CookieName = "MailBoxSession"
