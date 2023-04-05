@@ -82,7 +82,6 @@ func main() {
 			),
 		},
 	)
-	fmt.Println("___", os.Getenv(config.S3AccessKeyEnv), "______", os.Getenv(config.S3ASecretKeyEnv))
 	if err != nil {
 		log.Fatalf("Failed create S3 session : %v", err)
 	}
