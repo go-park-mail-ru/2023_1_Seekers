@@ -40,30 +40,32 @@ const (
 	CookiePath = "/"
 	CSRFHeader = "Csrf-Token"
 
+	RoutePrefix = "/api/v1"
+
 	//AuthRoutes
-	RouteSignin = "/api/v1/signin"
-	RouteSignup = "/api/v1/signup"
-	RouteLogout = "/api/v1/logout"
-	RouteAuth   = "/api/v1/auth"
-	RouteCSRF   = "/api/v1/csrf"
-	RoutePw     = "/api/v1/user/pw"
+	RouteSignin = RoutePrefix + "/signin"
+	RouteSignup = RoutePrefix + "/signup"
+	RouteLogout = RoutePrefix + "/logout"
+	RouteAuth   = RoutePrefix + "/auth"
+	RouteCSRF   = RoutePrefix + "/csrf"
+	RoutePw     = RoutePrefix + "/user/pw"
 
 	// MailRoutes
-	RouteGetFolderMessages = "/api/v1/folder/{slug}"
-	RouteGetFolders        = "/api/v1/folders"
-	RouteGetMessage        = "/api/v1/message/{id:[0-9]+}"
-	RouteSendMessage       = "/api/v1/message/send"
-	RouteReadMessage       = "/api/v1/message/{id:[0-9]+}/read"
-	RouteUnreadMessage     = "/api/v1/message/{id:[0-9]+}/unread"
+	RouteGetFolderMessages = RoutePrefix + "/folder/{slug}"
+	RouteGetFolders        = RoutePrefix + "/folders"
+	RouteGetMessage        = RoutePrefix + "/message/{id:[0-9]+}"
+	RouteSendMessage       = RoutePrefix + "/message/send"
+	RouteReadMessage       = RoutePrefix + "/message/{id:[0-9]+}/read"
+	RouteUnreadMessage     = RoutePrefix + "/message/{id:[0-9]+}/unread"
 
 	// UserService
 	MaxImageSize      = 32 << 20
 	UserFormNewAvatar = "avatar"
 
 	// UserRoutes
-	RouteUser                 = "/api/v1/user"
-	RouteUserInfo             = "/api/v1/user/info"
-	RouteUserAvatar           = "/api/v1/user/avatar"
+	RouteUser                 = RoutePrefix + "/user"
+	RouteUserInfo             = RoutePrefix + "/info"
+	RouteUserAvatar           = RoutePrefix + "/avatar"
 	RouteUserAvatarQueryEmail = "email"
 	RouteUserInfoQueryEmail   = "email"
 

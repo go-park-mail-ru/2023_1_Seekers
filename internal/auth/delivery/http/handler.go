@@ -35,6 +35,7 @@ func setNewCookie(w http.ResponseWriter, session *models.Session) {
 		Expires:  time.Now().Add(config.CookieTTL),
 		HttpOnly: true,
 		Path:     config.CookiePath,
+		SameSite: http.SameSiteLaxMode,
 	})
 }
 

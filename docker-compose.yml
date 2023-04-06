@@ -13,7 +13,11 @@ services:
       - $GOPATH/pkg/mod:/go/pkg/
       - ./logs/app:/app/logs/app
     build: ./
-    network_mode: "host"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.2
+    ports:
+      - "8001:8001"
   db:
     env_file:
       - .env
