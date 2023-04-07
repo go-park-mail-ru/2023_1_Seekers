@@ -60,7 +60,6 @@ func TestHandlers_GetInfo(t *testing.T) {
 	fmt.Println(respUserInfo)
 
 	require.Equal(t, resInfo, &respUserInfo)
-
 }
 
 func TestHandlers_Delete(t *testing.T) {
@@ -68,7 +67,51 @@ func TestHandlers_Delete(t *testing.T) {
 }
 
 func TestHandlers_EditAvatar(t *testing.T) {
-
+	//t.Parallel()
+	//
+	//ctrl := gomock.NewController(t)
+	//defer ctrl.Finish()
+	//
+	//userUC := userUCMock.NewMockUseCaseI(ctrl)
+	//
+	//img := []byte("sdsdjbasd;jrandombytes")
+	//body := &bytes.Buffer{}
+	//writer := multipart.NewWriter(body)
+	//metadataHeader := textproto.MIMEHeader{}
+	//metadataHeader.Add("Content-Disposition", `form-data; name="avatar"; filename="test.png"`)
+	//metadataHeader.Add("Content-Type", "image/png")
+	//part, err := writer.CreatePart(metadataHeader)
+	//require.Nil(t, err)
+	//_, err = part.Write(img)
+	//err = writer.Close()
+	//require.Nil(t, err)
+	//
+	//r := httptest.NewRequest(http.MethodPut, config.RouteUserAvatar, body)
+	//
+	//input := models.Image{
+	//	Name: "test.png",
+	//	Data: img,
+	//}
+	//
+	//r.Header.Set("Content-Type", writer.FormDataContentType())
+	//
+	//user := models.User{
+	//	UserID: 1,
+	//}
+	//
+	//ctx := context.WithValue(r.Context(), pkg.ContextUser, user)
+	//r = r.WithContext(ctx)
+	//
+	//userUC.EXPECT().EditAvatar(ctx, &input).Return(nil)
+	//
+	//w := httptest.NewRecorder()
+	//
+	//router := mux.NewRouter()
+	//handler := New(userUC)
+	//router.HandleFunc(config.RouteUserAvatar, handler.EditAvatar).Methods(http.MethodPut)
+	//handler.EditAvatar(w, r)
+	//
+	//require.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestHandlers_EditInfo(t *testing.T) {

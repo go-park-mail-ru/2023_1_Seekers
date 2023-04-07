@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -42,12 +42,12 @@ func New(uUC user.UseCaseI) user.HandlersI {
 func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		http2.HandleError(w, r, errors.ErrFailedGetUser)
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	err := h.userUC.Delete(userID)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -69,16 +69,16 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	email := vars[config.RouteUserInfoQueryEmail]
 	u, err := h.userUC.GetByEmail(email)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 	info, err := h.userUC.GetInfo(u.UserID)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
-	http2.SendJSON(w, r, http.StatusOK, info)
+	pkgHttp.SendJSON(w, r, http.StatusOK, info)
 }
 
 // GetPersonalInfo godoc
@@ -95,22 +95,22 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		http2.HandleError(w, r, errors.ErrFailedGetUser)
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	u, err := h.userUC.GetByID(userID)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 	info, err := h.userUC.GetInfo(u.UserID)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
-	http2.SendJSON(w, r, http.StatusOK, info)
+	pkgHttp.SendJSON(w, r, http.StatusOK, info)
 }
 
 // EditInfo godoc
@@ -129,7 +129,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 	// тут пока что просто из body - в будущем на form data
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		http2.HandleError(w, r, errors.ErrFailedGetUser)
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -142,7 +142,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
@@ -150,10 +150,10 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 
 	info, err := h.userUC.EditInfo(userID, form)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
-	http2.SendJSON(w, r, http.StatusOK, models.EditUserInfoResponse{Email: info.Email})
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.EditUserInfoResponse{Email: info.Email})
 }
 
 // EditAvatar godoc
@@ -172,31 +172,31 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		http2.HandleError(w, r, errors.ErrFailedGetUser)
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 
 	//err := r.ParseMultipartForm(config.MaxImageSize)
 	//if err != nil {
-	//	http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+	//	pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 	//	return
 	//}
 
 	file, header, err := r.FormFile(config.UserFormNewAvatar)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()+"aboba"))
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	img, err := image.ReadImage(file, header)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	err = h.userUC.EditAvatar(userID, img)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
@@ -223,9 +223,9 @@ func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get(config.RouteUserAvatarQueryEmail)
 	img, err := h.userUC.GetAvatar(sanitizer.Sanitize(email))
 	if err != nil {
-		http2.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
-	http2.SendImage(w, r, http.StatusOK, img.Data)
+	pkgHttp.SendImage(w, r, http.StatusOK, img.Data)
 }

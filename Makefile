@@ -25,7 +25,6 @@ cov:
 	go tool cover -func scripts/result_cover/cover2.out
 	go tool cover -html scripts/result_cover/cover2.out -o scripts/result_cover/coverage.html
 
-	
 clean_logs:
 	sudo rm -rf logs/*
 	mkdir -p -m 777 logs/postgres
