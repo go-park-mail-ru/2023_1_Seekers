@@ -10,6 +10,7 @@ import (
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -66,9 +67,10 @@ func TestDelivery_GetInfo(t *testing.T) {
 	userH := New(userUC)
 
 	r := httptest.NewRequest("GET", "/api/user/", bytes.NewReader([]byte{}))
-	q := r.URL.Query()
-	q.Add(config.RouteUserInfoQueryEmail, email)
-	r.URL.RawQuery = q.Encode()
+	vars := map[string]string{
+		config.RouteUserInfoQueryEmail: email,
+	}
+	r = mux.SetURLVars(r, vars)
 
 	w := httptest.NewRecorder()
 

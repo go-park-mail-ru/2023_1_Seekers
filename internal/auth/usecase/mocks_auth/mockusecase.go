@@ -34,6 +34,20 @@ func (m *MockUseCaseI) EXPECT() *MockUseCaseIMockRecorder {
 	return m.recorder
 }
 
+// EditPw mocks base method.
+func (m *MockUseCaseI) EditPw(arg0 uint64, arg1 models.EditPasswordRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EditPw", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EditPw indicates an expected call of EditPw.
+func (mr *MockUseCaseIMockRecorder) EditPw(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditPw", reflect.TypeOf((*MockUseCaseI)(nil).EditPw), arg0, arg1)
+}
+
 // SignIn mocks base method.
 func (m *MockUseCaseI) SignIn(arg0 models.FormLogin) (*models.AuthResponse, *models.Session, error) {
 	m.ctrl.T.Helper()

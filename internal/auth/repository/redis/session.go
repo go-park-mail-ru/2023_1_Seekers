@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -42,6 +43,7 @@ func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
 func (sDb *sessionsDB) DeleteSession(sessionID string) error {
 	err := sDb.redisSessions.Del(context.Background(), sessionID).Err()
 	if err != nil {
+		fmt.Println(err)
 		return pkgErrors.WithMessagef(errors.ErrFailedDeleteSession, "delete cookie %v", err.Error())
 	}
 

@@ -101,7 +101,8 @@ func (uDB *userDB) SetAvatar(ID uint64, avatar string) error {
 }
 
 func (uDB *userDB) EditPw(ID uint64, newPW string) error {
-	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).Update("password", []byte(newPW))
+	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).
+		Update("password", []byte(newPW))
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
