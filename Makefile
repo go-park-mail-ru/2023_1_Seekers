@@ -19,7 +19,6 @@ docker-prune-volumes:
 	docker volume rm $(docker volume ls -qf dangling=true)
 
 cov:
-	cov_report=scripts/result_cover
 	mkdir -p scripts/result_cover
 	go test -race -coverpkg=./... -coverprofile scripts/result_cover/cover.out ./...; cat scripts/result_cover/cover.out | fgrep -v "test.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" > scripts/result_cover/cover2.out
 	go tool cover -func scripts/result_cover/cover2.out

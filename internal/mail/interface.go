@@ -34,8 +34,7 @@ type RepoI interface {
 	SelectFolderMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.MessageInfo, error)
 	SelectRecipientsByMessage(messageID uint64, fromUserID uint64) ([]uint64, error)
 	SelectMessageByUserNMessage(userID uint64, messageID uint64) (*models.MessageInfo, error)
-	InsertMessageToMessages(message *models.MessageInfo) (uint64, error)
-	InsertMessageToBoxes(userID uint64, folderID uint64, message *models.MessageInfo) error
+	InsertMessage(fromUserID uint64, message *models.MessageInfo, user2folder []models.User2Folder) error
 	InsertFolder(folder *models.Folder) (uint64, error)
 	UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error
 }

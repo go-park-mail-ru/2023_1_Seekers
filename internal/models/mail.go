@@ -28,6 +28,11 @@ type MessageInfo struct {
 	Deleted          bool         `json:"deleted"`
 }
 
+type User2Folder struct {
+	UserID   uint64
+	FolderID uint64
+}
+
 type FormMessage struct {
 	Recipients       []string `json:"recipients" validate:"required"`
 	Title            string   `json:"title" validate:"required"`

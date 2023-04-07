@@ -4,9 +4,11 @@ go 1.20
 
 require (
 	github.com/aws/aws-sdk-go v1.44.224
+	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
+	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rs/cors v1.8.3
@@ -14,6 +16,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.10
+	golang.org/x/crypto v0.6.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
@@ -38,14 +41,11 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.23 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/swaggo/files v1.0.0 // indirect
-	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect

@@ -34,6 +34,14 @@ import (
 	"time"
 )
 
+var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+	os.Getenv(config.DBUserEnv),
+	os.Getenv(config.DBPasswordEnv),
+	os.Getenv(config.DBHostEnv),
+	os.Getenv(config.DBPortEnv),
+	os.Getenv(config.DBNameEnv),
+)
+
 // @title MailBox Swagger API
 // @version 1.0
 // @host localhost:8001
@@ -42,14 +50,6 @@ func main() {
 	pkg.InitLogger()
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
-
-	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-		os.Getenv(config.DBUserEnv),
-		os.Getenv(config.DBPasswordEnv),
-		os.Getenv(config.DBHostEnv),
-		os.Getenv(config.DBPortEnv),
-		os.Getenv(config.DBNameEnv),
-	)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
 		TablePrefix:   os.Getenv(config.DBSchemaNameEnv) + ".",
@@ -94,7 +94,7 @@ func main() {
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 	usersUC := _userUCase.New(userRepo, fStorageUC)
 	mailUC := _mailUCase.New(mailRepo, userRepo)
-	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
+	sessionUC := _authUCase.NewSessionUC(sessionRepo)
 	authUC := _authUCase.NewAuthUC(sessionUC, userRepo, mailUC)
 
 	middleware := _middleware.New(sessionUC, logger)
@@ -108,8 +108,7 @@ func main() {
 	_mailHandler.RegisterHTTPRoutes(router, mailH, middleware)
 	_userHandler.RegisterHTTPRoutes(router, userH, middleware)
 
-	router.Use(
-		middleware.HandlerLogger)
+	router.Use(middleware.HandlerLogger)
 	corsRouter := middleware.Cors(router)
 
 	server := http.Server{

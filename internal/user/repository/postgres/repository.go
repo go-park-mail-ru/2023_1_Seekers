@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:generate mockgen -destination=mocks/mockrepository.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user RepoI
+//go:generate mockgen -destination=../mocks/mockrepository.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user RepoI
 
 type userDB struct {
 	db *gorm.DB
@@ -88,7 +88,8 @@ func (uDB *userDB) GetByEmail(email string) (*models.User, error) {
 }
 
 func (uDB *userDB) SetAvatar(ID uint64, avatar string) error {
-	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email", "password").Where("user_id = ?", ID).Update("avatar", avatar)
+	tx := uDB.db.Model(&models.User{}).Omit("user_id", "email", "password").Where("user_id = ?", ID).
+		Update("avatar", avatar)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())

@@ -1,263 +1,397 @@
 package delivery
 
-// import (
-// 	"bytes"
-// 	"encoding/json"
-// 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-// 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
-// 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
-// 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
-// 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
-// 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
-// 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
-// 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
-// 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-// 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
-// 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
-// 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-// 	"github.com/gorilla/mux"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strconv"
-// 	"testing"
-// )
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	mockMailUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/mocks"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+)
 
-// type inputCase struct {
-// 	userCr   string
-// 	folderID uint64
-// }
+type inputCase struct {
+	userID      uint64
+	folderSlug  string
+	messageID   uint64
+	messageForm models.FormMessage
+}
 
-// type outputCase struct {
-// 	status int
-// }
+type outputCase struct {
+	status int
+}
 
-// type testCases struct {
-// 	name   string
-// 	input  inputCase
-// 	output outputCase
-// }
+type testCases struct {
+	name   string
+	input  inputCase
+	output outputCase
+}
 
-// var credentials = map[string][]byte{
-// 	"user1": []byte(`{"login": "test@mailbox.ru", "password": "12345"}`),
-// 	"user2": []byte(`{"login": "gena@mailbox.ru", "password": "54321"}`),
-// 	"user3": []byte(`{"login": "max@mailbox.ru", "password": "13795"}`),
-// 	"user4": []byte(`{"login": "valera@mailbox.ru", "password": "12345"}`),
-// }
+func TestDelivery_GetFolderMessages(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "default folder",
+			input: inputCase{
+				userID:     1,
+				folderSlug: "inbox",
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+		{
+			name: "custom folder",
+			input: inputCase{
+				userID:     1,
+				folderSlug: "1",
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
 
-// func prepare(t *testing.T, r *http.Request, testName string, userCr string) (*_middleware.Middleware, mail.HandlersI) {
-// 	userRepo := _userRepo.New()
-// 	authRepo := _authRepo.New()
-// 	mailRepo := _mailRepo.New(userRepo)
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	usersUCase := _userUCase.New(userRepo)
-// 	authUCase := _authUCase.New(authRepo, usersUCase)
-// 	mailUCase := _mailUCase.New(mailRepo)
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
 
-// 	authH := _authHandler.New(authUCase, usersUCase, mailUCase)
-// 	mailH := New(mailUCase)
-// 	logger := pkg.GetLogger()
-// 	middleware := _middleware.New(authUCase, logger)
+	for _, test := range tests {
+		r := httptest.NewRequest("GET", "/api/folder/", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"slug": test.input.folderSlug,
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
 
-// 	signinReq := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(credentials[userCr]))
-// 	w := httptest.NewRecorder()
+		mailUC.EXPECT().GetFolderInfo(test.input.userID, test.input.folderSlug).Return(&models.Folder{}, nil)
+		mailUC.EXPECT().GetFolderMessages(test.input.userID, test.input.folderSlug).Return([]models.MessageInfo{}, nil)
 
-// 	authH.SignIn(w, signinReq)
+		mailH.GetFolderMessages(w, r)
 
-// 	if w.Code != http.StatusOK {
-// 		t.Fatalf("Failed login for test \"%s\" with code %d", testName, w.Code)
-// 	}
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
 
-// 	var user models.SignInResponse
-// 	json.NewDecoder(w.Body).Decode(&user)
+func TestDelivery_GetFolders(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
 
-// 	s, err := authUCase.GetSessionByEmail(user.Email)
-// 	if err != nil {
-// 		t.Fatalf("Failed to get session %v for test \"%s\"", err, testName)
-// 	}
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	r.AddCookie(&http.Cookie{
-// 		Name:  config.CookieName,
-// 		Value: s.SessionID,
-// 	})
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
 
-// 	return middleware, mailH
-// }
+	for _, test := range tests {
+		r := httptest.NewRequest("GET", "/api/folders", bytes.NewReader([]byte{}))
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
 
-// func TestDelivery_GetInboxMessages(t *testing.T) {
-// 	var tests = []testCases{
-// 		{
-// 			name: "there are incoming messages user1",
-// 			input: inputCase{
-// 				userCr: "user1",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "there are incoming messages user2",
-// 			input: inputCase{
-// 				userCr: "user2",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "no incoming messages user4",
-// 			input: inputCase{
-// 				userCr: "user4",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 	}
+		mailUC.EXPECT().GetFolders(test.input.userID).Return([]models.Folder{}, nil)
 
-// 	t.Parallel()
+		mailH.GetFolders(w, r)
 
-// 	for _, test := range tests {
-// 		r := httptest.NewRequest("GET", "/api/inbox", bytes.NewReader([]byte{}))
-// 		w := httptest.NewRecorder()
-// 		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
 
-// 		middleware.CheckAuth(mailH.GetInboxMessages)(w, r)
+func TestDelivery_GetMessage(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:    1,
+				messageID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
 
-// 		if w.Code != test.output.status {
-// 			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.output.status, w.Code)
-// 		}
-// 	}
-// }
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// func TestDelivery_GetOutboxMessages(t *testing.T) {
-// 	var tests = []testCases{
-// 		{
-// 			name: "there are outgoing messages user1",
-// 			input: inputCase{
-// 				userCr: "user1",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "there are outgoing messages user2",
-// 			input: inputCase{
-// 				userCr: "user2",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "no outgoing messages user4",
-// 			input: inputCase{
-// 				userCr: "user4",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 	}
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
 
-// 	t.Parallel()
+	for _, test := range tests {
+		r := httptest.NewRequest("GET", "/api/message", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
 
-// 	for _, test := range tests {
-// 		r := httptest.NewRequest("GET", "/api/outbox", bytes.NewReader([]byte{}))
-// 		w := httptest.NewRecorder()
-// 		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+		mailUC.EXPECT().GetMessage(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
 
-// 		middleware.CheckAuth(mailH.GetOutboxMessages)(w, r)
+		mailH.GetMessage(w, r)
 
-// 		if w.Code != test.output.status {
-// 			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.output.status, w.Code)
-// 		}
-// 	}
-// }
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
 
-// func TestDelivery_GetFolderMessages(t *testing.T) {
-// 	var tests = []testCases{
-// 		{
-// 			name: "there are messages in the folder",
-// 			input: inputCase{
-// 				userCr:   "user2",
-// 				folderID: 7,
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "there are no messages in the folder",
-// 			input: inputCase{
-// 				userCr:   "user3",
-// 				folderID: 8,
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "the folder does not exist",
-// 			input: inputCase{
-// 				userCr:   "user1",
-// 				folderID: 7,
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusBadRequest,
-// 			},
-// 		},
-// 	}
+func TestDelivery_SendMessage(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "one recipient",
+			input: inputCase{
+				userID: 1,
+				messageForm: models.FormMessage{
+					Recipients:       []string{"valera@mailbox.ru"},
+					Title:            "title test message",
+					Text:             "text test message",
+					ReplyToMessageID: nil,
+				},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+		{
+			name: "several recipient",
+			input: inputCase{
+				userID: 1,
+				messageForm: models.FormMessage{
+					Recipients:       []string{"valera@mailbox.ru", "max@mailbox.ru"},
+					Title:            "title test message",
+					Text:             "text test message",
+					ReplyToMessageID: nil,
+				},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
 
-// 	t.Parallel()
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	for _, test := range tests {
-// 		r := httptest.NewRequest("GET", "/api/folder/", bytes.NewReader([]byte{}))
-// 		r = mux.SetURLVars(r, map[string]string{"id": strconv.FormatUint(test.input.folderID, 10)})
-// 		w := httptest.NewRecorder()
-// 		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
 
-// 		middleware.CheckAuth(mailH.GetFolderMessages)(w, r)
+	for _, test := range tests {
+		body, err := json.Marshal(test.input.messageForm)
+		if err != nil {
+			t.Fatalf("error while marshaling to json: %v", err)
+		}
 
-// 		if w.Code != test.output.status {
-// 			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.output.status, w.Code)
-// 		}
-// 	}
-// }
+		r := httptest.NewRequest("POST", "/api/message/send", bytes.NewReader(body))
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
 
-// func TestDelivery_GetFolders(t *testing.T) {
-// 	var tests = []testCases{
-// 		{
-// 			name: "only default folders",
-// 			input: inputCase{
-// 				userCr: "user1",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 		{
-// 			name: "there are not only default folders",
-// 			input: inputCase{
-// 				userCr: "user2",
-// 			},
-// 			output: outputCase{
-// 				status: http.StatusOK,
-// 			},
-// 		},
-// 	}
+		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
+		mailUC.EXPECT().SendMessage(test.input.userID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
 
-// 	t.Parallel()
+		mailH.SendMessage(w, r)
 
-// 	for _, test := range tests {
-// 		r := httptest.NewRequest("GET", "/api/folders", bytes.NewReader([]byte{}))
-// 		w := httptest.NewRecorder()
-// 		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
 
-// 		middleware.CheckAuth(mailH.GetFolders)(w, r)
+func TestDelivery_ReadMessage(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:    1,
+				messageID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
 
-// 		if w.Code != test.output.status {
-// 			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.output.status, w.Code)
-// 		}
-// 	}
-// }
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest("POST", "/api/v1/message/read", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
+
+		mailH.ReadMessage(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_UnreadMessage(t *testing.T) {
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:    1,
+				messageID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := New(mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest("POST", "/api/v1/message/unread", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
+
+		mailH.UnreadMessage(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+//func TestDelivery_GetOutboxMessages(t *testing.T) {
+//	var tests = []testCases{
+//		{
+//			name: "there are outgoing messages user1",
+//			input: inputCase{
+//				userCr: "user1",
+//			},
+//			output: outputCase{
+//				err: http.StatusOK,
+//			},
+//		},
+//		{
+//			name: "there are outgoing messages user2",
+//			input: inputCase{
+//				userCr: "user2",
+//			},
+//			output: outputCase{
+//				err: http.StatusOK,
+//			},
+//		},
+//		{
+//			name: "no outgoing messages user4",
+//			input: inputCase{
+//				userCr: "user4",
+//			},
+//			output: outputCase{
+//				err: http.StatusOK,
+//			},
+//		},
+//	}
+//
+//	t.Parallel()
+//
+//	for _, test := range tests {
+//		r := httptest.NewRequest("GET", "/api/outbox", bytes.NewReader([]byte{}))
+//		w := httptest.NewRecorder()
+//		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+//
+//		middleware.CheckAuth(mailH.GetOutboxMessages)(w, r)
+//
+//		if w.Code != test.output.err {
+//			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.err, w.Code)
+//		}
+//	}
+//}
+
+//func TestDelivery_GetFolderMessages(t *testing.T) {
+//	var tests = []testCases{
+//		{
+//			name: "there are messages in the folder",
+//			input: inputCase{
+//				userCr:   "user2",
+//				folderID: 7,
+//			},
+//			output: outputCase{
+//				err: http.StatusOK,
+//			},
+//		},
+//		{
+//			name: "there are no messages in the folder",
+//			input: inputCase{
+//				userCr:   "user3",
+//				folderID: 8,
+//			},
+//			output: outputCase{
+//				err: http.StatusOK,
+//			},
+//		},
+//		{
+//			name: "the folder does not exist",
+//			input: inputCase{
+//				userCr:   "user1",
+//				folderID: 7,
+//			},
+//			output: outputCase{
+//				err: http.StatusBadRequest,
+//			},
+//		},
+//	}
+//
+//	t.Parallel()
+//
+//	for _, test := range tests {
+//		r := httptest.NewRequest("GET", "/api/folder/", bytes.NewReader([]byte{}))
+//		r = mux.SetURLVars(r, map[string]string{"id": strconv.FormatUint(test.input.folderID, 10)})
+//		w := httptest.NewRecorder()
+//		middleware, mailH := prepare(t, r, test.name, test.input.userCr)
+//
+//		middleware.CheckAuth(mailH.GetFolderMessages)(w, r)
+//
+//		if w.Code != test.output.err {
+//			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.err, w.Code)
+//		}
+//	}
+//}

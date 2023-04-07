@@ -4,19 +4,16 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	pkgErrors "github.com/pkg/errors"
 )
 
 type sessionUC struct {
 	sessionRepo auth.SessionRepoI
-	userUC      _user.UseCaseI
 }
 
-func NewSessionUC(sr auth.SessionRepoI, uc _user.UseCaseI) auth.SessionUseCaseI {
+func NewSessionUC(sr auth.SessionRepoI) auth.SessionUseCaseI {
 	return &sessionUC{
 		sessionRepo: sr,
-		userUC:      uc,
 	}
 }
 
