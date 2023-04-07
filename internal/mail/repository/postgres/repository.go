@@ -51,9 +51,6 @@ func (m mailRepository) SelectFolderByUserNFolder(userID uint64, folderSlug stri
 
 	tx := m.db.Where("user_id = ? AND local_name = ?", userID, folderSlug).First(&folder)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -77,9 +74,6 @@ func (m mailRepository) SelectFolderMessagesByUserNFolder(userID uint64, folderI
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
 		Where("user_id = ? AND folder_id = ?", userID, folderID).Scan(&messages)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -104,9 +98,6 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
 		Where("user_id = ? AND message_id = ?", userID, messageID).Scan(&message)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
-		}
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -191,9 +182,6 @@ func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) {
 func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error {
 	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update(stateName, stateValue)
 	if err := tx.Error; err != nil {
-		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
-			return pkgErrors.WithMessage(errors.ErrMessageNotFound, err.Error())
-		}
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 	return nil

@@ -33,7 +33,7 @@ var defaultFolderNames = map[string]string{
 func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
 	folders, err := uc.repoMail.SelectFoldersByUser(userID)
 	if err != nil {
-		return folders, pkgErrors.Wrap(err, "get folders")
+		return []models.Folder{}, pkgErrors.Wrap(err, "get folders")
 	}
 
 	return folders, nil
@@ -45,7 +45,7 @@ func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Fold
 		return folder, pkgErrors.Wrap(err, "get folder info")
 	}
 	if folder == nil {
-		return folder, pkgErrors.WithMessage(errors.ErrFolderNotFound, "get folder info")
+		return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, "get folder info")
 	}
 
 	return folder, nil
@@ -56,12 +56,12 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models
 
 	folder, err := uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
-		return messages, pkgErrors.Wrap(err, "get folder messages")
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
 	messages, err = uc.repoMail.SelectFolderMessagesByUserNFolder(userID, folder.FolderID)
 	if err != nil {
-		return messages, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
 
 	for i, message := range messages {
@@ -244,29 +244,6 @@ func (uc *UseCase) SendWelcomeMessage(recipientEmail string) error {
 	return uc.sendMessageFromSupport(formMessage)
 }
 
-//func (uc *UseCase) createMessage(userID uint64, message *models.FormMessage) (*models.MessageInfo, error) {
-//	fromUser, err := uc.repoUser.GetInfoByID(userID)
-//	if err != nil {
-//		return nil, pkgErrors.Wrap(err, "create message : get info by Id")
-//	}
-//
-//	newMessage := models.MessageInfo{
-//		FromUser:         *fromUser,
-//		Title:            message.Title,
-//		CreatedAt:        pkg.GetCurrentTime(),
-//		Text:             message.Text,
-//		ReplyToMessageID: message.ReplyToMessageID,
-//	}
-//
-//	messageID, err := uc.repoMail.insertMessageToMessages(&newMessage)
-//	if err != nil {
-//		return nil, pkgErrors.Wrap(err, "create message : insert to messages")
-//	}
-//
-//	newMessage.MessageID = messageID
-//	return &newMessage, nil
-//}
-
 func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error {
 	supportAccount, err := uc.getSupportAccount()
 	if err != nil {
@@ -276,15 +253,6 @@ func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error {
 	_, err = uc.SendMessage(supportAccount.UserID, message)
 	return err
 }
-
-//func (uc *UseCase) insertMessageToFolder(userID uint64, folderSlug string, message *models.MessageInfo) error {
-//	folder, err := uc.GetFolderInfo(userID, folderSlug)
-//	if err != nil {
-//		return pkgErrors.Wrap(err, "insert message to folder")
-//	}
-//
-//	return uc.repoMail.insertMessageToBoxes(userID, folder.FolderID, message)
-//}
 
 func (uc *UseCase) getSupportAccount() (*models.UserInfo, error) {
 	return uc.repoUser.GetInfoByEmail("support@mailbox.ru")

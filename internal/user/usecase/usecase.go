@@ -98,6 +98,7 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 	}
 	return &info, nil
 }
+
 func (u *useCase) EditPw(ID uint64, pw models.EditPasswordRequest) error {
 	err := u.userRepo.EditPw(ID, pw.Password)
 	if err != nil {
@@ -116,7 +117,7 @@ func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
 		Name:   user.Email + filepath.Ext(newAvatar.Name),
 		Data:   newAvatar.Data,
 	}
-	err = u.fileUC.Upload(&f)
+
 	if err = u.fileUC.Upload(&f); err != nil {
 		return pkgErrors.Wrap(err, "edit avatar")
 	}

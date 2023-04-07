@@ -1,459 +1,278 @@
 package postgres
 
 import (
+	"database/sql"
+	"fmt"
+	"github.com/go-faker/faker/v4"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/stretchr/testify/assert"
+	pkgErr "github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-	"regexp"
-	"testing"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"os"
+	"regexp"
+	"testing"
 )
 
-func TestRepositoryCreateUser(t *testing.T) {
+func mockDB() (*sql.DB, *gorm.DB, sqlmock.Sqlmock, error) {
+	os.Setenv(config.DBSchemaNameEnv, "mail")
+
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if db == nil {
-		t.Fatal("mock db is null")
+		return nil, nil, nil, fmt.Errorf("mocking database error: %s", err)
 	}
 
-	if mock == nil {
-		t.Fatal("sqlmock is null")
-	}
-	defer db.Close()
-
-	dial := postgres.New(postgres.Config{
-		DSN:                  "sqlmock_test_db",
+	dialector := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_db_0",
 		DriverName:           "postgres",
 		Conn:                 db,
 		PreferSimpleProtocol: true,
 	})
-	gdb, err := gorm.Open(dial, &gorm.Config{})
+	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		t.Fatal(err)
-	}
-	if gdb == nil {
-		t.Fatal("gorm db is nil")
+		return nil, nil, nil, fmt.Errorf("opening gorm error: %s", err)
 	}
 
-	gdb.Logger.LogMode(logger.Info)
-	user := models.User{
-		Email:     "test@test.com",
-		Password:  "123456",
-		FirstName: "test",
-		LastName:  "test",
-		Avatar:    "default_avatar",
-	}
-	mock.ExpectBegin()
-
-	mock.ExpectQuery(regexp.QuoteMeta(
-		`INSERT INTO "mail"."users" ("email","password","first_name","last_name","avatar") VALUES ($1,$2,$3,$4,$5) RETURNING "user_id"`)).
-		WithArgs(user.Email, user.Password, user.FirstName, user.LastName, user.Avatar).
-		WillReturnRows(sqlmock.NewRows([]string{"user_id"}).AddRow(1))
-
-	mock.ExpectCommit()
-
-	pgRepo := New(gdb)
-
-	usr, err := pgRepo.Create(&user)
-	if err != nil {
-		t.Error(err)
-	}
-
-	assert.Equal(t, usr, user)
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
+	return db, gormDB, mock, nil
 }
 
-//
-//func TestRepositoryUpdateUser(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	mock.ExpectBegin()
-//
-//	var mockUser models.User
-//	err = faker.FakeData(&mockUser)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectExec(regexp.QuoteMeta(
-//		`UPDATE "users" SET "first_name"=$1,"last_name"=$2,"nick_name"=$3,"avatar_att_id"=$4,`+
-//			`"email"=$5,"password"=$6,"created_at"=$7 WHERE "id" = $8`)).WithArgs(mockUser.FirstName,
-//		mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password,
-//		mockUser.CreatedAt, mockUser.Id).WillReturnResult(sqlmock.NewResult(int64(mockUser.Id), 1))
-//
-//	mock.ExpectCommit()
-//
-//	repository := userRep.New(gdb)
-//
-//	err = repository.UpdateUser(mockUser)
-//	require.NoError(t, err)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositorySelectUserById(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	var mockUser models.User
-//	err = faker.FakeData(&mockUser)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(
-//		`SELECT * FROM "users" WHERE id = $1 LIMIT 1`)).WithArgs(mockUser.Id).
-//		WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-//			"nick_name", "avatar_att_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
-//			mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
-//
-//	repository := userRep.New(gdb)
-//
-//	actualUser, err := repository.SelectUserById(mockUser.Id)
-//	require.NoError(t, err)
-//	assert.Equal(t, mockUser, *actualUser)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositorySelectUserByNickName(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	var mockUser models.User
-//	err = faker.FakeData(&mockUser)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(
-//		`SELECT * FROM "users" WHERE nick_name = $1 LIMIT 1`)).WithArgs(mockUser.NickName).
-//		WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-//			"nick_name", "avatar_att_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
-//			mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
-//
-//	repository := userRep.New(gdb)
-//
-//	actualUser, err := repository.SelectUserByNickName(mockUser.NickName)
-//	require.NoError(t, err)
-//	assert.Equal(t, mockUser, *actualUser)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositorySelectUserByEmail(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	var mockUser models.User
-//	err = faker.FakeData(&mockUser)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(
-//		`SELECT * FROM "users" WHERE email = $1 LIMIT 1`)).WithArgs(mockUser.Email).
-//		WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-//			"nick_name", "avatar_att_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
-//			mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
-//
-//	repository := userRep.New(gdb)
-//
-//	actualUser, err := repository.SelectUserByEmail(mockUser.Email)
-//	require.NoError(t, err)
-//	assert.Equal(t, mockUser, *actualUser)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositorySelectAllUsers(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	mockUsers := make([]models.User, 0, 10)
-//	err = faker.FakeData(&mockUsers)
-//	assert.NoError(t, err)
-//
-//	for idx := range mockUsers {
-//		mockUsers[idx].Password = ""
-//	}
-//
-//	rows := sqlmock.NewRows([]string{"id",
-//		"first_name", "last_name", "nick_name", "avatar_att_id", "email", "created_at"})
-//
-//	for _, mockUser := range mockUsers {
-//		rows.AddRow(mockUser.Id, mockUser.FirstName, mockUser.LastName, mockUser.NickName,
-//			mockUser.Avatar, mockUser.Email, mockUser.CreatedAt)
-//	}
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "users"."id","users"."first_name",` +
-//		`"users"."last_name","users"."nick_name","users"."avatar_att_id",` +
-//		`"users"."email","users"."created_at" FROM "users"`)).WillReturnRows(rows)
-//
-//	repository := userRep.New(gdb)
-//
-//	actualUsers, err := repository.SelectAllUsers()
-//	require.NoError(t, err)
-//	assert.Equal(t, mockUsers, actualUsers)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositoryAddFriend(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	mock.ExpectBegin()
-//
-//	var mockFriends models.Friends
-//	err = faker.FakeData(&mockFriends)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectExec(regexp.QuoteMeta(
-//		`INSERT INTO "friends" ("user_id1","user_id2") VALUES ($1,$2)`)).WithArgs(mockFriends.Id1,
-//		mockFriends.Id2).WillReturnResult(sqlmock.NewResult(int64(1), 1))
-//
-//	mock.ExpectCommit()
-//
-//	repository := userRep.New(gdb)
-//
-//	err = repository.AddFriend(mockFriends)
-//	require.NoError(t, err)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositoryDeleteFriend(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	mock.ExpectBegin()
-//
-//	var mockFriends models.Friends
-//	err = faker.FakeData(&mockFriends)
-//	assert.NoError(t, err)
-//
-//	mock.ExpectExec(regexp.QuoteMeta(
-//		`DELETE FROM "friends" WHERE user_id1 = $1 AND user_id2 = $2`)).WithArgs(mockFriends.Id1,
-//		mockFriends.Id2).WillReturnResult(sqlmock.NewResult(int64(1), 1))
-//
-//	mock.ExpectCommit()
-//
-//	repository := userRep.New(gdb)
-//
-//	err = repository.DeleteFriend(mockFriends)
-//	require.NoError(t, err)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositoryCheckFriends(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	var mockFriends models.Friends
-//	err = faker.FakeData(&mockFriends)
-//	assert.NoError(t, err)
-//
-//	expectedCount := 1
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(
-//		`SELECT count(*) FROM "friends" WHERE user_id1 = $1 AND user_id2 = $2`)).WithArgs(mockFriends.Id1,
-//		mockFriends.Id2).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(expectedCount))
-//
-//	repository := userRep.New(gdb)
-//
-//	friendSExist, err := repository.CheckFriends(mockFriends)
-//	require.NoError(t, err)
-//	assert.True(t, friendSExist)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
-//
-//func TestRepositorySelectFriends(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	dialector := postgres.New(postgres.Config{
-//		DSN:                  "sqlmock_db_0",
-//		DriverName:           "postgres",
-//		Conn:                 db,
-//		PreferSimpleProtocol: true,
-//	})
-//	gdb, err := gorm.Open(dialector, &gorm.Config{})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	gdb.Logger.LogMode(logger.Info)
-//
-//	mockFriends := make([]models.User, 0, 10)
-//	err = faker.FakeData(&mockFriends)
-//	assert.NoError(t, err)
-//
-//	var userId uint64 = 1
-//
-//	rows := sqlmock.NewRows([]string{"id",
-//		"first_name", "last_name", "nick_name", "avatar_att_id", "email", "created_at"})
-//
-//	for _, mockFriend := range mockFriends {
-//		rows.AddRow(mockFriend.Id, mockFriend.FirstName, mockFriend.LastName, mockFriend.NickName,
-//			mockFriend.Avatar, mockFriend.Email, mockFriend.CreatedAt)
-//	}
-//
-//	for i := range mockFriends {
-//		mockFriends[i].Password = ""
-//	}
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "users"."id","users"."first_name",` +
-//		`"users"."last_name","users"."nick_name","users"."avatar_att_id","users"."email",` +
-//		`"users"."created_at" FROM "users" JOIN friends ON friends.user_id2 = users.id WHERE` +
-//		` user_id1 = $1`)).WillReturnRows(rows)
-//
-//	repository := userRep.New(gdb)
-//
-//	actualFriends, err := repository.SelectFriends(userId)
-//	require.NoError(t, err)
-//	assert.Equal(t, mockFriends, actualFriends)
-//
-//	err = mock.ExpectationsWereMet()
-//	assert.NoError(t, err)
-//}
+func generateFakeData(data any) {
+	faker.SetRandomMapAndSliceMaxSize(10)
+	faker.SetRandomMapAndSliceMinSize(1)
+	faker.SetRandomStringLength(30)
+
+	faker.FakeData(data)
+}
+
+func TestRepository_Create(t *testing.T) {
+	var fakeUser *models.User
+	generateFakeData(&fakeUser)
+	fakeUser.UserID = 0
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id"}).AddRow(fakeUser.UserID)
+
+	mock.ExpectBegin()
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "mail"."users" ("email","password","first_name","last_name","avatar")
+	VALUES ($1,$2,$3,$4,$5)`)).WithArgs(fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName,
+		fakeUser.Avatar).WillReturnRows(rows)
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	response, err := userRepo.Create(fakeUser)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
+
+func TestRepository_EditInfo(t *testing.T) {
+	var fakeUser models.UserInfo
+	generateFakeData(&fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "mail"."users" SET "first_name"=$1,"last_name"=$2 WHERE user_id = $3`)).
+		WithArgs(fakeUser.FirstName, fakeUser.LastName, fakeUser.UserID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	err = userRepo.EditInfo(fakeUser.UserID, fakeUser)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	}
+}
+
+func TestRepository_Delete(t *testing.T) {
+	userID := uint64(1)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "mail"."users" WHERE user_id = $1`)).
+		WithArgs(userID).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	err = userRepo.Delete(userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	}
+}
+
+func TestRepository_GetByID(t *testing.T) {
+	var fakeUser *models.User
+	generateFakeData(&fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar"}).
+		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName, fakeUser.Avatar)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE user_id = $1`)).WithArgs(fakeUser.UserID).WillReturnRows(rows)
+
+	userRepo := New(gormDB)
+	response, err := userRepo.GetByID(fakeUser.UserID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
+
+func TestRepository_GetByEmail(t *testing.T) {
+	var fakeUser *models.User
+	generateFakeData(&fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar"}).
+		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName, fakeUser.Avatar)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1`)).WithArgs(fakeUser.Email).WillReturnRows(rows)
+
+	userRepo := New(gormDB)
+	response, err := userRepo.GetByEmail(fakeUser.Email)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
+
+func TestRepository_SetAvatar(t *testing.T) {
+	userID := uint64(1)
+	avatar := "avatar.png"
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "mail"."users" SET "avatar"=$1 WHERE user_id = $2`)).
+		WithArgs(avatar, userID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	err = userRepo.SetAvatar(userID, avatar)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	}
+}
+
+func TestRepository_EditPw(t *testing.T) {
+	userID := uint64(1)
+	newPw := "too_long_password!"
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "mail"."users" SET "password"=$1 WHERE user_id = $2`)).
+		WithArgs(newPw, userID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	err = userRepo.EditPw(userID, newPw)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	}
+}
+
+func TestRepository_GetInfoByID(t *testing.T) {
+	var fakeUser *models.UserInfo
+	generateFakeData(&fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "email", "first_name", "last_name"}).
+		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.FirstName, fakeUser.LastName)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE user_id = $1 LIMIT 1`)).
+		WithArgs(fakeUser.UserID).WillReturnRows(rows)
+
+	userRepo := New(gormDB)
+	response, err := userRepo.GetInfoByID(fakeUser.UserID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
+
+func TestRepository_GetInfoByEmail(t *testing.T) {
+	var fakeUser *models.UserInfo
+	generateFakeData(&fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "email", "first_name", "last_name"}).
+		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.FirstName, fakeUser.LastName)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1 LIMIT 1`)).
+		WithArgs(fakeUser.Email).WillReturnRows(rows)
+
+	userRepo := New(gormDB)
+	response, err := userRepo.GetInfoByEmail(fakeUser.Email)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
