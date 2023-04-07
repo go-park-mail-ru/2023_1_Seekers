@@ -184,7 +184,7 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile(config.UserFormNewAvatar)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()+"aboba"))
 		return
 	}
 

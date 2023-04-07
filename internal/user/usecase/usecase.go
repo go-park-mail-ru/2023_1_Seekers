@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 )
 
-//go:generate mockgen -destination=mocks/usecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user UseCaseI
+//go:generate mockgen -destination=mocks/moucksecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user UseCaseI
 
 type useCase struct {
 	userRepo _user.RepoI

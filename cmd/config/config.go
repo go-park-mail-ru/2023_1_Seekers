@@ -64,8 +64,8 @@ const (
 
 	// UserRoutes
 	RouteUser                 = RoutePrefix + "/user"
-	RouteUserInfo             = RoutePrefix + "/info"
-	RouteUserAvatar           = RoutePrefix + "/avatar"
+	RouteUserInfo             = RouteUser + "/info"
+	RouteUserAvatar           = RouteUser + "/avatar"
 	RouteUserAvatarQueryEmail = "email"
 	RouteUserInfoQueryEmail   = "email"
 
@@ -79,6 +79,7 @@ const (
 
 var (
 	AllowedHeaders = []string{"Content-Type", "Content-Length", "X-Csrf-Token"}
-	AllowedOrigins = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://89.208.197.150:8002"}
+	AllowedOrigins = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://localhost", "http://127.0.0.1",
+		"http://89.208.197.150:8002", "https://mailbx.ru", "https://www.mailbx.ru"}
 	AllowedMethods = []string{"POST", "GET", "PUT", "DELETE"}
 )

@@ -18,7 +18,7 @@ services:
         ipv4_address: 172.28.0.2
     ports:
       - "8001:8001"
-    restart: "no"
+    restart: always
 
   db:
     env_file:
@@ -26,7 +26,7 @@ services:
     image: postgres:latest
     command: ["postgres",
               "-c", "log_directory=/var/log/postgresql",
-#              "-c", "logging_collector=on",
+              "-c", "logging_collector=on",
               "-c", "log_statement=all"]
     networks:
       my_network:
@@ -42,8 +42,7 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./scripts/sql:/docker-entrypoint-initdb.d
       - ./logs/postgres:/var/log/postgresql
-    restart: "no"
-
+    restart: always
 
   admin_db:
     env_file:
@@ -56,7 +55,7 @@ services:
       - "5050:80"
     depends_on:
       - db
-    restart: "no"
+    restart: always
 
   cache:
     env_file:
@@ -70,7 +69,7 @@ services:
         ipv4_address: 172.28.0.5
     volumes:
       - cache:/data
-    restart: "no"
+    restart: always
 
 volumes:
   db_data:
