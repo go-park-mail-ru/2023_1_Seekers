@@ -26,7 +26,7 @@ func TestUseCase_CreateSession(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeSession, response)
 	}
@@ -48,7 +48,7 @@ func TestUseCase_DeleteSession(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -69,7 +69,7 @@ func TestUseCase_GetSession(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeSession, response)
 	}

@@ -47,26 +47,6 @@ func generateFakeData(data any) {
 }
 
 func TestRepository_Create(t *testing.T) {
-	//var fakeUser *models.User
-	//generateFakeData(&fakeUser)
-	//
-	//db, gormDB, mock, err := mockDB()
-	//if err != nil {
-	//	t.Fatalf("error while mocking database: %s", err)
-	//}
-	//defer db.Close()
-	//
-	//rows := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar"}).
-	//	AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName, fakeUser.Avatar)
-	//
-	//mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1`)).WithArgs(fakeUser.Email).WillReturnRows(rows)
-	//
-	//userRepo := New(gormDB)
-	//response, err := userRepo.GetByEmail(fakeUser.Email)
-	//causeErr := pkgErr.Cause(err)
-
-	//
-
 	var fakeUser *models.User
 	generateFakeData(&fakeUser)
 	fakeUser.UserID = 0
@@ -122,7 +102,7 @@ func TestRepository_EditInfo(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -145,7 +125,7 @@ func TestRepository_Delete(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -169,7 +149,7 @@ func TestRepository_GetByID(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -195,7 +175,7 @@ func TestRepository_GetByEmail(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -221,7 +201,7 @@ func TestRepository_SetAvatar(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -246,7 +226,7 @@ func TestRepository_EditPw(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -271,7 +251,7 @@ func TestRepository_GetInfoByID(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -298,7 +278,7 @@ func TestRepository_GetInfoByEmail(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}

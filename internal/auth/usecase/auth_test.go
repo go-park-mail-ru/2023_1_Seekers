@@ -108,7 +108,7 @@ func TestUseCase_SignUp(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeAuthResponse, responseAuth)
 		require.Equal(t, fakeSession, responseSession)
@@ -149,6 +149,6 @@ func TestUseCase_EditPw(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }

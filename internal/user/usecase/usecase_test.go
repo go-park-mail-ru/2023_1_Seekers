@@ -42,7 +42,7 @@ func TestUseCase_Create(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -71,7 +71,7 @@ func TestUseCase_GetInfo(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, output, response)
 	}
@@ -93,7 +93,7 @@ func TestUseCase_Delete(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -114,7 +114,7 @@ func TestUseCase_GetByID(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -137,7 +137,7 @@ func TestUseCase_GetByEmail(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeUser, response)
 	}
@@ -163,7 +163,7 @@ func TestUseCase_EditInfo(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, request, *response)
 	}
@@ -196,7 +196,7 @@ func TestUseCase_EditAvatar(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -222,7 +222,7 @@ func TestUseCase_GetAvatar(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, &models.Image{
 			Name: fakeS3.Name,

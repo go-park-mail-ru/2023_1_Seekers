@@ -468,7 +468,7 @@ func TestUseCase_SendMessage(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, messageSelected, *response)
 	}
@@ -556,7 +556,7 @@ func TestUseCase_SendFailedSendingMessage(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -640,7 +640,7 @@ func TestUseCase_SendWelcomeMessage(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
 
@@ -692,7 +692,7 @@ func TestUseCase_MarkMessageAsSeen(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, mockMessageResponse, response)
 	}
@@ -746,7 +746,7 @@ func TestUseCase_MarkMessageAsUnseen(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, mockMessageResponse, response)
 	}

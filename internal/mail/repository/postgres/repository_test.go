@@ -69,7 +69,7 @@ func TestRepository_SelectFolderByUserNFolder(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeFolder, response)
 	}
@@ -99,7 +99,7 @@ func TestRepository_SelectFoldersByUser(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeFolders, response)
 	}
@@ -132,7 +132,8 @@ func TestRepository_SelectFolderMessagesByUserNFolder(t *testing.T) {
 			message.Text, message.ReplyToMessageID, message.Seen, message.Favorite, message.Deleted)
 	}
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."boxes" JOIN mail.messages using(message_id) WHERE user_id = $1 AND folder_id = $2`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."boxes" JOIN mail.messages using(message_id) WHERE user_id = $1 
+AND folder_id = $2`)).
 		WithArgs(userID, folderID).WillReturnRows(rows)
 
 	mailRepo := New(gormDB)
@@ -140,7 +141,7 @@ func TestRepository_SelectFolderMessagesByUserNFolder(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeMessages, response)
 	}
@@ -172,7 +173,7 @@ func TestRepository_SelectRecipientsByMessage(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeRecipients, response)
 	}
@@ -201,7 +202,8 @@ func TestRepository_SelectMessageByUserNMessage(t *testing.T) {
 	rows.AddRow(fakeMessage.MessageID, fakeMessage.FromUser.UserID, fakeMessage.Title, fakeMessage.CreatedAt,
 		fakeMessage.Text, fakeMessage.ReplyToMessageID, fakeMessage.Seen, fakeMessage.Favorite, fakeMessage.Deleted)
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."boxes" JOIN mail.messages using(message_id) WHERE user_id = $1 AND message_id = $2`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."boxes" JOIN mail.messages using(message_id) WHERE user_id = $1 
+AND message_id = $2`)).
 		WithArgs(userID, messageID).WillReturnRows(rows)
 
 	mailRepo := New(gormDB)
@@ -209,7 +211,7 @@ func TestRepository_SelectMessageByUserNMessage(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeMessage, response)
 	}
@@ -260,7 +262,7 @@ VALUES ($1,$2,$3,$4,$5,$6)`)).WithArgs(user2folder[0].UserID, fakeMessage.Messag
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, fakeMessage.MessageID, messageID)
 	}
@@ -293,7 +295,7 @@ func TestRepository_InsertFolder(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	} else {
 		require.Equal(t, folderID, folderID)
 	}
@@ -326,6 +328,6 @@ func TestRepository_UpdateMessageState(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
 	}
 }
