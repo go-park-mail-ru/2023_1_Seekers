@@ -20,7 +20,7 @@ docker-prune-volumes:
 
 cov:
 	mkdir -p scripts/result_cover
-	go test -race -coverpkg=./... -coverprofile scripts/result_cover/cover.out ./...; cat scripts/result_cover/cover.out | fgrep -v "test.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" > scripts/result_cover/cover2.out
+	go test -race -coverpkg=./... -coverprofile scripts/result_cover/cover.out ./...; cat scripts/result_cover/cover.out | fgrep -v "test.go" | fgrep -v "register.go"| fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" > scripts/result_cover/cover2.out
 	go tool cover -func scripts/result_cover/cover2.out
 	go tool cover -html scripts/result_cover/cover2.out -o scripts/result_cover/coverage.html
 
