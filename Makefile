@@ -1,7 +1,7 @@
 build:
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
-	docker-compose up --build
+	docker-compose up -d
 	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
