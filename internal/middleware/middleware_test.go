@@ -1,30 +1,108 @@
 package middleware
 
-//
-//import (
-//	"bytes"
-//	"context"
-//	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-//	_sessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis"
-//	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
-//	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/repository"
-//	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase"
-//
-//	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
-//	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
-//	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-//	"github.com/redis/go-redis/v9"
-//	log "github.com/sirupsen/logrus"
-//	"net/http"
-//	"net/http/httptest"
-//	"testing"
-//)
-//
-//func TestHandlers_Auth(t *testing.T) {
+import (
+	"bytes"
+	"context"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	mockSessionUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/mocks_session"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
+	"github.com/golang/mock/gomock"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestMiddleware_CheckAuth(t *testing.T) {
+	t.Parallel()
+	type inputCase struct {
+		createSession bool //нужно ли создавать сессию
+		noCookie      bool
+		cookie        string
+	}
+	type outputCase struct {
+		status int
+	}
+	type testCase struct {
+		inputCase
+		outputCase
+		name string
+	}
+
+	randCookie, err := rand.String(config.CookieLen)
+	if err != nil {
+		t.Errorf("failed generate rand str %v ", err)
+	}
+
+	testCases := []testCase{
+		{
+			// регистрируем пользователя и отправляем с ним куку
+			inputCase:  inputCase{createSession: true, cookie: "randgeneratedcookie12334524524523542"},
+			outputCase: outputCase{status: http.StatusOK},
+			name:       "success, created cookie",
+		},
+		{
+			// просто приходит кука которая ранее не была создана на сервере
+			inputCase:  inputCase{cookie: randCookie},
+			outputCase: outputCase{status: http.StatusUnauthorized},
+			name:       "not valid cookie",
+		},
+		{
+			// если вообще нет куки с таким названием
+			inputCase:  inputCase{noCookie: true},
+			outputCase: outputCase{status: http.StatusUnauthorized},
+			name:       "cookie not presented",
+		},
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	sUC := mockSessionUC.NewMockSessionUseCaseI(ctrl)
+	pkg.InitLogger()
+	logger := pkg.GetLogger()
+	middleware := New(sUC, logger)
+
+	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	for _, test := range testCases {
+		r := httptest.NewRequest("POST", "/", bytes.NewReader([]byte{}))
+		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextHandlerLog, logger))
+
+		if test.createSession && !test.noCookie {
+			r.AddCookie(&http.Cookie{
+				Name:  config.CookieName,
+				Value: test.cookie,
+			})
+			sUC.EXPECT().GetSession(test.cookie).Return(&models.Session{}, nil)
+		} else if !test.noCookie {
+			r.AddCookie(&http.Cookie{
+				Name:  config.CookieName,
+				Value: test.cookie,
+			})
+			sUC.EXPECT().GetSession(test.cookie).Return(nil, errors.ErrFailedAuth)
+		}
+		w := httptest.NewRecorder()
+
+		handler := middleware.CheckAuth(wrappedHandler)
+		handler(w, r)
+
+		if w.Code != test.outputCase.status {
+			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.status, w.Code)
+		}
+	}
+}
+
+//func TestMiddleware_CheckCSRF(t *testing.T) {
 //	t.Parallel()
 //	type inputCase struct {
-//		createSession bool //нужно ли создавать сессию
-//		noCookie      bool
+//		token    string
+//		noCookie bool
+//		cookie   string
 //	}
 //	type outputCase struct {
 //		status int
@@ -35,79 +113,72 @@ package middleware
 //		name string
 //	}
 //
-//	randCookie, err := pkg.String(config.CookieLen)
-//	if err != nil {
-//		t.Errorf("failed generate rand str %v ", err)
-//	}
-//
+//	tokenCSRF, _ := pkg.CreateCSRF("randgeneratedcookie12334524524523542")
 //	testCases := []testCase{
 //		{
-//			// регистрируем пользователя и отправляем с ним куку
-//			inputCase{true, false},
-//			outputCase{status: http.StatusOK},
-//			"success, created cookie",
+//			inputCase: inputCase{
+//				token:    tokenCSRF,
+//				noCookie: false,
+//				cookie:   "randgeneratedcookie12334524524523542",
+//			},
+//			outputCase: outputCase{status: http.StatusOK},
+//			name:       "success",
 //		},
 //		{
-//			// просто приходит кука которая ранее не была создана на сервере
-//			inputCase{false, false},
-//			outputCase{status: http.StatusUnauthorized},
-//			"not valid cookie",
+//			inputCase: inputCase{
+//				token:    "randgeneratedtoken.123345212",
+//				noCookie: false,
+//				cookie:   "randgeneratedcookie12334524524523542",
+//			},
+//			outputCase: outputCase{status: http.StatusBadRequest},
+//			name:       "bad token time",
 //		},
 //		{
-//			// если вообще нет куки с таким названием
-//			inputCase{false, true},
-//			outputCase{status: http.StatusUnauthorized},
-//			"cookie not presented",
+//			inputCase: inputCase{
+//				token:    "",
+//				noCookie: false,
+//				cookie:   "randgeneratedcookie12334524524523542",
+//			},
+//			outputCase: outputCase{status: http.StatusBadRequest},
+//			name:       "token not presented",
+//		},
+//		{
+//			inputCase: inputCase{
+//				token:    "",
+//				noCookie: true,
+//				cookie:   "",
+//			},
+//			outputCase: outputCase{status: http.StatusUnauthorized},
+//			name:       "cookie not presented",
 //		},
 //	}
-//
-//	pkg.InitLogger()
-//	logger := pkg.GetLogger()
-//
-//	if err != nil {
-//		logger.Fatalf("db connection error %v", err)
-//	}
-//
-//	rdb := redis.NewClient(&redis.Options{
-//		Addr:     config.RedisAddr,
-//		Password: config.RedisPassword,
-//	})
-//
-//	_, err = rdb.Ping(context.Background()).Result()
-//	if err != nil {
-//		log.Fatalf("failed connect to redis : %v", err)
-//	}
-//	userRepo := _userRepo.New()
-//	sessionRepo := _sessionRepo.NewSessionRepo(rdb)
-//	fStorageRepo := _fStorageRepo.New()
-//
-//	fStorageUC := _fStorageUCase.New(fStorageRepo)
-//	usersUC := _userUCase.New(userRepo, fStorageUC)
-//	sessionUC := _authUCase.NewSessionUC(sessionRepo, usersUC)
-//
-//	middleware := New(sessionUC, logger)
-//
 //	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 //		w.WriteHeader(http.StatusOK)
 //	})
 //
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//
+//	sUC := mockSessionUC.NewMockSessionUseCaseI(ctrl)
+//	pkg.InitLogger()
+//	logger := pkg.GetLogger()
+//	middleware := New(sUC, logger)
+//
 //	for _, test := range testCases {
 //		r := httptest.NewRequest("POST", "/", bytes.NewReader([]byte{}))
+//		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextHandlerLog, logger))
 //
-//		if test.createSession && !test.noCookie {
+//		r.Header.Set(config.CSRFHeader, test.token)
+//
+//		if !test.noCookie {
 //			r.AddCookie(&http.Cookie{
 //				Name:  config.CookieName,
-//				Value: "randgeneratedcookie12334524524523542",
-//			}) //выставляем авторизованную куку (ранее созданную дл тестирования)
-//		} else if !test.noCookie {
-//			r.AddCookie(&http.Cookie{
-//				Name:  config.CookieName,
-//				Value: randCookie,
-//			}) //создаем невалидную куку
+//				Value: test.cookie,
+//			})
 //		}
 //		w := httptest.NewRecorder()
 //
-//		handler := middleware.CheckAuth(wrappedHandler)
+//		handler := middleware.CheckCSRF(wrappedHandler)
 //		handler(w, r)
 //
 //		if w.Code != test.outputCase.status {
