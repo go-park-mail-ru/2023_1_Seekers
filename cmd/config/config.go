@@ -36,7 +36,6 @@ const (
 	// Sessions
 	CookieName = "MailBoxSession"
 	CookieTTL  = time.Hour * 24 * 100 // 100 days
-	CookieLen  = 32
 	CookiePath = "/"
 	CSRFHeader = "Csrf-Token"
 
@@ -69,8 +68,8 @@ const (
 	RouteUserAvatarQueryEmail = "email"
 	RouteUserInfoQueryEmail   = "email"
 
-	PasswordMinLen   = 5
-	PasswordSaltLen  = 10
+	PasswordMinLen = 5
+	//PasswordSaltLen  = 10
 	DefaultAvatar    = "default_avatar.png"
 	DefaultAvatarDir = "./cmd/config/static/"
 	PostDomain       = "mailbox.ru"
@@ -78,8 +77,10 @@ const (
 )
 
 var (
-	AllowedHeaders = []string{"Content-Type", "Content-Length", "X-Csrf-Token"}
-	AllowedOrigins = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://localhost", "http://127.0.0.1",
+	CookieLen       = 32
+	PasswordSaltLen = 10
+	AllowedHeaders  = []string{"Content-Type", "Content-Length", "X-Csrf-Token"}
+	AllowedOrigins  = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://localhost", "http://127.0.0.1",
 		"http://89.208.197.150:8002", "https://mailbx.ru", "https://www.mailbx.ru"}
 	AllowedMethods = []string{"POST", "GET", "PUT", "DELETE"}
 )

@@ -99,14 +99,6 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 	return &info, nil
 }
 
-func (u *useCase) EditPw(ID uint64, pw models.EditPasswordRequest) error {
-	err := u.userRepo.EditPw(ID, pw.Password)
-	if err != nil {
-		return pkgErrors.Wrap(err, "edit password")
-	}
-	return nil
-}
-
 func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
 	user, err := u.GetByID(ID)
 	if err != nil {

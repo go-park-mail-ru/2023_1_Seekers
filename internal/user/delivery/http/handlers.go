@@ -59,11 +59,11 @@ func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param id query string true "email"
+// @Param email path string true "email"
 // @Success 200 {object} models.UserInfo "success get user info"
 // @Failure 404 {object} errors.JSONError "user not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /user/info [get]
+// @Router   /user/info/{email} [get]
 func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	email := vars[config.RouteUserInfoQueryEmail]

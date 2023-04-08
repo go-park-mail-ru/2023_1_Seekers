@@ -139,7 +139,7 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Tags     auth
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 "success logout"
+// @Success  200 "success auth"
 // @Failure 401 {object} errors.JSONError "failed auth"
 // @Router   /auth [get]
 func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) {
