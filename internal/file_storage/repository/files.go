@@ -7,14 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsS3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"net/http"
-	"os"
 )
 
 type fileDB struct {
@@ -26,21 +23,6 @@ func New(s *session.Session) file_storage.RepoI {
 	db := &fileDB{
 		s3manager.NewUploader(s),
 		s3manager.NewDownloader(s),
-	}
-
-	dat, err := os.ReadFile(config.DefaultAvatarDir + config.DefaultAvatar)
-	if err != nil {
-		logrus.Fatalf("Failed init default avatar: %v", err)
-	}
-
-	err = db.Upload(&models.S3File{
-		Bucket: config.S3AvatarBucket,
-		Name:   config.DefaultAvatar,
-		Data:   dat,
-	})
-
-	if err != nil {
-		logrus.Fatalf("Failed init default avatar: %v", err)
 	}
 
 	return db

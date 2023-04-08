@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_authHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http"
@@ -21,25 +20,23 @@ import (
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
 	"github.com/gorilla/mux"
-	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
-var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
 	os.Getenv(config.DBUserEnv),
 	os.Getenv(config.DBPasswordEnv),
 	os.Getenv(config.DBHostEnv),
 	os.Getenv(config.DBPortEnv),
 	os.Getenv(config.DBNameEnv),
+	os.Getenv(config.DBSSLModeEnv),
 )
 
 // @title MailBox Swagger API
@@ -51,37 +48,29 @@ func main() {
 	logger := pkg.GetLogger()
 	router := mux.NewRouter()
 
-	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
-		TablePrefix:   os.Getenv(config.DBSchemaNameEnv) + ".",
-		SingularTable: false,
-	}})
+	tablePrefix := os.Getenv(config.DBSchemaNameEnv) + "."
+	db, err := connectors.NewGormDb(connStr, tablePrefix)
 	if err != nil {
 		logger.Fatalf("db connection error %v", err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv(config.RedisHostEnv) + ":" + os.Getenv(config.RedisPortEnv),
-		Password: os.Getenv(config.RedisPasswordEnv),
-	})
-
-	_, err = rdb.Ping(context.Background()).Result()
+	redisAddr := os.Getenv(config.RedisHostEnv) + ":" + os.Getenv(config.RedisPortEnv)
+	redisPw := os.Getenv(config.RedisPasswordEnv)
+	rdb, err := connectors.NewRedisClient(redisAddr, redisPw)
 	if err != nil {
 		log.Fatalf("failed connect to redis : %v", err)
 	}
 
-	s3Session, err := session.NewSession(
-		&aws.Config{
-			Endpoint:         aws.String(config.S3Endpoint),
-			Region:           aws.String(config.S3Region),
-			DisableSSL:       aws.Bool(true),
-			S3ForcePathStyle: aws.Bool(true),
-			Credentials: credentials.NewStaticCredentials(
-				os.Getenv(config.S3AccessKeyEnv),
-				os.Getenv(config.S3ASecretKeyEnv),
-				"",
-			),
-		},
+	endpoint := aws.String(config.S3Endpoint)
+	region := aws.String(config.S3Region)
+	disableSSL := aws.Bool(true)
+	s3ForcePathStyle := aws.Bool(true)
+	creds := credentials.NewStaticCredentials(
+		os.Getenv(config.S3AccessKeyEnv),
+		os.Getenv(config.S3ASecretKeyEnv),
+		"",
 	)
+	s3Session, err := connectors.NewS3(endpoint, region, disableSSL, s3ForcePathStyle, creds)
 	if err != nil {
 		log.Fatalf("Failed create S3 session : %v", err)
 	}

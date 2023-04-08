@@ -16,6 +16,7 @@ const (
 	DBPortEnv       = "POSTGRES_PORT"
 	DBNameEnv       = "POSTGRES_DB" //
 	DBSchemaNameEnv = "POSTGRES_SCHEMA"
+	DBSSLModeEnv    = "POSTGRES_SSL_MODE"
 
 	// Redis
 	RedisHostEnv     = "REDIS_HOST"

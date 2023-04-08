@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/usecase.go (82.1%)</option>
 				
-				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (56.5%)</option>
+				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (54.2%)</option>
 				
 				<option value="file9">github.com/go-park-mail-ru/2023_1_Seekers/internal/models/auth.go (100.0%)</option>
 				
@@ -87,7 +87,7 @@
 				
 				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (74.1%)</option>
 				
-				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/csrf.go (40.0%)</option>
+				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/csrf.go (43.3%)</option>
 				
 				<option value="file17">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/classificator.go (75.0%)</option>
 				
@@ -1451,7 +1451,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class=
 }
 
 func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc <span class="cov0" title="0">{
-        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{<span class="cov0" title="0">
+        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
                 //cookie, err := r.Cookie(config.CookieName)
                 //if err != nil {
                 //        pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
@@ -1468,7 +1468,7 @@ func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc <span class=
                 //        pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
                 //        return
                 //}
-                //h.ServeHTTP(w, r)
+                h.ServeHTTP(w, r)
         }</span>)
         <span class="cov0" title="0">return handler</span>
 }
@@ -2203,11 +2203,11 @@ const DefaultCSRFSecret = "sadsa2sadl149891mppinadpon"
 
 func init() <span class="cov10" title="6">{
         csrfSecret := os.Getenv("CSRF_SECRET")
-        if csrfSecret == "" </span><span class="cov0" title="0">{
+        if csrfSecret == "" </span><span class="cov10" title="6">{
                 secret = []byte(DefaultCSRFSecret)
                 return
         }</span>
-        <span class="cov10" title="6">secret = []byte(csrfSecret)</span>
+        <span class="cov0" title="0">secret = []byte(csrfSecret)</span>
 }
 
 func CreateMAC(data []byte) ([]byte, error) <span class="cov1" title="1">{

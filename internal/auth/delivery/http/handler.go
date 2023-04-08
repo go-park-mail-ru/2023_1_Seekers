@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	httpPkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -73,13 +73,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	form := models.FormSignUp{}
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
@@ -87,12 +87,12 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	response, session, err := h.authUC.SignUp(form)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		httpPkg.HandleError(w, r, err)
 		return
 	}
 
 	setNewCookie(w, session)
-	http2.SendJSON(w, r, http.StatusOK, response)
+	httpPkg.SendJSON(w, r, http.StatusOK, response)
 }
 
 // SignIn godoc
@@ -119,18 +119,18 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	response, session, err := h.authUC.SignIn(form)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		httpPkg.HandleError(w, r, err)
 		return
 	}
 
 	setNewCookie(w, session)
-	http2.SendJSON(w, r, http.StatusOK, response)
+	httpPkg.SendJSON(w, r, http.StatusOK, response)
 }
 
 // Auth godoc
@@ -175,7 +175,7 @@ func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
-		http2.HandleError(w, r, errors.ErrFailedGetUser)
+		httpPkg.HandleError(w, r, errors.ErrFailedGetUser)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -188,7 +188,7 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
@@ -196,7 +196,7 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 
 	err = h.authUC.EditPw(userID, form)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		httpPkg.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -213,13 +213,13 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(config.CookieName)
 	if err != nil {
-		http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 		return
 	}
 
 	csrfToken, err := pkg.CreateCSRF(cookie.Value)
 	if err != nil {
-		http2.HandleError(w, r, err)
+		httpPkg.HandleError(w, r, err)
 		return
 	}
 	w.Header().Set(config.CSRFHeader, csrfToken)
