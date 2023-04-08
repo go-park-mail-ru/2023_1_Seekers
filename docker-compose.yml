@@ -39,7 +39,6 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - db_data:/var/lib/postgresql/data
       - ./scripts/sql:/docker-entrypoint-initdb.d
       - ./logs/postgres:/var/log/postgresql
     restart: "no"
@@ -73,8 +72,6 @@ services:
     restart: "no"
 
 volumes:
-  db_data:
-    driver: local
   cache:
     driver: local
 
