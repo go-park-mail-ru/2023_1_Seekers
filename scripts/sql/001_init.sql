@@ -115,7 +115,7 @@ $BODY$ LANGUAGE plpgsql;
 -- срабатывает после вставки записей в boxes
 CREATE TRIGGER inc_cnt_after_ins_box
     AFTER INSERT
-    ON boxes
+    ON mail.boxes
     FOR EACH ROW
 EXECUTE PROCEDURE increment_count_messages();
 
@@ -140,7 +140,7 @@ $BODY$ LANGUAGE plpgsql;
 -- срабатывает после обновления столбца seen и boxes
 CREATE TRIGGER update_cnt_after_update_seen
     AFTER UPDATE
-    ON boxes
+    ON mail.boxes
     FOR EACH ROW
     WHEN (OLD.seen IS DISTINCT FROM NEW.seen)
 EXECUTE PROCEDURE update_count_messages();

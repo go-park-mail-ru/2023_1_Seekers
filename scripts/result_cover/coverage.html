@@ -1,0 +1,2848 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>http: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (66.7%)</option>
+				
+				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis/session.go (71.4%)</option>
+				
+				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/auth.go (67.3%)</option>
+				
+				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/session.go (76.9%)</option>
+				
+				<option value="file4">github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase/usecase.go (77.8%)</option>
+				
+				<option value="file5">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/delivery/handler.go (55.8%)</option>
+				
+				<option value="file6">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/postgres/repository.go (81.7%)</option>
+				
+				<option value="file7">github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/usecase.go (82.1%)</option>
+				
+				<option value="file8">github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware/middleware.go (56.5%)</option>
+				
+				<option value="file9">github.com/go-park-mail-ru/2023_1_Seekers/internal/models/auth.go (100.0%)</option>
+				
+				<option value="file10">github.com/go-park-mail-ru/2023_1_Seekers/internal/models/mail.go (100.0%)</option>
+				
+				<option value="file11">github.com/go-park-mail-ru/2023_1_Seekers/internal/models/user.go (100.0%)</option>
+				
+				<option value="file12">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/delivery/http/handlers.go (48.1%)</option>
+				
+				<option value="file13">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres/models.go (100.0%)</option>
+				
+				<option value="file14">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres/repository.go (61.9%)</option>
+				
+				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (74.1%)</option>
+				
+				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/csrf.go (40.0%)</option>
+				
+				<option value="file17">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/classificator.go (75.0%)</option>
+				
+				<option value="file18">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/errors.go (50.0%)</option>
+				
+				<option value="file19">github.com/go-park-mail-ru/2023_1_Seekers/pkg/hash.go (81.2%)</option>
+				
+				<option value="file20">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http/http_error.go (77.8%)</option>
+				
+				<option value="file21">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http/send_json.go (62.5%)</option>
+				
+				<option value="file22">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/image.go (0.0%)</option>
+				
+				<option value="file23">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/image_content_type.go (0.0%)</option>
+				
+				<option value="file24">github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger.go (64.5%)</option>
+				
+				<option value="file25">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand/string.go (87.5%)</option>
+				
+				<option value="file26">github.com/go-park-mail-ru/2023_1_Seekers/pkg/time.go (100.0%)</option>
+				
+				<option value="file27">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/login.go (55.6%)</option>
+				
+				<option value="file28">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/password.go (66.7%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package http
+
+import (
+        "encoding/json"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        _ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+        "github.com/go-playground/validator/v10"
+        pkgErrors "github.com/pkg/errors"
+        log "github.com/sirupsen/logrus"
+        "io"
+        "net/http"
+        "time"
+)
+
+type handlers struct {
+        authUC auth.UseCaseI
+}
+
+func New(aUC auth.UseCaseI) auth.HandlersI <span class="cov10" title="6">{
+        return &amp;handlers{
+                authUC: aUC,
+        }
+}</span>
+
+func setNewCookie(w http.ResponseWriter, session *models.Session) <span class="cov4" title="2">{
+        http.SetCookie(w, &amp;http.Cookie{
+                Name:     config.CookieName,
+                Value:    session.SessionID,
+                Expires:  time.Now().Add(config.CookieTTL),
+                HttpOnly: true,
+                Path:     config.CookiePath,
+                SameSite: http.SameSiteLaxMode,
+        })
+}</span>
+
+func delCookie(w http.ResponseWriter) <span class="cov1" title="1">{
+        http.SetCookie(w, &amp;http.Cookie{
+                Name:    config.CookieName,
+                Value:   "",
+                Expires: time.Now().AddDate(0, 0, -1),
+                Path:    config.CookiePath,
+        })
+}</span>
+
+// SignUp godoc
+// @Summary      SignUp
+// @Description  user sign up
+// @Tags     auth
+// @Accept         application/json
+// @Produce  application/json
+// @Param    user body models.FormSignUp true "user info"
+// @Success  200 {object} models.AuthResponse "user created"
+// @Failure 401 {object} errors.JSONError "passwords don`t match"
+// @Failure 401 {object} errors.JSONError "invalid login"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 403 {object} errors.JSONError "password too short"
+// @Failure 409 {object} errors.JSONError "user already exists"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /signup [post]
+func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
+                err := Body.Close()
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error("failed to close request: ", err)
+                }</span>
+        }(r.Body)
+
+        <span class="cov1" title="1">form := models.FormSignUp{}
+        if err := json.NewDecoder(r.Body).Decode(&amp;form); err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">validate := validator.New()
+        if err := validate.Struct(form); err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">form.Sanitize()
+
+        response, session, err := h.authUC.SignUp(form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">setNewCookie(w, session)
+        http2.SendJSON(w, r, http.StatusOK, response)</span>
+}
+
+// SignIn godoc
+// @Summary      SignIn
+// @Description  user sign in
+// @Tags     auth
+// @Accept         application/json
+// @Produce  application/json
+// @Param    user body models.FormLogin true "user info"
+// @Success  200 {object} models.AuthResponse "success sign in"
+// @Failure 401 {object} errors.JSONError "invalid login"
+// @Failure 401 {object} errors.JSONError "wrong password"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /signin [post]
+func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
+                err := Body.Close()
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error(fmt.Errorf("failed to close request: %w", err))
+                }</span>
+        }(r.Body)
+        <span class="cov1" title="1">form := models.FormLogin{}
+
+        err := json.NewDecoder(r.Body).Decode(&amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">response, session, err := h.authUC.SignIn(form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">setNewCookie(w, session)
+        http2.SendJSON(w, r, http.StatusOK, response)</span>
+}
+
+// Auth godoc
+// @Summary      Auth
+// @Description  check is user authorised
+// @Tags     auth
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 "success auth"
+// @Failure 401 {object} errors.JSONError "failed auth"
+// @Router   /auth [get]
+func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) <span class="cov1" title="1">{
+        w.WriteHeader(http.StatusOK)
+}</span>
+
+// Logout godoc
+// @Summary      Logout
+// @Description  check is user authorised
+// @Tags     auth
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 "success logout"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /logout [post]
+func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) <span class="cov1" title="1">{
+        delCookie(w)
+        w.WriteHeader(http.StatusOK)
+}</span>
+
+// EditPw godoc
+// @Summary      EditPw
+// @Description  edit password about user
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success 200 "success edit user password"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/pw [post]
+func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+        <span class="cov1" title="1">defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
+                err := Body.Close()
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error(fmt.Errorf("failed to close request: %w", err))
+                }</span>
+        }(r.Body)
+        <span class="cov1" title="1">form := models.EditPasswordRequest{}
+
+        err := json.NewDecoder(r.Body).Decode(&amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">form.Sanitize()
+
+        err = h.authUC.EditPw(userID, form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">w.WriteHeader(http.StatusOK)</span>
+}
+
+// GetCSRF godoc
+// @Summary      GetCSRF
+// @Description  Get CSRF token
+// @Tags         auth
+// @Success      200    "success create csrf"
+// @Failure 401 {object} errors.JSONError "failed get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router /create_csrf [post]
+func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        cookie, err := r.Cookie(config.CookieName)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">csrfToken, err := pkg.CreateCSRF(cookie.Value)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">w.Header().Set(config.CSRFHeader, csrfToken)
+        w.WriteHeader(http.StatusOK)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package redis
+
+import (
+        "context"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
+        pkgErrors "github.com/pkg/errors"
+        "github.com/redis/go-redis/v9"
+        "strconv"
+)
+
+type sessionsDB struct {
+        redisSessions *redis.Client
+}
+
+func NewSessionRepo(redisClient *redis.Client) auth.SessionRepoI <span class="cov10" title="3">{
+        redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
+        return &amp;sessionsDB{
+                redisSessions: redisClient,
+        }
+}</span>
+
+func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) <span class="cov1" title="1">{
+        value, err := rand.String(config.CookieLen)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, "cant generate cookie")
+        }</span>
+        <span class="cov1" title="1">err = sDb.redisSessions.Set(context.Background(), value, uID, config.CookieTTL).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessagef(errors.ErrInternal, "cant set cookie : %v", err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return &amp;models.Session{
+                UID:       uID,
+                SessionID: value,
+        }, nil</span>
+}
+
+func (sDb *sessionsDB) DeleteSession(sessionID string) error <span class="cov1" title="1">{
+        err := sDb.redisSessions.Del(context.Background(), sessionID).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return pkgErrors.WithMessagef(errors.ErrFailedDeleteSession, "delete cookie %v", err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (sDb *sessionsDB) GetSession(sessionID string) (*models.Session, error) <span class="cov1" title="1">{
+        uIDstr, err := sDb.redisSessions.Get(context.Background(), sessionID).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessagef(errors.ErrFailedGetSession, "get cookie %v", err.Error())
+        }</span>
+        <span class="cov1" title="1">uID, err := strconv.Atoi(uIDstr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return &amp;models.Session{
+                UID:       uint64(uID),
+                SessionID: sessionID,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package usecase
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
+        pkgErrors "github.com/pkg/errors"
+)
+
+type authUC struct {
+        sessionUC auth.SessionUseCaseI
+        userRepo  _user.RepoI
+        mailUC    mail.UseCaseI
+}
+
+func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI) auth.UseCaseI <span class="cov10" title="3">{
+        return &amp;authUC{
+                sessionUC: sUC,
+                userRepo:  uRepo,
+                mailUC:    mUC,
+        }
+}</span>
+
+func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Session, error) <span class="cov1" title="1">{
+        email, err := validation.Login(form.Login)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, errors.ErrInvalidLogin
+        }</span>
+        <span class="cov1" title="1">user, err := u.userRepo.GetByEmail(email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, errors.ErrWrongPw
+        }</span>
+
+        <span class="cov1" title="1">if !pkg.ComparePw2Hash(form.Password, user.Password) </span><span class="cov0" title="0">{
+                return nil, nil, errors.ErrWrongPw
+        }</span>
+
+        <span class="cov1" title="1">session, err := u.sessionUC.CreateSession(user.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, pkgErrors.Wrap(err, "sign in")
+        }</span>
+
+        <span class="cov1" title="1">return &amp;models.AuthResponse{
+                Email:     user.Email,
+                FirstName: user.FirstName,
+                LastName:  user.LastName,
+        }, session, nil</span>
+}
+
+func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) <span class="cov1" title="1">{
+        if form.RepeatPw != form.Password </span><span class="cov0" title="0">{
+                return nil, nil, errors.ErrPwDontMatch
+        }</span>
+
+        <span class="cov1" title="1">email, err := validation.Login(form.Login)
+        if err != nil || len(form.Login) &gt; 30 || len(form.Login) &lt; 3 </span><span class="cov0" title="0">{
+                return nil, nil, errors.ErrInvalidLogin
+        }</span>
+
+        <span class="cov1" title="1">user := &amp;models.User{
+                Email:     email,
+                FirstName: form.FirstName,
+                LastName:  form.LastName,
+                Avatar:    config.DefaultAvatar,
+        }
+
+        user.Password, err = pkg.HashPw(form.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgErrors.Wrap(err, "sign up")
+        }</span>
+
+        <span class="cov1" title="1">user, err = u.userRepo.Create(user)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, pkgErrors.Wrap(err, "sign up")
+        }</span>
+
+        <span class="cov1" title="1">_, err = u.mailUC.CreateDefaultFolders(user.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, pkgErrors.Wrap(err, "sign up")
+        }</span>
+
+        <span class="cov1" title="1">err = u.mailUC.SendWelcomeMessage(user.Email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, pkgErrors.Wrap(err, "sign up")
+        }</span>
+
+        <span class="cov1" title="1">session, err := u.sessionUC.CreateSession(user.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                //надо ли тут откатить прошлое ?
+                return nil, nil, pkgErrors.Wrap(err, "sign up")
+        }</span>
+
+        <span class="cov1" title="1">return &amp;models.AuthResponse{
+                Email:     user.Email,
+                FirstName: user.FirstName,
+                LastName:  user.LastName,
+        }, session, nil</span>
+}
+
+func (u *authUC) EditPw(ID uint64, form models.EditPasswordRequest) error <span class="cov1" title="1">{
+        if form.RepeatPw != form.Password </span><span class="cov0" title="0">{
+                return errors.ErrPwDontMatch
+        }</span>
+
+        <span class="cov1" title="1">user, err := u.userRepo.GetByID(ID)
+        if !pkg.ComparePw2Hash(form.PasswordOld, user.Password) </span><span class="cov0" title="0">{
+                return errors.ErrWrongPw
+        }</span>
+
+        <span class="cov1" title="1">if err := validation.Password(form.Password); err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "create")
+        }</span>
+        <span class="cov1" title="1">hashPw, err := pkg.HashPw(form.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "edit password")
+        }</span>
+        <span class="cov1" title="1">err = u.userRepo.EditPw(ID, hashPw)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "edit password")
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package usecase
+
+import (
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        pkgErrors "github.com/pkg/errors"
+)
+
+type sessionUC struct {
+        sessionRepo auth.SessionRepoI
+}
+
+func NewSessionUC(sr auth.SessionRepoI) auth.SessionUseCaseI <span class="cov10" title="3">{
+        return &amp;sessionUC{
+                sessionRepo: sr,
+        }
+}</span>
+
+func (u *sessionUC) CreateSession(uID uint64) (*models.Session, error) <span class="cov1" title="1">{
+        newSession, err := u.sessionRepo.CreateSession(uID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "create session")
+        }</span>
+
+        <span class="cov1" title="1">return newSession, nil</span>
+}
+
+func (u *sessionUC) DeleteSession(sessionID string) error <span class="cov1" title="1">{
+        err := u.sessionRepo.DeleteSession(sessionID)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "delete avatar")
+        }</span>
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (u *sessionUC) GetSession(sessionID string) (*models.Session, error) <span class="cov1" title="1">{
+        s, err := u.sessionRepo.GetSession(sessionID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("get session: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return s, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package usecase
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        pkgErrors "github.com/pkg/errors"
+)
+
+type useCase struct {
+        s3Repo file_storage.RepoI
+}
+
+func New(s3R file_storage.RepoI) file_storage.UseCaseI <span class="cov10" title="2">{
+        return &amp;useCase{
+                s3Repo: s3R,
+        }
+}</span>
+
+func (uc *useCase) Get(bName, fName string) (*models.S3File, error) <span class="cov1" title="1">{
+        file, err := uc.s3Repo.Get(bName, fName)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "failed get file : %v")
+        }</span>
+        <span class="cov1" title="1">return file, nil</span>
+}
+func (uc *useCase) Upload(file *models.S3File) error <span class="cov1" title="1">{
+        err := uc.s3Repo.Upload(file)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "failed upload file")
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package delivery
+
+import (
+        "encoding/json"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+        "github.com/go-playground/validator/v10"
+        "github.com/gorilla/mux"
+        pkgErrors "github.com/pkg/errors"
+        "net/http"
+        "strconv"
+)
+
+type delivery struct {
+        uc mail.UseCaseI
+}
+
+func New(uc mail.UseCaseI) mail.HandlersI <span class="cov10" title="6">{
+        return &amp;delivery{
+                uc: uc,
+        }
+}</span>
+
+// GetFolderMessages godoc
+// @Summary      GetFolderMessages
+// @Description  List of folder messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Param slug path string true "FolderSlug"
+// @Success  200 {object} models.FolderResponse "success get list of folder messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "folder not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /folder/{slug} [get]
+func (del *delivery) GetFolderMessages(w http.ResponseWriter, r *http.Request) <span class="cov4" title="2">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov4" title="2">vars := mux.Vars(r)
+        folderSlug, ok := vars["slug"]
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrInvalidURL)
+                return
+        }</span>
+
+        <span class="cov4" title="2">folder, err := del.uc.GetFolderInfo(userID, folderSlug)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov4" title="2">messages, err := del.uc.GetFolderMessages(userID, folderSlug)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov4" title="2">http2.SendJSON(w, r, http.StatusOK, models.FolderResponse{
+                Folder:   *folder,
+                Messages: messages,
+        })</span>
+}
+
+// GetFolders godoc
+// @Summary      GetFolders
+// @Description  List of outgoing messages
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 {object} models.FoldersResponse "success get list of outgoing messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /folders/ [get]
+func (del *delivery) GetFolders(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov1" title="1">folders, err := del.uc.GetFolders(userID)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">http2.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
+                Folders: folders,
+                Count:   len(folders),
+        })</span>
+}
+
+// GetMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Param id path int true "id"
+// @Success  200 {object} models.MessageResponse "success get messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id} [get]
+func (del *delivery) GetMessage(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov1" title="1">vars := mux.Vars(r)
+        messageID, err := strconv.ParseUint(vars["id"], 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrInvalidURL)
+                return
+        }</span>
+
+        <span class="cov1" title="1">message, err := del.uc.GetMessage(userID, messageID)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">http2.SendJSON(w, r, http.StatusOK, models.MessageResponse{
+                Message: *message,
+        })</span>
+}
+
+// SendMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success send message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "no valid emails"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "folder not found"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/send [post]
+func (del *delivery) SendMessage(w http.ResponseWriter, r *http.Request) <span class="cov4" title="2">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov4" title="2">form := models.FormMessage{}
+        if err := json.NewDecoder(r.Body).Decode(&amp;form); err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov4" title="2">validate := validator.New()
+        if err := validate.Struct(form); err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov4" title="2">form.Sanitize()
+
+        validEmails, invalidEmails := del.uc.ValidateRecipients(form.Recipients)
+        form.Recipients = validEmails
+
+        message, err := del.uc.SendMessage(userID, form)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov4" title="2">if len(invalidEmails) != 0 </span><span class="cov0" title="0">{
+                err = del.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        http2.HandleError(w, r, err)
+                        return
+                }</span>
+        }
+
+        <span class="cov4" title="2">http2.SendJSON(w, r, http.StatusOK, models.MessageResponse{
+                Message: *message,
+        })</span>
+}
+
+// ReadMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Param id path int true "id"
+// @Success  200 {object} models.MessageResponse "success read message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/read [post]
+func (del *delivery) ReadMessage(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov1" title="1">vars := mux.Vars(r)
+        messageID, err := strconv.ParseUint(vars["id"], 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrInvalidURL)
+                return
+        }</span>
+
+        <span class="cov1" title="1">message, err := del.uc.MarkMessageAsSeen(userID, messageID)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">http2.SendJSON(w, r, http.StatusOK, models.MessageResponse{
+                Message: *message,
+        })</span>
+}
+
+// UnreadMessage godoc
+// @Summary      GetMessage
+// @Description  Message
+// @Tags              messages
+// @Accept         application/json
+// @Produce  application/json
+// @Param id path int true "id"
+// @Success  200 {object} models.MessageResponse "success unread message"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "invalid url address"
+// @Failure 404 {object} errors.JSONError "message not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/unread [post]
+func (del *delivery) UnreadMessage(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov1" title="1">vars := mux.Vars(r)
+        messageID, err := strconv.ParseUint(vars["id"], 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, errors.ErrInvalidURL)
+                return
+        }</span>
+
+        <span class="cov1" title="1">message, err := del.uc.MarkMessageAsUnseen(userID, messageID)
+        if err != nil </span><span class="cov0" title="0">{
+                http2.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">http2.SendJSON(w, r, http.StatusOK, models.MessageResponse{
+                Message: *message,
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package postgres
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErrors "github.com/pkg/errors"
+        "gorm.io/gorm"
+        "os"
+)
+
+type mailRepository struct {
+        db *gorm.DB
+}
+
+type Box struct {
+        UserID    uint64
+        MessageID uint64
+        FolderID  uint64
+        Seen      bool
+        Favorite  bool
+        Deleted   bool
+}
+
+func (Box) TableName() string <span class="cov7" title="5">{
+        return os.Getenv(config.DBSchemaNameEnv) + ".boxes"
+}</span>
+
+type Message struct {
+        MessageID        uint64 `gorm:"primaryKey"`
+        FromUserID       uint64
+        Title            string
+        Text             string
+        CreatedAt        string
+        ReplyToMessageID *uint64
+}
+
+func (Message) TableName() string <span class="cov5" title="3">{
+        return os.Getenv(config.DBSchemaNameEnv) + ".messages"
+}</span>
+
+func New(db *gorm.DB) mail.RepoI <span class="cov10" title="8">{
+        return &amp;mailRepository{
+                db: db,
+        }
+}</span>
+
+func (m mailRepository) SelectFolderByUserNFolder(userID uint64, folderSlug string) (*models.Folder, error) <span class="cov1" title="1">{
+        var folder models.Folder
+
+        tx := m.db.Where("user_id = ? AND local_name = ?", userID, folderSlug).First(&amp;folder)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return &amp;folder, nil</span>
+}
+
+func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, error) <span class="cov1" title="1">{
+        var folders []models.Folder
+
+        tx := m.db.Where("user_id = ?", userID).Find(&amp;folders)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return folders, nil</span>
+}
+
+func (m mailRepository) SelectFolderMessagesByUserNFolder(userID uint64, folderID uint64) ([]models.MessageInfo, error) <span class="cov1" title="1">{
+        var messages []models.MessageInfo
+
+        tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
+                Where("user_id = ? AND folder_id = ?", userID, folderID).Scan(&amp;messages)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return messages, nil</span>
+}
+
+func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID uint64) ([]uint64, error) <span class="cov1" title="1">{
+        var recipientsIDs []uint64
+
+        tx := m.db.Model(Box{}).Select("user_id").Where("message_id = ? AND user_id != ?", messageID, fromUserID).
+                Scan(&amp;recipientsIDs)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return recipientsIDs, nil</span>
+}
+
+func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) <span class="cov1" title="1">{
+        var message *models.MessageInfo
+
+        tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
+                Where("user_id = ? AND message_id = ?", userID, messageID).Scan(&amp;message)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return message, nil</span>
+}
+
+func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *models.MessageInfo, tx *gorm.DB) (uint64, error) <span class="cov1" title="1">{
+        convMsg := convertToMessageDB(fromUserID, message)
+
+        tx = tx.Select("from_user_id", "title", "text", "created_at", "reply_to_message_id").Create(&amp;convMsg)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return convMsg.MessageID, nil</span>
+}
+
+func convertToMessageDB(fromUserID uint64, message *models.MessageInfo) Message <span class="cov1" title="1">{
+        return Message{
+                FromUserID:       fromUserID,
+                Title:            message.Title,
+                Text:             message.Text,
+                CreatedAt:        message.CreatedAt,
+                ReplyToMessageID: message.ReplyToMessageID,
+        }
+}</span>
+
+func (m mailRepository) insertMessageToBoxes(userID uint64, folderID uint64, message *models.MessageInfo, tx *gorm.DB) error <span class="cov4" title="2">{
+        convMsg := convertToBoxDB(userID, folderID, message)
+
+        tx = tx.Create(&amp;convMsg)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.WithMessage(errors.ErrInternal, tx.Error.Error())
+        }</span>
+
+        <span class="cov4" title="2">return nil</span>
+}
+
+func (m mailRepository) InsertMessage(fromUserID uint64, message *models.MessageInfo, user2folder []models.User2Folder) error <span class="cov1" title="1">{
+        return m.db.Transaction(func(tx *gorm.DB) error </span><span class="cov1" title="1">{
+                messageID, err := m.insertMessageToMessages(fromUserID, message, tx)
+                if err != nil </span><span class="cov0" title="0">{
+                        return pkgErrors.Wrap(err, "insert message : insert to messages")
+                }</span>
+
+                <span class="cov1" title="1">message.MessageID = messageID
+                message.Seen = true
+                for _, elem := range user2folder </span><span class="cov4" title="2">{
+                        err = m.insertMessageToBoxes(elem.UserID, elem.FolderID, message, tx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return pkgErrors.Wrap(err, "insert message : insert to boxes")
+                        }</span>
+
+                        <span class="cov4" title="2">message.Seen = false</span>
+                }
+
+                <span class="cov1" title="1">return nil</span>
+        })
+}
+
+func convertToBoxDB(userID uint64, folderID uint64, message *models.MessageInfo) Box <span class="cov4" title="2">{
+        return Box{
+                UserID:    userID,
+                MessageID: message.MessageID,
+                FolderID:  folderID,
+                Seen:      message.Seen,
+                Favorite:  message.Favorite,
+                Deleted:   message.Deleted,
+        }
+}</span>
+
+func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) <span class="cov1" title="1">{
+        tx := m.db.Create(&amp;folder)
+
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">return folder.FolderID, nil</span>
+}
+
+func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error <span class="cov1" title="1">{
+        tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update(stateName, stateValue)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package usecase
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErrors "github.com/pkg/errors"
+        "strings"
+)
+
+type UseCase struct {
+        repoMail mail.RepoI
+        repoUser user.RepoI
+}
+
+func New(repoMail mail.RepoI, repoUser user.RepoI) mail.UseCaseI <span class="cov10" title="11">{
+        return &amp;UseCase{
+                repoMail: repoMail,
+                repoUser: repoUser,
+        }
+}</span>
+
+var defaultFolderNames = map[string]string{
+        "inbox":  "Входящие",
+        "outbox": "Исходящие",
+        "trash":  "Корзина",
+        "drafts": "Черновики",
+        "spam":   "Спам",
+}
+
+func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) <span class="cov5" title="3">{
+        folders, err := uc.repoMail.SelectFoldersByUser(userID)
+        if err != nil </span><span class="cov1" title="1">{
+                return []models.Folder{}, pkgErrors.Wrap(err, "get folders")
+        }</span>
+
+        <span class="cov3" title="2">return folders, nil</span>
+}
+
+func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error) <span class="cov9" title="10">{
+        folder, err := uc.repoMail.SelectFolderByUserNFolder(userID, folderSlug)
+        if err != nil </span><span class="cov1" title="1">{
+                return folder, pkgErrors.Wrap(err, "get folder info")
+        }</span>
+        <span class="cov9" title="9">if folder == nil </span><span class="cov1" title="1">{
+                return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, "get folder info")
+        }</span>
+
+        <span class="cov8" title="8">return folder, nil</span>
+}
+
+func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) <span class="cov1" title="1">{
+        var messages []models.MessageInfo
+
+        folder, err := uc.GetFolderInfo(userID, folderSlug)
+        if err != nil </span><span class="cov0" title="0">{
+                return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
+        }</span>
+
+        <span class="cov1" title="1">messages, err = uc.repoMail.SelectFolderMessagesByUserNFolder(userID, folder.FolderID)
+        if err != nil </span><span class="cov0" title="0">{
+                return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
+        }</span>
+
+        <span class="cov1" title="1">for i, message := range messages </span><span class="cov1" title="1">{
+                messageID := message.MessageID
+
+                fromUser, err := uc.repoUser.GetInfoByID(message.FromUser.UserID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get info by id")
+                }</span>
+
+                <span class="cov1" title="1">messages[i].FromUser = *fromUser
+                recipientsIDs, err := uc.repoMail.SelectRecipientsByMessage(messageID, message.FromUser.UserID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get recipients by msg")
+                }</span>
+
+                <span class="cov1" title="1">for _, recipientsID := range recipientsIDs </span><span class="cov1" title="1">{
+                        profile, err := uc.repoUser.GetInfoByID(recipientsID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get info by id")
+                        }</span>
+
+                        <span class="cov1" title="1">messages[i].Recipients = append(message.Recipients, *profile)</span>
+                }
+        }
+
+        <span class="cov1" title="1">return messages, nil</span>
+}
+
+func (uc *UseCase) CreateDefaultFolders(userID uint64) ([]models.Folder, error) <span class="cov1" title="1">{
+        for key, value := range defaultFolderNames </span><span class="cov7" title="5">{
+                currentFolder := models.Folder{
+                        UserID:    userID,
+                        LocalName: key,
+                        Name:      value,
+                }
+
+                _, err := uc.repoMail.InsertFolder(&amp;currentFolder)
+                if err != nil </span><span class="cov0" title="0">{
+                        return []models.Folder{}, pkgErrors.Wrap(err, "create default folders")
+                }</span>
+        }
+
+        <span class="cov1" title="1">return uc.GetFolders(userID)</span>
+}
+
+func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) <span class="cov7" title="6">{
+        var firstMessage *models.MessageInfo
+        var prevMessage *models.MessageInfo
+        replyToMsgID := &amp;messageID
+
+        for replyToMsgID != nil </span><span class="cov7" title="6">{
+                curMessage, err := uc.repoMail.SelectMessageByUserNMessage(userID, *replyToMsgID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
+                }</span>
+                <span class="cov7" title="6">if curMessage == nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
+                }</span>
+
+                <span class="cov7" title="6">fromUser, err := uc.repoUser.GetInfoByID(curMessage.FromUser.UserID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "get message : get info by Uid")
+                }</span>
+
+                <span class="cov7" title="6">curMessage.FromUser = *fromUser
+                recipientsIDs, err := uc.repoMail.SelectRecipientsByMessage(*replyToMsgID, curMessage.FromUser.UserID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "get message : get recipients by Mid")
+                }</span>
+
+                <span class="cov7" title="6">for _, recipientsID := range recipientsIDs </span><span class="cov7" title="6">{
+                        profile, err := uc.repoUser.GetInfoByID(recipientsID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return nil, pkgErrors.Wrap(err, "get message : get recipient info by Uid")
+                        }</span>
+
+                        <span class="cov7" title="6">curMessage.Recipients = append(curMessage.Recipients, *profile)</span>
+                }
+
+                <span class="cov7" title="6">if *replyToMsgID == messageID </span><span class="cov7" title="6">{
+                        firstMessage = curMessage
+                }</span> else<span class="cov0" title="0"> {
+                        prevMessage.ReplyTo = curMessage
+                }</span>
+
+                <span class="cov7" title="6">replyToMsgID = curMessage.ReplyToMessageID
+                prevMessage = curMessage</span>
+        }
+
+        <span class="cov7" title="6">return firstMessage, nil</span>
+}
+
+func (uc *UseCase) ValidateRecipients(recipients []string) ([]string, []string) <span class="cov1" title="1">{
+        var validEmails []string
+        var invalidEmails []string
+
+        for _, email := range recipients </span><span class="cov5" title="3">{
+                _, err := uc.repoUser.GetInfoByEmail(email)
+                if err != nil </span><span class="cov1" title="1">{
+                        invalidEmails = append(invalidEmails, email)
+                }</span> else<span class="cov3" title="2"> {
+                        validEmails = append(validEmails, email)
+                }</span>
+        }
+
+        <span class="cov1" title="1">return validEmails, invalidEmails</span>
+}
+
+func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) <span class="cov5" title="3">{
+        if len(message.Recipients) == 0 </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrNoValidEmails, "send message")
+        }</span>
+
+        <span class="cov5" title="3">folder, err := uc.GetFolderInfo(fromUserID, "outbox")
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+        }</span>
+
+        <span class="cov5" title="3">var user2folder []models.User2Folder
+        user2folder = append(user2folder, models.User2Folder{
+                UserID:   fromUserID,
+                FolderID: folder.FolderID,
+        })
+
+        for _, email := range message.Recipients </span><span class="cov5" title="3">{
+                recipient, err := uc.repoUser.GetInfoByEmail(email)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+                }</span>
+
+                <span class="cov5" title="3">folder, err = uc.GetFolderInfo(recipient.UserID, "inbox")
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+                }</span>
+
+                <span class="cov5" title="3">user2folder = append(user2folder, models.User2Folder{
+                        UserID:   recipient.UserID,
+                        FolderID: folder.FolderID,
+                })</span>
+        }
+
+        <span class="cov5" title="3">newMessage := models.MessageInfo{
+                Title:            message.Title,
+                CreatedAt:        pkg.GetCurrentTime(),
+                Text:             message.Text,
+                ReplyToMessageID: message.ReplyToMessageID,
+        }
+
+        err = uc.repoMail.InsertMessage(fromUserID, &amp;newMessage, user2folder)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "send message : insert message")
+        }</span>
+
+        <span class="cov5" title="3">return uc.GetMessage(fromUserID, newMessage.MessageID)</span>
+}
+
+func (uc *UseCase) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error <span class="cov1" title="1">{
+        formMessage := models.FormMessage{
+                Recipients: []string{recipientEmail},
+                Title:      "Ваше сообщение не доставлено",
+                Text: "Это письмо создано автоматически сервером Mailbox.ru, отвечать на него не нужно.\n\n" +
+                        "К сожалению, Ваше письмо не может быть доставлено одному или нескольким получателям:\n" +
+                        strings.Join(invalidEmails, "\n") + "\n\nРекомендуем Вам проверить корректность указания адресов получателей.",
+                ReplyToMessageID: nil,
+        }
+
+        return uc.sendMessageFromSupport(formMessage)
+}</span>
+
+func (uc *UseCase) SendWelcomeMessage(recipientEmail string) error <span class="cov1" title="1">{
+        formMessage := models.FormMessage{
+                Recipients: []string{recipientEmail},
+                Title:      "Добро пожаловать в почту Mailbox",
+                Text: "Это письмо создано автоматически сервером Mailbox.ru, отвечать на него не нужно.\n" +
+                        "Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использванием!",
+                ReplyToMessageID: nil,
+        }
+
+        return uc.sendMessageFromSupport(formMessage)
+}</span>
+
+func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error <span class="cov3" title="2">{
+        supportAccount, err := uc.getSupportAccount()
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "send support message : get support account")
+        }</span>
+
+        <span class="cov3" title="2">_, err = uc.SendMessage(supportAccount.UserID, message)
+        return err</span>
+}
+
+func (uc *UseCase) getSupportAccount() (*models.UserInfo, error) <span class="cov3" title="2">{
+        return uc.repoUser.GetInfoByEmail("support@mailbox.ru")
+}</span>
+
+func (uc *UseCase) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) <span class="cov1" title="1">{
+        err := uc.repoMail.UpdateMessageState(userID, messageID, "seen", true)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "mark message seen : update state")
+        }</span>
+
+        <span class="cov1" title="1">return uc.GetMessage(userID, messageID)</span>
+}
+
+func (uc *UseCase) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models.MessageInfo, error) <span class="cov1" title="1">{
+        err := uc.repoMail.UpdateMessageState(userID, messageID, "seen", false)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "mark message unseen : update state")
+        }</span>
+
+        <span class="cov1" title="1">return uc.GetMessage(userID, messageID)</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package middleware
+
+import (
+        "context"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+        pkgErrors "github.com/pkg/errors"
+        "github.com/rs/cors"
+        "net/http"
+)
+
+type Middleware struct {
+        sUC auth.SessionUseCaseI
+        log *pkg.Logger
+}
+
+func New(sUC auth.SessionUseCaseI, l *pkg.Logger) *Middleware <span class="cov1" title="1">{
+        return &amp;Middleware{sUC, l}
+}</span>
+
+func (m *Middleware) Cors(h http.Handler) http.Handler <span class="cov0" title="0">{
+        c := cors.New(cors.Options{
+                AllowedMethods:   config.AllowedMethods,
+                AllowedOrigins:   config.AllowedOrigins,
+                AllowCredentials: true,
+                AllowedHeaders:   config.AllowedHeaders,
+        })
+        return c.Handler(h)
+}</span>
+
+func (m *Middleware) HandlerLogger(h http.Handler) http.Handler <span class="cov0" title="0">{
+        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                handlerLogger := m.log.LoggerWithFields(map[string]any{
+                        "method": r.Method,
+                        "url":    r.URL.Path,
+                })
+                handlerLogger.Info("new request")
+                r = r.WithContext(context.WithValue(r.Context(), pkg.ContextHandlerLog, handlerLogger))
+                h.ServeHTTP(w, r)
+        }</span>)
+        <span class="cov0" title="0">return handler</span>
+}
+
+func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc <span class="cov10" title="3">{
+        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov10" title="3">{
+                cookie, err := r.Cookie(config.CookieName)
+                if err != nil </span><span class="cov1" title="1">{
+                        pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+                        return
+                }</span>
+                <span class="cov6" title="2">session, err := m.sUC.GetSession(cookie.Value)
+                if err != nil </span><span class="cov1" title="1">{
+                        pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+                        return
+                }</span>
+
+                <span class="cov1" title="1">r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, session.UID))
+
+                h.ServeHTTP(w, r)</span>
+        })
+        <span class="cov10" title="3">return handler</span>
+}
+
+func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc <span class="cov0" title="0">{
+        handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{<span class="cov0" title="0">
+                //cookie, err := r.Cookie(config.CookieName)
+                //if err != nil {
+                //        pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+                //        return
+                //}
+                //csrfToken := r.Header.Get(config.CSRFHeader)
+                //if csrfToken == "" {
+                //        pkgHttp.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
+                //        return
+                //}
+                //
+                //err = pkg.CheckCSRF(cookie.Value, csrfToken)
+                //if err != nil {
+                //        pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
+                //        return
+                //}
+                //h.ServeHTTP(w, r)
+        }</span>)
+        <span class="cov0" title="0">return handler</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package models
+
+import (
+        "html"
+)
+
+type AuthResponse struct {
+        Email     string `json:"email" validate:"required"`
+        FirstName string `json:"firstName" validate:"required"`
+        LastName  string `json:"lastName" validate:"required"`
+}
+
+type EditPasswordRequest struct {
+        PasswordOld string `json:"passwordOld" validate:"required"`
+        Password    string `json:"password" validate:"required"`
+        RepeatPw    string `json:"repeatPw" validate:"required"`
+}
+
+func (form *EditPasswordRequest) Sanitize() <span class="cov8" title="1">{
+        form.Password = html.EscapeString(form.Password)
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package models
+
+import (
+        "github.com/microcosm-cc/bluemonday"
+        "html"
+)
+
+type Folder struct {
+        FolderID       uint64 `json:"folder_id" gorm:"primaryKey"`
+        UserID         uint64 `json:"-"`
+        LocalName      string `json:"folder_slug"`
+        Name           string `json:"name"`
+        MessagesUnseen int    `json:"messages_unseen"`
+        MessagesCount  int    `json:"messages_count"`
+}
+
+type MessageInfo struct {
+        MessageID        uint64       `json:"message_id"`
+        FromUser         UserInfo     `json:"from_user_id" gorm:"embedded;embeddedPrefix:from_"`
+        Recipients       []UserInfo   `json:"recipients" gorm:"-"`
+        Title            string       `json:"title"`
+        CreatedAt        string       `json:"created_at"`
+        Text             string       `json:"text"`
+        ReplyToMessageID *uint64      `json:"-" gorm:"null"`
+        ReplyTo          *MessageInfo `json:"reply_to" gorm:"-"`
+        Seen             bool         `json:"seen"`
+        Favorite         bool         `json:"favorite"`
+        Deleted          bool         `json:"deleted"`
+}
+
+type User2Folder struct {
+        UserID   uint64
+        FolderID uint64
+}
+
+type FormMessage struct {
+        Recipients       []string `json:"recipients" validate:"required"`
+        Title            string   `json:"title" validate:"required"`
+        Text             string   `json:"text" validate:"required"`
+        ReplyToMessageID *uint64  `json:"reply_to"`
+}
+
+func (form *FormMessage) Sanitize() <span class="cov6" title="2">{
+        form.Title = html.EscapeString(form.Title)
+        sanitizer := bluemonday.UGCPolicy()
+        form.Text = sanitizer.Sanitize(form.Text)
+        for i, s := range form.Recipients </span><span class="cov10" title="3">{
+                form.Recipients[i] = html.EscapeString(s)
+        }</span>
+}
+
+type FolderResponse struct {
+        Folder   Folder        `json:"folder"`
+        Messages []MessageInfo `json:"messages"`
+}
+
+type FoldersResponse struct {
+        Folders []Folder `json:"folders"`
+        Count   int      `json:"count"`
+}
+
+type MessageResponse struct {
+        Message MessageInfo `json:"message"`
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package models
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "html"
+        "os"
+)
+
+type User struct {
+        UserID uint64 `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key"`
+        //HereSince time.Time `json:"hereSince" gorm:"column:here_since"`
+        //IsDeleted bool   `json:"isDeleted" gorm:"column:is_deleted"`
+        Email     string `json:"email" validate:"required"`
+        Password  string `json:"password" validate:"required"`
+        FirstName string `json:"firstName" validate:"required"`
+        LastName  string `json:"lastName" validate:"required"`
+        Avatar    string `json:"avatar,omitempty"`
+}
+
+type FormSignUp struct {
+        Login     string `json:"login" validate:"required"`
+        Password  string `json:"password" validate:"required"`
+        RepeatPw  string `json:"repeatPw" validate:"required"`
+        FirstName string `json:"firstName" validate:"required"`
+        LastName  string `json:"lastName" validate:"required"`
+}
+
+func (form *FormSignUp) Sanitize() <span class="cov1" title="1">{
+        form.Login = html.EscapeString(form.Login)
+        form.Password = html.EscapeString(form.Password)
+        form.RepeatPw = html.EscapeString(form.RepeatPw)
+        form.FirstName = html.EscapeString(form.FirstName)
+        form.LastName = html.EscapeString(form.LastName)
+}</span>
+
+type FormLogin struct {
+        Login    string `json:"login" validate:"required"`
+        Password string `json:"password" validate:"required"`
+        Remember bool   `json:"remember" validate:"required"`
+}
+
+type UserInfo struct {
+        UserID    uint64 `json:"-" gorm:"column:user_id"`
+        FirstName string `json:"firstName" validate:"required" gorm:"column:first_name"`
+        LastName  string `json:"lastName" validate:"required" gorm:"column:last_name"`
+        Email     string `json:"email" validate:"required" gorm:"column:email"`
+}
+
+func (form *UserInfo) Sanitize() <span class="cov1" title="1">{
+        form.FirstName = html.EscapeString(form.FirstName)
+        form.LastName = html.EscapeString(form.LastName)
+        form.Email = html.EscapeString(form.Email)
+}</span>
+
+type EditUserInfoResponse struct {
+        Email string `json:"email" validate:"required"`
+}
+
+func (*User) TableName() string <span class="cov10" title="6">{
+        return os.Getenv(config.DBSchemaNameEnv) + ".users"
+}</span>
+
+func (*UserInfo) TableName() string <span class="cov9" title="5">{
+        return os.Getenv(config.DBSchemaNameEnv) + ".users"
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package http
+
+import (
+        "encoding/json"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
+        "github.com/gorilla/mux"
+        "github.com/microcosm-cc/bluemonday"
+        pkgErrors "github.com/pkg/errors"
+        log "github.com/sirupsen/logrus"
+        "io"
+        "net/http"
+)
+
+type handlers struct {
+        userUC user.UseCaseI
+}
+
+func New(uUC user.UseCaseI) user.HandlersI <span class="cov10" title="5">{
+        return &amp;handlers{
+                userUC: uUC,
+        }
+}</span>
+
+// Delete godoc
+// @Summary      Delete
+// @Description  delete user
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success  200 "success delete user"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user [delete]
+func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+        <span class="cov1" title="1">err := h.userUC.Delete(userID)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">w.WriteHeader(http.StatusOK)</span>
+}
+
+// GetInfo godoc
+// @Summary      GetInfo
+// @Description  get info about user
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Param email path string true "email"
+// @Success 200 {object} models.UserInfo "success get user info"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/info/{email} [get]
+func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        vars := mux.Vars(r)
+        email := vars[config.RouteUserInfoQueryEmail]
+        u, err := h.userUC.GetByEmail(email)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">info, err := h.userUC.GetInfo(u.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">pkgHttp.SendJSON(w, r, http.StatusOK, info)</span>
+}
+
+// GetPersonalInfo godoc
+// @Summary      GetPersonalInfo
+// @Description  get info about request creator
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success 200 {object} models.UserInfo "success get user info"
+// @Failure 401 {object} errors.JSONError "failed get user"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/info [get]
+func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        <span class="cov1" title="1">u, err := h.userUC.GetByID(userID)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">info, err := h.userUC.GetInfo(u.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">pkgHttp.SendJSON(w, r, http.StatusOK, info)</span>
+}
+
+// EditInfo godoc
+// @Summary      EditInfo
+// @Description  edit info about user
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success 200 {object} models.EditUserInfoResponse "success edit user info"
+// @Failure 401 {object} errors.JSONError "failed to get user"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/info [post]
+func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        // тут пока что просто из body - в будущем на form data
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+        <span class="cov1" title="1">defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
+                err := Body.Close()
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error(fmt.Errorf("failed to close request: %w", err))
+                }</span>
+        }(r.Body)
+        <span class="cov1" title="1">form := models.UserInfo{}
+
+        err := json.NewDecoder(r.Body).Decode(&amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov1" title="1">form.Sanitize()
+
+        info, err := h.userUC.EditInfo(userID, form)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+        <span class="cov1" title="1">pkgHttp.SendJSON(w, r, http.StatusOK, models.EditUserInfoResponse{Email: info.Email})</span>
+}
+
+// EditAvatar godoc
+// @Summary      EditAvatar
+// @Description  edit user avatar
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Success 200 "success edit user avatar"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "unsupported content type"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/avatar [put]
+func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+                return
+        }</span>
+
+        //err := r.ParseMultipartForm(config.MaxImageSize)
+        //if err != nil {
+        //        pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+        //        return
+        //}
+
+        <span class="cov0" title="0">file, header, err := r.FormFile(config.UserFormNewAvatar)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                return
+        }</span>
+
+        <span class="cov0" title="0">img, err := image.ReadImage(file, header)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">err = h.userUC.EditAvatar(userID, img)
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+
+        //pkg.SendImage(w, r, http.StatusOK, img.Data)
+        <span class="cov0" title="0">w.WriteHeader(http.StatusOK)</span>
+}
+
+// GetAvatar godoc
+// @Summary      GetAvatar
+// @Description  get user avatar
+// @Tags     users
+// @Accept         application/json
+// @Produce  application/json
+// @Param id query string true "email"
+// @Success 200 {object} []byte "success get user avatar"
+// @Failure 400 {object} errors.JSONError "failed get file"
+// @Failure 400 {object} errors.JSONError "no key"
+// @Failure 400 {object} errors.JSONError "no bucket"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/avatar [get]
+func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        sanitizer := bluemonday.UGCPolicy()
+        email := r.URL.Query().Get(config.RouteUserAvatarQueryEmail)
+        img, err := h.userUC.GetAvatar(sanitizer.Sanitize(email))
+        if err != nil </span><span class="cov0" title="0">{
+                pkgHttp.HandleError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov1" title="1">pkgHttp.SendImage(w, r, http.StatusOK, img.Data)</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package postgres
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "os"
+)
+
+type User struct {
+        UserID uint64 `sql:"AUTO_INCREMENT" gorm:"primary_key"`
+        //HereSince time.Time `json:"hereSince" gorm:"column:here_since"`
+        //IsDeleted bool   `json:"isDeleted" gorm:"column:is_deleted"`
+        Email     string `validate:"required"`
+        Password  []byte `validate:"required"`
+        FirstName string `validate:"required"`
+        LastName  string `validate:"required"`
+        Avatar    string
+}
+
+func (*User) TableName() string <span class="cov1" title="1">{
+        return os.Getenv(config.DBSchemaNameEnv) + ".users"
+}</span>
+
+func (u *User) FromModel(user *models.User) <span class="cov10" title="2">{
+        u.Email = user.Email
+        u.Password = []byte(user.Password)
+        u.FirstName = user.FirstName
+        u.LastName = user.LastName
+        u.Avatar = user.Avatar
+}</span>
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package postgres
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErrors "github.com/pkg/errors"
+        "gorm.io/gorm"
+)
+
+//go:generate mockgen -destination=../mocks/mockrepository.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user RepoI
+
+type userDB struct {
+        db *gorm.DB
+}
+
+func New(db *gorm.DB) user.RepoI <span class="cov10" title="9">{
+        return &amp;userDB{
+                db: db,
+        }
+}</span>
+
+func (uDB *userDB) Create(user *models.User) (*models.User, error) <span class="cov1" title="1">{
+        _, err := uDB.GetByEmail(user.Email)
+        if err == nil </span><span class="cov0" title="0">{
+                return nil, errors.ErrUserExists
+        }</span>
+        <span class="cov1" title="1">dbUser := User{}
+        dbUser.FromModel(user)
+        tx := uDB.db.Create(&amp;dbUser)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+        }</span>
+
+        <span class="cov1" title="1">user.UserID = dbUser.UserID
+        return user, nil</span>
+}
+
+func (uDB *userDB) EditInfo(ID uint64, info models.UserInfo) error <span class="cov1" title="1">{
+        tx := uDB.db.Omit("user_id", "email", "password").Where("user_id = ?", ID).Updates(&amp;info)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+                <span class="cov0" title="0">return pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (uDB *userDB) Delete(ID uint64) error <span class="cov1" title="1">{
+        tx := uDB.db.Where("user_id = ?", ID).Delete(models.User{})
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+                <span class="cov0" title="0">return pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (uDB *userDB) GetByID(ID uint64) (*models.User, error) <span class="cov1" title="1">{
+        usr := models.User{}
+
+        tx := uDB.db.Where("user_id = ?", ID).Take(&amp;usr)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+                <span class="cov0" title="0">return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return &amp;usr, nil</span>
+}
+
+func (uDB *userDB) GetByEmail(email string) (*models.User, error) <span class="cov3" title="2">{
+        usr := models.User{}
+
+        tx := uDB.db.Where("email = ?", email).Take(&amp;usr)
+        if err := tx.Error; err != nil </span><span class="cov1" title="1">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov1" title="1">{
+                        return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+                <span class="cov0" title="0">return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return &amp;usr, nil</span>
+}
+
+func (uDB *userDB) SetAvatar(ID uint64, avatar string) error <span class="cov1" title="1">{
+        tx := uDB.db.Model(&amp;models.User{}).Omit("user_id", "email", "password").Where("user_id = ?", ID).
+                Update("avatar", avatar)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+                <span class="cov0" title="0">return pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (uDB *userDB) EditPw(ID uint64, newPW string) error <span class="cov1" title="1">{
+        tx := uDB.db.Model(&amp;models.User{}).Omit("user_id", "email").Where("user_id = ?", ID).
+                Update("password", []byte(newPW))
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+
+                <span class="cov0" title="0">return pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (uDB *userDB) GetInfoByID(ID uint64) (*models.UserInfo, error) <span class="cov1" title="1">{
+        userInfo := models.UserInfo{}
+        tx := uDB.db.Where("user_id = ?", ID).Take(&amp;userInfo)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+
+                <span class="cov0" title="0">return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return &amp;userInfo, nil</span>
+}
+
+func (uDB *userDB) GetInfoByEmail(email string) (*models.UserInfo, error) <span class="cov1" title="1">{
+        userInfo := models.UserInfo{}
+        tx := uDB.db.Where("email = ?", email).Take(&amp;userInfo)
+        if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                if pkgErrors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+                }</span>
+
+                <span class="cov0" title="0">return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())</span>
+        }
+
+        <span class="cov1" title="1">return &amp;userInfo, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package usecase
+
+import (
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-playground/validator/v10"
+        pkgErrors "github.com/pkg/errors"
+        "net/mail"
+        "path/filepath"
+)
+
+type useCase struct {
+        userRepo _user.RepoI
+        fileUC   file_storage.UseCaseI
+}
+
+func New(r _user.RepoI, fUC file_storage.UseCaseI) _user.UseCaseI <span class="cov10" title="8">{
+        return &amp;useCase{userRepo: r, fileUC: fUC}
+}</span>
+
+func validMailAddress(email string) (string, bool) <span class="cov1" title="1">{
+        addr, err := mail.ParseAddress(email)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", false
+        }</span>
+        <span class="cov1" title="1">return addr.Address, true</span>
+}
+
+func (u *useCase) Create(user *models.User) (*models.User, error) <span class="cov1" title="1">{
+        validate := validator.New()
+        err := validate.Struct(user)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()) //fmt.Errorf("failed to create user: %w", err)
+        }</span>
+        <span class="cov1" title="1">if len(user.Password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
+                return nil, errors.ErrTooShortPw
+        }</span>
+        <span class="cov1" title="1">if _, ok := validMailAddress(user.Email); !ok </span><span class="cov0" title="0">{
+                return nil, errors.ErrInvalidEmail
+        }</span>
+        <span class="cov1" title="1">_, err = u.GetByEmail(user.Email)
+        if err == nil </span><span class="cov0" title="0">{
+                return nil, errors.ErrUserExists
+        }</span>
+        <span class="cov1" title="1">return u.userRepo.Create(user)</span>
+}
+
+func (u *useCase) GetInfo(ID uint64) (*models.UserInfo, error) <span class="cov1" title="1">{
+        user, err := u.GetByID(ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed get user : %w", err)
+        }</span>
+        <span class="cov1" title="1">return &amp;models.UserInfo{
+                UserID:    user.UserID,
+                FirstName: user.FirstName,
+                LastName:  user.LastName,
+                Email:     user.Email,
+        }, nil</span>
+}
+
+func (u *useCase) Delete(ID uint64) error <span class="cov1" title="1">{
+        err := u.userRepo.Delete(ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "delete user")
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (u *useCase) GetByID(ID uint64) (*models.User, error) <span class="cov5" title="3">{
+        user, err := u.userRepo.GetByID(ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return user, pkgErrors.Wrap(err, "get user by id")
+        }</span>
+        <span class="cov5" title="3">return user, nil</span>
+}
+
+func (u *useCase) GetByEmail(email string) (*models.User, error) <span class="cov5" title="3">{
+        user, err := u.userRepo.GetByEmail(email)
+        if err != nil </span><span class="cov1" title="1">{
+                return user, pkgErrors.Wrap(err, "get user by email")
+        }</span>
+        <span class="cov4" title="2">return user, nil</span>
+}
+
+func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error) <span class="cov1" title="1">{
+        user, err := u.userRepo.GetByID(ID)
+        if err != nil || user.UserID != ID </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "get user by id")
+        }</span>
+
+        <span class="cov1" title="1">err = u.userRepo.EditInfo(ID, info)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "edit info")
+        }</span>
+        <span class="cov1" title="1">return &amp;info, nil</span>
+}
+
+func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error <span class="cov1" title="1">{
+        user, err := u.GetByID(ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "get user by id")
+        }</span>
+        <span class="cov1" title="1">f := models.S3File{
+                Bucket: config.S3AvatarBucket,
+                Name:   user.Email + filepath.Ext(newAvatar.Name),
+                Data:   newAvatar.Data,
+        }
+
+        if err = u.fileUC.Upload(&amp;f); err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "edit avatar")
+        }</span>
+        <span class="cov1" title="1">if err = u.userRepo.SetAvatar(ID, f.Name); err != nil </span><span class="cov0" title="0">{
+                return pkgErrors.Wrap(err, "set avatar")
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (u *useCase) GetAvatar(email string) (*models.Image, error) <span class="cov1" title="1">{
+        user, err := u.GetByEmail(email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "get user by email")
+        }</span>
+        <span class="cov1" title="1">f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
+        if err != nil </span><span class="cov1" title="1">{
+                //надо ли отправлять дефолтный если что-то пошло не так
+                f, err = u.fileUC.Get(config.S3AvatarBucket, config.DefaultAvatar)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, pkgErrors.Wrap(err, "get get avatar")
+                }</span>
+        }
+
+        <span class="cov1" title="1">return &amp;models.Image{
+                Name: f.Name,
+                Data: f.Data,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package pkg
+
+import (
+        "crypto/hmac"
+        "crypto/sha256"
+        "encoding/hex"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErrors "github.com/pkg/errors"
+        "os"
+        "strconv"
+        "strings"
+        "time"
+)
+
+var secret []byte
+
+const DefaultCSRFSecret = "sadsa2sadl149891mppinadpon"
+
+func init() <span class="cov10" title="6">{
+        csrfSecret := os.Getenv("CSRF_SECRET")
+        if csrfSecret == "" </span><span class="cov0" title="0">{
+                secret = []byte(DefaultCSRFSecret)
+                return
+        }</span>
+        <span class="cov10" title="6">secret = []byte(csrfSecret)</span>
+}
+
+func CreateMAC(data []byte) ([]byte, error) <span class="cov1" title="1">{
+        h := hmac.New(sha256.New, secret)
+        if _, err := h.Write(data); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov1" title="1">return h.Sum(nil), nil</span>
+}
+
+func CreateCSRF(cookie string) (string, error) <span class="cov1" title="1">{
+        csrfExpire := time.Now().Add(time.Minute * 10).Unix()
+        tokenData := []byte(fmt.Sprintf("%s.%d", cookie, csrfExpire))
+        mac, err := CreateMAC(tokenData)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov1" title="1">token := hex.EncodeToString(mac) + "." + strconv.FormatInt(csrfExpire, 10)
+        return token, nil</span>
+}
+
+func CheckCSRF(cookie string, csrfToken string) error <span class="cov0" title="0">{
+        data := strings.Split(csrfToken, ".")
+        expire, err := strconv.ParseInt(data[1], 10, 64)
+        if err != nil || expire &lt; time.Now().Unix() </span><span class="cov0" title="0">{
+                return pkgErrors.WithMessage(errors.ErrWrongCSRF, "bad token time")
+        }</span>
+
+        <span class="cov0" title="0">tokenData := []byte(fmt.Sprintf("%s.%d", cookie, expire))
+        tokenMAC, err := hex.DecodeString(data[0])
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">mac, err := CreateMAC(tokenData)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if hmac.Equal(mac, tokenMAC) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">return pkgErrors.WithMessage(errors.ErrWrongCSRF, "not equal with expected")</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package errors
+
+import (
+        "github.com/pkg/errors"
+        "net/http"
+)
+
+var (
+        ErrInvalidForm         = errors.New("invalid form")
+        ErrPwDontMatch         = errors.New("passwords dont match")
+        ErrInvalidLogin        = errors.New("invalid login")
+        ErrWrongPw             = errors.New("wrong password")
+        ErrUserExists          = errors.New("user already exists")
+        ErrFailedGetSession    = errors.New("failed get session")
+        ErrFailedDeleteSession = errors.New("failed delete session")
+        ErrFailedGetUser       = errors.New("failed to get user")
+        ErrInternal            = errors.New("internal server error")
+        ErrTooShortPw          = errors.New("too short password")
+        ErrInvalidEmail        = errors.New("invalid email address")
+        ErrUserNotFound        = errors.New("user not found")
+        ErrGetFile             = errors.New("failed get file")
+        ErrNoKey               = errors.New("no key")
+        ErrNoBucket            = errors.New("no bucket")
+        ErrInvalidURL          = errors.New("invalid url address")
+        ErrFolderNotFound      = errors.New("folder not found")
+        ErrMessageNotFound     = errors.New("message not found")
+        ErrNoValidEmails       = errors.New("no valid emails")
+        ErrWrongContentType    = errors.New("unsupported content type")
+        ErrFailedAuth          = errors.New("failed auth")
+        ErrWrongCSRF           = errors.New("wrong csrf token")
+)
+
+var Codes = map[error]int{
+        ErrInvalidForm:         http.StatusForbidden,
+        ErrPwDontMatch:         http.StatusUnauthorized,
+        ErrInvalidLogin:        http.StatusUnauthorized,
+        ErrWrongPw:             http.StatusUnauthorized,
+        ErrUserExists:          http.StatusConflict,
+        ErrFailedGetSession:    http.StatusUnauthorized,
+        ErrFailedDeleteSession: http.StatusUnauthorized,
+        ErrInternal:            http.StatusInternalServerError,
+        ErrTooShortPw:          http.StatusForbidden,
+        ErrInvalidEmail:        http.StatusUnauthorized,
+        ErrUserNotFound:        http.StatusNotFound,
+        ErrFailedGetUser:       http.StatusUnauthorized,
+        ErrGetFile:             http.StatusBadRequest,
+        ErrNoKey:               http.StatusBadRequest,
+        ErrNoBucket:            http.StatusBadRequest,
+        ErrInvalidURL:          http.StatusBadRequest,
+        ErrFolderNotFound:      http.StatusNotFound,
+        ErrMessageNotFound:     http.StatusNotFound,
+        ErrNoValidEmails:       http.StatusBadRequest,
+        ErrWrongContentType:    http.StatusBadRequest,
+        ErrFailedAuth:          http.StatusUnauthorized,
+        ErrWrongCSRF:           http.StatusBadRequest,
+}
+
+func Code(err error) int <span class="cov10" title="2">{
+        code, ok := Codes[err]
+        if !ok </span><span class="cov0" title="0">{
+                return http.StatusInternalServerError
+        }</span>
+
+        <span class="cov10" title="2">return code</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package errors
+
+type JSONError struct {
+        Code    int    `json:"code"`
+        Message string `json:"message"`
+}
+
+func (err *JSONError) Error() string <span class="cov0" title="0">{
+        return err.Message
+}</span>
+
+func New(code int, err error) *JSONError <span class="cov10" title="2">{
+        return &amp;JSONError{
+                Code:    code,
+                Message: err.Error(),
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package pkg
+
+import (
+        "bytes"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
+        pkgErr "github.com/pkg/errors"
+        "golang.org/x/crypto/argon2"
+)
+
+func GetSalt() ([]byte, error) <span class="cov8" title="6">{
+        salt, err := rand.String(config.PasswordSaltLen)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="6">return []byte(salt), nil</span>
+}
+
+func Hash(salt []byte, str string) []byte <span class="cov10" title="8">{
+        hash := argon2.IDKey([]byte(str), salt, 1, 1024, 4, 32)
+        return append(salt, hash...)
+}</span>
+
+func HashPw(password string) (string, error) <span class="cov8" title="6">{
+        salt, err := GetSalt()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", pkgErr.Wrap(err, "failed get salt")
+        }</span>
+
+        <span class="cov8" title="6">hashPw := string(Hash(salt, password))
+        return hashPw, nil</span>
+}
+
+func ComparePw2Hash(password, hash string) bool <span class="cov4" title="2">{
+        if len(hash) &lt; config.PasswordSaltLen </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov4" title="2">salt := hash[0:config.PasswordSaltLen]
+        newHash := Hash([]byte(salt), password)
+        return bytes.Equal(newHash, []byte(hash))</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package http
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErr "github.com/pkg/errors"
+        log "github.com/sirupsen/logrus"
+        "net/http"
+)
+
+func HandleError(w http.ResponseWriter, r *http.Request, err error) <span class="cov10" title="2">{
+        logger, ok := r.Context().Value(pkg.ContextHandlerLog).(*pkg.Logger)
+        if !ok </span><span class="cov0" title="0">{
+                log.Error("failed to get logger for handler", r.URL.Path)
+                log.Error(err)
+        }</span> else<span class="cov10" title="2"> {
+                logger.Error(err)
+        }</span>
+
+        <span class="cov10" title="2">causeErr := pkgErr.Cause(err)
+        code := errors.Code(causeErr)
+        customErr := errors.New(code, causeErr)
+        SendJSON(w, r, code, customErr)</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package http
+
+import (
+        "encoding/json"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+        "net/http"
+)
+
+func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any) <span class="cov10" title="15">{
+        dataJSON, err := json.Marshal(dataStruct)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(w, r, fmt.Errorf("failed to marshal : %w", err))
+                return
+        }</span>
+
+        <span class="cov10" title="15">w.Header().Set("Content-Type", pkg.ContentTypeJSON)
+        w.WriteHeader(status)
+
+        _, err = w.Write(dataJSON)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+                return
+        }</span>
+}
+
+func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) <span class="cov1" title="1">{
+        w.Header().Set("Content-Type", http.DetectContentType(data))
+        w.WriteHeader(status)
+
+        _, err := w.Write(data)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+                return
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package image
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErrors "github.com/pkg/errors"
+        "io"
+        "mime/multipart"
+        "net/http"
+)
+
+func ReadImage(file multipart.File, header *multipart.FileHeader) (*models.Image, error) <span class="cov0" title="0">{
+        img := models.Image{
+                Data: make([]byte, header.Size),
+                Name: header.Filename,
+        }
+        _, err := io.ReadFull(file, img.Data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, err.Error())
+        }</span>
+
+        <span class="cov0" title="0">if ok := CheckImageContentType(http.DetectContentType(img.Data)); !ok </span><span class="cov0" title="0">{
+                return nil, errors.ErrWrongContentType
+        }</span>
+        <span class="cov0" title="0">return &amp;img, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package image
+
+import "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+
+func CheckImageContentType(contentType string) bool <span class="cov0" title="0">{
+        if contentType == pkg.ContentTypePNG || contentType == pkg.ContentTypeSVG ||
+                contentType == pkg.ContentTypeWEBP || contentType == pkg.ContentTypeJPEG </span><span class="cov0" title="0">{
+                return true
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package pkg
+
+import (
+        "bytes"
+        "fmt"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/sirupsen/logrus"
+        "io"
+        "os"
+        "runtime"
+        "sort"
+        "strings"
+        "time"
+)
+
+type logHook struct {
+        Writers   []io.Writer
+        LogLevels []logrus.Level
+}
+
+func (h *logHook) Fire(entry *logrus.Entry) error <span class="cov4" title="2">{
+        line, err := entry.String()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov4" title="2">for _, w := range h.Writers </span><span class="cov7" title="4">{
+                if _, err = w.Write([]byte(line)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov4" title="2">return nil</span>
+}
+
+func (h *logHook) Levels() []logrus.Level <span class="cov1" title="1">{
+        return h.LogLevels
+}</span>
+
+var logEntry *logrus.Entry
+
+type Logger struct {
+        *logrus.Entry
+}
+
+func GetLogger() *Logger <span class="cov1" title="1">{
+        return &amp;Logger{logEntry}
+}</span>
+
+func (l *Logger) LoggerWithFields(fields map[string]any) *Logger <span class="cov0" title="0">{
+        return &amp;Logger{l.WithFields(fields)}
+}</span>
+
+func (l *Logger) LoggerWithField(key string, val any) *Logger <span class="cov0" title="0">{
+        return &amp;Logger{l.WithField(key, val)}
+}</span>
+
+func InitLogger() <span class="cov1" title="1">{
+        l := logrus.New()
+        loc, err := time.LoadLocation("Europe/Moscow")
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Fatalf("Error: cant load time location")
+        }</span>
+
+        <span class="cov1" title="1">now := time.Now().In(loc)
+        logsFName := config.LogsDir + config.LogsFileName + now.Format(config.LogsTimeFormat) + ".log"
+
+        l.SetReportCaller(true)
+        l.SetFormatter(&amp;Formatter{
+                TimeFormat:  config.LogsTimeFormat,
+                Colors:      true,
+                Caller:      true,
+                FieldsSpace: true,
+                CustomCallerFormatter: func(f *runtime.Frame) string </span><span class="cov7" title="4">{
+                        s := strings.Split(f.Function, ".")
+                        funcName := s[len(s)-1]
+                        var dir string
+                        if idx := strings.Index(f.File, config.ProjectBaseDir); idx != -1 </span><span class="cov7" title="4">{
+                                dir = f.File[idx+len(config.ProjectBaseDir):]
+                        }</span> else<span class="cov0" title="0"> {
+                                dir = f.File
+                        }</span>
+                        <span class="cov7" title="4">return fmt.Sprintf("[%s:%d @%s]", dir, f.Line, funcName)</span>
+                },
+        })
+
+        <span class="cov1" title="1">if err = os.MkdirAll(config.LogsDir, 0777); err != nil </span><span class="cov0" title="0">{
+                if os.IsExist(err) </span><span class="cov0" title="0">{
+                        logrus.Fatalf("Error: Such path already exists")
+                }</span>
+                <span class="cov0" title="0">logrus.Fatalf("Error: create logs directory %v", err)</span>
+        }
+
+        <span class="cov1" title="1">f, err := os.OpenFile(logsFName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+        if err != nil </span><span class="cov0" title="0">{
+                logrus.Fatalf("Error: open file %v", err)
+        }</span>
+
+        <span class="cov1" title="1">l.SetOutput(io.Discard)
+
+        l.AddHook(&amp;logHook{
+                Writers:   []io.Writer{f, os.Stdout},
+                LogLevels: logrus.AllLevels,
+        })
+
+        l.SetLevel(logrus.InfoLevel)
+
+        logEntry = logrus.NewEntry(l)</span>
+}
+
+type color uint8
+
+const (
+        Red    color = 31
+        Yellow color = 33
+        Cyan   color = 36
+        Gray   color = 37
+)
+
+func (f *Formatter) printColored(b *bytes.Buffer, level logrus.Level, message string) <span class="cov7" title="4">{
+        var levelColor color
+        switch level </span>{
+        case logrus.DebugLevel, logrus.TraceLevel:<span class="cov0" title="0">
+                levelColor = Gray</span>
+        case logrus.WarnLevel:<span class="cov0" title="0">
+                levelColor = Yellow</span>
+        case logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel:<span class="cov7" title="4">
+                levelColor = Red</span>
+        default:<span class="cov0" title="0">
+                levelColor = Cyan</span>
+        }
+        <span class="cov7" title="4">_, err := fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m", levelColor, message)
+        if err != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+}
+
+type Formatter struct {
+        TimeFormat            string
+        Colors                bool
+        Caller                bool
+        LevelFirst            bool
+        FieldsSpace           bool
+        CustomCallerFormatter func(*runtime.Frame) string
+}
+
+func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) <span class="cov7" title="4">{
+        if f.TimeFormat == "" </span><span class="cov0" title="0">{
+                f.TimeFormat = time.RFC3339
+        }</span>
+
+        <span class="cov7" title="4">b := &amp;bytes.Buffer{}
+
+        f.writeStringBrackets(b, entry.Time.Format(f.TimeFormat))
+        if f.FieldsSpace </span><span class="cov7" title="4">{
+                b.WriteString(" ")
+        }</span>
+
+        <span class="cov7" title="4">if !f.LevelFirst </span><span class="cov7" title="4">{
+                if f.Caller </span><span class="cov7" title="4">{
+                        f.writeCaller(b, entry)
+                }</span>
+
+                <span class="cov7" title="4">if f.FieldsSpace </span><span class="cov7" title="4">{
+                        b.WriteString(" ")
+                }</span>
+        }
+
+        <span class="cov7" title="4">level := strings.ToUpper(entry.Level.String())
+        if f.Colors </span><span class="cov7" title="4">{
+                f.printColored(b, entry.Level, f.getStringInBr(level))
+        }</span> else<span class="cov0" title="0"> {
+                f.writeStringBrackets(b, level)
+        }</span>
+
+        <span class="cov7" title="4">if f.FieldsSpace </span><span class="cov7" title="4">{
+                b.WriteString(" ")
+        }</span>
+
+        <span class="cov7" title="4">f.writeFields(b, entry)
+
+        if f.FieldsSpace </span><span class="cov7" title="4">{
+                b.WriteString(" ")
+        }</span>
+
+        <span class="cov7" title="4">if f.LevelFirst </span><span class="cov0" title="0">{
+                if f.Caller </span><span class="cov0" title="0">{
+                        f.writeCaller(b, entry)
+                }</span>
+
+                <span class="cov0" title="0">if f.FieldsSpace </span><span class="cov0" title="0">{
+                        b.WriteString(" ")
+                }</span>
+        }
+
+        <span class="cov7" title="4">b.WriteString(strings.TrimSpace(entry.Message))
+        b.WriteByte('\n')
+        return b.Bytes(), nil</span>
+}
+
+func (f *Formatter) getStringInBr(message string) string <span class="cov10" title="8">{
+        return fmt.Sprintf("[%s]", message)
+}</span>
+
+func (f *Formatter) writeStringBrackets(b *bytes.Buffer, message string) <span class="cov7" title="4">{
+        b.WriteString(f.getStringInBr(message))
+}</span>
+
+func (f *Formatter) writeCaller(b *bytes.Buffer, entry *logrus.Entry) <span class="cov7" title="4">{
+        if entry.HasCaller() </span><span class="cov7" title="4">{
+                if f.CustomCallerFormatter != nil </span><span class="cov7" title="4">{
+                        fmt.Fprint(b, f.CustomCallerFormatter(entry.Caller))
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Fprintf(
+                                b,
+                                "[%s:%d @%s]",
+                                entry.Caller.File,
+                                entry.Caller.Line,
+                                entry.Caller.Function,
+                        )
+                }</span>
+        }
+}
+
+func (f *Formatter) writeFields(b *bytes.Buffer, entry *logrus.Entry) <span class="cov7" title="4">{
+        if len(entry.Data) != 0 </span><span class="cov0" title="0">{
+                fields := make([]string, 0, len(entry.Data))
+                for field := range entry.Data </span><span class="cov0" title="0">{
+                        fields = append(fields, field)
+                }</span>
+
+                <span class="cov0" title="0">sort.Strings(fields)
+
+                for _, field := range fields </span><span class="cov0" title="0">{
+                        f.writeField(b, entry, field)
+                }</span>
+        }
+}
+
+func (f *Formatter) writeField(b *bytes.Buffer, entry *logrus.Entry, field string) <span class="cov0" title="0">{
+        str := fmt.Sprintf("[%s:%v]", field, entry.Data[field])
+
+        if f.FieldsSpace </span><span class="cov0" title="0">{
+                str += " "
+        }</span>
+        <span class="cov0" title="0">if f.Colors </span><span class="cov0" title="0">{
+                f.printColored(b, entry.Level, str)
+        }</span> else<span class="cov0" title="0"> {
+                b.WriteString(str)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package rand
+
+import (
+        "crypto/rand"
+        "math/big"
+)
+
+func String(length int) (string, error) <span class="cov6" title="8">{
+        charSet := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        randBytes := make([]byte, length)
+        for i := range randBytes </span><span class="cov10" title="32">{
+                res, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+                <span class="cov10" title="32">randBytes[i] = charSet[res.Int64()]</span>
+        }
+        <span class="cov6" title="8">return string(randBytes), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">package pkg
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "time"
+)
+
+func GetCurrentTime() string <span class="cov10" title="6">{
+        return time.Now().Format(config.LogsTimeFormat)
+}</span>
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package validation
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "strings"
+)
+
+func Login(login string) (string, error) <span class="cov10" title="2">{
+        email := login
+        if !strings.Contains(login, config.PostAtDomain) </span><span class="cov10" title="2">{
+                if strings.Contains(login, "@") || strings.Contains(login, ".") </span><span class="cov0" title="0">{
+                        return "", errors.ErrInvalidLogin
+                }</span> else<span class="cov10" title="2"> {
+                        email += config.PostAtDomain
+                }</span>
+        } else<span class="cov0" title="0"> {
+                idx := strings.Index(login, config.PostAtDomain)
+                if idx+len(config.PostAtDomain) &lt; len(login) ||
+                        strings.Index(login, "@") &lt; idx || strings.Index(login, ".") &lt; idx </span><span class="cov0" title="0">{
+                        return "", errors.ErrInvalidLogin
+                }</span>
+        }
+        <span class="cov10" title="2">return email, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package validation
+
+import (
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        pkgErr "github.com/pkg/errors"
+)
+
+func Password(password string) error <span class="cov8" title="1">{
+        if len(password) &lt; config.PasswordMinLen </span><span class="cov0" title="0">{
+                return pkgErr.WithMessage(errors.ErrTooShortPw, "failed validate")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -82,7 +82,7 @@ func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 		//	pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
 		//	return
 		//}
-		//h.ServeHTTP(w, r)
+		h.ServeHTTP(w, r)
 	})
 	return handler
 }
