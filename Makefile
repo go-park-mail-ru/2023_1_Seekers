@@ -6,8 +6,8 @@ build:
 	sudo systemctl restart nginx
 
 build-prod:
-	mkdir -m 777 logs/app
-	mkdir -m 777 logs/postgres
+	mkdir -p -m 777 logs/app
+	mkdir -p -m 777 logs/postgres
 	docker-compose -f docker-compose-prod.yml up --build
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
