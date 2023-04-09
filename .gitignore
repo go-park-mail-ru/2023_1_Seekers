@@ -6,3 +6,5 @@ coverage.out
 minio_data
 .env
 go-modules/
+cover.out
+cover2.out
