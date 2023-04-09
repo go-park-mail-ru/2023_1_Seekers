@@ -75,7 +75,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 
 	user.Password, err = pkg.HashPw(form.Password)
 	if err != nil {
-		pkgErrors.Wrap(err, "sign up")
+		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
 
 	user, err = u.userRepo.Create(user)
@@ -84,11 +84,11 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	}
 
 	col := image.GetRandColor()
-	label := user.FirstName[0:1]
+	label := pkg.GetFirstUtf(user.FirstName)
 	img, err := image.GenImage(col, label)
 	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img})
 	if err != nil {
-		log.Info(err, "edit ava")
+		log.Warn(err, "edit avatar")
 	}
 
 	_, err = u.mailUC.CreateDefaultFolders(user.UserID)

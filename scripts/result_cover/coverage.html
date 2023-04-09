@@ -57,9 +57,9 @@
 				
 				<option value="file0">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/delivery/http/handler.go (66.7%)</option>
 				
-				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis/session.go (71.4%)</option>
+				<option value="file1">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis/session.go (75.0%)</option>
 				
-				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/auth.go (67.3%)</option>
+				<option value="file2">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/auth.go (32.7%)</option>
 				
 				<option value="file3">github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/session.go (76.9%)</option>
 				
@@ -85,9 +85,9 @@
 				
 				<option value="file14">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres/repository.go (61.9%)</option>
 				
-				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (74.1%)</option>
+				<option value="file15">github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/usecase.go (55.9%)</option>
 				
-				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/csrf.go (43.3%)</option>
+				<option value="file16">github.com/go-park-mail-ru/2023_1_Seekers/pkg/csrf.go (40.0%)</option>
 				
 				<option value="file17">github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors/classificator.go (75.0%)</option>
 				
@@ -97,21 +97,25 @@
 				
 				<option value="file20">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http/http_error.go (77.8%)</option>
 				
-				<option value="file21">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http/send_json.go (62.5%)</option>
+				<option value="file21">github.com/go-park-mail-ru/2023_1_Seekers/pkg/http/send_json.go (65.0%)</option>
 				
-				<option value="file22">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/image.go (0.0%)</option>
+				<option value="file22">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/generate.go (11.3%)</option>
 				
 				<option value="file23">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/image_content_type.go (0.0%)</option>
 				
-				<option value="file24">github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger.go (64.5%)</option>
+				<option value="file24">github.com/go-park-mail-ru/2023_1_Seekers/pkg/image/read.go (0.0%)</option>
 				
-				<option value="file25">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand/string.go (87.5%)</option>
+				<option value="file25">github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger.go (64.5%)</option>
 				
-				<option value="file26">github.com/go-park-mail-ru/2023_1_Seekers/pkg/time.go (100.0%)</option>
+				<option value="file26">github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand/string.go (87.5%)</option>
 				
-				<option value="file27">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/login.go (55.6%)</option>
+				<option value="file27">github.com/go-park-mail-ru/2023_1_Seekers/pkg/strings.go (0.0%)</option>
 				
-				<option value="file28">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/password.go (66.7%)</option>
+				<option value="file28">github.com/go-park-mail-ru/2023_1_Seekers/pkg/time.go (100.0%)</option>
+				
+				<option value="file29">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/login.go (55.6%)</option>
+				
+				<option value="file30">github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation/password.go (66.7%)</option>
 				
 				</select>
 			</div>
@@ -145,7 +149,7 @@ import (
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
         _ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-        http2 "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+        httpPkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
         "github.com/go-playground/validator/v10"
         pkgErrors "github.com/pkg/errors"
         log "github.com/sirupsen/logrus"
@@ -209,13 +213,13 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
 
         <span class="cov1" title="1">form := models.FormSignUp{}
         if err := json.NewDecoder(r.Body).Decode(&amp;form); err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
                 return
         }</span>
 
         <span class="cov1" title="1">validate := validator.New()
         if err := validate.Struct(form); err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
                 return
         }</span>
 
@@ -223,12 +227,12 @@ func (h *handlers) SignUp(w http.ResponseWriter, r *http.Request) <span class="c
 
         response, session, err := h.authUC.SignUp(form)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, err)
+                httpPkg.HandleError(w, r, err)
                 return
         }</span>
 
         <span class="cov1" title="1">setNewCookie(w, session)
-        http2.SendJSON(w, r, http.StatusOK, response)</span>
+        httpPkg.SendJSON(w, r, http.StatusOK, response)</span>
 }
 
 // SignIn godoc
@@ -255,18 +259,18 @@ func (h *handlers) SignIn(w http.ResponseWriter, r *http.Request) <span class="c
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
                 return
         }</span>
 
         <span class="cov1" title="1">response, session, err := h.authUC.SignIn(form)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, err)
+                httpPkg.HandleError(w, r, err)
                 return
         }</span>
 
         <span class="cov1" title="1">setNewCookie(w, session)
-        http2.SendJSON(w, r, http.StatusOK, response)</span>
+        httpPkg.SendJSON(w, r, http.StatusOK, response)</span>
 }
 
 // Auth godoc
@@ -311,7 +315,7 @@ func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) <span class="c
 func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
         userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
         if !ok </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, errors.ErrFailedGetUser)
+                httpPkg.HandleError(w, r, errors.ErrFailedGetUser)
                 return
         }</span>
         <span class="cov1" title="1">defer func(Body io.ReadCloser) </span><span class="cov1" title="1">{
@@ -324,7 +328,7 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) <span class="c
 
         err := json.NewDecoder(r.Body).Decode(&amp;form)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+                httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
                 return
         }</span>
 
@@ -332,7 +336,7 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) <span class="c
 
         err = h.authUC.EditPw(userID, form)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, err)
+                httpPkg.HandleError(w, r, err)
                 return
         }</span>
         <span class="cov1" title="1">w.WriteHeader(http.StatusOK)</span>
@@ -349,13 +353,13 @@ func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) <span class="c
 func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
         cookie, err := r.Cookie(config.CookieName)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+                httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
                 return
         }</span>
 
         <span class="cov1" title="1">csrfToken, err := pkg.CreateCSRF(cookie.Value)
         if err != nil </span><span class="cov0" title="0">{
-                http2.HandleError(w, r, err)
+                httpPkg.HandleError(w, r, err)
                 return
         }</span>
         <span class="cov1" title="1">w.Header().Set(config.CSRFHeader, csrfToken)
@@ -367,7 +371,6 @@ func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) <span class="
 
 import (
         "context"
-        "fmt"
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -408,7 +411,6 @@ func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) <span 
 func (sDb *sessionsDB) DeleteSession(sessionID string) error <span class="cov1" title="1">{
         err := sDb.redisSessions.Del(context.Background(), sessionID).Err()
         if err != nil </span><span class="cov0" title="0">{
-                fmt.Println(err)
                 return pkgErrors.WithMessagef(errors.ErrFailedDeleteSession, "delete cookie %v", err.Error())
         }</span>
 
@@ -442,21 +444,25 @@ import (
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
         pkgErrors "github.com/pkg/errors"
+        log "github.com/sirupsen/logrus"
 )
 
 type authUC struct {
         sessionUC auth.SessionUseCaseI
         userRepo  _user.RepoI
         mailUC    mail.UseCaseI
+        userUC    _user.UseCaseI
 }
 
-func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI) auth.UseCaseI <span class="cov10" title="3">{
+func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI, uUC _user.UseCaseI) auth.UseCaseI <span class="cov10" title="2">{
         return &amp;authUC{
                 sessionUC: sUC,
                 userRepo:  uRepo,
                 mailUC:    mUC,
+                userUC:    uUC,
         }
 }</span>
 
@@ -486,17 +492,17 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
         }, session, nil</span>
 }
 
-func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) <span class="cov1" title="1">{
+func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) <span class="cov0" title="0">{
         if form.RepeatPw != form.Password </span><span class="cov0" title="0">{
                 return nil, nil, errors.ErrPwDontMatch
         }</span>
 
-        <span class="cov1" title="1">email, err := validation.Login(form.Login)
+        <span class="cov0" title="0">email, err := validation.Login(form.Login)
         if err != nil || len(form.Login) &gt; 30 || len(form.Login) &lt; 3 </span><span class="cov0" title="0">{
                 return nil, nil, errors.ErrInvalidLogin
         }</span>
 
-        <span class="cov1" title="1">user := &amp;models.User{
+        <span class="cov0" title="0">user := &amp;models.User{
                 Email:     email,
                 FirstName: form.FirstName,
                 LastName:  form.LastName,
@@ -505,31 +511,39 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 
         user.Password, err = pkg.HashPw(form.Password)
         if err != nil </span><span class="cov0" title="0">{
-                pkgErrors.Wrap(err, "sign up")
+                return nil, nil, pkgErrors.Wrap(err, "sign up")
         }</span>
 
-        <span class="cov1" title="1">user, err = u.userRepo.Create(user)
+        <span class="cov0" title="0">user, err = u.userRepo.Create(user)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, pkgErrors.Wrap(err, "sign up")
         }</span>
 
-        <span class="cov1" title="1">_, err = u.mailUC.CreateDefaultFolders(user.UserID)
+        <span class="cov0" title="0">col := image.GetRandColor()
+        label := pkg.GetFirstUtf(user.FirstName)
+        img, err := image.GenImage(col, label)
+        err = u.userUC.EditAvatar(user.UserID, &amp;models.Image{Data: img})
+        if err != nil </span><span class="cov0" title="0">{
+                log.Warn(err, "edit avatar")
+        }</span>
+
+        <span class="cov0" title="0">_, err = u.mailUC.CreateDefaultFolders(user.UserID)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, pkgErrors.Wrap(err, "sign up")
         }</span>
 
-        <span class="cov1" title="1">err = u.mailUC.SendWelcomeMessage(user.Email)
+        <span class="cov0" title="0">err = u.mailUC.SendWelcomeMessage(user.Email)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, pkgErrors.Wrap(err, "sign up")
         }</span>
 
-        <span class="cov1" title="1">session, err := u.sessionUC.CreateSession(user.UserID)
+        <span class="cov0" title="0">session, err := u.sessionUC.CreateSession(user.UserID)
         if err != nil </span><span class="cov0" title="0">{
                 //надо ли тут откатить прошлое ?
                 return nil, nil, pkgErrors.Wrap(err, "sign up")
         }</span>
 
-        <span class="cov1" title="1">return &amp;models.AuthResponse{
+        <span class="cov0" title="0">return &amp;models.AuthResponse{
                 Email:     user.Email,
                 FirstName: user.FirstName,
                 LastName:  user.LastName,
@@ -2048,7 +2062,9 @@ import (
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
         _user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
         "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+        "github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
         "github.com/go-playground/validator/v10"
         pkgErrors "github.com/pkg/errors"
         "net/mail"
@@ -2060,7 +2076,7 @@ type useCase struct {
         fileUC   file_storage.UseCaseI
 }
 
-func New(r _user.RepoI, fUC file_storage.UseCaseI) _user.UseCaseI <span class="cov10" title="8">{
+func New(r _user.RepoI, fUC file_storage.UseCaseI) _user.UseCaseI <span class="cov10" title="7">{
         return &amp;useCase{userRepo: r, fileUC: fUC}
 }</span>
 
@@ -2112,15 +2128,15 @@ func (u *useCase) Delete(ID uint64) error <span class="cov1" title="1">{
         <span class="cov1" title="1">return nil</span>
 }
 
-func (u *useCase) GetByID(ID uint64) (*models.User, error) <span class="cov5" title="3">{
+func (u *useCase) GetByID(ID uint64) (*models.User, error) <span class="cov6" title="3">{
         user, err := u.userRepo.GetByID(ID)
         if err != nil </span><span class="cov0" title="0">{
                 return user, pkgErrors.Wrap(err, "get user by id")
         }</span>
-        <span class="cov5" title="3">return user, nil</span>
+        <span class="cov6" title="3">return user, nil</span>
 }
 
-func (u *useCase) GetByEmail(email string) (*models.User, error) <span class="cov5" title="3">{
+func (u *useCase) GetByEmail(email string) (*models.User, error) <span class="cov6" title="3">{
         user, err := u.userRepo.GetByEmail(email)
         if err != nil </span><span class="cov1" title="1">{
                 return user, pkgErrors.Wrap(err, "get user by email")
@@ -2128,17 +2144,31 @@ func (u *useCase) GetByEmail(email string) (*models.User, error) <span class="co
         <span class="cov4" title="2">return user, nil</span>
 }
 
-func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error) <span class="cov1" title="1">{
+func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error) <span class="cov0" title="0">{
         user, err := u.userRepo.GetByID(ID)
         if err != nil || user.UserID != ID </span><span class="cov0" title="0">{
                 return nil, pkgErrors.Wrap(err, "get user by id")
         }</span>
 
-        <span class="cov1" title="1">err = u.userRepo.EditInfo(ID, info)
+        <span class="cov0" title="0">err = u.userRepo.EditInfo(ID, info)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, pkgErrors.Wrap(err, "edit info")
         }</span>
-        <span class="cov1" title="1">return &amp;info, nil</span>
+        <span class="cov0" title="0">avatar, err := u.GetAvatar(user.Email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "edit info - get avatar")
+        }</span>
+        <span class="cov0" title="0">label := pkg.GetFirstUtf(info.FirstName)
+        updAvatar, err := image.UpdateImgText(avatar.Data, label)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+        }</span>
+
+        <span class="cov0" title="0">err = u.EditAvatar(user.UserID, &amp;models.Image{Data: updAvatar})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+        }</span>
+        <span class="cov0" title="0">return &amp;info, nil</span>
 }
 
 func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error <span class="cov1" title="1">{
@@ -2201,13 +2231,13 @@ var secret []byte
 
 const DefaultCSRFSecret = "sadsa2sadl149891mppinadpon"
 
-func init() <span class="cov10" title="6">{
+func init() <span class="cov10" title="7">{
         csrfSecret := os.Getenv("CSRF_SECRET")
-        if csrfSecret == "" </span><span class="cov10" title="6">{
+        if csrfSecret == "" </span><span class="cov0" title="0">{
                 secret = []byte(DefaultCSRFSecret)
                 return
         }</span>
-        <span class="cov0" title="0">secret = []byte(csrfSecret)</span>
+        <span class="cov10" title="7">secret = []byte(csrfSecret)</span>
 }
 
 func CreateMAC(data []byte) ([]byte, error) <span class="cov1" title="1">{
@@ -2350,27 +2380,27 @@ import (
         "golang.org/x/crypto/argon2"
 )
 
-func GetSalt() ([]byte, error) <span class="cov8" title="6">{
+func GetSalt() ([]byte, error) <span class="cov7" title="4">{
         salt, err := rand.String(config.PasswordSaltLen)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov8" title="6">return []byte(salt), nil</span>
+        <span class="cov7" title="4">return []byte(salt), nil</span>
 }
 
-func Hash(salt []byte, str string) []byte <span class="cov10" title="8">{
+func Hash(salt []byte, str string) []byte <span class="cov10" title="6">{
         hash := argon2.IDKey([]byte(str), salt, 1, 1024, 4, 32)
         return append(salt, hash...)
 }</span>
 
-func HashPw(password string) (string, error) <span class="cov8" title="6">{
+func HashPw(password string) (string, error) <span class="cov7" title="4">{
         salt, err := GetSalt()
         if err != nil </span><span class="cov0" title="0">{
                 return "", pkgErr.Wrap(err, "failed get salt")
         }</span>
 
-        <span class="cov8" title="6">hashPw := string(Hash(salt, password))
+        <span class="cov7" title="4">hashPw := string(Hash(salt, password))
         return hashPw, nil</span>
 }
 
@@ -2438,6 +2468,12 @@ func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any
 
 func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) <span class="cov1" title="1">{
         w.Header().Set("Content-Type", http.DetectContentType(data))
+        imageType := http.DetectContentType(data)
+        if imageType == "text/xml; charset=utf-8" </span><span class="cov0" title="0">{
+                imageType = "image/svg+xml"
+        }</span>
+
+        <span class="cov1" title="1">w.Header().Set("Content-Type", imageType)
         w.WriteHeader(status)
 
         _, err := w.Write(data)
@@ -2449,6 +2485,114 @@ func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) 
 </pre>
 		
 		<pre class="file" id="file22" style="display: none">package image
+
+import (
+        "bytes"
+        "fmt"
+        "github.com/ajstarks/svgo"
+        "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+        "golang.org/x/net/html"
+        "image/color"
+        "sync"
+)
+
+var colors = make(map[string]color.RGBA)
+
+func init() <span class="cov10" title="3">{
+        colors["purple"] = color.RGBA{R: 178, G: 102, B: 255, A: 255}
+        colors["green"] = color.RGBA{R: 102, G: 255, B: 102, A: 255}
+        colors["orange"] = color.RGBA{R: 255, G: 153, B: 51, A: 255}
+        colors["red        "] = color.RGBA{R: 255, G: 102, B: 102, A: 255}
+        colors["yellow"] = color.RGBA{R: 255, G: 255, B: 102, A: 255}
+        colors["blue"] = color.RGBA{R: 51, G: 153, B: 255, A: 255}
+}</span>
+
+var mu sync.RWMutex
+
+func GetRandColor() string <span class="cov0" title="0">{
+        mu.RLock()
+        defer mu.RUnlock()
+        for k := range colors </span><span class="cov0" title="0">{
+                return k
+        }</span>
+        <span class="cov0" title="0">return "green"</span>
+}
+
+func getCol(col string) color.RGBA <span class="cov0" title="0">{
+        mu.RLock()
+        defer mu.RUnlock()
+        rgbaCol, ok := colors[col]
+        if !ok </span><span class="cov0" title="0">{
+                return color.RGBA{G: 255, A: 255}
+        }</span>
+        <span class="cov0" title="0">return rgbaCol</span>
+}
+
+func GenImage(col, label string) ([]byte, error) <span class="cov0" title="0">{
+        width := config.UserDefaultAvatarSize
+        height := config.UserDefaultAvatarSize
+        buffer := new(bytes.Buffer)
+        canvas := svg.New(buffer)
+        canvas.Start(width, height, `xlink:href="data:image/png;base64"`)
+        rgbaBackCol := getCol(col)
+        backCol := canvas.RGBA(int(rgbaBackCol.R), int(rgbaBackCol.G), int(rgbaBackCol.B), float64(rgbaBackCol.A))
+        canvas.Rect(0, 0, height, width, fmt.Sprintf("fill:%s", backCol))
+        canvas.Text(width/2, height/2, label, "dominant-baseline:middle;text-anchor:middle;font-size:25px;fill:black;font-family:Arial")
+        canvas.End()
+        return buffer.Bytes(), nil
+}</span>
+func getBackgoundStyle(img []byte) string <span class="cov0" title="0">{
+        buffer := new(bytes.Buffer)
+        buffer.Write(img)
+        doc, _ := html.Parse(buffer)
+        var f func(*html.Node)
+        var resStyle string
+        f = func(n *html.Node) </span><span class="cov0" title="0">{
+                if n.Type == html.ElementNode &amp;&amp; n.Data == "rect" </span><span class="cov0" title="0">{
+                        for _, s := range n.Attr </span><span class="cov0" title="0">{
+                                if s.Key == "style" </span><span class="cov0" title="0">{
+                                        resStyle = s.Val
+                                        return
+                                }</span>
+                        }
+                }
+
+                <span class="cov0" title="0">for at := n.FirstChild; at != nil; at = at.NextSibling </span><span class="cov0" title="0">{
+                        f(at)
+                }</span>
+        }
+
+        <span class="cov0" title="0">f(doc)
+        return resStyle</span>
+}
+func UpdateImgText(img []byte, label string) ([]byte, error) <span class="cov0" title="0">{
+        style := getBackgoundStyle(img)
+        width := config.UserDefaultAvatarSize
+        height := config.UserDefaultAvatarSize
+        buffer := new(bytes.Buffer)
+        canvas := svg.New(buffer)
+        canvas.Start(width, height, `xlink:href="data:image/png;base64"`)
+        canvas.Rect(0, 0, height, width, style)
+        canvas.Text(width/2, height/2, label, "dominant-baseline:middle;text-anchor:middle;font-size:25px;fill:black;font-family:Arial")
+        canvas.End()
+        return buffer.Bytes(), nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package image
+
+import "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+
+func CheckImageContentType(contentType string) bool <span class="cov0" title="0">{
+        if contentType == pkg.ContentTypePNG || contentType == pkg.ContentTypeSVG ||
+                contentType == pkg.ContentTypeWEBP || contentType == pkg.ContentTypeJPEG </span><span class="cov0" title="0">{
+                return true
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package image
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -2476,20 +2620,7 @@ func ReadImage(file multipart.File, header *multipart.FileHeader) (*models.Image
 }
 </pre>
 		
-		<pre class="file" id="file23" style="display: none">package image
-
-import "github.com/go-park-mail-ru/2023_1_Seekers/pkg"
-
-func CheckImageContentType(contentType string) bool <span class="cov0" title="0">{
-        if contentType == pkg.ContentTypePNG || contentType == pkg.ContentTypeSVG ||
-                contentType == pkg.ContentTypeWEBP || contentType == pkg.ContentTypeJPEG </span><span class="cov0" title="0">{
-                return true
-        }</span>
-        <span class="cov0" title="0">return false</span>
-}
-</pre>
-		
-		<pre class="file" id="file24" style="display: none">package pkg
+		<pre class="file" id="file25" style="display: none">package pkg
 
 import (
         "bytes"
@@ -2740,14 +2871,14 @@ func (f *Formatter) writeField(b *bytes.Buffer, entry *logrus.Entry, field strin
 }
 </pre>
 		
-		<pre class="file" id="file25" style="display: none">package rand
+		<pre class="file" id="file26" style="display: none">package rand
 
 import (
         "crypto/rand"
         "math/big"
 )
 
-func String(length int) (string, error) <span class="cov6" title="8">{
+func String(length int) (string, error) <span class="cov5" title="6">{
         charSet := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         randBytes := make([]byte, length)
         for i := range randBytes </span><span class="cov10" title="32">{
@@ -2757,11 +2888,21 @@ func String(length int) (string, error) <span class="cov6" title="8">{
                 }</span>
                 <span class="cov10" title="32">randBytes[i] = charSet[res.Int64()]</span>
         }
-        <span class="cov6" title="8">return string(randBytes), nil</span>
+        <span class="cov5" title="6">return string(randBytes), nil</span>
 }
 </pre>
 		
-		<pre class="file" id="file26" style="display: none">package pkg
+		<pre class="file" id="file27" style="display: none">package pkg
+
+func GetFirstUtf(str string) string <span class="cov0" title="0">{
+        for _, c := range str </span><span class="cov0" title="0">{
+                return string(c)
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package pkg
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
@@ -2773,7 +2914,7 @@ func GetCurrentTime() string <span class="cov10" title="6">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file27" style="display: none">package validation
+		<pre class="file" id="file29" style="display: none">package validation
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
@@ -2781,12 +2922,12 @@ import (
         "strings"
 )
 
-func Login(login string) (string, error) <span class="cov10" title="2">{
+func Login(login string) (string, error) <span class="cov8" title="1">{
         email := login
-        if !strings.Contains(login, config.PostAtDomain) </span><span class="cov10" title="2">{
+        if !strings.Contains(login, config.PostAtDomain) </span><span class="cov8" title="1">{
                 if strings.Contains(login, "@") || strings.Contains(login, ".") </span><span class="cov0" title="0">{
                         return "", errors.ErrInvalidLogin
-                }</span> else<span class="cov10" title="2"> {
+                }</span> else<span class="cov8" title="1"> {
                         email += config.PostAtDomain
                 }</span>
         } else<span class="cov0" title="0"> {
@@ -2796,11 +2937,11 @@ func Login(login string) (string, error) <span class="cov10" title="2">{
                         return "", errors.ErrInvalidLogin
                 }</span>
         }
-        <span class="cov10" title="2">return email, nil</span>
+        <span class="cov8" title="1">return email, nil</span>
 }
 </pre>
 		
-		<pre class="file" id="file28" style="display: none">package validation
+		<pre class="file" id="file30" style="display: none">package validation
 
 import (
         "github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"

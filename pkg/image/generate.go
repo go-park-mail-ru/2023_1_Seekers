@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/ajstarks/svgo"
+	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"golang.org/x/net/html"
 	"image/color"
 	"sync"
 )
@@ -41,8 +43,8 @@ func getCol(col string) color.RGBA {
 }
 
 func GenImage(col, label string) ([]byte, error) {
-	width := 46
-	height := 46
+	width := config.UserDefaultAvatarSize
+	height := config.UserDefaultAvatarSize
 	buffer := new(bytes.Buffer)
 	canvas := svg.New(buffer)
 	canvas.Start(width, height, `xlink:href="data:image/png;base64"`)
@@ -52,5 +54,40 @@ func GenImage(col, label string) ([]byte, error) {
 	canvas.Text(width/2, height/2, label, "dominant-baseline:middle;text-anchor:middle;font-size:25px;fill:black;font-family:Arial")
 	canvas.End()
 	return buffer.Bytes(), nil
+}
+func getBackgoundStyle(img []byte) string {
+	buffer := new(bytes.Buffer)
+	buffer.Write(img)
+	doc, _ := html.Parse(buffer)
+	var f func(*html.Node)
+	var resStyle string
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "rect" {
+			for _, s := range n.Attr {
+				if s.Key == "style" {
+					resStyle = s.Val
+					return
+				}
+			}
+		}
 
+		for at := n.FirstChild; at != nil; at = at.NextSibling {
+			f(at)
+		}
+	}
+
+	f(doc)
+	return resStyle
+}
+func UpdateImgText(img []byte, label string) ([]byte, error) {
+	style := getBackgoundStyle(img)
+	width := config.UserDefaultAvatarSize
+	height := config.UserDefaultAvatarSize
+	buffer := new(bytes.Buffer)
+	canvas := svg.New(buffer)
+	canvas.Start(width, height, `xlink:href="data:image/png;base64"`)
+	canvas.Rect(0, 0, height, width, style)
+	canvas.Text(width/2, height/2, label, "dominant-baseline:middle;text-anchor:middle;font-size:25px;fill:black;font-family:Arial")
+	canvas.End()
+	return buffer.Bytes(), nil
 }

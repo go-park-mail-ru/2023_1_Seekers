@@ -59,8 +59,9 @@ const (
 	RouteUnreadMessage     = RoutePrefix + "/message/{id:[0-9]+}/unread"
 
 	// UserService
-	MaxImageSize      = 32 << 20
-	UserFormNewAvatar = "avatar"
+	MaxImageSize          = 32 << 20
+	UserFormNewAvatar     = "avatar"
+	UserDefaultAvatarSize = 46
 
 	// UserRoutes
 	RouteUser                 = RoutePrefix + "/user"
@@ -71,10 +72,9 @@ const (
 
 	PasswordMinLen = 5
 	//PasswordSaltLen  = 10
-	DefaultAvatar    = "default_avatar.png"
-	DefaultAvatarDir = "./cmd/config/static/"
-	PostDomain       = "mailbox.ru"
-	PostAtDomain     = "@" + PostDomain
+	DefaultAvatar = "default_avatar.png"
+	PostDomain    = "mailbox.ru"
+	PostAtDomain  = "@" + PostDomain
 )
 
 var (

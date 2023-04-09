@@ -6,7 +6,9 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
 	"net/mail"
@@ -95,6 +97,20 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 	err = u.userRepo.EditInfo(ID, info)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "edit info")
+	}
+	avatar, err := u.GetAvatar(user.Email)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "edit info - get avatar")
+	}
+	label := pkg.GetFirstUtf(info.FirstName)
+	updAvatar, err := image.UpdateImgText(avatar.Data, label)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+	}
+
+	err = u.EditAvatar(user.UserID, &models.Image{Data: updAvatar})
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "edit info - update avatar")
 	}
 	return &info, nil
 }

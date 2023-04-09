@@ -11,7 +11,6 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/microcosm-cc/bluemonday v1.0.23
-	github.com/mskrha/svg2png v0.0.0-20220111070911-b5983936965c
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rs/cors v1.8.3
