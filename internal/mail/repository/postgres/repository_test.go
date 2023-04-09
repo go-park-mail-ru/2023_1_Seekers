@@ -165,8 +165,8 @@ func TestRepository_SelectRecipientsByMessage(t *testing.T) {
 		rows.AddRow(recipient)
 	}
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "user_id" FROM "mail"."boxes" WHERE message_id = $1 AND user_id != $2`)).
-		WithArgs(messageID, fromUserID).WillReturnRows(rows)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "user_id" FROM "mail"."boxes" WHERE message_id = $1`)).
+		WithArgs(messageID).WillReturnRows(rows)
 
 	mailRepo := New(gormDB)
 	response, err := mailRepo.SelectRecipientsByMessage(messageID, fromUserID)
