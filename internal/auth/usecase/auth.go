@@ -8,6 +8,7 @@ import (
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
 )
@@ -16,13 +17,15 @@ type authUC struct {
 	sessionUC auth.SessionUseCaseI
 	userRepo  _user.RepoI
 	mailUC    mail.UseCaseI
+	userUC    _user.UseCaseI
 }
 
-func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI) auth.UseCaseI {
+func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI, uUC _user.UseCaseI) auth.UseCaseI {
 	return &authUC{
 		sessionUC: sUC,
 		userRepo:  uRepo,
 		mailUC:    mUC,
+		userUC:    uUC,
 	}
 }
 
@@ -78,6 +81,11 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
+
+	col := image.GetRandColor()
+	label := user.FirstName[0:1]
+	img, err := image.GenImage(col, label)
+	u.userUC.EditAvatar(user.UserID, &models.Image{Data: img})
 
 	_, err = u.mailUC.CreateDefaultFolders(user.UserID)
 	if err != nil {
