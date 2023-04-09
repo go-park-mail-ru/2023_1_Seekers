@@ -11,6 +11,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type authUC struct {
@@ -85,7 +86,10 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	col := image.GetRandColor()
 	label := user.FirstName[0:1]
 	img, err := image.GenImage(col, label)
-	u.userUC.EditAvatar(user.UserID, &models.Image{Data: img})
+	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img})
+	if err != nil {
+		log.Info(err, "edit ava")
+	}
 
 	_, err = u.mailUC.CreateDefaultFolders(user.UserID)
 	if err != nil {

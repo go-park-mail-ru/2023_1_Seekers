@@ -80,7 +80,7 @@ const (
 var (
 	CookieLen       = 32
 	PasswordSaltLen = 10
-	AllowedHeaders  = []string{"Content-Type", "Content-Length", "X-Csrf-Token"}
+	AllowedHeaders  = []string{"Content-Type", "Content-Length", "X-Csrf-Token", "application/json", "text/xml"}
 	AllowedOrigins  = []string{"http://127.0.0.1:8002", "http://localhost:8002", "http://localhost", "http://127.0.0.1",
 		"http://89.208.197.150:8002", "https://mailbx.ru", "https://www.mailbx.ru"}
 	AllowedMethods = []string{"POST", "GET", "PUT", "DELETE"}

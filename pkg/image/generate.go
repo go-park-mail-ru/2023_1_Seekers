@@ -2,13 +2,9 @@ package image
 
 import (
 	"bytes"
-	"github.com/pkg/errors"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/inconsolata"
-	"golang.org/x/image/math/fixed"
-	"image"
+	"fmt"
+	"github.com/ajstarks/svgo"
 	"image/color"
-	"image/png"
 	"sync"
 )
 
@@ -44,34 +40,17 @@ func getCol(col string) color.RGBA {
 	return rgbaCol
 }
 
-func addLabel(img *image.RGBA, x, y int, label string) {
-	col := color.RGBA{A: 255}
-	point := fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
-
-	d := &font.Drawer{
-		Dst:  img,
-		Src:  image.NewUniform(col),
-		Face: inconsolata.Regular8x16,
-		Dot:  point,
-	}
-	d.DrawString(label)
-}
-
 func GenImage(col, label string) ([]byte, error) {
-	size := 20
-	img := image.NewRGBA(image.Rect(0, 0, size, size))
-	backCol := getCol(col)
-	for i := 0; i < size; i++ {
-		for j := 0; j < size; j++ {
-			img.Set(i, j, backCol)
-		}
-	}
-
-	addLabel(img, 6, 15, label)
-
+	width := 46
+	height := 46
 	buffer := new(bytes.Buffer)
-	if err := png.Encode(buffer, img); err != nil {
-		return nil, errors.Wrap(err, "failed encode to png")
-	}
+	canvas := svg.New(buffer)
+	canvas.Start(width, height, `xlink:href="data:image/png;base64"`)
+	rgbaBackCol := getCol(col)
+	backCol := canvas.RGBA(int(rgbaBackCol.R), int(rgbaBackCol.G), int(rgbaBackCol.B), float64(rgbaBackCol.A))
+	canvas.Rect(0, 0, height, width, fmt.Sprintf("fill:%s", backCol))
+	canvas.Text(width/2, height/2, label, "dominant-baseline:middle;text-anchor:middle;font-size:25px;fill:black;font-family:Arial")
+	canvas.End()
 	return buffer.Bytes(), nil
+
 }

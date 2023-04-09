@@ -3,6 +3,7 @@ module github.com/go-park-mail-ru/2023_1_Seekers
 go 1.20
 
 require (
+	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/aws/aws-sdk-go v1.44.224
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-playground/validator/v10 v10.11.2
@@ -10,6 +11,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/microcosm-cc/bluemonday v1.0.23
+	github.com/mskrha/svg2png v0.0.0-20220111070911-b5983936965c
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rs/cors v1.8.3
@@ -18,7 +20,6 @@ require (
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.10
 	golang.org/x/crypto v0.6.0
-	golang.org/x/image v0.7.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11

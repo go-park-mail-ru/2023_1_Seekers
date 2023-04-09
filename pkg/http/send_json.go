@@ -26,6 +26,12 @@ func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any
 
 func SendImage(w http.ResponseWriter, r *http.Request, status int, data []byte) {
 	w.Header().Set("Content-Type", http.DetectContentType(data))
+	imageType := http.DetectContentType(data)
+	if imageType == "text/xml; charset=utf-8" {
+		imageType = "image/svg+xml"
+	}
+
+	w.Header().Set("Content-Type", imageType)
 	w.WriteHeader(status)
 
 	_, err := w.Write(data)

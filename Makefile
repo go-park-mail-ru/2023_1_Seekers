@@ -1,14 +1,14 @@
 build:
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
-	docker-compose up -d
+	docker-compose up -d --build
 	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
 build-prod:
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
-	docker-compose -f docker-compose-prod.yml up -d
+	docker-compose -f docker-compose-prod.yml up -d --build
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
