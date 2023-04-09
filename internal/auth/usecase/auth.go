@@ -14,17 +14,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -destination=./mocks_auth/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/auth UseCaseI
+
 type authUC struct {
 	sessionUC auth.SessionUseCaseI
-	userRepo  _user.RepoI
 	mailUC    mail.UseCaseI
 	userUC    _user.UseCaseI
 }
 
-func NewAuthUC(sUC auth.SessionUseCaseI, uRepo _user.RepoI, mUC mail.UseCaseI, uUC _user.UseCaseI) auth.UseCaseI {
+func NewAuthUC(sUC auth.SessionUseCaseI, mUC mail.UseCaseI, uUC _user.UseCaseI) auth.UseCaseI {
 	return &authUC{
 		sessionUC: sUC,
-		userRepo:  uRepo,
 		mailUC:    mUC,
 		userUC:    uUC,
 	}
@@ -35,7 +35,7 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 	if err != nil {
 		return nil, nil, errors.ErrInvalidLogin
 	}
-	user, err := u.userRepo.GetByEmail(email)
+	user, err := u.userUC.GetByEmail(email)
 	if err != nil {
 		return nil, nil, errors.ErrWrongPw
 	}
@@ -78,7 +78,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
 
-	user, err = u.userRepo.Create(user)
+	user, err = u.userUC.Create(user)
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
@@ -112,28 +112,4 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}, session, nil
-}
-
-func (u *authUC) EditPw(ID uint64, form models.EditPasswordRequest) error {
-	if form.RepeatPw != form.Password {
-		return errors.ErrPwDontMatch
-	}
-
-	user, err := u.userRepo.GetByID(ID)
-	if !pkg.ComparePw2Hash(form.PasswordOld, user.Password) {
-		return errors.ErrWrongPw
-	}
-
-	if err := validation.Password(form.Password); err != nil {
-		return pkgErrors.Wrap(err, "create")
-	}
-	hashPw, err := pkg.HashPw(form.Password)
-	if err != nil {
-		return pkgErrors.Wrap(err, "edit password")
-	}
-	err = u.userRepo.EditPw(ID, hashPw)
-	if err != nil {
-		return pkgErrors.Wrap(err, "edit password")
-	}
-	return nil
 }

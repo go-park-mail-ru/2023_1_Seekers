@@ -231,3 +231,42 @@ func TestUseCase_GetAvatar(t *testing.T) {
 		}, response)
 	}
 }
+
+//func TestUseCase_EditPw(t *testing.T) {
+//	config.PasswordSaltLen = 0
+//	var fakeForm models.EditPasswordRequest
+//	generateFakeData(&fakeForm)
+//	fakeForm.RepeatPw = fakeForm.Password
+//	var fakeUser *models.User
+//	generateFakeData(&fakeUser)
+//	var err error
+//	fakeUser.Password, err = pkg.HashPw(fakeForm.PasswordOld)
+//	if err != nil {
+//		t.Fatalf("error while hashing pw")
+//	}
+//	newPw, err := pkg.HashPw(fakeForm.Password)
+//	if err != nil {
+//		t.Fatalf("error while hashing pw")
+//	}
+//	userID := uint64(1)
+//
+//	t.Parallel()
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//
+//	sUC := mockSessionUC.NewMockSessionUseCaseI(ctrl)
+//	userRepo := mockUserRepo.NewMockRepoI(ctrl)
+//	userUc := mockUserUC.NewMockUseCaseI(ctrl)
+//	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+//	aUC := NewAuthUC(sUC, userRepo, mailUC, userUc)
+//
+//	userRepo.EXPECT().GetByID(userID).Return(fakeUser, nil)
+//	userRepo.EXPECT().EditPw(userID, newPw).Return(nil)
+//
+//	err = aUC.EditPw(userID, fakeForm)
+//	causeErr := pkgErr.Cause(err)
+//
+//	if causeErr != nil {
+//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+//	}
+//}

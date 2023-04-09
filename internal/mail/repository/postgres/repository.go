@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+//go:generate mockgen -destination=./mocks/mockrepository.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/mail RepoI
+
 type mailRepository struct {
 	db *gorm.DB
 }

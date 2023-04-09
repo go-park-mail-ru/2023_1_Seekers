@@ -12,6 +12,8 @@ import (
 	"strconv"
 )
 
+//go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/auth SessionRepoI
+
 type sessionsDB struct {
 	redisSessions *redis.Client
 }

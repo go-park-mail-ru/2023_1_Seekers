@@ -84,7 +84,7 @@ func main() {
 	usersUC := _userUCase.New(userRepo, fStorageUC)
 	mailUC := _mailUCase.New(mailRepo, userRepo)
 	sessionUC := _authUCase.NewSessionUC(sessionRepo)
-	authUC := _authUCase.NewAuthUC(sessionUC, userRepo, mailUC, usersUC)
+	authUC := _authUCase.NewAuthUC(sessionUC, mailUC, usersUC)
 
 	middleware := _middleware.New(sessionUC, logger)
 

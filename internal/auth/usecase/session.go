@@ -7,6 +7,8 @@ import (
 	pkgErrors "github.com/pkg/errors"
 )
 
+//go:generate mockgen -destination=./mocks_session/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/auth SessionUseCaseI
+
 type sessionUC struct {
 	sessionRepo auth.SessionRepoI
 }

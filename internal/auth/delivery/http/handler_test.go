@@ -2,13 +2,11 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	mockAuthUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/mocks_auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
@@ -122,36 +120,6 @@ func TestDelivery_Auth(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	authH.Auth(w, r)
-
-	if w.Code != status {
-		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
-	}
-}
-
-func TestDelivery_EditPw(t *testing.T) {
-	var fakeForm models.EditPasswordRequest
-	generateFakeData(&fakeForm)
-	userID := uint64(1)
-	status := http.StatusOK
-
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
-	authH := New(authUC)
-
-	body, err := json.Marshal(fakeForm)
-	if err != nil {
-		t.Fatalf("error while marshaling to json: %v", err)
-	}
-
-	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
-	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
-	w := httptest.NewRecorder()
-
-	authUC.EXPECT().EditPw(userID, fakeForm).Return(nil)
-	authH.EditPw(w, r)
 
 	if w.Code != status {
 		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)

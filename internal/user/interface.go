@@ -12,6 +12,7 @@ type HandlersI interface {
 	EditInfo(w http.ResponseWriter, r *http.Request)
 	EditAvatar(w http.ResponseWriter, r *http.Request)
 	GetAvatar(w http.ResponseWriter, r *http.Request)
+	EditPw(w http.ResponseWriter, r *http.Request)
 }
 
 type UseCaseI interface {
@@ -23,6 +24,7 @@ type UseCaseI interface {
 	EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error)
 	EditAvatar(ID uint64, newAvatar *models.Image) error
 	GetAvatar(email string) (*models.Image, error)
+	EditPw(ID uint64, form models.EditPasswordRequest) error
 }
 
 type RepoI interface {

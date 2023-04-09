@@ -229,3 +229,45 @@ func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 
 	pkgHttp.SendImage(w, r, http.StatusOK, img.Data)
 }
+
+// EditPw godoc
+// @Summary      EditPw
+// @Description  edit password about user
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Success 200 "success edit user password"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 403 {object} errors.JSONError "invalid form"
+// @Failure 404 {object} errors.JSONError "user not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /user/pw [post]
+func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Error(fmt.Errorf("failed to close request: %w", err))
+		}
+	}(r.Body)
+	form := models.EditPasswordRequest{}
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		return
+	}
+
+	form.Sanitize()
+
+	err = h.userUC.EditPw(userID, form)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

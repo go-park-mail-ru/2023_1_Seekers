@@ -9,11 +9,14 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
 	"net/mail"
 	"path/filepath"
 )
+
+//go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/user UseCaseI
 
 type useCase struct {
 	userRepo _user.RepoI
@@ -153,4 +156,28 @@ func (u *useCase) GetAvatar(email string) (*models.Image, error) {
 		Name: f.Name,
 		Data: f.Data,
 	}, nil
+}
+
+func (u *useCase) EditPw(ID uint64, form models.EditPasswordRequest) error {
+	if form.RepeatPw != form.Password {
+		return errors.ErrPwDontMatch
+	}
+
+	user, err := u.userRepo.GetByID(ID)
+	if !pkg.ComparePw2Hash(form.PasswordOld, user.Password) {
+		return errors.ErrWrongPw
+	}
+
+	if err := validation.Password(form.Password); err != nil {
+		return pkgErrors.Wrap(err, "create")
+	}
+	hashPw, err := pkg.HashPw(form.Password)
+	if err != nil {
+		return pkgErrors.Wrap(err, "edit password")
+	}
+	err = u.userRepo.EditPw(ID, hashPw)
+	if err != nil {
+		return pkgErrors.Wrap(err, "edit password")
+	}
+	return nil
 }
