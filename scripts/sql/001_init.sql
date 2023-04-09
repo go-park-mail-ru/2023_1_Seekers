@@ -84,7 +84,7 @@ CREATE TABLE mail.boxes
     favorite   boolean NOT null default false,
     deleted    boolean NOT null default false,
 
-    CONSTRAINT pk_box PRIMARY KEY (user_id, message_id),
+--     CONSTRAINT pk_box PRIMARY KEY (user_id, message_id),
 --    CONSTRAINT uk_box_id UNIQUE (user_id, folder_id),
     CONSTRAINT fk_box_messages_user_id FOREIGN KEY (user_id)
         REFERENCES mail.users ON DELETE RESTRICT INITIALLY deferred,

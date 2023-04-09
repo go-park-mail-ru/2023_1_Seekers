@@ -74,7 +74,7 @@ func (m mailRepository) SelectFolderMessagesByUserNFolder(userID uint64, folderI
 	var messages []models.MessageInfo
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
-		Where("user_id = ? AND folder_id = ?", userID, folderID).Scan(&messages)
+		Where("user_id = ? AND folder_id = ?", userID, folderID).Order("created_at DESC").Scan(&messages)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -85,10 +85,18 @@ func (m mailRepository) SelectFolderMessagesByUserNFolder(userID uint64, folderI
 func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID uint64) ([]uint64, error) {
 	var recipientsIDs []uint64
 
-	tx := m.db.Model(Box{}).Select("user_id").Where("message_id = ? AND user_id != ?", messageID, fromUserID).
+	tx := m.db.Model(Box{}).Select("user_id").Where("message_id = ?", messageID).
 		Scan(&recipientsIDs)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	for i, id := range recipientsIDs {
+		if id == fromUserID {
+			recipientsIDs = append(recipientsIDs[:i], recipientsIDs[i+1:]...)
+
+			return recipientsIDs, nil
+		}
 	}
 
 	return recipientsIDs, nil
