@@ -2,14 +2,15 @@ CREATE SCHEMA mail;
 
 CREATE TABLE mail.users
 (
-    user_id    bigserial                NOT NULL,
-    here_since timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    is_deleted boolean                  NOT NULL DEFAULT false,
-    email      text                     NOT NULL,
-    password   bytea                    NOT NULL,
-    first_name text                     NOT NULL,
-    last_name  text                     NOT NULL,
-    avatar     text                     NOT NULL,
+    user_id          bigserial                NOT NULL,
+    here_since       timestamp with time zone NOT NULL DEFAULT current_timestamp,
+    is_deleted       boolean                  NOT NULL DEFAULT false,
+    email            text                     NOT NULL,
+    password         bytea                    NOT NULL,
+    first_name       text                     NOT NULL,
+    last_name        text                     NOT NULL,
+    avatar           text                     NOT NULL,
+    is_custom_avatar bool                     NOT NULL DEFAULT false,
     CONSTRAINT pk_users PRIMARY KEY (user_id)
 );
 

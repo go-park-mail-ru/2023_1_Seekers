@@ -126,7 +126,6 @@ func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/info [post]
 func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
-	// тут пока что просто из body - в будущем на form data
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
@@ -194,7 +193,7 @@ func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userUC.EditAvatar(userID, img)
+	err = h.userUC.EditAvatar(userID, img, true)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return

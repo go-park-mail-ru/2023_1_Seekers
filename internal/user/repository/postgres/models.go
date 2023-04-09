@@ -15,6 +15,7 @@ type User struct {
 	FirstName string `validate:"required"`
 	LastName  string `validate:"required"`
 	Avatar    string
+	//IsCustomAvatar bool
 }
 
 func (*User) TableName() string {
@@ -27,4 +28,12 @@ func (u *User) FromModel(user *models.User) {
 	u.FirstName = user.FirstName
 	u.LastName = user.LastName
 	u.Avatar = user.Avatar
+}
+
+type IsCustomAvatar struct {
+	IsCustomAvatar bool
+}
+
+func (*IsCustomAvatar) TableName() string {
+	return os.Getenv(config.DBSchemaNameEnv) + ".users"
 }

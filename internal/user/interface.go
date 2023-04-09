@@ -22,7 +22,7 @@ type UseCaseI interface {
 	GetByEmail(email string) (*models.User, error)
 	GetInfo(ID uint64) (*models.UserInfo, error)
 	EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, error)
-	EditAvatar(ID uint64, newAvatar *models.Image) error
+	EditAvatar(ID uint64, newAvatar *models.Image, isCustom bool) error
 	GetAvatar(email string) (*models.Image, error)
 	EditPw(ID uint64, form models.EditPasswordRequest) error
 }
@@ -37,4 +37,6 @@ type RepoI interface {
 	EditPw(ID uint64, newPW string) error
 	GetInfoByID(ID uint64) (*models.UserInfo, error)
 	GetInfoByEmail(email string) (*models.UserInfo, error)
+	IsCustomAvatar(ID uint64) (bool, error)
+	SetCustomAvatar(ID uint64) error
 }

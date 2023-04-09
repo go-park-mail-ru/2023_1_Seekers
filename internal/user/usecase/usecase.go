@@ -101,24 +101,32 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "edit info")
 	}
-	avatar, err := u.GetAvatar(user.Email)
+	ok, err := u.userRepo.IsCustomAvatar(ID)
 	if err != nil {
-		return nil, pkgErrors.Wrap(err, "edit info - get avatar")
-	}
-	label := pkg.GetFirstUtf(info.FirstName)
-	updAvatar, err := image.UpdateImgText(avatar.Data, label)
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+		return nil, pkgErrors.Wrap(err, "edit info - check is custom avatar")
 	}
 
-	err = u.EditAvatar(user.UserID, &models.Image{Data: updAvatar})
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+	if !ok {
+		avatar, err := u.GetAvatar(user.Email)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "edit info - get avatar")
+		}
+
+		label := pkg.GetFirstUtf(info.FirstName)
+		updAvatar, err := image.UpdateImgText(avatar.Data, label)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+		}
+
+		err = u.EditAvatar(user.UserID, &models.Image{Data: updAvatar}, false)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "edit info - update avatar")
+		}
 	}
 	return &info, nil
 }
 
-func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
+func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image, isCustom bool) error {
 	user, err := u.GetByID(ID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get user by id")
@@ -133,7 +141,12 @@ func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image) error {
 		return pkgErrors.Wrap(err, "edit avatar")
 	}
 	if err = u.userRepo.SetAvatar(ID, f.Name); err != nil {
-		return pkgErrors.Wrap(err, "set avatar")
+		return pkgErrors.Wrap(err, "edit avatar - set")
+	}
+	if isCustom {
+		if err = u.userRepo.SetCustomAvatar(ID); err != nil {
+			return pkgErrors.Wrap(err, "edit avatar - set custom")
+		}
 	}
 	return nil
 }

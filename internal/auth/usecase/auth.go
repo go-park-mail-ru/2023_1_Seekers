@@ -86,7 +86,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	col := image.GetRandColor()
 	label := pkg.GetFirstUtf(user.FirstName)
 	img, err := image.GenImage(col, label)
-	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img})
+	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img}, false)
 	if err != nil {
 		log.Warn(err, "edit avatar")
 	}

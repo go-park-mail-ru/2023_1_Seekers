@@ -135,9 +135,34 @@ func (uDB *userDB) GetInfoByEmail(email string) (*models.UserInfo, error) {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
 		}
-
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return &userInfo, nil
+}
+
+func (uDB *userDB) IsCustomAvatar(ID uint64) (bool, error) {
+	result := IsCustomAvatar{}
+	tx := uDB.db.Where("user_id = ?", ID).Take(&result)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return false, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+		}
+		return false, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return result.IsCustomAvatar, nil
+}
+
+func (uDB *userDB) SetCustomAvatar(ID uint64) error {
+	customField := IsCustomAvatar{IsCustomAvatar: true}
+	tx := uDB.db.Where("user_id = ?", ID).Updates(customField)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())
+		}
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
 }
