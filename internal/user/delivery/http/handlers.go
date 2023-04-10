@@ -124,7 +124,7 @@ func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 403 {object} errors.JSONError "invalid form"
 // @Failure 404 {object} errors.JSONError "user not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /user/info [post]
+// @Router   /user/info [put]
 func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {
@@ -240,7 +240,7 @@ func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 // @Failure 403 {object} errors.JSONError "invalid form"
 // @Failure 404 {object} errors.JSONError "user not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /user/pw [post]
+// @Router   /user/pw [put]
 func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
 	if !ok {

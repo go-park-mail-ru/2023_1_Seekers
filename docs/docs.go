@@ -15,6 +15,58 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth": {
+            "get": {
+                "description": "check is user authorised",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Auth",
+                "responses": {
+                    "200": {
+                        "description": "success auth"
+                    },
+                    "401": {
+                        "description": "failed auth",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/create_csrf": {
+            "get": {
+                "description": "Get CSRF token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "GetCSRF",
+                "responses": {
+                    "200": {
+                        "description": "success create csrf"
+                    },
+                    "401": {
+                        "description": "failed get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/folder/{slug}": {
             "get": {
                 "description": "List of folder messages",
@@ -101,8 +153,8 @@ const docTemplate = `{
             }
         },
         "/logout": {
-            "post": {
-                "description": "user log out",
+            "delete": {
+                "description": "check is user authorised",
                 "consumes": [
                     "application/json"
                 ],
@@ -523,7 +575,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "description": "edit user avatar",
                 "consumes": [
                     "application/json"
@@ -568,7 +620,7 @@ const docTemplate = `{
         },
         "/user/info": {
             "get": {
-                "description": "get info about user",
+                "description": "get info about request creator",
                 "consumes": [
                     "application/json"
                 ],
@@ -578,21 +630,18 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "GetInfo",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "email",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
+                "summary": "GetPersonalInfo",
                 "responses": {
                     "200": {
                         "description": "success get user info",
                         "schema": {
                             "$ref": "#/definitions/models.UserInfo"
+                        }
+                    },
+                    "401": {
+                        "description": "failed get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
                         }
                     },
                     "404": {
@@ -609,7 +658,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "description": "edit info about user",
                 "consumes": [
                     "application/json"
@@ -628,7 +677,7 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.EditUserInfoResponse"
                         }
                     },
-                    "400": {
+                    "401": {
                         "description": "failed to get user",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
@@ -655,8 +704,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/info/{email}": {
+            "get": {
+                "description": "get info about user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get user info",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/user/pw": {
-            "post": {
+            "put": {
                 "description": "edit password about user",
                 "consumes": [
                     "application/json"
