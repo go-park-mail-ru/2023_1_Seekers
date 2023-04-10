@@ -64,17 +64,17 @@ func (mr *MockUseCaseIMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // EditAvatar mocks base method.
-func (m *MockUseCaseI) EditAvatar(arg0 uint64, arg1 *models.Image) error {
+func (m *MockUseCaseI) EditAvatar(arg0 uint64, arg1 *models.Image, arg2 bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EditAvatar", arg0, arg1)
+	ret := m.ctrl.Call(m, "EditAvatar", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // EditAvatar indicates an expected call of EditAvatar.
-func (mr *MockUseCaseIMockRecorder) EditAvatar(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) EditAvatar(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditAvatar", reflect.TypeOf((*MockUseCaseI)(nil).EditAvatar), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditAvatar", reflect.TypeOf((*MockUseCaseI)(nil).EditAvatar), arg0, arg1, arg2)
 }
 
 // EditInfo mocks base method.

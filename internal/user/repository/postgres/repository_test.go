@@ -283,3 +283,50 @@ func TestRepository_GetInfoByEmail(t *testing.T) {
 		require.Equal(t, fakeUser, response)
 	}
 }
+
+func TestRepository_IsCustomAvatar(t *testing.T) {
+	userID := uint64(1)
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"is_custom_avatar"}).
+		AddRow(true)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE user_id = $1 LIMIT 1`)).
+		WithArgs(userID).WillReturnRows(rows)
+
+	userRepo := New(gormDB)
+	response, err := userRepo.IsCustomAvatar(userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, true, response)
+	}
+}
+
+func TestRepository_SetCustomAvatar(t *testing.T) {
+	userID := uint64(1)
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "mail"."users" SET "is_custom_avatar"=$1 WHERE user_id = $2`)).
+		WithArgs(true, userID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	userRepo := New(gormDB)
+	err = userRepo.SetCustomAvatar(userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	}
+}
