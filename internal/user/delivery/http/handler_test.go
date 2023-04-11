@@ -147,11 +147,10 @@ func TestDelivery_EditInfo(t *testing.T) {
 
 func TestDelivery_EditAvatar(t *testing.T) {
 	//t.Parallel()
-	//
 	//ctrl := gomock.NewController(t)
 	//defer ctrl.Finish()
 	//
-	//userUC := userUCMock.NewMockUseCaseI(ctrl)
+	//userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	//
 	//img := []byte("sdsdjbasd;jrandombytes")
 	//body := &bytes.Buffer{}
@@ -178,10 +177,9 @@ func TestDelivery_EditAvatar(t *testing.T) {
 	//	UserID: 1,
 	//}
 	//
-	//ctx := context.WithValue(r.Context(), pkg.ContextUser, user)
-	//r = r.WithContext(ctx)
+	//r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, user.UserID))
 	//
-	//userUC.EXPECT().EditAvatar(ctx, &input).Return(nil)
+	//userUC.EXPECT().EditAvatar(user.UserID, &input, true).Return(nil)
 	//
 	//w := httptest.NewRecorder()
 	//
@@ -222,32 +220,32 @@ func TestDelivery_GetAvatar(t *testing.T) {
 	}
 }
 
-//func TestDelivery_EditPw(t *testing.T) {
-//	var fakeForm models.EditPasswordRequest
-//	generateFakeData(&fakeForm)
-//	userID := uint64(1)
-//	status := http.StatusOK
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
-//	authH := New(authUC)
-//
-//	body, err := json.Marshal(fakeForm)
-//	if err != nil {
-//		t.Fatalf("error while marshaling to json: %v", err)
-//	}
-//
-//	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
-//	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
-//	w := httptest.NewRecorder()
-//
-//	authUC.EXPECT().EditPw(userID, fakeForm).Return(nil)
-//	authH.EditPw(w, r)
-//
-//	if w.Code != status {
-//		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
-//	}
-//}
+func TestDelivery_EditPw(t *testing.T) {
+	var fakeForm models.EditPasswordRequest
+	generateFakeData(&fakeForm)
+	userID := uint64(1)
+	status := http.StatusOK
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	userH := New(userUC)
+
+	body, err := json.Marshal(fakeForm)
+	if err != nil {
+		t.Fatalf("error while marshaling to json: %v", err)
+	}
+
+	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
+	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
+	w := httptest.NewRecorder()
+
+	userUC.EXPECT().EditPw(userID, fakeForm).Return(nil)
+	userH.EditPw(w, r)
+
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
+	}
+}

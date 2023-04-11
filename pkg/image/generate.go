@@ -10,15 +10,15 @@ import (
 	"sync"
 )
 
-var colors = make(map[string]color.RGBA)
+var Colors = make(map[string]color.RGBA)
 
 func init() {
-	colors["purple"] = color.RGBA{R: 178, G: 102, B: 255, A: 255}
-	colors["green"] = color.RGBA{R: 102, G: 255, B: 102, A: 255}
-	colors["orange"] = color.RGBA{R: 255, G: 153, B: 51, A: 255}
-	colors["red	"] = color.RGBA{R: 255, G: 102, B: 102, A: 255}
-	colors["yellow"] = color.RGBA{R: 255, G: 255, B: 102, A: 255}
-	colors["blue"] = color.RGBA{R: 51, G: 153, B: 255, A: 255}
+	Colors["purple"] = color.RGBA{R: 178, G: 102, B: 255, A: 255}
+	Colors["green"] = color.RGBA{R: 102, G: 255, B: 102, A: 255}
+	Colors["orange"] = color.RGBA{R: 255, G: 153, B: 51, A: 255}
+	Colors["red"] = color.RGBA{R: 255, G: 102, B: 102, A: 255}
+	Colors["yellow"] = color.RGBA{R: 255, G: 255, B: 102, A: 255}
+	Colors["blue"] = color.RGBA{R: 51, G: 153, B: 255, A: 255}
 }
 
 var mu sync.RWMutex
@@ -26,7 +26,7 @@ var mu sync.RWMutex
 func GetRandColor() string {
 	mu.RLock()
 	defer mu.RUnlock()
-	for k := range colors {
+	for k := range Colors {
 		return k
 	}
 	return "green"
@@ -35,7 +35,7 @@ func GetRandColor() string {
 func getCol(col string) color.RGBA {
 	mu.RLock()
 	defer mu.RUnlock()
-	rgbaCol, ok := colors[col]
+	rgbaCol, ok := Colors[col]
 	if !ok {
 		return color.RGBA{G: 255, A: 255}
 	}

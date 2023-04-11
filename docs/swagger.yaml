@@ -139,6 +139,40 @@ info:
   title: MailBox Swagger API
   version: "1.0"
 paths:
+  /auth:
+    get:
+      consumes:
+      - application/json
+      description: check is user authorised
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success auth
+        "401":
+          description: failed auth
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: Auth
+      tags:
+      - auth
+  /create_csrf:
+    get:
+      description: Get CSRF token
+      responses:
+        "200":
+          description: success create csrf
+        "401":
+          description: failed get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetCSRF
+      tags:
+      - auth
   /folder/{slug}:
     get:
       consumes:
@@ -196,10 +230,10 @@ paths:
       tags:
       - messages
   /logout:
-    post:
+    delete:
       consumes:
       - application/json
-      description: user log out
+      description: check is user authorised
       produces:
       - application/json
       responses:
@@ -474,7 +508,7 @@ paths:
       summary: GetAvatar
       tags:
       - users
-    post:
+    put:
       consumes:
       - application/json
       description: edit user avatar
@@ -506,11 +540,68 @@ paths:
     get:
       consumes:
       - application/json
+      description: get info about request creator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get user info
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "401":
+          description: failed get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetPersonalInfo
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: edit info about user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit user info
+          schema:
+            $ref: '#/definitions/models.EditUserInfoResponse'
+        "401":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditInfo
+      tags:
+      - users
+  /user/info/{email}:
+    get:
+      consumes:
+      - application/json
       description: get info about user
       parameters:
       - description: email
-        in: query
-        name: id
+        in: path
+        name: email
         required: true
         type: string
       produces:
@@ -531,38 +622,8 @@ paths:
       summary: GetInfo
       tags:
       - users
-    post:
-      consumes:
-      - application/json
-      description: edit info about user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success edit user info
-          schema:
-            $ref: '#/definitions/models.EditUserInfoResponse'
-        "400":
-          description: failed to get user
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "403":
-          description: invalid form
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "404":
-          description: user not found
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-      summary: EditInfo
-      tags:
-      - users
   /user/pw:
-    post:
+    put:
       consumes:
       - application/json
       description: edit password about user

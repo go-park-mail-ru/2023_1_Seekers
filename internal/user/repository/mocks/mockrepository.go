@@ -151,6 +151,21 @@ func (mr *MockRepoIMockRecorder) GetInfoByID(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInfoByID", reflect.TypeOf((*MockRepoI)(nil).GetInfoByID), arg0)
 }
 
+// IsCustomAvatar mocks base method.
+func (m *MockRepoI) IsCustomAvatar(arg0 uint64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsCustomAvatar", arg0)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsCustomAvatar indicates an expected call of IsCustomAvatar.
+func (mr *MockRepoIMockRecorder) IsCustomAvatar(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCustomAvatar", reflect.TypeOf((*MockRepoI)(nil).IsCustomAvatar), arg0)
+}
+
 // SetAvatar mocks base method.
 func (m *MockRepoI) SetAvatar(arg0 uint64, arg1 string) error {
 	m.ctrl.T.Helper()
@@ -163,4 +178,18 @@ func (m *MockRepoI) SetAvatar(arg0 uint64, arg1 string) error {
 func (mr *MockRepoIMockRecorder) SetAvatar(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAvatar", reflect.TypeOf((*MockRepoI)(nil).SetAvatar), arg0, arg1)
+}
+
+// SetCustomAvatar mocks base method.
+func (m *MockRepoI) SetCustomAvatar(arg0 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetCustomAvatar", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetCustomAvatar indicates an expected call of SetCustomAvatar.
+func (mr *MockRepoIMockRecorder) SetCustomAvatar(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCustomAvatar", reflect.TypeOf((*MockRepoI)(nil).SetCustomAvatar), arg0)
 }

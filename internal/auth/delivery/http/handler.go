@@ -154,7 +154,7 @@ func (h *handlers) Auth(w http.ResponseWriter, _ *http.Request) {
 // @Produce  application/json
 // @Success  200 "success logout"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /logout [post]
+// @Router   /logout [delete]
 func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 	delCookie(w)
 	w.WriteHeader(http.StatusOK)
@@ -167,7 +167,7 @@ func (h *handlers) Logout(w http.ResponseWriter, _ *http.Request) {
 // @Success      200    "success create csrf"
 // @Failure 401 {object} errors.JSONError "failed get user"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router /create_csrf [post]
+// @Router /create_csrf [get]
 func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(config.CookieName)
 	if err != nil {

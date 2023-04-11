@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-//go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/auth UseCaseI
+//go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/mail UseCaseI
 
 type UseCase struct {
 	repoMail mail.RepoI
