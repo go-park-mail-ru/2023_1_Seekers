@@ -47,6 +47,10 @@ func CreateCSRF(cookie string) (string, error) {
 
 func CheckCSRF(cookie string, csrfToken string) error {
 	data := strings.Split(csrfToken, ".")
+	if len(data) < 2 {
+		return pkgErrors.WithMessage(errors.ErrWrongCSRF, "wrong token len after split")
+	}
+
 	expire, err := strconv.ParseInt(data[1], 10, 64)
 	if err != nil || expire < time.Now().Unix() {
 		return pkgErrors.WithMessage(errors.ErrWrongCSRF, "bad token time")
