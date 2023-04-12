@@ -4,7 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
 	"strings"
@@ -208,7 +208,7 @@ func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*
 
 	newMessage := models.MessageInfo{
 		Title:            message.Title,
-		CreatedAt:        pkg.GetCurrentTime(),
+		CreatedAt:        common.GetCurrentTime(),
 		Text:             message.Text,
 		ReplyToMessageID: message.ReplyToMessageID,
 	}

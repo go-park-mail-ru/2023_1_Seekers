@@ -6,7 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	httpPkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
@@ -175,7 +175,7 @@ func (h *handlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrfToken, err := pkg.CreateCSRF(cookie.Value)
+	csrfToken, err := crypto.CreateCSRF(cookie.Value)
 	if err != nil {
 		httpPkg.HandleError(w, r, err)
 		return

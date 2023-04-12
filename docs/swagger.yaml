@@ -309,7 +309,7 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: GetMessage
+      summary: ReadMessage
       tags:
       - messages
   /message/{id}/unread:
@@ -342,7 +342,7 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: GetMessage
+      summary: UnreadMessage
       tags:
       - messages
   /message/send:
@@ -373,7 +373,7 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: GetMessage
+      summary: SendMessage
       tags:
       - messages
   /signin:

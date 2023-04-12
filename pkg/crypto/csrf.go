@@ -1,4 +1,4 @@
-package pkg
+package crypto
 
 import (
 	"crypto/hmac"

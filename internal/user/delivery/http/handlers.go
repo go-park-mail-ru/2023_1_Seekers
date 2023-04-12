@@ -6,7 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
@@ -40,7 +40,7 @@ func New(uUC user.UseCaseI) user.HandlersI {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user [delete]
 func (h *handlers) Delete(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -93,7 +93,7 @@ func (h *handlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/info [get]
 func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -126,7 +126,7 @@ func (h *handlers) GetPersonalInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/info [put]
 func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -169,7 +169,7 @@ func (h *handlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/avatar [put]
 func (h *handlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -242,7 +242,7 @@ func (h *handlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /user/pw [put]
 func (h *handlers) EditPw(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(pkg.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return

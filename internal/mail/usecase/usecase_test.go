@@ -5,7 +5,7 @@ import (
 	mockMailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	mockUserRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/mocks"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/golang/mock/gomock"
 	pkgErr "github.com/pkg/errors"
@@ -39,11 +39,11 @@ type testCases struct {
 }
 
 func generateFakeData(data any) {
-	faker.SetRandomMapAndSliceMaxSize(10)
-	faker.SetRandomMapAndSliceMinSize(1)
-	faker.SetRandomStringLength(30)
+	_ = faker.SetRandomMapAndSliceMaxSize(10)
+	_ = faker.SetRandomMapAndSliceMinSize(1)
+	_ = faker.SetRandomStringLength(30)
 
-	faker.FakeData(data)
+	_ = faker.FakeData(data)
 }
 
 func TestUseCase_GetFolders(t *testing.T) {
@@ -289,7 +289,7 @@ func TestDelivery_CreateDefaultFolders(t *testing.T) {
 	userRepo := mockUserRepo.NewMockRepoI(ctrl)
 	mailH := New(mailRepo, userRepo)
 
-	for i, _ := range output {
+	for i := range output {
 		mailRepo.EXPECT().InsertFolder(&output[i]).Return(uint64(i+1), nil)
 	}
 	mailRepo.EXPECT().SelectFoldersByUser(userID).Return(output, nil)
@@ -439,7 +439,7 @@ func TestUseCase_SendMessage(t *testing.T) {
 	}
 	newMessage := models.MessageInfo{
 		Title:            formMessage.Title,
-		CreatedAt:        pkg.GetCurrentTime(),
+		CreatedAt:        common.GetCurrentTime(),
 		Text:             formMessage.Text,
 		ReplyToMessageID: formMessage.ReplyToMessageID,
 	}
@@ -526,7 +526,7 @@ func TestUseCase_SendFailedSendingMessage(t *testing.T) {
 	}
 	newMessage := models.MessageInfo{
 		Title:            formMessage.Title,
-		CreatedAt:        pkg.GetCurrentTime(),
+		CreatedAt:        common.GetCurrentTime(),
 		Text:             formMessage.Text,
 		ReplyToMessageID: formMessage.ReplyToMessageID,
 	}
@@ -610,7 +610,7 @@ func TestUseCase_SendWelcomeMessage(t *testing.T) {
 	}
 	newMessage := models.MessageInfo{
 		Title:            formMessage.Title,
-		CreatedAt:        pkg.GetCurrentTime(),
+		CreatedAt:        common.GetCurrentTime(),
 		Text:             formMessage.Text,
 		ReplyToMessageID: formMessage.ReplyToMessageID,
 	}

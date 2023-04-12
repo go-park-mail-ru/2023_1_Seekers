@@ -6,7 +6,7 @@ import (
 	mockFileRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	mockUserRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/mocks"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/golang/mock/gomock"
 	pkgErr "github.com/pkg/errors"
@@ -16,11 +16,11 @@ import (
 )
 
 func generateFakeData(data any) {
-	faker.SetRandomMapAndSliceMaxSize(10)
-	faker.SetRandomMapAndSliceMinSize(1)
-	faker.SetRandomStringLength(30)
+	_ = faker.SetRandomMapAndSliceMaxSize(10)
+	_ = faker.SetRandomMapAndSliceMinSize(1)
+	_ = faker.SetRandomStringLength(30)
 
-	faker.FakeData(data)
+	_ = faker.FakeData(data)
 }
 
 func TestUseCase_Create(t *testing.T) {
@@ -36,7 +36,6 @@ func TestUseCase_Create(t *testing.T) {
 	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
 	userUC := New(userRepo, fileUC)
 
-	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(nil, errors.ErrUserNotFound)
 	userRepo.EXPECT().Create(fakeUser).Return(fakeUser, nil)
 
 	response, err := userUC.Create(fakeUser)
@@ -249,11 +248,11 @@ func TestUseCase_EditPw(t *testing.T) {
 	generateFakeData(&fakeForm)
 	fakeForm.RepeatPw = fakeForm.Password
 	var err error
-	fakeUser.Password, err = pkg.HashPw(fakeForm.PasswordOld)
+	fakeUser.Password, err = crypto.HashPw(fakeForm.PasswordOld)
 	if err != nil {
 		t.Fatalf("error while hashing pw")
 	}
-	newPw, err := pkg.HashPw(fakeForm.Password)
+	newPw, err := crypto.HashPw(fakeForm.Password)
 	if err != nil {
 		t.Fatalf("error while hashing pw")
 	}

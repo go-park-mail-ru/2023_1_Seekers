@@ -7,7 +7,8 @@ import (
 	mockMailUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/mocks"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/golang/mock/gomock"
 	pkgErr "github.com/pkg/errors"
@@ -16,11 +17,11 @@ import (
 )
 
 func generateFakeData(data any) {
-	faker.SetRandomMapAndSliceMaxSize(10)
-	faker.SetRandomMapAndSliceMinSize(1)
-	faker.SetRandomStringLength(30)
+	_ = faker.SetRandomMapAndSliceMaxSize(10)
+	_ = faker.SetRandomMapAndSliceMinSize(1)
+	_ = faker.SetRandomStringLength(30)
 
-	faker.FakeData(data)
+	_ = faker.FakeData(data)
 }
 
 func TestUseCase_SignIn(t *testing.T) {
@@ -33,7 +34,7 @@ func TestUseCase_SignIn(t *testing.T) {
 	generateFakeData(&fakeUser)
 	fakeUser.Email = fakeForm.Login + config.PostAtDomain
 	var err error
-	fakeUser.Password, err = pkg.HashPw(fakeForm.Password)
+	fakeUser.Password, err = crypto.HashPw(fakeForm.Password)
 	if err != nil {
 		t.Fatalf("error while hashing pw")
 	}
@@ -48,11 +49,11 @@ func TestUseCase_SignIn(t *testing.T) {
 	defer ctrl.Finish()
 
 	sUC := mockSessionUC.NewMockSessionUseCaseI(ctrl)
-	userUС := mockUserUC.NewMockUseCaseI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
-	aUC := NewAuthUC(sUC, mailUC, userUС)
+	aUC := NewAuthUC(sUC, mailUC, userUC)
 
-	userUС.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
+	userUC.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
 	sUC.EXPECT().CreateSession(fakeUser.UserID).Return(fakeSession, nil)
 
 	responseAuth, responseSession, err := aUC.SignIn(fakeForm)
@@ -72,7 +73,7 @@ func TestUseCase_SignUp(t *testing.T) {
 	generateFakeData(&fakeForm)
 	fakeForm.RepeatPw = fakeForm.Password
 	email := fakeForm.Login + config.PostAtDomain
-	hashPW, err := pkg.HashPw(fakeForm.Password)
+	hashPW, err := crypto.HashPw(fakeForm.Password)
 	if err != nil {
 		t.Fatalf("error while hashing pw")
 	}
@@ -96,20 +97,20 @@ func TestUseCase_SignUp(t *testing.T) {
 	defer ctrl.Finish()
 
 	sUC := mockSessionUC.NewMockSessionUseCaseI(ctrl)
-	userUС := mockUserUC.NewMockUseCaseI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
-	aUC := NewAuthUC(sUC, mailUC, userUС)
+	aUC := NewAuthUC(sUC, mailUC, userUC)
 
-	userUС.EXPECT().Create(fakeUser).Return(fakeUser, nil)
-	label := pkg.GetFirstUtf(fakeUser.FirstName)
+	userUC.EXPECT().Create(fakeUser).Return(fakeUser, nil)
+	label := common.GetFirstUtf(fakeUser.FirstName)
 
-	for color, _ := range image.Colors {
+	for color := range image.Colors {
 		img, err := image.GenImage(color, label)
 		if err != nil {
 			t.Fatalf("error while generating image")
 		}
 
-		userUС.EXPECT().EditAvatar(fakeUser.UserID, &models.Image{Data: img}, false).Return(nil).AnyTimes()
+		userUC.EXPECT().EditAvatar(fakeUser.UserID, &models.Image{Data: img}, false).Return(nil).AnyTimes()
 	}
 
 	mailUC.EXPECT().CreateDefaultFolders(fakeUser.UserID).Return([]models.Folder{}, nil)

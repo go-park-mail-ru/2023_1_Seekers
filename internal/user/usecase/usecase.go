@@ -6,7 +6,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
@@ -47,10 +48,7 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	if _, ok := validMailAddress(user.Email); !ok {
 		return nil, errors.ErrInvalidEmail
 	}
-	_, err = u.GetByEmail(user.Email)
-	if err == nil {
-		return nil, errors.ErrUserExists
-	}
+
 	return u.userRepo.Create(user)
 }
 
@@ -112,7 +110,7 @@ func (u *useCase) EditInfo(ID uint64, info models.UserInfo) (*models.UserInfo, e
 			return nil, pkgErrors.Wrap(err, "edit info - get avatar")
 		}
 
-		label := pkg.GetFirstUtf(info.FirstName)
+		label := common.GetFirstUtf(info.FirstName)
 		updAvatar, err := image.UpdateImgText(avatar.Data, label)
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "edit info - update avatar")
@@ -177,14 +175,14 @@ func (u *useCase) EditPw(ID uint64, form models.EditPasswordRequest) error {
 	}
 
 	user, err := u.userRepo.GetByID(ID)
-	if !pkg.ComparePw2Hash(form.PasswordOld, user.Password) {
+	if !crypto.ComparePw2Hash(form.PasswordOld, user.Password) {
 		return errors.ErrWrongPw
 	}
 
 	if err := validation.Password(form.Password); err != nil {
 		return pkgErrors.Wrap(err, "create")
 	}
-	hashPw, err := pkg.HashPw(form.Password)
+	hashPw, err := crypto.HashPw(form.Password)
 	if err != nil {
 		return pkgErrors.Wrap(err, "edit password")
 	}

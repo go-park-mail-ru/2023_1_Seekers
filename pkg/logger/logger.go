@@ -1,4 +1,4 @@
-package pkg
+package logger
 
 import (
 	"bytes"
@@ -41,7 +41,7 @@ type Logger struct {
 	*logrus.Entry
 }
 
-func GetLogger() *Logger {
+func Get() *Logger {
 	return &Logger{logEntry}
 }
 
@@ -53,7 +53,7 @@ func (l *Logger) LoggerWithField(key string, val any) *Logger {
 	return &Logger{l.WithField(key, val)}
 }
 
-func InitLogger() {
+func Init(level logrus.Level, toStdout bool) {
 	l := logrus.New()
 	loc, err := time.LoadLocation("Europe/Moscow")
 	if err != nil {
@@ -69,6 +69,7 @@ func InitLogger() {
 		Colors:      true,
 		Caller:      true,
 		FieldsSpace: true,
+		LevelFirst:  false,
 		CustomCallerFormatter: func(f *runtime.Frame) string {
 			s := strings.Split(f.Function, ".")
 			funcName := s[len(s)-1]
@@ -95,13 +96,19 @@ func InitLogger() {
 	}
 
 	l.SetOutput(io.Discard)
+	if toStdout {
+		l.AddHook(&logHook{
+			Writers:   []io.Writer{f, os.Stdout},
+			LogLevels: logrus.AllLevels,
+		})
+	} else {
+		l.AddHook(&logHook{
+			Writers:   []io.Writer{f},
+			LogLevels: logrus.AllLevels,
+		})
+	}
 
-	l.AddHook(&logHook{
-		Writers:   []io.Writer{f, os.Stdout},
-		LogLevels: logrus.AllLevels,
-	})
-
-	l.SetLevel(logrus.InfoLevel)
+	l.SetLevel(level)
 
 	logEntry = logrus.NewEntry(l)
 }
@@ -207,9 +214,9 @@ func (f *Formatter) writeStringBrackets(b *bytes.Buffer, message string) {
 func (f *Formatter) writeCaller(b *bytes.Buffer, entry *logrus.Entry) {
 	if entry.HasCaller() {
 		if f.CustomCallerFormatter != nil {
-			fmt.Fprint(b, f.CustomCallerFormatter(entry.Caller))
+			_, _ = fmt.Fprint(b, f.CustomCallerFormatter(entry.Caller))
 		} else {
-			fmt.Fprintf(
+			_, _ = fmt.Fprintf(
 				b,
 				"[%s:%d @%s]",
 				entry.Caller.File,

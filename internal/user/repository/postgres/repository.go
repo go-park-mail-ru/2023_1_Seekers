@@ -25,10 +25,11 @@ func (uDB *userDB) Create(user *models.User) (*models.User, error) {
 	if err == nil {
 		return nil, errors.ErrUserExists
 	}
+
 	dbUser := User{}
 	dbUser.FromModel(user)
 	tx := uDB.db.Create(&dbUser)
-	if err := tx.Error; err != nil {
+	if err = tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 

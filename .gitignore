@@ -8,3 +8,4 @@ minio_data
 go-modules/
 cover.out
 cover2.out
+coverage.html

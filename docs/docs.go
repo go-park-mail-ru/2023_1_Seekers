@@ -190,7 +190,7 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "SendMessage",
                 "responses": {
                     "200": {
                         "description": "success send message",
@@ -287,7 +287,7 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "ReadMessage",
                 "parameters": [
                     {
                         "type": "integer",
@@ -337,7 +337,7 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "UnreadMessage",
                 "parameters": [
                     {
                         "type": "integer",

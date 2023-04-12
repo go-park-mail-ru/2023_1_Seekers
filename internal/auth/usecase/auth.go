@@ -6,7 +6,8 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
@@ -40,7 +41,7 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 		return nil, nil, errors.ErrWrongPw
 	}
 
-	if !pkg.ComparePw2Hash(form.Password, user.Password) {
+	if !crypto.ComparePw2Hash(form.Password, user.Password) {
 		return nil, nil, errors.ErrWrongPw
 	}
 
@@ -73,7 +74,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		Avatar:    config.DefaultAvatar,
 	}
 
-	user.Password, err = pkg.HashPw(form.Password)
+	user.Password, err = crypto.HashPw(form.Password)
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
@@ -84,7 +85,7 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	}
 
 	col := image.GetRandColor()
-	label := pkg.GetFirstUtf(user.FirstName)
+	label := common.GetFirstUtf(user.FirstName)
 	img, err := image.GenImage(col, label)
 	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img}, false)
 	if err != nil {

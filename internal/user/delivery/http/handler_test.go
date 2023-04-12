@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase/mocks"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -17,11 +17,11 @@ import (
 )
 
 func generateFakeData(data any) {
-	faker.SetRandomMapAndSliceMaxSize(10)
-	faker.SetRandomMapAndSliceMinSize(1)
-	faker.SetRandomStringLength(30)
+	_ = faker.SetRandomMapAndSliceMaxSize(10)
+	_ = faker.SetRandomMapAndSliceMinSize(1)
+	_ = faker.SetRandomStringLength(30)
 
-	faker.FakeData(data)
+	_ = faker.FakeData(data)
 }
 
 func TestDelivery_Delete(t *testing.T) {
@@ -36,7 +36,7 @@ func TestDelivery_Delete(t *testing.T) {
 	userH := New(userUC)
 
 	r := httptest.NewRequest("DELETE", "/api/user/", bytes.NewReader([]byte{}))
-	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
 	userUC.EXPECT().Delete(userID).Return(nil)
@@ -103,7 +103,7 @@ func TestDelivery_GetPersonalInfo(t *testing.T) {
 	userH := New(userUC)
 
 	r := httptest.NewRequest("GET", "/api/user/info", bytes.NewReader([]byte{}))
-	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
 	userUC.EXPECT().GetByID(userID).Return(fakeUser, nil)
@@ -134,7 +134,7 @@ func TestDelivery_EditInfo(t *testing.T) {
 	}
 
 	r := httptest.NewRequest("POST", "/api/user/info", bytes.NewReader(body))
-	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, fakeUserInfo.UserID))
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, fakeUserInfo.UserID))
 	w := httptest.NewRecorder()
 
 	userUC.EXPECT().EditInfo(fakeUserInfo.UserID, *fakeUserInfo).Return(fakeUserInfo, nil)
@@ -239,7 +239,7 @@ func TestDelivery_EditPw(t *testing.T) {
 	}
 
 	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
-	r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, userID))
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
 	userUC.EXPECT().EditPw(userID, fakeForm).Return(nil)

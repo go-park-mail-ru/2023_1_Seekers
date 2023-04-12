@@ -19,8 +19,8 @@ import (
 	_userHandler "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/delivery/http"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/postgres"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -44,14 +44,14 @@ var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode
 // @host localhost:8001
 // @BasePath	/api/v1
 func main() {
-	pkg.InitLogger()
-	logger := pkg.GetLogger()
+	logger.Init(log.InfoLevel, true)
+	globalLogger := logger.Get()
 	router := mux.NewRouter()
 
 	tablePrefix := os.Getenv(config.DBSchemaNameEnv) + "."
 	db, err := connectors.NewGormDb(connStr, tablePrefix)
 	if err != nil {
-		logger.Fatalf("db connection error %v", err)
+		globalLogger.Fatalf("db connection error %v", err)
 	}
 
 	redisAddr := os.Getenv(config.RedisHostEnv) + ":" + os.Getenv(config.RedisPortEnv)
@@ -86,7 +86,7 @@ func main() {
 	sessionUC := _authUCase.NewSessionUC(sessionRepo)
 	authUC := _authUCase.NewAuthUC(sessionUC, mailUC, usersUC)
 
-	middleware := _middleware.New(sessionUC, logger)
+	middleware := _middleware.New(sessionUC, globalLogger)
 
 	authH := _authHandler.New(authUC)
 	mailH := _mailHandler.New(mailUC)
@@ -108,9 +108,9 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("server started")
+		globalLogger.Info("server started")
 		if err := server.ListenAndServe(); err != nil {
-			logger.Fatalf("server stopped %v", err)
+			globalLogger.Fatalf("server stopped %v", err)
 		}
 	}()
 
@@ -122,8 +122,8 @@ func main() {
 	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdown()
 
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Errorf("failed to gracefully shutdown server")
+	if err = server.Shutdown(ctx); err != nil {
+		globalLogger.Errorf("failed to gracefully shutdown server")
 	}
 
 }

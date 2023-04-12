@@ -2,6 +2,7 @@ package errors
 
 import (
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -55,6 +56,31 @@ var Codes = map[error]int{
 	ErrWrongCSRF:           http.StatusBadRequest,
 }
 
+var LogLevels = map[error]logrus.Level{
+	ErrInvalidForm:         logrus.WarnLevel,
+	ErrPwDontMatch:         logrus.WarnLevel,
+	ErrInvalidLogin:        logrus.WarnLevel,
+	ErrWrongPw:             logrus.WarnLevel,
+	ErrUserExists:          logrus.WarnLevel,
+	ErrFailedGetSession:    logrus.WarnLevel,
+	ErrFailedDeleteSession: logrus.WarnLevel,
+	ErrInternal:            logrus.ErrorLevel,
+	ErrTooShortPw:          logrus.WarnLevel,
+	ErrInvalidEmail:        logrus.WarnLevel,
+	ErrUserNotFound:        logrus.WarnLevel,
+	ErrFailedGetUser:       logrus.WarnLevel,
+	ErrGetFile:             logrus.WarnLevel,
+	ErrNoKey:               logrus.WarnLevel,
+	ErrNoBucket:            logrus.ErrorLevel,
+	ErrInvalidURL:          logrus.WarnLevel,
+	ErrFolderNotFound:      logrus.WarnLevel,
+	ErrMessageNotFound:     logrus.WarnLevel,
+	ErrNoValidEmails:       logrus.WarnLevel,
+	ErrWrongContentType:    logrus.WarnLevel,
+	ErrFailedAuth:          logrus.WarnLevel,
+	ErrWrongCSRF:           logrus.WarnLevel,
+}
+
 func Code(err error) int {
 	code, ok := Codes[err]
 	if !ok {
@@ -62,4 +88,13 @@ func Code(err error) int {
 	}
 
 	return code
+}
+
+func LogLevel(err error) logrus.Level {
+	level, ok := LogLevels[err]
+	if !ok {
+		return logrus.ErrorLevel
+	}
+
+	return level
 }

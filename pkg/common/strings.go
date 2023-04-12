@@ -1,4 +1,4 @@
-package pkg
+package common
 
 func GetFirstUtf(str string) string {
 	for _, c := range str {

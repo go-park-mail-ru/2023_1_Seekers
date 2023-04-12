@@ -4,9 +4,11 @@ import (
 	"context"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
 	"net/http"
@@ -14,10 +16,10 @@ import (
 
 type Middleware struct {
 	sUC auth.SessionUseCaseI
-	log *pkg.Logger
+	log *logger.Logger
 }
 
-func New(sUC auth.SessionUseCaseI, l *pkg.Logger) *Middleware {
+func New(sUC auth.SessionUseCaseI, l *logger.Logger) *Middleware {
 	return &Middleware{sUC, l}
 }
 
@@ -33,12 +35,12 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 
 func (m *Middleware) HandlerLogger(h http.Handler) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlerLogger := m.log.LoggerWithFields(map[string]any{
+		handlerLogger := m.log.WithFields(map[string]any{
 			"method": r.Method,
 			"url":    r.URL.Path,
 		})
 		handlerLogger.Info("new request")
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextHandlerLog, handlerLogger))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextHandlerLog, handlerLogger))
 		h.ServeHTTP(w, r)
 	})
 	return handler
@@ -57,7 +59,7 @@ func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, session.UID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, session.UID))
 
 		h.ServeHTTP(w, r)
 	})
@@ -77,7 +79,7 @@ func (m *Middleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		err = pkg.CheckCSRF(cookie.Value, csrfToken)
+		err = crypto.CheckCSRF(cookie.Value, csrfToken)
 		if err != nil {
 			pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
 			return

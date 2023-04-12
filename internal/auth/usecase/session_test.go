@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	mockSessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/mocks"
+	mockSessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/redis/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/golang/mock/gomock"
 	pkgErr "github.com/pkg/errors"

@@ -1,4 +1,4 @@
-package pkg
+package common
 
 const (
 	ContextUser       = "user-ctx"

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	mockMailUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -69,7 +69,7 @@ func TestDelivery_GetFolderMessages(t *testing.T) {
 			"slug": test.input.folderSlug,
 		}
 		r = mux.SetURLVars(r, vars)
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().GetFolderInfo(test.input.userID, test.input.folderSlug).Return(&models.Folder{}, nil)
@@ -105,7 +105,7 @@ func TestDelivery_GetFolders(t *testing.T) {
 
 	for _, test := range tests {
 		r := httptest.NewRequest("GET", "/api/folders", bytes.NewReader([]byte{}))
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().GetFolders(test.input.userID).Return([]models.Folder{}, nil)
@@ -145,7 +145,7 @@ func TestDelivery_GetMessage(t *testing.T) {
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
 		r = mux.SetURLVars(r, vars)
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().GetMessage(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
@@ -206,7 +206,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 		}
 
 		r := httptest.NewRequest("POST", "/api/message/send", bytes.NewReader(body))
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
@@ -247,7 +247,7 @@ func TestDelivery_ReadMessage(t *testing.T) {
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
 		r = mux.SetURLVars(r, vars)
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
@@ -287,7 +287,7 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
 		r = mux.SetURLVars(r, vars)
-		r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, test.input.userID))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)

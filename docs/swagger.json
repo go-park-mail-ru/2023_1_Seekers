@@ -183,7 +183,7 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "SendMessage",
                 "responses": {
                     "200": {
                         "description": "success send message",
@@ -280,7 +280,7 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "ReadMessage",
                 "parameters": [
                     {
                         "type": "integer",
@@ -330,7 +330,7 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetMessage",
+                "summary": "UnreadMessage",
                 "parameters": [
                     {
                         "type": "integer",
