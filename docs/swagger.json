@@ -8,9 +8,61 @@
     "host": "localhost:8001",
     "basePath": "/api/v1",
     "paths": {
-        "/folder/{id}": {
+        "/auth": {
             "get": {
-                "description": "List of outgoing messages",
+                "description": "check is user authorised",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Auth",
+                "responses": {
+                    "200": {
+                        "description": "success auth"
+                    },
+                    "401": {
+                        "description": "failed auth",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/create_csrf": {
+            "get": {
+                "description": "Get CSRF token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "GetCSRF",
+                "responses": {
+                    "200": {
+                        "description": "success create csrf"
+                    },
+                    "401": {
+                        "description": "failed get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/folder/{slug}": {
+            "get": {
+                "description": "List of folder messages",
                 "consumes": [
                     "application/json"
                 ],
@@ -23,34 +75,34 @@
                 "summary": "GetFolderMessages",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "FolderID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "FolderSlug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success get list of outgoing messages",
+                        "description": "success get list of folder messages",
                         "schema": {
                             "$ref": "#/definitions/models.FolderResponse"
                         }
                     },
                     "400": {
-                        "description": "failed to get folder messages",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    },
-                    "401": {
-                        "description": "failed get session",
+                        "description": "invalid url address",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
                     },
                     "404": {
-                        "description": "invalid url address",
+                        "description": "folder not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -84,43 +136,8 @@
                             "$ref": "#/definitions/errors.JSONError"
                         }
                     },
-                    "401": {
-                        "description": "failed get session",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    }
-                }
-            }
-        },
-        "/inbox/": {
-            "get": {
-                "description": "List of incoming messages",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "messages"
-                ],
-                "summary": "GetInboxMessages",
-                "responses": {
-                    "200": {
-                        "description": "success get list of incoming messages",
-                        "schema": {
-                            "$ref": "#/definitions/models.InboxResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "failed to get inbox messages",
-                        "schema": {
-                            "$ref": "#/definitions/errors.JSONError"
-                        }
-                    },
-                    "401": {
-                        "description": "failed get session",
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -129,8 +146,8 @@
             }
         },
         "/logout": {
-            "post": {
-                "description": "user log out",
+            "delete": {
+                "description": "check is user authorised",
                 "consumes": [
                     "application/json"
                 ],
@@ -138,15 +155,15 @@
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "Logout",
                 "responses": {
                     "200": {
                         "description": "success logout"
                     },
-                    "401": {
-                        "description": "failed get session",
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -154,9 +171,9 @@
                 }
             }
         },
-        "/outbox/": {
-            "get": {
-                "description": "List of outgoing messages",
+        "/message/send": {
+            "post": {
+                "description": "Message",
                 "consumes": [
                     "application/json"
                 ],
@@ -166,22 +183,184 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "GetOutboxMessages",
+                "summary": "SendMessage",
                 "responses": {
                     "200": {
-                        "description": "success get list of outgoing messages",
+                        "description": "success send message",
                         "schema": {
-                            "$ref": "#/definitions/models.OutboxResponse"
+                            "$ref": "#/definitions/models.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "failed to get outbox messages",
+                        "description": "no valid emails",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
                     },
-                    "401": {
-                        "description": "failed get session",
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/message/{id}": {
+            "get": {
+                "description": "Message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetMessage",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid url address",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/message/{id}/read": {
+            "post": {
+                "description": "Message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "ReadMessage",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success read message",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid url address",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/message/{id}/unread": {
+            "post": {
+                "description": "Message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "UnreadMessage",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success unread message",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid url address",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -199,7 +378,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "SignIn",
                 "parameters": [
@@ -215,9 +394,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "user created",
+                        "description": "success sign in",
                         "schema": {
-                            "$ref": "#/definitions/models.SignInResponse"
+                            "$ref": "#/definitions/models.AuthResponse"
                         }
                     },
                     "401": {
@@ -233,7 +412,7 @@
                         }
                     },
                     "500": {
-                        "description": "failed to create session",
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -251,7 +430,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "SignUp",
                 "parameters": [
@@ -269,11 +448,11 @@
                     "200": {
                         "description": "user created",
                         "schema": {
-                            "$ref": "#/definitions/models.SignUpResponse"
+                            "$ref": "#/definitions/models.AuthResponse"
                         }
                     },
                     "401": {
-                        "description": "passwords dont match",
+                        "description": "invalid login",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -291,7 +470,314 @@
                         }
                     },
                     "500": {
-                        "description": "failed to create session",
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "delete": {
+                "description": "delete user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete",
+                "responses": {
+                    "200": {
+                        "description": "success delete user"
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/avatar": {
+            "get": {
+                "description": "get user avatar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetAvatar",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get user avatar",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "no bucket",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "edit user avatar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "EditAvatar",
+                "responses": {
+                    "200": {
+                        "description": "success edit user avatar"
+                    },
+                    "400": {
+                        "description": "unsupported content type",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
+            "get": {
+                "description": "get info about request creator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetPersonalInfo",
+                "responses": {
+                    "200": {
+                        "description": "success get user info",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInfo"
+                        }
+                    },
+                    "401": {
+                        "description": "failed get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "edit info about user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "EditInfo",
+                "responses": {
+                    "200": {
+                        "description": "success edit user info",
+                        "schema": {
+                            "$ref": "#/definitions/models.EditUserInfoResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info/{email}": {
+            "get": {
+                "description": "get info about user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get user info",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/pw": {
+            "put": {
+                "description": "edit password about user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "EditPw",
+                "responses": {
+                    "200": {
+                        "description": "success edit user password"
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -312,17 +798,53 @@
                 }
             }
         },
+        "models.AuthResponse": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstName",
+                "lastName"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.EditUserInfoResponse": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Folder": {
             "type": "object",
             "properties": {
                 "folder_id": {
                     "type": "integer"
                 },
-                "name": {
+                "folder_slug": {
                     "type": "string"
                 },
-                "user_id": {
+                "messages_count": {
                     "type": "integer"
+                },
+                "messages_unseen": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -335,7 +857,7 @@
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.IncomingMessage"
+                        "$ref": "#/definitions/models.MessageInfo"
                     }
                 }
             }
@@ -343,6 +865,9 @@
         "models.FoldersResponse": {
             "type": "object",
             "properties": {
+                "count": {
+                    "type": "integer"
+                },
                 "folders": {
                     "type": "array",
                     "items": {
@@ -373,17 +898,17 @@
         "models.FormSignUp": {
             "type": "object",
             "required": [
-                "first_name",
-                "last_name",
+                "firstName",
+                "lastName",
                 "login",
                 "password",
-                "repeat_pw"
+                "repeatPw"
             ],
             "properties": {
-                "first_name": {
+                "firstName": {
                     "type": "string"
                 },
-                "last_name": {
+                "lastName": {
                     "type": "string"
                 },
                 "login": {
@@ -392,39 +917,39 @@
                 "password": {
                     "type": "string"
                 },
-                "repeat_pw": {
-                    "description": "?",
+                "repeatPw": {
                     "type": "string"
                 }
             }
         },
-        "models.InboxResponse": {
+        "models.MessageInfo": {
             "type": "object",
             "properties": {
-                "messages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.IncomingMessage"
-                    }
-                }
-            }
-        },
-        "models.IncomingMessage": {
-            "type": "object",
-            "properties": {
-                "creating_date": {
+                "created_at": {
                     "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
                 },
                 "favorite": {
                     "type": "boolean"
                 },
-                "from_user": {
-                    "type": "string"
+                "from_user_id": {
+                    "$ref": "#/definitions/models.UserInfo"
                 },
                 "message_id": {
                     "type": "integer"
                 },
-                "read": {
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserInfo"
+                    }
+                },
+                "reply_to": {
+                    "$ref": "#/definitions/models.MessageInfo"
+                },
+                "seen": {
                     "type": "boolean"
                 },
                 "text": {
@@ -435,64 +960,29 @@
                 }
             }
         },
-        "models.OutboxResponse": {
+        "models.MessageResponse": {
             "type": "object",
             "properties": {
-                "messages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.OutgoingMessage"
-                    }
+                "message": {
+                    "$ref": "#/definitions/models.MessageInfo"
                 }
             }
         },
-        "models.OutgoingMessage": {
-            "type": "object",
-            "properties": {
-                "creating_date": {
-                    "type": "string"
-                },
-                "favorite": {
-                    "type": "boolean"
-                },
-                "message_id": {
-                    "type": "integer"
-                },
-                "read": {
-                    "type": "boolean"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "to_users": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "models.SignInResponse": {
+        "models.UserInfo": {
             "type": "object",
             "required": [
-                "email"
+                "email",
+                "firstName",
+                "lastName"
             ],
             "properties": {
                 "email": {
                     "type": "string"
-                }
-            }
-        },
-        "models.SignUpResponse": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
                     "type": "string"
                 }
             }

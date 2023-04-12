@@ -3,256 +3,154 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/repository/inmemory"
-	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase"
-	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/repository/inmemory"
-	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/mail/usecase"
-	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
+	mockAuthUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/auth/usecase/mocks_auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/repository/inmemory"
-	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/user/usecase"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg"
+	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
-func TestHandlers_SignIn(t *testing.T) {
+func generateFakeData(data any) {
+	faker.SetRandomMapAndSliceMaxSize(10)
+	faker.SetRandomMapAndSliceMinSize(1)
+	faker.SetRandomStringLength(30)
+
+	faker.FakeData(data)
+}
+
+func TestDelivery_SignUp(t *testing.T) {
+	var fakeForm models.FormSignUp
+	var fakeAuthResponse *models.AuthResponse
+	var fakeSession *models.Session
+	status := http.StatusOK
+	generateFakeData(&fakeForm)
+	generateFakeData(&fakeAuthResponse)
+	generateFakeData(&fakeSession)
+
 	t.Parallel()
-	type outputCase struct {
-		status int
-	}
-	type testCase struct {
-		input []byte
-		outputCase
-		name string
-	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	testCases := []testCase{
-		{
-			[]byte(`{"login": "test", "password": "12345"}`),
-			outputCase{status: http.StatusOK},
-			"default success",
-		},
-		{
-			[]byte(`{"login": "test_signin1", "password": "43212"}`),
-			outputCase{status: http.StatusUnauthorized},
-			"no such user",
-		},
-		{
-			[]byte(`{"login: test_signin", "password": "12334"}`),
-			outputCase{status: http.StatusForbidden},
-			"invalid form",
-		},
+	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
+	authH := New(authUC)
+
+	body, err := json.Marshal(fakeForm)
+	if err != nil {
+		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	r := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(body))
+	w := httptest.NewRecorder()
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
+	authUC.EXPECT().SignUp(fakeForm).Return(fakeAuthResponse, fakeSession, nil)
+	authH.SignUp(w, r)
 
-	authH := New(authUCase, usersUCase, mailUCase)
-	for _, test := range testCases {
-		r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(test.input))
-		w := httptest.NewRecorder()
-
-		authH.SignIn(w, r)
-
-		if w.Code != test.status {
-			t.Errorf("[TEST] %s : Expected status %d, got %d ", test.name, test.status, w.Code)
-		}
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
 	}
 }
 
-func TestHandlers_SignUp(t *testing.T) {
+func TestDelivery_SignIn(t *testing.T) {
+	var fakeForm models.FormLogin
+	var fakeAuthResponse *models.AuthResponse
+	var fakeSession *models.Session
+	status := http.StatusOK
+	generateFakeData(&fakeForm)
+	generateFakeData(&fakeAuthResponse)
+	generateFakeData(&fakeSession)
+
 	t.Parallel()
-	type outputCase struct {
-		status int
-	}
-	type testCase struct {
-		input []byte
-		outputCase
-		name string
-	}
-	randStr, err := pkg.String(3)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
+	authH := New(authUC)
+
+	body, err := json.Marshal(fakeForm)
 	if err != nil {
-		t.Errorf("failed generate rand str %v ", err)
+		t.Fatalf("error while marshaling to json: %v", err)
 	}
-	testCases := []testCase{
-		{
-			[]byte(`{"login":"` + randStr + `testing_signup1",
-						  "password":"54321",
-						  "repeat_pw":"54321",
-						  "first_name":"Ivan",
-						  "last_name":"Ivanov",
-						  "birth_date":"29.01.2002"}`),
-			outputCase{status: http.StatusOK},
-			"default success",
-		},
-		{
-			[]byte(`{"login":"` + randStr + `testing_signup2",
-                           "password":"54321",
-                           "repeat_pw":"12311",
-                           "first_name":"Ivan", 
-                           "last_name":"Ivanov", 
-                           "birth_date":"29.01.2002"}`),
-			outputCase{status: http.StatusUnauthorized},
-			"passwords dont match",
-		},
-		{
-			[]byte(`{"login: + testing_signup2",
-                           "password:"54321",
-                           "repeat_pw":"12313",
-                           "first_name":"Ivan", 
-                           "last_name":"Ivanov", 
-                           "birth_date":"29.01.2002"}`),
-			outputCase{status: http.StatusForbidden},
-			"invalid form",
-		},
-		{
-			[]byte(`{"login":"test",
-                           "password":"54321",
-                           "repeat_pw":"54321",
-                           "first_name":"Ivan", 
-                           "last_name":"Ivanov", 
-                           "birth_date":"29.01.2002"}`),
-			outputCase{status: http.StatusConflict},
-			"user with such login exists",
-		},
-	}
-	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
+	r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(body))
+	w := httptest.NewRecorder()
 
-	authH := New(authUCase, usersUCase, mailUCase)
+	authUC.EXPECT().SignIn(fakeForm).Return(fakeAuthResponse, fakeSession, nil)
+	authH.SignIn(w, r)
 
-	for _, test := range testCases {
-		r := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.input))
-		w := httptest.NewRecorder()
-
-		authH.SignUp(w, r)
-
-		if w.Code != test.status {
-			t.Errorf("[TEST] %s , Expected status %d, got %d ", test.name, test.status, w.Code)
-		}
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
 	}
 }
 
-func TestHandlers_Logout(t *testing.T) {
+func TestDelivery_Logout(t *testing.T) {
+	status := http.StatusOK
+
 	t.Parallel()
-	type inputCase struct {
-		user          []byte
-		createSession bool //нужно ли создавать сессию
-		noCookie      bool
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
+	authH := New(authUC)
+
+	r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader([]byte{}))
+	w := httptest.NewRecorder()
+
+	authH.Logout(w, r)
+
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
 	}
-	type outputCase struct {
-		status int
+}
+
+func TestDelivery_Auth(t *testing.T) {
+	status := http.StatusOK
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
+	authH := New(authUC)
+
+	r := httptest.NewRequest("GET", "/api/auth", bytes.NewReader([]byte{}))
+	w := httptest.NewRecorder()
+
+	authH.Auth(w, r)
+
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
 	}
-	type testCase struct {
-		inputCase
-		outputCase
-		name string
-	}
+}
 
-	randStr, err := pkg.String(3)
-	if err != nil {
-		t.Errorf("failed generate rand str %v ", err)
-	}
+func TestDelivery_GetCSRF(t *testing.T) {
+	var fakeSession *models.Session
+	generateFakeData(&fakeSession)
+	status := http.StatusOK
 
-	randCookie, err := pkg.String(config.CookieLen)
-	if err != nil {
-		t.Errorf("failed generate rand str %v ", err)
-	}
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	testCases := []testCase{
-		{
-			// регистрируем пользователя и отправляем с ним куку
-			inputCase{[]byte(
-				`{"login":"` + randStr + `testing_auth1",
-				"password":  "54321",
-				"repeat_pw":  "54321",
-				"first_name": "Ivan",
-				"last_name":  "Ivanov",
-				"birth_date": "29.01.1999"}`), true, false},
-			outputCase{status: http.StatusOK},
-			"success, created cookie",
-		},
-		{
-			// просто приходит кука которая ранее не была создана на сервере
-			inputCase{[]byte(
-				`{"login":"` + randStr + `testing_auth2",
-				"password":  "54321",
-				"repeat_pw":  "54321",
-				"first_name": "Ivan",
-				"last_name":  "Ivanov",
-				"birth_date": "29.01.1999"}`), false, false},
-			outputCase{status: http.StatusUnauthorized},
-			"not valid cookie",
-		},
-		{
-			// если вообще нет куки с таким названием
-			inputCase{[]byte(
-				`{"login":"` + randStr + `testing_auth3",
-				"password":  "54321",
-				"repeat_pw":  "54321",
-				"first_name": "Ivan",
-				"last_name":  "Ivanov",
-				"birth_date": "29.01.1999"}`), false, true},
-			outputCase{status: http.StatusUnauthorized},
-			"cookie not presented",
-		},
-	}
+	authUC := mockAuthUC.NewMockUseCaseI(ctrl)
+	authH := New(authUC)
 
-	userRepo := _userRepo.New()
-	authRepo := _authRepo.New()
-	mailRepo := _mailRepo.New(userRepo)
+	r := httptest.NewRequest("POST", "/api/create_csrf", bytes.NewReader([]byte{}))
+	r.AddCookie(&http.Cookie{
+		Name:     config.CookieName,
+		Value:    fakeSession.SessionID,
+		Expires:  time.Now().Add(config.CookieTTL),
+		HttpOnly: true,
+		Path:     config.CookiePath,
+		SameSite: http.SameSiteLaxMode,
+	})
+	w := httptest.NewRecorder()
 
-	usersUCase := _userUCase.New(userRepo)
-	authUCase := _authUCase.New(authRepo, usersUCase)
-	mailUCase := _mailUCase.New(mailRepo)
-
-	authH := New(authUCase, usersUCase, mailUCase)
-	logger := pkg.GetLogger()
-	middleware := _middleware.New(authUCase, logger)
-
-	for _, test := range testCases {
-		r := httptest.NewRequest("POST", "/api/logout", bytes.NewReader([]byte{}))
-		var user models.SignUpResponse
-		if test.createSession && !test.noCookie {
-			signupReq := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(test.user))
-			w := httptest.NewRecorder()
-
-			authH.SignUp(w, signupReq)
-			json.NewDecoder(w.Body).Decode(&user)
-			s, err := authUCase.GetSessionByEmail(user.Email)
-			if err != nil {
-				t.Errorf("failed to get session %v ", err)
-			}
-
-			r.AddCookie(&http.Cookie{
-				Name:  config.CookieName,
-				Value: s.SessionID,
-			}) //необходимо проверить если нет кук,поэтому в случае пустого кейса - кука не выставится
-		} else if !test.noCookie {
-			r.AddCookie(&http.Cookie{
-				Name:  config.CookieName,
-				Value: randCookie,
-			}) //создаем невалидную куку
-		}
-		w := httptest.NewRecorder()
-
-		middleware.CheckAuth(authH.Logout)(w, r)
-
-		if w.Code != test.outputCase.status {
-			t.Errorf("[TEST] %s: Expected status %d, got %d ", test.name, test.status, w.Code)
-		}
+	authH.GetCSRF(w, r)
+	if w.Code != status {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", status, w.Code)
 	}
 }

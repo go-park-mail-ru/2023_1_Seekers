@@ -15,10 +15,3 @@ func New(code int, err error) *JSONError {
 		Message: err.Error(),
 	}
 }
-
-func NewWrappedErr(code int, message string, err error) *JSONError {
-	return &JSONError{
-		Code:    code,
-		Message: message + " : " + err.Error(),
-	}
-}

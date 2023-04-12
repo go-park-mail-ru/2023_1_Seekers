@@ -1,11 +1,21 @@
 package models
 
-type SignUpResponse struct {
-	Email string `json:"email" validate:"required"`
-	// TODO Avatar
+import (
+	"html"
+)
+
+type AuthResponse struct {
+	Email     string `json:"email" validate:"required"`
+	FirstName string `json:"firstName" validate:"required"`
+	LastName  string `json:"lastName" validate:"required"`
 }
 
-type SignInResponse struct {
-	Email string `json:"email" validate:"required"`
-	// TODO Avatar
+type EditPasswordRequest struct {
+	PasswordOld string `json:"passwordOld" validate:"required"`
+	Password    string `json:"password" validate:"required"`
+	RepeatPw    string `json:"repeatPw" validate:"required"`
+}
+
+func (form *EditPasswordRequest) Sanitize() {
+	form.Password = html.EscapeString(form.Password)
 }

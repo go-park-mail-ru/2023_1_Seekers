@@ -1,4 +1,11 @@
 .idea
 logs/
+result/cover
 cover.html
 coverage.out
+minio_data
+.env
+go-modules/
+cover.out
+cover2.out
+coverage.html

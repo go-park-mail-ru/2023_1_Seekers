@@ -1,14 +1,9 @@
-FROM golang:1.18 AS builder
+FROM golang:alpine3.17
 
 WORKDIR /app
 COPY . .
+RUN go mod download
 RUN go build cmd/main.go
-
-FROM golang:1.18
-
-WORKDIR /app
-
-COPY --from=builder /app/main /app/main
 
 EXPOSE 8001
 CMD ["./main"]

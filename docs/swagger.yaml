@@ -7,14 +7,38 @@ definitions:
       message:
         type: string
     type: object
+  models.AuthResponse:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    type: object
+  models.EditUserInfoResponse:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   models.Folder:
     properties:
       folder_id:
         type: integer
+      folder_slug:
+        type: string
+      messages_count:
+        type: integer
+      messages_unseen:
+        type: integer
       name:
         type: string
-      user_id:
-        type: integer
     type: object
   models.FolderResponse:
     properties:
@@ -22,11 +46,13 @@ definitions:
         $ref: '#/definitions/models.Folder'
       messages:
         items:
-          $ref: '#/definitions/models.IncomingMessage'
+          $ref: '#/definitions/models.MessageInfo'
         type: array
     type: object
   models.FoldersResponse:
     properties:
+      count:
+        type: integer
       folders:
         items:
           $ref: '#/definitions/models.Folder'
@@ -47,87 +73,65 @@ definitions:
     type: object
   models.FormSignUp:
     properties:
-      first_name:
+      firstName:
         type: string
-      last_name:
+      lastName:
         type: string
       login:
         type: string
       password:
         type: string
-      repeat_pw:
-        description: '?'
+      repeatPw:
         type: string
     required:
-    - first_name
-    - last_name
+    - firstName
+    - lastName
     - login
     - password
-    - repeat_pw
+    - repeatPw
     type: object
-  models.InboxResponse:
+  models.MessageInfo:
     properties:
-      messages:
-        items:
-          $ref: '#/definitions/models.IncomingMessage'
-        type: array
-    type: object
-  models.IncomingMessage:
-    properties:
-      creating_date:
+      created_at:
         type: string
+      deleted:
+        type: boolean
       favorite:
         type: boolean
-      from_user:
-        type: string
+      from_user_id:
+        $ref: '#/definitions/models.UserInfo'
       message_id:
         type: integer
-      read:
+      recipients:
+        items:
+          $ref: '#/definitions/models.UserInfo'
+        type: array
+      reply_to:
+        $ref: '#/definitions/models.MessageInfo'
+      seen:
         type: boolean
       text:
         type: string
       title:
         type: string
     type: object
-  models.OutboxResponse:
+  models.MessageResponse:
     properties:
-      messages:
-        items:
-          $ref: '#/definitions/models.OutgoingMessage'
-        type: array
+      message:
+        $ref: '#/definitions/models.MessageInfo'
     type: object
-  models.OutgoingMessage:
-    properties:
-      creating_date:
-        type: string
-      favorite:
-        type: boolean
-      message_id:
-        type: integer
-      read:
-        type: boolean
-      text:
-        type: string
-      title:
-        type: string
-      to_users:
-        items:
-          type: string
-        type: array
-    type: object
-  models.SignInResponse:
+  models.UserInfo:
     properties:
       email:
         type: string
-    required:
-    - email
-    type: object
-  models.SignUpResponse:
-    properties:
-      email:
+      firstName:
+        type: string
+      lastName:
         type: string
     required:
     - email
+    - firstName
+    - lastName
     type: object
 host: localhost:8001
 info:
@@ -135,34 +139,68 @@ info:
   title: MailBox Swagger API
   version: "1.0"
 paths:
-  /folder/{id}:
+  /auth:
     get:
       consumes:
       - application/json
-      description: List of outgoing messages
-      parameters:
-      - description: FolderID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: check is user authorised
       produces:
       - application/json
       responses:
         "200":
-          description: success get list of outgoing messages
+          description: success auth
+        "401":
+          description: failed auth
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: Auth
+      tags:
+      - auth
+  /create_csrf:
+    get:
+      description: Get CSRF token
+      responses:
+        "200":
+          description: success create csrf
+        "401":
+          description: failed get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetCSRF
+      tags:
+      - auth
+  /folder/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: List of folder messages
+      parameters:
+      - description: FolderSlug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get list of folder messages
           schema:
             $ref: '#/definitions/models.FolderResponse'
         "400":
-          description: failed to get folder messages
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
+          description: invalid url address
           schema:
             $ref: '#/definitions/errors.JSONError'
         "404":
-          description: invalid url address
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: GetFolderMessages
@@ -184,74 +222,158 @@ paths:
           description: failed to get user
           schema:
             $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: GetFolders
       tags:
       - messages
-  /inbox/:
-    get:
-      consumes:
-      - application/json
-      description: List of incoming messages
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success get list of incoming messages
-          schema:
-            $ref: '#/definitions/models.InboxResponse'
-        "400":
-          description: failed to get inbox messages
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
-          schema:
-            $ref: '#/definitions/errors.JSONError'
-      summary: GetInboxMessages
-      tags:
-      - messages
   /logout:
-    post:
+    delete:
       consumes:
       - application/json
-      description: user log out
+      description: check is user authorised
       produces:
       - application/json
       responses:
         "200":
           description: success logout
-        "401":
-          description: failed get session
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: Logout
       tags:
-      - users
-  /outbox/:
+      - auth
+  /message/{id}:
     get:
       consumes:
       - application/json
-      description: List of outgoing messages
+      description: Message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: success get list of outgoing messages
+          description: success get messages
           schema:
-            $ref: '#/definitions/models.OutboxResponse'
+            $ref: '#/definitions/models.MessageResponse'
         "400":
-          description: failed to get outbox messages
+          description: invalid url address
           schema:
             $ref: '#/definitions/errors.JSONError'
-        "401":
-          description: failed get session
+        "404":
+          description: message not found
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: GetOutboxMessages
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetMessage
+      tags:
+      - messages
+  /message/{id}/read:
+    post:
+      consumes:
+      - application/json
+      description: Message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success read message
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: invalid url address
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: ReadMessage
+      tags:
+      - messages
+  /message/{id}/unread:
+    post:
+      consumes:
+      - application/json
+      description: Message
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success unread message
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: invalid url address
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: UnreadMessage
+      tags:
+      - messages
+  /message/send:
+    post:
+      consumes:
+      - application/json
+      description: Message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success send message
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: no valid emails
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: SendMessage
       tags:
       - messages
   /signin:
@@ -270,9 +392,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: user created
+          description: success sign in
           schema:
-            $ref: '#/definitions/models.SignInResponse'
+            $ref: '#/definitions/models.AuthResponse'
         "401":
           description: wrong password
           schema:
@@ -282,12 +404,12 @@ paths:
           schema:
             $ref: '#/definitions/errors.JSONError'
         "500":
-          description: failed to create session
+          description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: SignIn
       tags:
-      - users
+      - auth
   /signup:
     post:
       consumes:
@@ -306,9 +428,9 @@ paths:
         "200":
           description: user created
           schema:
-            $ref: '#/definitions/models.SignUpResponse'
+            $ref: '#/definitions/models.AuthResponse'
         "401":
-          description: passwords dont match
+          description: invalid login
           schema:
             $ref: '#/definitions/errors.JSONError'
         "403":
@@ -320,10 +442,213 @@ paths:
           schema:
             $ref: '#/definitions/errors.JSONError'
         "500":
-          description: failed to create session
+          description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: SignUp
+      tags:
+      - auth
+  /user:
+    delete:
+      consumes:
+      - application/json
+      description: delete user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete user
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: Delete
+      tags:
+      - users
+  /user/avatar:
+    get:
+      consumes:
+      - application/json
+      description: get user avatar
+      parameters:
+      - description: email
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get user avatar
+          schema:
+            items:
+              type: integer
+            type: array
+        "400":
+          description: no bucket
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetAvatar
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: edit user avatar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit user avatar
+        "400":
+          description: unsupported content type
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditAvatar
+      tags:
+      - users
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      description: get info about request creator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get user info
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "401":
+          description: failed get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetPersonalInfo
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: edit info about user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit user info
+          schema:
+            $ref: '#/definitions/models.EditUserInfoResponse'
+        "401":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditInfo
+      tags:
+      - users
+  /user/info/{email}:
+    get:
+      consumes:
+      - application/json
+      description: get info about user
+      parameters:
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get user info
+          schema:
+            $ref: '#/definitions/models.UserInfo'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetInfo
+      tags:
+      - users
+  /user/pw:
+    put:
+      consumes:
+      - application/json
+      description: edit password about user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit user password
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditPw
       tags:
       - users
 swagger: "2.0"
