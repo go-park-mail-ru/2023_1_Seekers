@@ -3,13 +3,24 @@ ALL_PKG = ./internal/... ./pkg/...
 COV_DIR = scripts/result_cover
 
 build:
+	sudo systemctl stop nginx.service
+	sudo systemctl stop postgresql
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
 	docker-compose up -d --build
+
+build-with_nginx:
+	sudo systemctl stop nginx.service
+	sudo systemctl stop postgresql
+	mkdir -p -m 777 logs/postgres
+	mkdir -p -m 777 logs/app
+	docker-compose up -d --build app db admin_db cache
 	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
 build-prod:
+	sudo systemctl stop nginx.service
+	sudo systemctl stop postgresql
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
 	docker-compose -f docker-compose-prod.yml up -d --build
