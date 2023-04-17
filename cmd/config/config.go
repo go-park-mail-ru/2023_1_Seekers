@@ -62,6 +62,7 @@ const (
 	MaxImageSize          = 32 << 20
 	UserFormNewAvatar     = "avatar"
 	UserDefaultAvatarSize = 46
+	AvatarTTFPath         = "./cmd/config/wqy-zenhei.ttf"
 
 	// UserRoutes
 	RouteUser                 = RoutePrefix + "/user"
