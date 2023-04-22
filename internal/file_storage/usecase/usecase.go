@@ -19,7 +19,7 @@ func New(s3R file_storage.RepoI) file_storage.UseCaseI {
 func (uc *useCase) Get(bName, fName string) (*models.S3File, error) {
 	file, err := uc.s3Repo.Get(bName, fName)
 	if err != nil {
-		return nil, pkgErrors.Wrap(err, "failed get file : %v")
+		return nil, pkgErrors.Wrap(err, "failed get file")
 	}
 	return file, nil
 }

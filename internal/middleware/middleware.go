@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
@@ -11,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -41,6 +43,12 @@ func (m *Middleware) HandlerLogger(h http.Handler) http.Handler {
 		})
 		handlerLogger.Info("new request")
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextHandlerLog, handlerLogger))
+		fmt.Println(r.Context())
+		fmt.Println(handlerLogger)
+		_, ok := r.Context().Value(common.ContextHandlerLog).(*logger.Logger)
+		if !ok {
+			log.Error("failed to get logger for handler")
+		}
 		h.ServeHTTP(w, r)
 	})
 	return handler

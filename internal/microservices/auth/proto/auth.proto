@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+message UID {
+  uint64 uID = 1;
+}
+
+message SessionId {
+  string Value = 1;
+}
+
+message Session {
+  uint64 UID = 1;
+  string Value = 2;
+}
+
+message FormLogin {
+  string Login = 1;
+  string Password = 2;
+}
+
+message FormSignup {
+  string Login = 1;
+  string Password = 2;
+  string RepeatPassword = 3;
+  string FirstName = 4;
+  string LastName = 5;
+}
+
+message UserInfo {
+  string Email = 1;
+  string FirstName = 2;
+  string LastName = 3;
+}
+
+message AuthResponse {
+  UserInfo Info = 1;
+  Session Session = 2;
+}
+
+message Nothing {
+  bool dummy = 1;
+}
+
+service AuthService {
+  // Session
+  rpc CreateSession(UID) returns (Session) {}
+  rpc DeleteSession(SessionId) returns (Nothing) {}
+  rpc GetSession(SessionId) returns (Session) {}
+  // Auth
+  rpc SignIn(FormLogin) returns (AuthResponse) {}
+  rpc SignUp(FormSignup) returns (AuthResponse) {}
+}
