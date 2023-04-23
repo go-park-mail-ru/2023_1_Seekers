@@ -111,9 +111,6 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("wewqeq")
-	fmt.Println(user)
-
 	_, err = h.mailUC.CreateDefaultFolders(user.UserID)
 	if err != nil {
 		httpPkg.HandleError(w, r, err)

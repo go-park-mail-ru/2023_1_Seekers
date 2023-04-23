@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/utils"
@@ -22,14 +21,11 @@ func NewUserClientGRPC(cc *grpc.ClientConn) user.UseCaseI {
 }
 
 func (g UserClientGRPC) Create(user *models.User) (*models.User, error) {
-	fmt.Println(utils.ProtoByUserModel(user))
 	protoUser, err := g.userClient.Create(context.Background(), utils.ProtoByUserModel(user))
-	fmt.Println("_____")
-	fmt.Println(protoUser)
 	if err != nil {
 		return nil, errors.Wrap(err, "user client - Create")
 	}
-	fmt.Println(utils.UserModelByProto(protoUser))
+
 	return utils.UserModelByProto(protoUser), nil
 }
 
@@ -66,7 +62,6 @@ func (g UserClientGRPC) GetInfo(ID uint64) (*models.UserInfo, error) {
 }
 
 func (g UserClientGRPC) GetInfoByEmail(email string) (*models.UserInfo, error) {
-	fmt.Println()
 	protoInfo, err := g.userClient.GetInfoByEmail(context.Background(), &user_proto.Email{Email: email})
 	if err != nil {
 		return nil, errors.Wrap(err, "user client - GetInfo")

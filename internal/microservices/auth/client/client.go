@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/utils"
@@ -31,8 +30,6 @@ func (g AuthClientGRPC) SignIn(form *models.FormLogin) (*models.AuthResponse, *m
 }
 
 func (g AuthClientGRPC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.Session, error) {
-	fmt.Println("---------")
-	fmt.Println(utils.ProtoBySignupFormModel(form))
 	authResp, err := g.authClient.SignUp(context.Background(), utils.ProtoBySignupFormModel(form))
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "auth client - SignUp")

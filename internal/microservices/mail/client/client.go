@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/utils"
@@ -106,8 +105,6 @@ func (g MailClientGRPC) SendFailedSendingMessage(recipientEmail string, invalidE
 }
 
 func (g MailClientGRPC) SendWelcomeMessage(recipientEmail string) error {
-	fmt.Println("+_+_+_+_+_+_+_+_+_+")
-	fmt.Println(&mail_proto.RecipientEmail{RecipientEmail: recipientEmail})
 	_, err := g.mailClient.SendWelcomeMessage(context.Background(), &mail_proto.RecipientEmail{RecipientEmail: recipientEmail})
 	if err != nil {
 		return errors.Wrap(err, "mail client - SendWelcomeMessage")
