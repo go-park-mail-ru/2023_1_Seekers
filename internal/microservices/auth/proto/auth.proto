@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-option go_package = "./proto";
+package auth_proto;
+option go_package = "./auth_proto";
 
 message UID {
   uint64 uID = 1;

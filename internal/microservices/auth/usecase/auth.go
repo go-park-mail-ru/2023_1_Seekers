@@ -1,11 +1,12 @@
 package usecase
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/mail"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
+	authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -15,23 +16,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -destination=./mocks_auth/mockusecase.go -package=mocks github.com/go-park-mail-ru/2023_1_Seekers/internal/auth UseCaseI
+//go:generate mockgen -destination=./mocks/mockauthusecase.go -package=mocks -source=../interface.go
 
 type authUC struct {
-	sessionUC auth.SessionUseCaseI
-	mailUC    mail.UseCaseI
-	userUC    _user.UseCaseI
+	userUC      _user.UseCaseI
+	sessionRepo authRepo.SessionRepoI
 }
 
-func NewAuthUC(sUC auth.SessionUseCaseI, mUC mail.UseCaseI, uUC _user.UseCaseI) auth.UseCaseI {
+func NewAuthUC(uUC _user.UseCaseI, sr authRepo.SessionRepoI) auth.UseCaseI {
 	return &authUC{
-		sessionUC: sUC,
-		mailUC:    mUC,
-		userUC:    uUC,
+		userUC:      uUC,
+		sessionRepo: sr,
 	}
 }
 
-func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Session, error) {
+func (u *authUC) SignIn(form *models.FormLogin) (*models.AuthResponse, *models.Session, error) {
 	email, err := validation.Login(form.Login)
 	if err != nil {
 		return nil, nil, errors.ErrInvalidLogin
@@ -45,7 +44,7 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 		return nil, nil, errors.ErrWrongPw
 	}
 
-	session, err := u.sessionUC.CreateSession(user.UserID)
+	session, err := u.CreateSession(user.UserID)
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign in")
 	}
@@ -57,7 +56,7 @@ func (u *authUC) SignIn(form models.FormLogin) (*models.AuthResponse, *models.Se
 	}, session, nil
 }
 
-func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.Session, error) {
+func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.Session, error) {
 	if form.RepeatPw != form.Password {
 		return nil, nil, errors.ErrPwDontMatch
 	}
@@ -91,18 +90,18 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 	if err != nil {
 		log.Warn(err, "edit avatar")
 	}
+	// TODO TO API!!!
+	//_, err = u.mailUC.CreateDefaultFolders(user.UserID)
+	//if err != nil {
+	//	return nil, nil, pkgErrors.Wrap(err, "sign up")
+	//}
+	//
+	//err = u.mailUC.SendWelcomeMessage(user.Email)
+	//if err != nil {
+	//	return nil, nil, pkgErrors.Wrap(err, "sign up")
+	//}
 
-	_, err = u.mailUC.CreateDefaultFolders(user.UserID)
-	if err != nil {
-		return nil, nil, pkgErrors.Wrap(err, "sign up")
-	}
-
-	err = u.mailUC.SendWelcomeMessage(user.Email)
-	if err != nil {
-		return nil, nil, pkgErrors.Wrap(err, "sign up")
-	}
-
-	session, err := u.sessionUC.CreateSession(user.UserID)
+	session, err := u.CreateSession(user.UserID)
 	if err != nil {
 		//надо ли тут откатить прошлое ?
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
@@ -113,4 +112,31 @@ func (u *authUC) SignUp(form models.FormSignUp) (*models.AuthResponse, *models.S
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}, session, nil
+}
+
+func (u *authUC) CreateSession(uID uint64) (*models.Session, error) {
+	newSession, err := u.sessionRepo.CreateSession(uID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "create session")
+	}
+
+	return newSession, nil
+}
+
+func (u *authUC) DeleteSession(sessionID string) error {
+	err := u.sessionRepo.DeleteSession(sessionID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "delete avatar")
+	}
+
+	return nil
+}
+
+func (u *authUC) GetSession(sessionID string) (*models.Session, error) {
+	s, err := u.sessionRepo.GetSession(sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("get session: %w", err)
+	}
+
+	return s, nil
 }

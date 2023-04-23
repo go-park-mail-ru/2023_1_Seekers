@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
@@ -12,19 +13,11 @@ import (
 	"strconv"
 )
 
-//go:generate mockgen -destination=./mocks/mockrepo.go -source=./session.go -package=mocks
-
-type RepoI interface {
-	CreateSession(uID uint64) (*models.Session, error)
-	DeleteSession(sessionID string) error
-	GetSession(sessionID string) (*models.Session, error)
-}
-
 type sessionsDB struct {
 	redisSessions *redis.Client
 }
 
-func NewSessionRepo(redisClient *redis.Client) RepoI {
+func NewSessionRepo(redisClient *redis.Client) repository.SessionRepoI {
 	err := redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
 	if err != nil {
 		log.Fatal("failed init session repo")

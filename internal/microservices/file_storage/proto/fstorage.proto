@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package fstorage_proto;
+option go_package = "./fstorage_proto";
+
+message GetFileParams {
+  string BucketName = 1;
+  string FileName = 2;
+}
+
+message File {
+  string BucketName = 1;
+  string FileName = 2;
+  bytes Data = 3;
+}
+
+message Nothing {
+  bool dummy = 1;
+}
+
+service FileStorageService {
+  rpc Get(GetFileParams) returns (File) {}
+  rpc Upload(File) returns (Nothing) {}
+}

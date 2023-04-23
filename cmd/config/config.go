@@ -3,11 +3,29 @@ package config
 import "time"
 
 const (
-	Port           = "8001"
+	ApiPort        = "8001"
 	ProjectBaseDir = "2023_1_Seekers"
 	LogsDir        = "logs/app/"
 	LogsFileName   = "server_"
 	LogsTimeFormat = "2006-01-02_15:04:05_MST"
+
+	//FileServiceGRPCPort = "8005"
+	//FileServiceGRPCHost = "127.0.0.1"
+	//UserGRPCPort        = "8006"
+	//UserGRPCHost        = "127.0.0.1"
+	//AuthGRPCPort        = "8007"
+	//AuthGRPCHost        = "127.0.0.1"
+	//MailGRPCPort        = "8008"
+	//MailGRPCHost        = "127.0.0.1"
+
+	FileServiceGRPCPort = "8005"
+	FileServiceGRPCHost = "172.28.0.7"
+	UserGRPCPort        = "8006"
+	UserGRPCHost        = "172.28.0.8"
+	AuthGRPCPort        = "8007"
+	AuthGRPCHost        = "172.28.0.9"
+	MailGRPCPort        = "8008"
+	MailGRPCHost        = "172.28.0.10"
 
 	// Postgres
 	DBUserEnv       = "POSTGRES_USER"

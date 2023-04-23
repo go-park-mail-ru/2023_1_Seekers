@@ -2,9 +2,8 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/auth"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -12,16 +11,15 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 type Middleware struct {
-	sUC auth.SessionUseCaseI
+	sUC auth.UseCaseI
 	log *logger.Logger
 }
 
-func New(sUC auth.SessionUseCaseI, l *logger.Logger) *Middleware {
+func New(sUC auth.UseCaseI, l *logger.Logger) *Middleware {
 	return &Middleware{sUC, l}
 }
 
@@ -37,18 +35,12 @@ func (m *Middleware) Cors(h http.Handler) http.Handler {
 
 func (m *Middleware) HandlerLogger(h http.Handler) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlerLogger := m.log.WithFields(map[string]any{
+		handlerLogger := m.log.LoggerWithFields(map[string]any{
 			"method": r.Method,
 			"url":    r.URL.Path,
 		})
 		handlerLogger.Info("new request")
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextHandlerLog, handlerLogger))
-		fmt.Println(r.Context())
-		fmt.Println(handlerLogger)
-		_, ok := r.Context().Value(common.ContextHandlerLog).(*logger.Logger)
-		if !ok {
-			log.Error("failed to get logger for handler")
-		}
 		h.ServeHTTP(w, r)
 	})
 	return handler
