@@ -9,7 +9,7 @@ func UserModelByProto(proto *user_proto.User) *models.User {
 	return &models.User{
 		UserID:    proto.UID,
 		Email:     proto.Email,
-		Password:  proto.Password,
+		Password:  string(proto.Password),
 		FirstName: proto.FirstName,
 		LastName:  proto.LastName,
 		Avatar:    proto.Avatar,
@@ -20,7 +20,7 @@ func ProtoByUserModel(user *models.User) *user_proto.User {
 	return &user_proto.User{
 		UID:       user.UserID,
 		Email:     user.Email,
-		Password:  user.Password,
+		Password:  []byte(user.Password),
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Avatar:    user.Avatar,
@@ -29,6 +29,7 @@ func ProtoByUserModel(user *models.User) *user_proto.User {
 
 func ProtoByInfoModel(info *models.UserInfo) *user_proto.UserInfo {
 	return &user_proto.UserInfo{
+		UID:       info.UserID,
 		Email:     info.Email,
 		FirstName: info.FirstName,
 		LastName:  info.LastName,
@@ -37,6 +38,7 @@ func ProtoByInfoModel(info *models.UserInfo) *user_proto.UserInfo {
 
 func InfoModelByProto(protoInfo *user_proto.UserInfo) *models.UserInfo {
 	return &models.UserInfo{
+		UserID:    protoInfo.UID,
 		FirstName: protoInfo.FirstName,
 		LastName:  protoInfo.LastName,
 		Email:     protoInfo.Email,

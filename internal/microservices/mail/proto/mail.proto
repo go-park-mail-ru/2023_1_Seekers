@@ -69,7 +69,7 @@ message MessageInfo {
   string CreatedAt = 5;
   string Text = 6;
   uint64 ReplyToMessageID = 7;
-  optional MessageInfo ReplyTo = 8;
+  MessageInfo ReplyTo = 8;
   bool Seen = 9;
   bool Favorite = 10;
   bool Deleted = 11;

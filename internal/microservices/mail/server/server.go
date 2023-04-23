@@ -101,7 +101,7 @@ func (g *AuthServerGRPC) SendFailedSendingMessage(ctx context.Context, protoPara
 		return nil, errors.Wrap(err, "mail server - SendFailedSendingMessage")
 	}
 
-	return nil, nil
+	return &mail_proto.Nothing{}, nil
 }
 
 func (g *AuthServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mail_proto.RecipientEmail) (*mail_proto.Nothing, error) {
@@ -110,7 +110,7 @@ func (g *AuthServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mai
 		return nil, errors.Wrap(err, "mail server - SendWelcomeMessage")
 	}
 
-	return nil, nil
+	return &mail_proto.Nothing{}, nil
 }
 
 func (g *AuthServerGRPC) MarkMessageAsSeen(ctx context.Context, protoId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {

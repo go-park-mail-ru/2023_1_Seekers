@@ -85,8 +85,8 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 
-	form := &models.FormSignUp{}
-	if err := json.NewDecoder(r.Body).Decode(form); err != nil {
+	form := models.FormSignUp{}
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
 		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -99,16 +99,20 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	form.Sanitize()
 
-	response, session, err := h.authUC.SignUp(form)
+	response, session, err := h.authUC.SignUp(&form)
 	if err != nil {
 		httpPkg.HandleError(w, r, err)
 		return
 	}
-	user, err := h.userUC.GetByEmail(response.Email)
+
+	user, err := h.userUC.GetInfoByEmail(response.Email)
 	if err != nil {
 		httpPkg.HandleError(w, r, err)
 		return
 	}
+
+	fmt.Println("wewqeq")
+	fmt.Println(user)
 
 	_, err = h.mailUC.CreateDefaultFolders(user.UserID)
 	if err != nil {
@@ -146,15 +150,15 @@ func (h *authHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := &models.FormLogin{}
+	form := models.FormLogin{}
 
-	err := json.NewDecoder(r.Body).Decode(form)
+	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
-	response, session, err := h.authUC.SignIn(form)
+	response, session, err := h.authUC.SignIn(&form)
 	if err != nil {
 		httpPkg.HandleError(w, r, err)
 		return

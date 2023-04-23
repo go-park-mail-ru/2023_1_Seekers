@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -219,6 +220,7 @@ func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*
 		return nil, pkgErrors.Wrap(err, "send message : insert message")
 	}
 
+	fmt.Println(uc.GetMessage(fromUserID, newMessage.MessageID))
 	return uc.GetMessage(fromUserID, newMessage.MessageID)
 }
 

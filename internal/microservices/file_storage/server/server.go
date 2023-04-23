@@ -46,5 +46,5 @@ func (g *FStorageServerGRPC) Upload(ctx context.Context, protoFile *fstorage_pro
 	if err := g.fStorageUC.Upload(utils.FileModelByProto(protoFile)); err != nil {
 		return nil, errors.Wrap(err, "file storage - upload")
 	}
-	return nil, nil
+	return &fstorage_proto.Nothing{}, nil
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/utils"
@@ -47,7 +48,7 @@ func (g *AuthServerGRPC) DeleteSession(_ context.Context, protoSessionID *auth_p
 		return nil, errors.Wrap(err, "auth server - DeleteSession")
 	}
 
-	return nil, nil
+	return &auth_proto.Nothing{}, nil
 }
 
 func (g *AuthServerGRPC) GetSession(_ context.Context, protoSessionID *auth_proto.SessionId) (*auth_proto.Session, error) {
@@ -68,6 +69,7 @@ func (g *AuthServerGRPC) SignIn(_ context.Context, protoFormLogin *auth_proto.Fo
 }
 
 func (g *AuthServerGRPC) SignUp(_ context.Context, protoFormSignup *auth_proto.FormSignup) (*auth_proto.AuthResponse, error) {
+	fmt.Println(utils.SignupFormModelByProto(protoFormSignup))
 	info, session, err := g.authUC.SignUp(utils.SignupFormModelByProto(protoFormSignup))
 	if err != nil {
 		return nil, errors.Wrap(err, "auth server - SignUp")

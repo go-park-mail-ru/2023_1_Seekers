@@ -90,16 +90,6 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 	if err != nil {
 		log.Warn(err, "edit avatar")
 	}
-	// TODO TO API!!!
-	//_, err = u.mailUC.CreateDefaultFolders(user.UserID)
-	//if err != nil {
-	//	return nil, nil, pkgErrors.Wrap(err, "sign up")
-	//}
-	//
-	//err = u.mailUC.SendWelcomeMessage(user.Email)
-	//if err != nil {
-	//	return nil, nil, pkgErrors.Wrap(err, "sign up")
-	//}
 
 	session, err := u.CreateSession(user.UserID)
 	if err != nil {

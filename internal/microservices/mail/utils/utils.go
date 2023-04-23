@@ -39,6 +39,16 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		protoRecipients = append(protoRecipients, ProtoByUserInfo(r))
 	}
 
+	var replyToInfo *mail_proto.MessageInfo = nil
+	if info.ReplyTo != nil {
+		replyToInfo = ProtoByMessageInfo(*info.ReplyTo)
+	}
+
+	var replyMessageID uint64
+	if info.ReplyToMessageID != nil {
+		replyMessageID = *info.ReplyToMessageID
+	}
+
 	return &mail_proto.MessageInfo{
 		MessageID:        info.MessageID,
 		FromUser:         ProtoByUserInfo(info.FromUser),
@@ -46,8 +56,8 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Title:            info.Title,
 		CreatedAt:        info.CreatedAt,
 		Text:             info.CreatedAt,
-		ReplyToMessageID: *info.ReplyToMessageID,
-		ReplyTo:          ProtoByMessageInfo(*info.ReplyTo),
+		ReplyToMessageID: replyMessageID,
+		ReplyTo:          replyToInfo,
 		Seen:             info.Seen,
 		Favorite:         info.Favorite,
 		Deleted:          info.Deleted,
@@ -126,13 +136,18 @@ func MessageModelByProtoSendParams(protoParams *mail_proto.SendMessageParams) mo
 }
 
 func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_proto.SendMessageParams {
+	var replyMessageID uint64
+	if form.ReplyToMessageID != nil {
+		replyMessageID = *form.ReplyToMessageID
+	}
+
 	return &mail_proto.SendMessageParams{
 		UID: uID,
 		Message: &mail_proto.Message{
 			Recipients:       form.Recipients,
 			Title:            form.Title,
 			Text:             form.Text,
-			ReplyToMessageID: *form.ReplyToMessageID,
+			ReplyToMessageID: replyMessageID,
 		},
 	}
 }

@@ -2,7 +2,8 @@ package server
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
+	"fmt"
+	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/utils"
 	"github.com/pkg/errors"
@@ -14,10 +15,10 @@ type UserServerGRPC struct {
 	user_proto.UnimplementedUserServiceServer
 
 	grpcServer *grpc.Server
-	userUC     user.UseCaseI
+	userUC     _user.UseCaseI
 }
 
-func NewUserServerGRPC(g *grpc.Server, uUC user.UseCaseI) *UserServerGRPC {
+func NewUserServerGRPC(g *grpc.Server, uUC _user.UseCaseI) *UserServerGRPC {
 	return &UserServerGRPC{
 		grpcServer: g,
 		userUC:     uUC,
@@ -29,15 +30,19 @@ func (g *UserServerGRPC) Start(url string) error {
 	if err != nil {
 		return err
 	}
+
 	user_proto.RegisterUserServiceServer(g.grpcServer, g)
 	return g.grpcServer.Serve(lis)
 }
 
 func (g *UserServerGRPC) Create(ctx context.Context, protoUser *user_proto.User) (*user_proto.User, error) {
+	fmt.Println(utils.UserModelByProto(protoUser))
 	user, err := g.userUC.Create(utils.UserModelByProto(protoUser))
 	if err != nil {
 		return nil, errors.Wrap(err, "user server - Create")
 	}
+
+	fmt.Println(utils.ProtoByUserModel(user))
 	return utils.ProtoByUserModel(user), nil
 }
 
@@ -46,7 +51,8 @@ func (g *UserServerGRPC) Delete(ctx context.Context, protoUID *user_proto.UID) (
 	if err != nil {
 		return nil, errors.Wrap(err, "user server - Delete")
 	}
-	return nil, nil
+
+	return &user_proto.Nothing{}, nil
 }
 
 func (g *UserServerGRPC) GetByID(ctx context.Context, protoUID *user_proto.UID) (*user_proto.User, error) {
@@ -96,7 +102,8 @@ func (g *UserServerGRPC) EditAvatar(ctx context.Context, protoEditAvatar *user_p
 	if err != nil {
 		return nil, errors.Wrap(err, "user server - EditAvatar")
 	}
-	return nil, nil
+
+	return &user_proto.Nothing{}, nil
 }
 
 func (g *UserServerGRPC) GetAvatar(ctx context.Context, protoEmail *user_proto.Email) (*user_proto.Image, error) {
@@ -112,5 +119,6 @@ func (g *UserServerGRPC) EditPw(ctx context.Context, protoEditPw *user_proto.Edi
 	if err != nil {
 		return nil, errors.Wrap(err, "user server - EditPw")
 	}
-	return nil, nil
+
+	return &user_proto.Nothing{}, nil
 }

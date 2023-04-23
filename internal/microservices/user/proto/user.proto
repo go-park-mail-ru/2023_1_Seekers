@@ -10,7 +10,7 @@ message UID {
 message User {
   uint64 UID = 1;
   string Email = 2;
-  string Password = 3;
+  bytes Password = 3;
   string FirstName = 4;
   string LastName = 5;
   string Avatar = 6;
@@ -21,9 +21,10 @@ message Email {
 }
 
 message UserInfo {
-  string Email = 1;
-  string FirstName = 2;
-  string LastName = 3;
+  uint64 UID = 1;
+  string Email = 2;
+  string FirstName = 3;
+  string LastName = 4;
 }
 
 message UserInfoResponse {
