@@ -2,7 +2,8 @@ INTERNAL_PKG = ./internal/...
 ALL_PKG = ./internal/... ./pkg/...
 COV_DIR = scripts/result_cover
 
-#include .env
+include .env
+export
 
 build:
 	sudo systemctl stop nginx.service
