@@ -19,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/api/Dockerfile
+    command: sh -c "./main -config=./cmd/config/debug.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.2
@@ -100,6 +101,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/file_storage/Dockerfile
+    command: sh -c "./main -config=./cmd/config/debug.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.7
@@ -121,6 +123,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/user/Dockerfile
+    command: sh -c "./main -config=./cmd/config/debug.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.8
@@ -142,6 +145,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/auth/Dockerfile
+    command: sh -c "./main -config=./cmd/config/debug.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.9
@@ -163,6 +167,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/mail/Dockerfile
+    command: sh -c "./main -config=./cmd/config/debug.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.10

@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -14,26 +14,28 @@ import (
 )
 
 type sessionsDB struct {
+	cfg           *config.Config
 	redisSessions *redis.Client
 }
 
-func NewSessionRepo(redisClient *redis.Client) repository.SessionRepoI {
-	err := redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, config.CookieTTL).Err()
+func NewSessionRepo(c *config.Config, redisClient *redis.Client) repository.SessionRepoI {
+	err := redisClient.Set(context.Background(), "randgeneratedcookie12334524524523542", 1, c.Sessions.CookieTTL).Err()
 	if err != nil {
 		log.Fatal("failed init session repo")
 	}
 
 	return &sessionsDB{
+		cfg:           c,
 		redisSessions: redisClient,
 	}
 }
 
 func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
-	value, err := rand.String(config.CookieLen)
+	value, err := rand.String(sDb.cfg.Sessions.CookieLen)
 	if err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, "cant generate cookie")
 	}
-	err = sDb.redisSessions.Set(context.Background(), value, uID, config.CookieTTL).Err()
+	err = sDb.redisSessions.Set(context.Background(), value, uID, sDb.cfg.Sessions.CookieTTL).Err()
 	if err != nil {
 		return nil, pkgErrors.WithMessagef(errors.ErrInternal, "cant set cookie : %v", err.Error())
 	}

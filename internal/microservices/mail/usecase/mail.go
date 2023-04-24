@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -14,12 +15,14 @@ import (
 //go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks -source=../interface.go
 
 type UseCase struct {
+	cfg      *config.Config
 	mailRepo mailRepo.MailRepoI
 	userUC   user.UseCaseI
 }
 
-func New(mR mailRepo.MailRepoI, uUC user.UseCaseI) mail.UseCaseI {
+func New(c *config.Config, mR mailRepo.MailRepoI, uUC user.UseCaseI) mail.UseCaseI {
 	return &UseCase{
+		cfg:      c,
 		mailRepo: mR,
 		userUC:   uUC,
 	}
@@ -209,7 +212,7 @@ func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*
 
 	newMessage := models.MessageInfo{
 		Title:            message.Title,
-		CreatedAt:        common.GetCurrentTime(),
+		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
 		Text:             message.Text,
 		ReplyToMessageID: message.ReplyToMessageID,
 	}

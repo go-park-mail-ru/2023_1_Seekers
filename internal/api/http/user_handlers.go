@@ -3,7 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
@@ -29,11 +29,13 @@ type UserHandlersI interface {
 }
 
 type userHandlers struct {
+	cfg    *config.Config
 	userUC user.UseCaseI
 }
 
-func NewUserHandlers(uUC user.UseCaseI) UserHandlersI {
+func NewUserHandlers(c *config.Config, uUC user.UseCaseI) UserHandlersI {
 	return &userHandlers{
+		cfg:    c,
 		userUC: uUC,
 	}
 }
@@ -76,7 +78,7 @@ func (h *userHandlers) Delete(w http.ResponseWriter, r *http.Request) {
 // @Router   /user/info/{email} [get]
 func (h *userHandlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	email := vars[config.RouteUserInfoQueryEmail]
+	email := vars[h.cfg.Routes.RouteUserInfoQueryEmail]
 	u, err := h.userUC.GetByEmail(email)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
@@ -191,7 +193,7 @@ func (h *userHandlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	file, header, err := r.FormFile(config.UserFormNewAvatar)
+	file, header, err := r.FormFile(h.cfg.UserService.UserFormNewAvatar)
 	if err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
@@ -229,7 +231,7 @@ func (h *userHandlers) EditAvatar(w http.ResponseWriter, r *http.Request) {
 // @Router   /user/avatar [get]
 func (h *userHandlers) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	sanitizer := bluemonday.UGCPolicy()
-	email := r.URL.Query().Get(config.RouteUserAvatarQueryEmail)
+	email := r.URL.Query().Get(h.cfg.Routes.RouteUserAvatarQueryEmail)
 	img, err := h.userUC.GetAvatar(sanitizer.Sanitize(email))
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)

@@ -1,13 +1,11 @@
 package postgres
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
 	"gorm.io/gorm"
-	"os"
 )
 
 type mailRepository struct {
@@ -24,7 +22,7 @@ type Box struct {
 }
 
 func (Box) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".boxes"
+	return "mail.boxes"
 }
 
 type Message struct {
@@ -37,7 +35,7 @@ type Message struct {
 }
 
 func (Message) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".messages"
+	return "mail.messages"
 }
 
 func New(db *gorm.DB) repository.MailRepoI {

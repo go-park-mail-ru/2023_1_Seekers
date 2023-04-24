@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -14,20 +14,21 @@ import (
 )
 
 type Middleware struct {
+	cfg *config.Config
 	sUC auth.UseCaseI
 	log *logger.Logger
 }
 
-func New(sUC auth.UseCaseI, l *logger.Logger) *Middleware {
-	return &Middleware{sUC, l}
+func New(c *config.Config, sUC auth.UseCaseI, l *logger.Logger) *Middleware {
+	return &Middleware{c, sUC, l}
 }
 
 func (m *Middleware) Cors(h http.Handler) http.Handler {
 	c := cors.New(cors.Options{
-		AllowedMethods:   config.AllowedMethods,
-		AllowedOrigins:   config.AllowedOrigins,
+		AllowedMethods:   m.cfg.Cors.AllowedMethods,
+		AllowedOrigins:   m.cfg.Cors.AllowedOrigins,
 		AllowCredentials: true,
-		AllowedHeaders:   config.AllowedHeaders,
+		AllowedHeaders:   m.cfg.Cors.AllowedHeaders,
 	})
 	return c.Handler(h)
 }
@@ -47,7 +48,7 @@ func (m *Middleware) HandlerLogger(h http.Handler) http.Handler {
 
 func (m *Middleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(config.CookieName)
+		cookie, err := r.Cookie(m.cfg.Sessions.CookieName)
 		if err != nil {
 			pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 			return

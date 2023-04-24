@@ -6,4 +6,4 @@ RUN go mod download
 RUN go build cmd/api/main.go
 
 EXPOSE 8001
-CMD ["./main"]
+

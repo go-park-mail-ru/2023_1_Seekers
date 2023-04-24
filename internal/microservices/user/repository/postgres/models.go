@@ -1,9 +1,7 @@
 package postgres
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"os"
 )
 
 type User struct {
@@ -19,7 +17,7 @@ type User struct {
 }
 
 func (*User) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".users"
+	return "mail.users"
 }
 
 func (u *User) FromModel(user *models.User) {
@@ -35,5 +33,5 @@ type IsCustomAvatar struct {
 }
 
 func (*IsCustomAvatar) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".users"
+	return "mail.users"
 }

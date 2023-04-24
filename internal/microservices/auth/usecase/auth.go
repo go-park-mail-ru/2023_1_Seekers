@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -19,19 +19,21 @@ import (
 //go:generate mockgen -destination=./mocks/mockauthusecase.go -package=mocks -source=../interface.go
 
 type authUC struct {
+	cfg         *config.Config
 	userUC      _user.UseCaseI
 	sessionRepo authRepo.SessionRepoI
 }
 
-func NewAuthUC(uUC _user.UseCaseI, sr authRepo.SessionRepoI) auth.UseCaseI {
+func NewAuthUC(c *config.Config, uUC _user.UseCaseI, sr authRepo.SessionRepoI) auth.UseCaseI {
 	return &authUC{
+		cfg:         c,
 		userUC:      uUC,
 		sessionRepo: sr,
 	}
 }
 
 func (u *authUC) SignIn(form *models.FormLogin) (*models.AuthResponse, *models.Session, error) {
-	email, err := validation.Login(form.Login)
+	email, err := validation.Login(form.Login, u.cfg.Mail.PostAtDomain)
 	if err != nil {
 		return nil, nil, errors.ErrInvalidLogin
 	}
@@ -40,7 +42,7 @@ func (u *authUC) SignIn(form *models.FormLogin) (*models.AuthResponse, *models.S
 		return nil, nil, errors.ErrWrongPw
 	}
 
-	if !crypto.ComparePw2Hash(form.Password, user.Password) {
+	if !crypto.ComparePw2Hash(form.Password, user.Password, u.cfg.Password.PasswordSaltLen) {
 		return nil, nil, errors.ErrWrongPw
 	}
 
@@ -61,7 +63,7 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 		return nil, nil, errors.ErrPwDontMatch
 	}
 
-	email, err := validation.Login(form.Login)
+	email, err := validation.Login(form.Login, u.cfg.Mail.PostAtDomain)
 	if err != nil || len(form.Login) > 30 || len(form.Login) < 3 {
 		return nil, nil, errors.ErrInvalidLogin
 	}
@@ -70,10 +72,10 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 		Email:     email,
 		FirstName: form.FirstName,
 		LastName:  form.LastName,
-		Avatar:    config.DefaultAvatar,
+		Avatar:    u.cfg.UserService.DefaultAvatar,
 	}
 
-	user.Password, err = crypto.HashPw(form.Password)
+	user.Password, err = crypto.HashPw(form.Password, u.cfg.Password.PasswordSaltLen)
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
 	}
@@ -85,7 +87,7 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 
 	col := image.GetRandColor()
 	label := common.GetFirstUtf(user.FirstName)
-	img, err := image.GenImage(col, label)
+	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
 	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img}, false)
 	if err != nil {
 		log.Warn(err, "edit avatar")

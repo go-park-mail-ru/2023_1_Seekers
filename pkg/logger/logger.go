@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -53,7 +52,7 @@ func (l *Logger) LoggerWithField(key string, val any) *Logger {
 	return &Logger{l.WithField(key, val)}
 }
 
-func Init(level logrus.Level, toStdout bool) {
+func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, logsDir string) {
 	l := logrus.New()
 	loc, err := time.LoadLocation("Europe/Moscow")
 	if err != nil {
@@ -61,11 +60,11 @@ func Init(level logrus.Level, toStdout bool) {
 	}
 
 	now := time.Now().In(loc)
-	logsFName := config.LogsDir + config.LogsFileName + now.Format(config.LogsTimeFormat) + ".log"
+	logsFName := logsDir + logsFileName + now.Format(timeFormat) + ".log"
 
 	l.SetReportCaller(true)
 	l.SetFormatter(&Formatter{
-		TimeFormat:  config.LogsTimeFormat,
+		TimeFormat:  timeFormat,
 		Colors:      true,
 		Caller:      true,
 		FieldsSpace: true,
@@ -74,8 +73,8 @@ func Init(level logrus.Level, toStdout bool) {
 			s := strings.Split(f.Function, ".")
 			funcName := s[len(s)-1]
 			var dir string
-			if idx := strings.Index(f.File, config.ProjectBaseDir); idx != -1 {
-				dir = f.File[idx+len(config.ProjectBaseDir):]
+			if idx := strings.Index(f.File, baseDir); idx != -1 {
+				dir = f.File[idx+len(baseDir):]
 			} else {
 				dir = f.File
 			}
@@ -83,7 +82,7 @@ func Init(level logrus.Level, toStdout bool) {
 		},
 	})
 
-	if err = os.MkdirAll(config.LogsDir, 0777); err != nil {
+	if err = os.MkdirAll(logsDir, 0777); err != nil {
 		if os.IsExist(err) {
 			logrus.Fatalf("Error: Such path already exists")
 		}

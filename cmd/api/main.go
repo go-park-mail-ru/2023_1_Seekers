@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"flag"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_api "github.com/go-park-mail-ru/2023_1_Seekers/internal/api/http"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	_authClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/client"
 	_mailClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/client"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
@@ -26,12 +27,22 @@ import (
 // @host localhost:8001
 // @BasePath	/api/v1
 func main() {
-	logger.Init(log.InfoLevel, true)
+	var configFile string
+
+	flag.StringVar(&configFile, "config", "cmd/config/debug.yml", "-config=./cmd/configs/debug.yml")
+	flag.Parse()
+
+	cfg, err := config.Parse(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger.Init(log.InfoLevel, true, cfg.Logger.LogsFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 	globalLogger := logger.Get()
 	router := mux.NewRouter()
 
 	authServiceCon, err := grpc.Dial(
-		config.AuthGRPCHost+":"+config.AuthGRPCPort,
+		cfg.AuthGRPCService.Host+":"+cfg.AuthGRPCService.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -41,7 +52,7 @@ func main() {
 	authServiceClient := _authClient.NewAuthClientGRPC(authServiceCon)
 
 	mailServiceCon, err := grpc.Dial(
-		config.MailGRPCHost+":"+config.MailGRPCPort,
+		cfg.MailGRPCService.Host+":"+cfg.MailGRPCService.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -51,7 +62,7 @@ func main() {
 	mailServiceClient := _mailClient.NewMailClientGRPC(mailServiceCon)
 
 	userServiceCon, err := grpc.Dial(
-		config.UserGRPCHost+":"+config.UserGRPCPort,
+		cfg.UserGRPCService.Host+":"+cfg.UserGRPCService.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -60,19 +71,19 @@ func main() {
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
 
-	authH := _api.NewAuthHandlers(authServiceClient, mailServiceClient, userServiceClient)
-	mailH := _api.NewMailHandlers(mailServiceClient)
-	userH := _api.NewUserHandlers(userServiceClient)
-	middleware := _middleware.New(authServiceClient, globalLogger)
+	authH := _api.NewAuthHandlers(cfg, authServiceClient, mailServiceClient, userServiceClient)
+	mailH := _api.NewMailHandlers(cfg, mailServiceClient)
+	userH := _api.NewUserHandlers(cfg, userServiceClient)
+	middleware := _middleware.New(cfg, authServiceClient, globalLogger)
 
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-	_api.RegisterHTTPRoutes(router, authH, userH, mailH, middleware)
+	_api.RegisterHTTPRoutes(router, cfg, authH, userH, mailH, middleware)
 
 	router.Use(middleware.HandlerLogger)
 	corsRouter := middleware.Cors(router)
 
 	server := http.Server{
-		Addr:         ":" + config.ApiPort,
+		Addr:         ":" + cfg.Api.Port,
 		Handler:      corsRouter,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,

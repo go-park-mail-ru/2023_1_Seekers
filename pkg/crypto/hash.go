@@ -2,14 +2,13 @@ package crypto
 
 import (
 	"bytes"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
 	pkgErr "github.com/pkg/errors"
 	"golang.org/x/crypto/argon2"
 )
 
-func GetSalt() ([]byte, error) {
-	salt, err := rand.String(config.PasswordSaltLen)
+func GetSalt(len int) ([]byte, error) {
+	salt, err := rand.String(len)
 	if err != nil {
 		return nil, err
 	}
@@ -22,8 +21,8 @@ func Hash(salt []byte, str string) []byte {
 	return append(salt, hash...)
 }
 
-func HashPw(password string) (string, error) {
-	salt, err := GetSalt()
+func HashPw(password string, saultLen int) (string, error) {
+	salt, err := GetSalt(saultLen)
 	if err != nil {
 		return "", pkgErr.Wrap(err, "failed get salt")
 	}
@@ -32,11 +31,11 @@ func HashPw(password string) (string, error) {
 	return hashPw, nil
 }
 
-func ComparePw2Hash(password, hash string) bool {
-	if len(hash) < config.PasswordSaltLen {
+func ComparePw2Hash(password, hash string, saultLen int) bool {
+	if len(hash) < saultLen {
 		return false
 	}
-	salt := hash[0:config.PasswordSaltLen]
+	salt := hash[0:saultLen]
 	newHash := Hash([]byte(salt), password)
 	return bytes.Equal(newHash, []byte(hash))
 }

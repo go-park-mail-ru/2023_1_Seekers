@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/repository"
@@ -21,12 +21,14 @@ import (
 //go:generate mockgen -destination=./mocks/mockusecase.go -source=../interface.go -package=mocks
 
 type useCase struct {
+	cfg      *config.Config
 	userRepo _userRepo.UserRepoI
 	fileUC   file_storage.UseCaseI
 }
 
-func New(r _userRepo.UserRepoI, fUC file_storage.UseCaseI) _user.UseCaseI {
-	return &useCase{userRepo: r, fileUC: fUC}
+func New(c *config.Config, r _userRepo.UserRepoI, fUC file_storage.UseCaseI) _user.UseCaseI {
+	image.Init(c.UserService.AvatarTTFPath)
+	return &useCase{cfg: c, userRepo: r, fileUC: fUC}
 }
 
 func validMailAddress(email string) (string, bool) {
@@ -34,6 +36,7 @@ func validMailAddress(email string) (string, bool) {
 	if err != nil {
 		return "", false
 	}
+
 	return addr.Address, true
 }
 
@@ -43,7 +46,7 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	if err != nil {
 		return nil, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()) //fmt.Errorf("failed to create user: %w", err)
 	}
-	if len(user.Password) < config.PasswordMinLen {
+	if len(user.Password) < u.cfg.Password.PasswordMinLen {
 		return nil, errors.ErrTooShortPw
 	}
 	if _, ok := validMailAddress(user.Email); !ok {
@@ -125,7 +128,7 @@ func (u *useCase) EditInfo(ID uint64, info *models.UserInfo) (*models.UserInfo, 
 		}
 
 		label := common.GetFirstUtf(info.FirstName)
-		updAvatar, err := image.UpdateImgText(avatar.Data, label)
+		updAvatar, err := image.UpdateImgText(avatar.Data, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "edit info - update avatar")
 		}
@@ -144,7 +147,7 @@ func (u *useCase) EditAvatar(ID uint64, newAvatar *models.Image, isCustom bool) 
 		return pkgErrors.Wrap(err, "get user by id")
 	}
 	f := models.S3File{
-		Bucket: config.S3AvatarBucket,
+		Bucket: u.cfg.S3.S3AvatarBucket,
 		Name:   user.Email + filepath.Ext(newAvatar.Name),
 		Data:   newAvatar.Data,
 	}
@@ -168,10 +171,10 @@ func (u *useCase) GetAvatar(email string) (*models.Image, error) {
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get user by email")
 	}
-	f, err := u.fileUC.Get(config.S3AvatarBucket, user.Avatar)
+	f, err := u.fileUC.Get(u.cfg.S3.S3AvatarBucket, user.Avatar)
 	if err != nil {
 		//надо ли отправлять дефолтный если что-то пошло не так
-		f, err = u.fileUC.Get(config.S3AvatarBucket, config.DefaultAvatar)
+		f, err = u.fileUC.Get(u.cfg.S3.S3AvatarBucket, u.cfg.UserService.DefaultAvatar)
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "get get avatar")
 		}
@@ -189,14 +192,14 @@ func (u *useCase) EditPw(ID uint64, form *models.EditPasswordRequest) error {
 	}
 
 	user, err := u.userRepo.GetByID(ID)
-	if !crypto.ComparePw2Hash(form.PasswordOld, user.Password) {
+	if !crypto.ComparePw2Hash(form.PasswordOld, user.Password, u.cfg.Password.PasswordSaltLen) {
 		return errors.ErrWrongPw
 	}
 
-	if err := validation.Password(form.Password); err != nil {
+	if err := validation.Password(form.Password, u.cfg.Password.PasswordSaltLen); err != nil {
 		return pkgErrors.Wrap(err, "create")
 	}
-	hashPw, err := crypto.HashPw(form.Password)
+	hashPw, err := crypto.HashPw(form.Password, u.cfg.Password.PasswordSaltLen)
 	if err != nil {
 		return pkgErrors.Wrap(err, "edit password")
 	}

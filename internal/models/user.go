@@ -1,9 +1,7 @@
 package models
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"html"
-	"os"
 )
 
 type User struct {
@@ -57,9 +55,9 @@ type EditUserInfoResponse struct {
 }
 
 func (*User) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".users"
+	return "mail.users"
 }
 
 func (*UserInfo) TableName() string {
-	return os.Getenv(config.DBSchemaNameEnv) + ".users"
+	return "mail.users"
 }

@@ -6,4 +6,4 @@ RUN go mod download
 RUN go build cmd/mail/main.go
 
 EXPOSE 8008
-CMD ["./main"]
+

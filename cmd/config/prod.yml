@@ -1,0 +1,97 @@
+api:
+  port: 8001
+
+project:
+  project_base_dir: 2023_1_Seekers
+logger:
+  logs_dir: logs/app/
+  logs_file_name: server_
+  logs_time_format: 2006-01-02_15:04:05_MST
+
+file_grpc_service:
+  port: 8005
+  host: 127.0.0.1
+
+user_grpc_service:
+  port: 8006
+  host: 127.0.0.1
+
+
+auth_grpc_service:
+  port: 8007
+  host: 127.0.0.1
+
+mail_grpc_service:
+  port: 8008
+  host: 127.0.0.1
+
+s3:
+  s3_region: eu-west-2
+  s3_endpoint: https://hb.bizmrg.com
+  s3_avatar_bucket: avatars_mailbox_vkcloud
+
+sessions:
+  cookie_name: MailBoxSession
+  cookie_ttl: 2400h0m0s
+  cookie_path: /
+  csrf_header: Csrf-Token
+  cookie_len: 32
+
+routes:
+  route_prefix: /api/v1
+
+  route_signin: /signin
+  route_signup: /signup
+  route_logout: /logout
+  route_auth: /auth
+  route_csrf: /csrf
+
+  route_get_folder_messages: /folder/{slug}
+  route_get_folders: /folders
+  route_get_message: /message/{id:[0-9]+}
+  route_send_message: /message/send
+  route_read_message: /message/{id:[0-9]+}/read
+  route_unread_message: /message/{id:[0-9]+}/
+
+  route_user: /user
+  route_user_info: /user/info
+  route_user_avatar: /user/avatar
+  route_pw: /user/pw
+  route_user_avatar_query_email: email
+  route_user_info_query_email: email
+
+user_service:
+  max_image_size: 2147483648
+  user_form_new_avatar: avatar
+  user_default_avatar_size: 46
+  default_avatar: default_avatar.png
+  avatar_ttf_path: ./cmd/config/wqy-zenhei.ttf
+
+password:
+  password_min_len: 5
+  password_salt_len: 10
+
+mail:
+  post_domain: "mailbox.ru"
+  post_at_domain: "@mailbox.ru"
+
+cors:
+  allowed_headers:
+    - Content-Type
+    - Content-Length
+    - X-Csrf-Token
+    - application/json
+    - text/xml
+  allowed_origins:
+    - http://127.0.0.1:8002
+    - http://localhost:8002
+    - http://localhost
+    - http://127.0.0.1
+    - http://89.208.197.150:8002
+    - https://mailbx.ru
+    - https://www.mailbx.ru
+  allowed_methods:
+    - POST
+    - GET
+    - PUT,
+    - DELETE

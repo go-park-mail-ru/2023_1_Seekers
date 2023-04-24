@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
@@ -24,12 +25,14 @@ type MailHandlersI interface {
 }
 
 type mailHandlers struct {
-	uc mail.UseCaseI
+	cfg *config.Config
+	uc  mail.UseCaseI
 }
 
-func NewMailHandlers(uc mail.UseCaseI) MailHandlersI {
+func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
 	return &mailHandlers{
-		uc: uc,
+		cfg: c,
+		uc:  uc,
 	}
 }
 

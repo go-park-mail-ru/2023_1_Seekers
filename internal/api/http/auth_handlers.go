@@ -3,7 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -29,37 +29,19 @@ type AuthHandlersI interface {
 }
 
 type authHandlers struct {
+	cfg    *config.Config
 	authUC auth.UseCaseI
 	mailUC mail.UseCaseI
 	userUC _user.UseCaseI
 }
 
-func NewAuthHandlers(aUC auth.UseCaseI, mUC mail.UseCaseI, uUC _user.UseCaseI) AuthHandlersI {
+func NewAuthHandlers(c *config.Config, aUC auth.UseCaseI, mUC mail.UseCaseI, uUC _user.UseCaseI) AuthHandlersI {
 	return &authHandlers{
+		cfg:    c,
 		authUC: aUC,
 		mailUC: mUC,
 		userUC: uUC,
 	}
-}
-
-func setNewCookie(w http.ResponseWriter, session *models.Session) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     config.CookieName,
-		Value:    session.SessionID,
-		Expires:  time.Now().Add(config.CookieTTL),
-		HttpOnly: true,
-		Path:     config.CookiePath,
-		SameSite: http.SameSiteLaxMode,
-	})
-}
-
-func delCookie(w http.ResponseWriter) {
-	http.SetCookie(w, &http.Cookie{
-		Name:    config.CookieName,
-		Value:   "",
-		Expires: time.Now().AddDate(0, 0, -1),
-		Path:    config.CookiePath,
-	})
 }
 
 // SignUp godoc
@@ -123,7 +105,7 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setNewCookie(w, session)
+	h.setNewCookie(w, session)
 	httpPkg.SendJSON(w, r, http.StatusOK, response)
 }
 
@@ -161,7 +143,7 @@ func (h *authHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setNewCookie(w, session)
+	h.setNewCookie(w, session)
 	httpPkg.SendJSON(w, r, http.StatusOK, response)
 }
 
@@ -188,7 +170,7 @@ func (h *authHandlers) Auth(w http.ResponseWriter, _ *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /logout [delete]
 func (h *authHandlers) Logout(w http.ResponseWriter, _ *http.Request) {
-	delCookie(w)
+	h.delCookie(w)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -201,7 +183,7 @@ func (h *authHandlers) Logout(w http.ResponseWriter, _ *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router /create_csrf [get]
 func (h *authHandlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie(config.CookieName)
+	cookie, err := r.Cookie(h.cfg.Sessions.CookieName)
 	if err != nil {
 		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 		return
@@ -212,6 +194,26 @@ func (h *authHandlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
 		httpPkg.HandleError(w, r, err)
 		return
 	}
-	w.Header().Set(config.CSRFHeader, csrfToken)
+	w.Header().Set(h.cfg.Sessions.CSRFHeader, csrfToken)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *authHandlers) setNewCookie(w http.ResponseWriter, session *models.Session) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     h.cfg.Sessions.CookieName,
+		Value:    session.SessionID,
+		Expires:  time.Now().Add(h.cfg.Sessions.CookieTTL),
+		HttpOnly: true,
+		Path:     h.cfg.Sessions.CookiePath,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func (h *authHandlers) delCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    h.cfg.Sessions.CookieName,
+		Value:   "",
+		Expires: time.Now().AddDate(0, 0, -1),
+		Path:    h.cfg.Sessions.CookiePath,
+	})
 }

@@ -2,7 +2,6 @@ package image
 
 import (
 	"bytes"
-	"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/freetype/truetype"
 	log "github.com/sirupsen/logrus"
@@ -21,7 +20,7 @@ var TextColors = make(map[color.RGBA]color.RGBA)
 var fontTtf *truetype.Font
 var fontSize = 20.0
 
-func init() {
+func Init(ttfPath string) {
 	Colors["purple"] = color.RGBA{R: 178, G: 102, B: 255, A: 255}
 	Colors["green"] = color.RGBA{R: 102, G: 255, B: 102, A: 255}
 	Colors["orange"] = color.RGBA{R: 255, G: 153, B: 51, A: 255}
@@ -36,7 +35,7 @@ func init() {
 	TextColors[color.RGBA{R: 255, G: 255, B: 102, A: 255}] = color.RGBA{R: 248, G: 165, B: 29, A: 255}  // yellow
 	TextColors[color.RGBA{R: 51, G: 153, B: 255, A: 255}] = color.RGBA{R: 0, G: 0, B: 0, A: 255}        // blue
 
-	fontBytes, err := os.ReadFile(config.AvatarTTFPath)
+	fontBytes, err := os.ReadFile(ttfPath)
 	if err != nil {
 		log.Fatal("cant read font file")
 	}
@@ -104,9 +103,7 @@ func NewPNG(width, height int, col color.RGBA) *image.RGBA {
 	return img
 }
 
-func GenImage(col, label string) ([]byte, error) {
-	width := config.UserDefaultAvatarSize
-	height := config.UserDefaultAvatarSize
+func GenImage(col, label string, height, width int) ([]byte, error) {
 	buffer := new(bytes.Buffer)
 	rgbaBgCol := getCol(col)
 	img := NewPNG(width, height, rgbaBgCol)
@@ -143,7 +140,7 @@ func GenImage(col, label string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func UpdateImgText(img []byte, label string) ([]byte, error) {
+func UpdateImgText(img []byte, label string, height, width int) ([]byte, error) {
 	pngImg, err := png.Decode(bytes.NewReader(img))
 	if err != nil {
 		return nil, err
@@ -156,8 +153,7 @@ func UpdateImgText(img []byte, label string) ([]byte, error) {
 		B: uint8(b),
 		A: uint8(a),
 	}
-	width := config.UserDefaultAvatarSize
-	height := config.UserDefaultAvatarSize
+
 	buffer := new(bytes.Buffer)
 	resultPng := NewPNG(width, height, col)
 

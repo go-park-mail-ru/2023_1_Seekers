@@ -6,4 +6,4 @@ RUN go mod download
 RUN go build cmd/auth/main.go
 
 EXPOSE 8007
-CMD ["./main"]
+
