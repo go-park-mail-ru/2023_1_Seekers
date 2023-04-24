@@ -14,7 +14,7 @@ services:
       mail_service:
         condition: service_started
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
     build:
       context: .
@@ -96,7 +96,7 @@ services:
     env_file:
       - .env
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
     build:
       context: .
@@ -118,7 +118,7 @@ services:
       file_storage_service:
         condition: service_started
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
     build:
       context: .
@@ -140,7 +140,7 @@ services:
       cache:
         condition: service_started
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
     build:
       context: .
@@ -162,7 +162,7 @@ services:
       user_service:
         condition: service_started
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
     build:
       context: .

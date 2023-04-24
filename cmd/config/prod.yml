@@ -10,20 +10,19 @@ logger:
 
 file_grpc_service:
   port: 8005
-  host: 127.0.0.1
+  host: 172.28.0.7
 
 user_grpc_service:
   port: 8006
-  host: 127.0.0.1
-
+  host: 172.28.0.8
 
 auth_grpc_service:
   port: 8007
-  host: 127.0.0.1
+  host: 172.28.0.9
 
 mail_grpc_service:
   port: 8008
-  host: 127.0.0.1
+  host: 172.28.0.10
 
 s3:
   s3_region: eu-west-2

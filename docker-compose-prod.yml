@@ -1,18 +1,25 @@
 version: "3.8"
 
 services:
-  app:
+  api:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
-      cache:
+      file_storage_service:
+        condition: service_started
+      user_service:
+        condition: service_started
+      auth_service:
+        condition: service_started
+      mail_service:
         condition: service_started
     volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
+      # - ${VENDOR}:/go/pkg/
       - ./logs/app:/app/logs/app
-    build: ./
+    build:
+      context: .
+      dockerfile: ./cmd/api/Dockerfile
+    command: sh -c "./main -config=./cmd/config/prod.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.2
@@ -24,10 +31,10 @@ services:
     env_file:
       - .env
     image: postgres:latest
-    command: ["postgres",
-              "-c", "log_directory=/var/log/postgresql",
-              "-c", "logging_collector=on",
-              "-c", "log_statement=all"]
+    command: [ "postgres",
+               "-c", "log_directory=/var/log/postgresql",
+               "-c", "logging_collector=on",
+               "-c", "log_statement=all" ]
     networks:
       my_network:
         ipv4_address: 172.28.0.3
@@ -70,6 +77,90 @@ services:
     volumes:
       - cache:/data
     restart: always
+
+  file_storage_service:
+    env_file:
+      - .env
+    volumes:
+      # - ${VENDOR}:/go/pkg/
+      - ./logs/app:/app/logs/app
+    build:
+      context: .
+      dockerfile: ./cmd/file_storage/Dockerfile
+    command: sh -c "./main -config=./cmd/config/prod.yml"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.7
+    ports:
+      - "8005:8005"
+    restart: "no"
+
+  user_service:
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      file_storage_service:
+        condition: service_started
+    volumes:
+      # - ${VENDOR}:/go/pkg/
+      - ./logs/app:/app/logs/app
+    build:
+      context: .
+      dockerfile: ./cmd/user/Dockerfile
+    command: sh -c "./main -config=./cmd/config/prod.yml"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.8
+    ports:
+      - "8006:8006"
+    restart: "no"
+
+  auth_service:
+    env_file:
+      - .env
+    depends_on:
+      user_service:
+        condition: service_started
+      cache:
+        condition: service_started
+    volumes:
+      # - ${VENDOR}:/go/pkg/
+      - ./logs/app:/app/logs/app
+    build:
+      context: .
+      dockerfile: ./cmd/auth/Dockerfile
+    command: sh -c "./main -config=./cmd/config/prod.yml"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.9
+    ports:
+      - "8007:8007"
+    restart: "no"
+
+  mail_service:
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      user_service:
+        condition: service_started
+    volumes:
+      # - ${VENDOR}:/go/pkg/
+      - ./logs/app:/app/logs/app
+    build:
+      context: .
+      dockerfile: ./cmd/mail/Dockerfile
+    command: sh -c "./main -config=./cmd/config/prod.yml"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.10
+    ports:
+      - "8008:8008"
+    restart: "no"
+
 
 volumes:
   db_data:
