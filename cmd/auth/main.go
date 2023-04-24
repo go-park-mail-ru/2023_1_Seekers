@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository/redis"
 	_authServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/server"
@@ -24,8 +25,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	redisAddr := cfg.Redis.RedisHost + ":" + cfg.Redis.RedisPassword
+	redisAddr := cfg.Redis.RedisHost + ":" + cfg.Redis.RedisPort
 	redisPw := cfg.Redis.RedisPassword
+	fmt.Println(redisAddr, redisPw)
 	rdb, err := connectors.NewRedisClient(redisAddr, redisPw)
 	if err != nil {
 		log.Fatalf("failed connect to redis : %v", err)
