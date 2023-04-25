@@ -27,10 +27,17 @@ func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, 
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserInfo, m.CheckAuth(userH.GetPersonalInfo)).Methods(http.MethodGet)
 
 	// Mail
-	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteGetFolderMessages, m.CheckAuth(m.CheckCSRF(mailH.GetFolderMessages))).Methods(http.MethodGet)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteFolder, m.CheckAuth(m.CheckCSRF(mailH.GetFolderMessages))).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteGetFolders, m.CheckAuth(m.CheckCSRF(mailH.GetFolders))).Methods(http.MethodGet)
-	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteGetMessage, m.CheckAuth(m.CheckCSRF(mailH.GetMessage))).Methods(http.MethodGet)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMessage, m.CheckAuth(m.CheckCSRF(mailH.GetMessage))).Methods(http.MethodGet)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMessage, m.CheckAuth(m.CheckCSRF(mailH.DeleteMessage))).Methods(http.MethodDelete)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteSendMessage, m.CheckAuth(m.CheckCSRF(mailH.SendMessage))).Methods(http.MethodPost)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteReadMessage, m.CheckAuth(m.CheckCSRF(mailH.ReadMessage))).Methods(http.MethodPost)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUnreadMessage, m.CheckAuth(m.CheckCSRF(mailH.UnreadMessage))).Methods(http.MethodPost)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteCreateFolder, m.CheckAuth(m.CheckCSRF(mailH.CreateFolder))).Methods(http.MethodPost)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteFolder, m.CheckAuth(m.CheckCSRF(mailH.DeleteFolder))).Methods(http.MethodDelete)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteEditFolder, m.CheckAuth(m.CheckCSRF(mailH.EditFolder))).Methods(http.MethodPut)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMoveToFolder, m.CheckAuth(m.CheckCSRF(mailH.MoveToFolder))).Methods(http.MethodPut)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteSaveDraftMessage, m.CheckAuth(m.CheckCSRF(mailH.SaveDraft))).Methods(http.MethodPost)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMessage, m.CheckAuth(m.CheckCSRF(mailH.EditDraft))).Methods(http.MethodPut)
 }

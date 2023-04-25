@@ -67,6 +67,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/folder/create": {
+            "post": {
+                "description": "creating folder",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "folders"
+                ],
+                "summary": "CreateFolder",
+                "responses": {
+                    "200": {
+                        "description": "success create folder",
+                        "schema": {
+                            "$ref": "#/definitions/models.FolderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "folder already exists",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "folder not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/folder/{slug}": {
             "get": {
                 "description": "List of folder messages",
@@ -77,7 +124,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "messages"
+                    "folders"
                 ],
                 "summary": "GetFolderMessages",
                 "parameters": [
@@ -115,11 +162,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/folders/": {
-            "get": {
-                "description": "List of outgoing messages",
+            },
+            "put": {
+                "description": "edit folder name",
                 "consumes": [
                     "application/json"
                 ],
@@ -127,7 +172,108 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "messages"
+                    "folders"
+                ],
+                "summary": "EditFolder",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "FolderSlug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success edit folder",
+                        "schema": {
+                            "$ref": "#/definitions/models.FolderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid folder name",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "folder not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete folder",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "folders"
+                ],
+                "summary": "DeleteFolder",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "FolderSlug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete folder"
+                    },
+                    "400": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "folder not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/folders": {
+            "get": {
+                "description": "List of user folders",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "folders"
                 ],
                 "summary": "GetFolders",
                 "responses": {
@@ -178,9 +324,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/message/save": {
+            "post": {
+                "description": "save draft message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "SaveDraft",
+                "responses": {
+                    "200": {
+                        "description": "success save draft message",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "some emails are invalid",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/message/send": {
             "post": {
-                "description": "Message",
+                "description": "send message",
                 "consumes": [
                     "application/json"
                 ],
@@ -273,6 +466,96 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "edit draft message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "EditDraft",
+                "responses": {
+                    "200": {
+                        "description": "success edit draft message",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "some emails are invalid",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid form",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete message for user (moving to trash or full delete - depends of folder)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "DeleteMessage",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete message"
+                    },
+                    "400": {
+                        "description": "invalid url address",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
             }
         },
         "/message/{id}/read": {
@@ -327,7 +610,7 @@ const docTemplate = `{
         },
         "/message/{id}/unread": {
             "post": {
-                "description": "Message",
+                "description": "move message to folder",
                 "consumes": [
                     "application/json"
                 ],
@@ -337,7 +620,7 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "UnreadMessage",
+                "summary": "MoveToFolder",
                 "parameters": [
                     {
                         "type": "integer",
@@ -349,19 +632,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success unread message",
-                        "schema": {
-                            "$ref": "#/definitions/models.MessageResponse"
-                        }
+                        "description": "success changed message's folder"
                     },
                     "400": {
-                        "description": "invalid url address",
+                        "description": "can't move message from draft folder",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
                     },
                     "404": {
-                        "description": "message not found",
+                        "description": "folder not found",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -935,14 +1215,14 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deleted": {
-                    "type": "boolean"
-                },
                 "favorite": {
                     "type": "boolean"
                 },
                 "from_user_id": {
                     "$ref": "#/definitions/models.UserInfo"
+                },
+                "is_draft": {
+                    "type": "boolean"
                 },
                 "message_id": {
                     "type": "integer"

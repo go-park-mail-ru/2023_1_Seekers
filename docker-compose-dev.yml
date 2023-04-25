@@ -52,6 +52,18 @@ services:
       - cache:/data
     restart: "no"
 
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx-local-net.conf:/etc/nginx/nginx.conf
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.6
+    ports:
+      - "443:443"
+      - "80:80"
+    restart: "no"
+
 volumes:
   cache:
     driver: local

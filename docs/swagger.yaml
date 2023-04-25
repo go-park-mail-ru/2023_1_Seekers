@@ -94,12 +94,12 @@ definitions:
     properties:
       created_at:
         type: string
-      deleted:
-        type: boolean
       favorite:
         type: boolean
       from_user_id:
         $ref: '#/definitions/models.UserInfo'
+      is_draft:
+        type: boolean
       message_id:
         type: integer
       recipients:
@@ -174,6 +174,36 @@ paths:
       tags:
       - auth
   /folder/{slug}:
+    delete:
+      consumes:
+      - application/json
+      description: delete folder
+      parameters:
+      - description: FolderSlug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete folder
+        "400":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: DeleteFolder
+      tags:
+      - folders
     get:
       consumes:
       - application/json
@@ -205,12 +235,79 @@ paths:
             $ref: '#/definitions/errors.JSONError'
       summary: GetFolderMessages
       tags:
-      - messages
-  /folders/:
+      - folders
+    put:
+      consumes:
+      - application/json
+      description: edit folder name
+      parameters:
+      - description: FolderSlug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit folder
+          schema:
+            $ref: '#/definitions/models.FolderResponse'
+        "400":
+          description: invalid folder name
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditFolder
+      tags:
+      - folders
+  /folder/create:
+    post:
+      consumes:
+      - application/json
+      description: creating folder
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success create folder
+          schema:
+            $ref: '#/definitions/models.FolderResponse'
+        "400":
+          description: folder already exists
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: CreateFolder
+      tags:
+      - folders
+  /folders:
     get:
       consumes:
       - application/json
-      description: List of outgoing messages
+      description: List of user folders
       produces:
       - application/json
       responses:
@@ -228,7 +325,7 @@ paths:
             $ref: '#/definitions/errors.JSONError'
       summary: GetFolders
       tags:
-      - messages
+      - folders
   /logout:
     delete:
       consumes:
@@ -247,6 +344,37 @@ paths:
       tags:
       - auth
   /message/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete message for user (moving to trash or full delete - depends
+        of folder)
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete message
+        "400":
+          description: invalid url address
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: DeleteMessage
+      tags:
+      - messages
     get:
       consumes:
       - application/json
@@ -277,6 +405,36 @@ paths:
           schema:
             $ref: '#/definitions/errors.JSONError'
       summary: GetMessage
+      tags:
+      - messages
+    put:
+      consumes:
+      - application/json
+      description: edit draft message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success edit draft message
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: some emails are invalid
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: message not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: EditDraft
       tags:
       - messages
   /message/{id}/read:
@@ -316,7 +474,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Message
+      description: move message to folder
       parameters:
       - description: id
         in: path
@@ -327,11 +485,40 @@ paths:
       - application/json
       responses:
         "200":
-          description: success unread message
+          description: success changed message's folder
+        "400":
+          description: can't move message from draft folder
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: MoveToFolder
+      tags:
+      - messages
+  /message/save:
+    post:
+      consumes:
+      - application/json
+      description: save draft message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success save draft message
           schema:
             $ref: '#/definitions/models.MessageResponse'
         "400":
-          description: invalid url address
+          description: some emails are invalid
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "403":
+          description: invalid form
           schema:
             $ref: '#/definitions/errors.JSONError'
         "404":
@@ -342,14 +529,14 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: UnreadMessage
+      summary: SaveDraft
       tags:
       - messages
   /message/send:
     post:
       consumes:
       - application/json
-      description: Message
+      description: send message
       produces:
       - application/json
       responses:

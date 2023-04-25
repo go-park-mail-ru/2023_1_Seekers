@@ -6,8 +6,8 @@ include .env
 export
 
 build:
-	sudo systemctl stop nginx.service
-	sudo systemctl stop postgresql
+	sudo systemctl stop nginx.service || true  
+	sudo systemctl stop postgresql || true 
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
 	docker-compose up -d --build --remove-orphans
@@ -22,13 +22,11 @@ build-prod:
 	sudo systemctl restart nginx
 
 build-dev-env:
-	sudo systemctl stop nginx.service
-	sudo systemctl stop postgresql
+	sudo systemctl stop nginx.service || true 
+	sudo systemctl stop postgresql || true 
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
 	docker-compose -f docker-compose-dev.yml up -d --build --remove-orphans
-	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
-	sudo systemctl restart nginx
 
 run-dev:
 	@make build-dev-env
@@ -78,7 +76,7 @@ clean_logs:
 	mkdir -p -m 777 logs/app
 
 doc:
-	swag init -g cmd/main.go -o docs
+	swag init -g cmd/api/main.go -o docs
 
 generate:
 	go generate ${ALL_PKG}

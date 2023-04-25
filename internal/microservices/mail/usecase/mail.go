@@ -17,14 +17,14 @@ import (
 
 //go:generate mockgen -destination=./mocks/mockusecase.go -package=mocks -source=../interface.go
 
-type UseCase struct {
+type mailUC struct {
 	cfg      *config.Config
 	mailRepo mailRepo.MailRepoI
 	userUC   user.UseCaseI
 }
 
 func New(c *config.Config, mR mailRepo.MailRepoI, uUC user.UseCaseI) mail.UseCaseI {
-	return &UseCase{
+	return &mailUC{
 		cfg:      c,
 		mailRepo: mR,
 		userUC:   uUC,
@@ -39,7 +39,7 @@ var defaultFolderNames = map[string]string{
 	"spam":   "Спам",
 }
 
-func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
+func (uc *mailUC) GetFolders(userID uint64) ([]models.Folder, error) {
 	folders, err := uc.mailRepo.SelectFoldersByUser(userID)
 	if err != nil {
 		return []models.Folder{}, pkgErrors.Wrap(err, "get folders")
@@ -48,7 +48,7 @@ func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
 	return folders, nil
 }
 
-func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error) {
+func (uc *mailUC) GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error) {
 	folder, err := uc.mailRepo.SelectFolderByUserNFolderSlug(userID, folderSlug)
 	if err != nil {
 		return folder, pkgErrors.Wrap(err, "get folder info")
@@ -57,7 +57,7 @@ func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Fold
 	return folder, nil
 }
 
-func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
+func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
 	folder, err := uc.GetFolderInfo(userID, folderSlug)
@@ -97,7 +97,7 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models
 	return messages, nil
 }
 
-func (uc *UseCase) CreateDefaultFolders(userID uint64) ([]models.Folder, error) {
+func (uc *mailUC) CreateDefaultFolders(userID uint64) ([]models.Folder, error) {
 	for key, value := range defaultFolderNames {
 		currentFolder := models.Folder{
 			UserID:    userID,
@@ -114,7 +114,7 @@ func (uc *UseCase) CreateDefaultFolders(userID uint64) ([]models.Folder, error) 
 	return uc.GetFolders(userID)
 }
 
-func (uc *UseCase) getLastLocalFolderID(userID uint64) (uint64, error) {
+func (uc *mailUC) getLastLocalFolderID(userID uint64) (uint64, error) {
 	folders, err := uc.GetFolders(userID)
 	if err != nil {
 		return 0, pkgErrors.Wrap(err, "get folders")
@@ -146,7 +146,7 @@ func (uc *UseCase) getLastLocalFolderID(userID uint64) (uint64, error) {
 	return lastLocalID, nil
 }
 
-func (uc *UseCase) CreateFolder(userID uint64, form models.FormFolder) (*models.Folder, error) {
+func (uc *mailUC) CreateFolder(userID uint64, form models.FormFolder) (*models.Folder, error) {
 	if err := validation.FolderName(form.Name); err != nil {
 		return nil, pkgErrors.Wrap(err, "validate folder name")
 	}
@@ -175,7 +175,7 @@ func (uc *UseCase) CreateFolder(userID uint64, form models.FormFolder) (*models.
 	return folder, nil
 }
 
-func (uc *UseCase) isDefaultFolder(folderSlug string) bool {
+func (uc *mailUC) isDefaultFolder(folderSlug string) bool {
 	for key := range defaultFolderNames {
 		if folderSlug == key {
 			return true
@@ -185,7 +185,7 @@ func (uc *UseCase) isDefaultFolder(folderSlug string) bool {
 	return false
 }
 
-func (uc *UseCase) DeleteFolder(userID uint64, folderSlug string) error {
+func (uc *mailUC) DeleteFolder(userID uint64, folderSlug string) error {
 	if uc.isDefaultFolder(folderSlug) {
 		return pkgErrors.WithMessage(errors.ErrDeleteDefaultFolder, "is default folder")
 	}
@@ -215,7 +215,7 @@ func (uc *UseCase) DeleteFolder(userID uint64, folderSlug string) error {
 	return nil
 }
 
-func (uc *UseCase) EditFolder(userID uint64, folderSlug string, form models.FormFolder) (*models.Folder, error) {
+func (uc *mailUC) EditFolder(userID uint64, folderSlug string, form models.FormFolder) (*models.Folder, error) {
 	if err := validation.FolderName(form.Name); err != nil {
 		return nil, pkgErrors.Wrap(err, "validate folder name")
 	}
@@ -244,7 +244,7 @@ func (uc *UseCase) EditFolder(userID uint64, folderSlug string, form models.Form
 	return uc.GetFolderInfo(userID, folderSlug)
 }
 
-func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
+func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
 	var firstMessage *models.MessageInfo
 	var prevMessage *models.MessageInfo
 	replyToMsgID := &messageID
@@ -291,7 +291,7 @@ func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageI
 	return firstMessage, nil
 }
 
-func (uc *UseCase) DeleteMessage(userID uint64, messageID uint64) error {
+func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64) error {
 	curMessage, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
@@ -329,7 +329,7 @@ func (uc *UseCase) DeleteMessage(userID uint64, messageID uint64) error {
 	return nil
 }
 
-func (uc *UseCase) ValidateRecipients(recipients []string) ([]string, []string) {
+func (uc *mailUC) ValidateRecipients(recipients []string) ([]string, []string) {
 	var validEmails []string
 	var invalidEmails []string
 
@@ -345,7 +345,7 @@ func (uc *UseCase) ValidateRecipients(recipients []string) ([]string, []string) 
 	return validEmails, invalidEmails
 }
 
-func (uc *UseCase) SaveDraft(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	folder, err := uc.GetFolderInfo(fromUserID, "drafts")
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
@@ -390,7 +390,7 @@ func (uc *UseCase) SaveDraft(fromUserID uint64, message models.FormMessage) (*mo
 	return uc.GetMessage(fromUserID, newMessage.MessageID)
 }
 
-func (uc *UseCase) mapRecipients(newRecipients []string, oldMessage *models.MessageInfo) map[string]string {
+func (uc *mailUC) mapRecipients(newRecipients []string, oldMessage *models.MessageInfo) map[string]string {
 	recipients := make(map[string]string)
 
 	for _, recipient := range newRecipients {
@@ -408,7 +408,7 @@ func (uc *UseCase) mapRecipients(newRecipients []string, oldMessage *models.Mess
 	return recipients
 }
 
-func (uc *UseCase) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormMessage) (*models.MessageInfo, error) {
 	message, err := uc.GetMessage(fromUserID, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message")
@@ -467,7 +467,7 @@ func (uc *UseCase) EditDraft(fromUserID uint64, messageID uint64, formMessage mo
 	return uc.GetMessage(fromUserID, messageID)
 }
 
-func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	if len(message.Recipients) == 0 {
 		return nil, pkgErrors.WithMessage(errors.ErrNoValidEmails, "send message")
 	}
@@ -515,7 +515,7 @@ func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*
 	return uc.GetMessage(fromUserID, newMessage.MessageID)
 }
 
-func (uc *UseCase) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
+func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
 		Title:      "Ваше сообщение не доставлено",
@@ -528,7 +528,7 @@ func (uc *UseCase) SendFailedSendingMessage(recipientEmail string, invalidEmails
 	return uc.sendMessageFromSupport(formMessage)
 }
 
-func (uc *UseCase) SendWelcomeMessage(recipientEmail string) error {
+func (uc *mailUC) SendWelcomeMessage(recipientEmail string) error {
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
 		Title:      "Добро пожаловать в почту Mailbox",
@@ -540,7 +540,7 @@ func (uc *UseCase) SendWelcomeMessage(recipientEmail string) error {
 	return uc.sendMessageFromSupport(formMessage)
 }
 
-func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error {
+func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) error {
 	supportAccount, err := uc.getSupportAccount()
 	if err != nil {
 		return pkgErrors.Wrap(err, "send support message : get support account")
@@ -550,11 +550,11 @@ func (uc *UseCase) sendMessageFromSupport(message models.FormMessage) error {
 	return err
 }
 
-func (uc *UseCase) getSupportAccount() (*models.UserInfo, error) {
+func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {
 	return uc.userUC.GetInfoByEmail("support@mailbox.ru")
 }
 
-func (uc *UseCase) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
+func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
 	err := uc.mailRepo.UpdateMessageState(userID, messageID, "seen", true)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message seen : update state")
@@ -563,7 +563,7 @@ func (uc *UseCase) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.M
 	return uc.GetMessage(userID, messageID)
 }
 
-func (uc *UseCase) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
+func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
 	err := uc.mailRepo.UpdateMessageState(userID, messageID, "seen", false)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message unseen : update state")
@@ -572,7 +572,7 @@ func (uc *UseCase) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models
 	return uc.GetMessage(userID, messageID)
 }
 
-func (uc *UseCase) getFolderByMessage(userID uint64, messageID uint64) (*models.Folder, error) {
+func (uc *mailUC) getFolderByMessage(userID uint64, messageID uint64) (*models.Folder, error) {
 	folder, err := uc.mailRepo.SelectFolderByUserNMessage(userID, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "select folder by message")
@@ -581,7 +581,7 @@ func (uc *UseCase) getFolderByMessage(userID uint64, messageID uint64) (*models.
 	return folder, nil
 }
 
-func (uc *UseCase) MoveMessageToFolder(userID uint64, messageID uint64, folderSlug string) error {
+func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, folderSlug string) error {
 	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
@@ -616,4 +616,18 @@ func (uc *UseCase) MoveMessageToFolder(userID uint64, messageID uint64, folderSl
 	}
 
 	return nil
+}
+
+func (uc *mailUC) GetCustomFolders(userID uint64) ([]models.Folder, error) {
+	localNames := make([]string, 0, len(defaultFolderNames))
+	for localName := range defaultFolderNames {
+		localNames = append(localNames, localName)
+	}
+
+	folders, err := uc.mailRepo.SelectCustomFoldersByUser(userID, localNames)
+	if err != nil {
+		return []models.Folder{}, pkgErrors.Wrap(err, "get folders")
+	}
+
+	return folders, nil
 }
