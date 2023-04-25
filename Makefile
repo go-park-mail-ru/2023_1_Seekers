@@ -53,7 +53,7 @@ run-file_storage-service:
 	go run ./cmd/file_storage/main.go -config=./cmd/config/dev.yml
 
 docker-prune:
-	bash -c 'docker system prune'
+	@bash -c 'docker system prune'
 
 docker-stop:
 	@bash -c "docker kill $(shell eval docker ps -q)"
@@ -61,7 +61,7 @@ docker-stop:
 	@make docker-prune
 
 docker-rm-volumes:
-	bash -c "docker volume rm $(shell eval docker volume ls -qf dangling=true)"
+	@bash -c "docker volume rm $(shell eval docker volume ls -qf dangling=true)"
 
 docker-rm-images:
 	@bash -c "docker rmi $(shell eval docker images -q)"

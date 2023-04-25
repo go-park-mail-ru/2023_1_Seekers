@@ -33,7 +33,7 @@ func (g *AuthServerGRPC) Start(url string) error {
 	return g.grpcServer.Serve(lis)
 }
 
-func (g *AuthServerGRPC) CreateSession(ctx context.Context, protoUID *auth_proto.UID) (*auth_proto.Session, error) {
+func (g *AuthServerGRPC) CreateSession(_ context.Context, protoUID *auth_proto.UID) (*auth_proto.Session, error) {
 	session, err := g.authUC.CreateSession(protoUID.UID)
 	if err != nil {
 		return nil, errors.Wrap(err, "auth server - CreateSession")

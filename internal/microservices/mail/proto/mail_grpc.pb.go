@@ -29,6 +29,13 @@ type MailServiceClient interface {
 	SendWelcomeMessage(ctx context.Context, in *RecipientEmail, opts ...grpc.CallOption) (*Nothing, error)
 	MarkMessageAsSeen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
 	MarkMessageAsUnseen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
+	CreateFolder(ctx context.Context, in *CreateFolderParams, opts ...grpc.CallOption) (*Folder, error)
+	DeleteFolder(ctx context.Context, in *DeleteFolderParams, opts ...grpc.CallOption) (*Nothing, error)
+	EditFolder(ctx context.Context, in *EditFolderParams, opts ...grpc.CallOption) (*Folder, error)
+	DeleteMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*Nothing, error)
+	SaveDraft(ctx context.Context, in *SaveDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
+	EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
+	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 }
 
 type mailServiceClient struct {
@@ -138,6 +145,69 @@ func (c *mailServiceClient) MarkMessageAsUnseen(ctx context.Context, in *UIDMess
 	return out, nil
 }
 
+func (c *mailServiceClient) CreateFolder(ctx context.Context, in *CreateFolderParams, opts ...grpc.CallOption) (*Folder, error) {
+	out := new(Folder)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/CreateFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) DeleteFolder(ctx context.Context, in *DeleteFolderParams, opts ...grpc.CallOption) (*Nothing, error) {
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/DeleteFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) EditFolder(ctx context.Context, in *EditFolderParams, opts ...grpc.CallOption) (*Folder, error) {
+	out := new(Folder)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/EditFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) DeleteMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*Nothing, error) {
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/DeleteMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) SaveDraft(ctx context.Context, in *SaveDraftParams, opts ...grpc.CallOption) (*MessageInfo, error) {
+	out := new(MessageInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/SaveDraft", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error) {
+	out := new(MessageInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/EditDraft", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error) {
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/MoveMessageToFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -153,6 +223,13 @@ type MailServiceServer interface {
 	SendWelcomeMessage(context.Context, *RecipientEmail) (*Nothing, error)
 	MarkMessageAsSeen(context.Context, *UIDMessageID) (*MessageInfo, error)
 	MarkMessageAsUnseen(context.Context, *UIDMessageID) (*MessageInfo, error)
+	CreateFolder(context.Context, *CreateFolderParams) (*Folder, error)
+	DeleteFolder(context.Context, *DeleteFolderParams) (*Nothing, error)
+	EditFolder(context.Context, *EditFolderParams) (*Folder, error)
+	DeleteMessage(context.Context, *UIDMessageID) (*Nothing, error)
+	SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error)
+	EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error)
+	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -192,6 +269,27 @@ func (UnimplementedMailServiceServer) MarkMessageAsSeen(context.Context, *UIDMes
 }
 func (UnimplementedMailServiceServer) MarkMessageAsUnseen(context.Context, *UIDMessageID) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MarkMessageAsUnseen not implemented")
+}
+func (UnimplementedMailServiceServer) CreateFolder(context.Context, *CreateFolderParams) (*Folder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFolder not implemented")
+}
+func (UnimplementedMailServiceServer) DeleteFolder(context.Context, *DeleteFolderParams) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolder not implemented")
+}
+func (UnimplementedMailServiceServer) EditFolder(context.Context, *EditFolderParams) (*Folder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditFolder not implemented")
+}
+func (UnimplementedMailServiceServer) DeleteMessage(context.Context, *UIDMessageID) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessage not implemented")
+}
+func (UnimplementedMailServiceServer) SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveDraft not implemented")
+}
+func (UnimplementedMailServiceServer) EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditDraft not implemented")
+}
+func (UnimplementedMailServiceServer) MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveMessageToFolder not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -404,6 +502,132 @@ func _MailService_MarkMessageAsUnseen_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_CreateFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFolderParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).CreateFolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/CreateFolder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).CreateFolder(ctx, req.(*CreateFolderParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_DeleteFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFolderParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).DeleteFolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/DeleteFolder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).DeleteFolder(ctx, req.(*DeleteFolderParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_EditFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditFolderParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).EditFolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/EditFolder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).EditFolder(ctx, req.(*EditFolderParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_DeleteMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UIDMessageID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).DeleteMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/DeleteMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).DeleteMessage(ctx, req.(*UIDMessageID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_SaveDraft_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveDraftParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).SaveDraft(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/SaveDraft",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).SaveDraft(ctx, req.(*SaveDraftParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_EditDraft_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditDraftParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).EditDraft(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/EditDraft",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).EditDraft(ctx, req.(*EditDraftParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_MoveMessageToFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToFolderParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).MoveMessageToFolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/MoveMessageToFolder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).MoveMessageToFolder(ctx, req.(*MoveToFolderParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -454,6 +678,34 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MarkMessageAsUnseen",
 			Handler:    _MailService_MarkMessageAsUnseen_Handler,
+		},
+		{
+			MethodName: "CreateFolder",
+			Handler:    _MailService_CreateFolder_Handler,
+		},
+		{
+			MethodName: "DeleteFolder",
+			Handler:    _MailService_DeleteFolder_Handler,
+		},
+		{
+			MethodName: "EditFolder",
+			Handler:    _MailService_EditFolder_Handler,
+		},
+		{
+			MethodName: "DeleteMessage",
+			Handler:    _MailService_DeleteMessage_Handler,
+		},
+		{
+			MethodName: "SaveDraft",
+			Handler:    _MailService_SaveDraft_Handler,
+		},
+		{
+			MethodName: "EditDraft",
+			Handler:    _MailService_EditDraft_Handler,
+		},
+		{
+			MethodName: "MoveMessageToFolder",
+			Handler:    _MailService_MoveMessageToFolder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -130,3 +130,43 @@ func (g *AuthServerGRPC) MarkMessageAsUnseen(ctx context.Context, protoId *mail_
 
 	return utils.ProtoByMessageInfo(*info), nil
 }
+
+func (g *AuthServerGRPC) CreateFolder(ctx context.Context, params *mail_proto.CreateFolderParams) (*mail_proto.Folder, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) DeleteFolder(ctx context.Context, params *mail_proto.DeleteFolderParams) (*mail_proto.Nothing, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) EditFolder(ctx context.Context, params *mail_proto.EditFolderParams) (*mail_proto.Folder, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) DeleteMessage(ctx context.Context, id *mail_proto.UIDMessageID) (*mail_proto.Nothing, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) SaveDraft(ctx context.Context, params *mail_proto.SaveDraftParams) (*mail_proto.MessageInfo, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) EditDraft(ctx context.Context, params *mail_proto.EditDraftParams) (*mail_proto.MessageInfo, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) MoveMessageToFolder(ctx context.Context, params *mail_proto.MoveToFolderParams) (*mail_proto.Nothing, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *AuthServerGRPC) mustEmbedUnimplementedMailServiceServer() {
+	//TODO implement me
+	panic("implement me")
+}

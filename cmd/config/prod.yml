@@ -45,12 +45,18 @@ routes:
   route_auth: /auth
   route_csrf: /csrf
 
-  route_get_folder_messages: /folder/{slug}
-  route_get_folders: /folders
-  route_get_message: /message/{id:[0-9]+}
+  route_message: /message/{id:[0-9]+}
   route_send_message: /message/send
+  route_save_draft_message: message/save
   route_read_message: /message/{id:[0-9]+}/read
-  route_unread_message: /message/{id:[0-9]+}/
+  route_unread_message: /message/{id:[0-9]+}/unread
+  route_move_to_folder: /message/{id:[0-9]+}/move
+  route_move_to_folder_query_folder_slug: folderSlug
+  route_get_folders: /folders
+  route_folder: /folder/{slug}
+  route_create_folder: /folder/create
+  route_edit_folder: /folder/{slug}/edit
+  route_get_folders_is_custom: custom
 
   route_user: /user
   route_user_info: /user/info

@@ -181,3 +181,38 @@ func FoldersModelByProto(protoFolders *mail_proto.FoldersResponse) []models.Fold
 
 	return folders
 }
+
+func ProtoSaveDraftParamsByModels(uID uint64, form *models.FormMessage) *mail_proto.SaveDraftParams {
+	var replyMessageID *mail_proto.UID = nil
+	if form.ReplyToMessageID != nil {
+		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
+	}
+
+	return &mail_proto.SaveDraftParams{
+		UID: uID,
+		Message: &mail_proto.Message{
+			Recipients:       form.Recipients,
+			Title:            form.Title,
+			Text:             form.Text,
+			ReplyToMessageID: replyMessageID,
+		},
+	}
+}
+
+func ProtoEditDraftParamsByModels(uID, messageId uint64, form *models.FormMessage) *mail_proto.EditDraftParams {
+	var replyMessageID *mail_proto.UID = nil
+	if form.ReplyToMessageID != nil {
+		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
+	}
+
+	return &mail_proto.EditDraftParams{
+		UID:       uID,
+		MessageID: messageId,
+		Message: &mail_proto.Message{
+			Recipients:       form.Recipients,
+			Title:            form.Title,
+			Text:             form.Text,
+			ReplyToMessageID: replyMessageID,
+		},
+	}
+}

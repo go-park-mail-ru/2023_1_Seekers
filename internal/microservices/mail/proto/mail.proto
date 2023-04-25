@@ -55,6 +55,43 @@ message FoldersResponse {
   repeated Folder Folders = 1;
 }
 
+message FormFolder {
+  string Name = 1;
+}
+
+message CreateFolderParams {
+  uint64 UID = 1;
+  FormFolder FormFolder = 2;
+}
+
+message DeleteFolderParams {
+  uint64 UID = 1;
+  string FolderSlug = 2;
+}
+
+message EditFolderParams {
+  uint64 UID = 1;
+  string FolderSlug = 2;
+  FormFolder FormFolder = 3;
+}
+
+message SaveDraftParams {
+  uint64 UID = 1;
+  Message Message = 2;
+}
+
+message MoveToFolderParams{
+  uint64 UID = 1;
+  uint64 MessageID = 2;
+  string FolderSlug = 3;
+}
+
+message EditDraftParams {
+  uint64 UID = 1;
+  uint64 MessageID = 2;
+  Message Message = 3;
+}
+
 message UserInfo {
   string Email = 1;
   string FirstName = 2;
@@ -100,4 +137,11 @@ service MailService {
   rpc SendWelcomeMessage(RecipientEmail) returns (Nothing) {}
   rpc MarkMessageAsSeen(UIDMessageID) returns (MessageInfo) {}
   rpc MarkMessageAsUnseen(UIDMessageID) returns (MessageInfo) {}
+  rpc CreateFolder(CreateFolderParams) returns (Folder) {}
+  rpc DeleteFolder(DeleteFolderParams) returns (Nothing) {}
+  rpc EditFolder(EditFolderParams) returns (Folder) {}
+  rpc DeleteMessage(UIDMessageID) returns (Nothing) {}
+  rpc SaveDraft(SaveDraftParams) returns (MessageInfo) {}
+  rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
+  rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
 }

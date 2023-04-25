@@ -8,7 +8,10 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -46,12 +49,9 @@ func (uc *UseCase) GetFolders(userID uint64) ([]models.Folder, error) {
 }
 
 func (uc *UseCase) GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error) {
-	folder, err := uc.mailRepo.SelectFolderByUserNFolder(userID, folderSlug)
+	folder, err := uc.mailRepo.SelectFolderByUserNFolderSlug(userID, folderSlug)
 	if err != nil {
 		return folder, pkgErrors.Wrap(err, "get folder info")
-	}
-	if folder == nil {
-		return nil, pkgErrors.WithMessage(errors.ErrFolderNotFound, "get folder info")
 	}
 
 	return folder, nil
@@ -65,7 +65,7 @@ func (uc *UseCase) GetFolderMessages(userID uint64, folderSlug string) ([]models
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
-	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolder(userID, folder.FolderID)
+	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -112,6 +112,136 @@ func (uc *UseCase) CreateDefaultFolders(userID uint64) ([]models.Folder, error) 
 	}
 
 	return uc.GetFolders(userID)
+}
+
+func (uc *UseCase) getLastLocalFolderID(userID uint64) (uint64, error) {
+	folders, err := uc.GetFolders(userID)
+	if err != nil {
+		return 0, pkgErrors.Wrap(err, "get folders")
+	}
+
+	var lastLocalID uint64
+	var IDs []uint64
+
+	for _, folder := range folders {
+		curID, err := strconv.ParseUint(folder.LocalName, 10, 64)
+		if err == nil {
+			IDs = append(IDs, curID)
+		}
+	}
+
+	sort.Slice(IDs, func(i, j int) bool {
+		return IDs[i] < IDs[j]
+	})
+
+	for _, id := range IDs {
+		lastLocalID++
+
+		if id != lastLocalID {
+			lastLocalID--
+			break
+		}
+	}
+
+	return lastLocalID, nil
+}
+
+func (uc *UseCase) CreateFolder(userID uint64, form models.FormFolder) (*models.Folder, error) {
+	if err := validation.FolderName(form.Name); err != nil {
+		return nil, pkgErrors.Wrap(err, "validate folder name")
+	}
+
+	folder, err := uc.mailRepo.SelectFolderByUserNFolderName(userID, form.Name)
+	if !pkgErrors.Is(err, errors.ErrFolderNotFound) {
+		return nil, pkgErrors.WithMessage(errors.ErrFolderAlreadyExists, "select folder by user and name")
+	}
+
+	lastLocalID, err := uc.getLastLocalFolderID(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get last local folder id")
+	}
+
+	folder = &models.Folder{
+		UserID:    userID,
+		LocalName: strconv.FormatUint(lastLocalID+1, 10),
+		Name:      form.Name,
+	}
+
+	_, err = uc.mailRepo.InsertFolder(folder)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "insert folder")
+	}
+
+	return folder, nil
+}
+
+func (uc *UseCase) isDefaultFolder(folderSlug string) bool {
+	for key := range defaultFolderNames {
+		if folderSlug == key {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (uc *UseCase) DeleteFolder(userID uint64, folderSlug string) error {
+	if uc.isDefaultFolder(folderSlug) {
+		return pkgErrors.WithMessage(errors.ErrDeleteDefaultFolder, "is default folder")
+	}
+
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get folder info")
+	}
+
+	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
+	}
+
+	for _, message := range messages {
+		err = uc.MoveMessageToFolder(userID, message.MessageID, "trash")
+		if err != nil {
+			return pkgErrors.Wrap(err, "move message to trash folder")
+		}
+	}
+
+	err = uc.mailRepo.DeleteFolder(folder.FolderID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get delete folder")
+	}
+
+	return nil
+}
+
+func (uc *UseCase) EditFolder(userID uint64, folderSlug string, form models.FormFolder) (*models.Folder, error) {
+	if err := validation.FolderName(form.Name); err != nil {
+		return nil, pkgErrors.Wrap(err, "validate folder name")
+	}
+
+	if uc.isDefaultFolder(folderSlug) {
+		return nil, pkgErrors.WithMessage(errors.ErrEditDefaultFolder, "is default folder")
+	}
+
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get folder info")
+	}
+
+	_, err = uc.mailRepo.SelectFolderByUserNFolderName(userID, form.Name)
+	if !pkgErrors.Is(err, errors.ErrFolderNotFound) {
+		return nil, pkgErrors.WithMessage(errors.ErrFolderAlreadyExists, "select folder by user and name")
+	}
+
+	folder.Name = form.Name
+
+	err = uc.mailRepo.UpdateFolder(*folder)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "update folder")
+	}
+
+	return uc.GetFolderInfo(userID, folderSlug)
 }
 
 func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
@@ -161,6 +291,44 @@ func (uc *UseCase) GetMessage(userID uint64, messageID uint64) (*models.MessageI
 	return firstMessage, nil
 }
 
+func (uc *UseCase) DeleteMessage(userID uint64, messageID uint64) error {
+	curMessage, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
+	}
+	if curMessage == nil {
+		return pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
+	}
+
+	fromFolder, err := uc.getFolderByMessage(userID, messageID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get folder by message")
+	}
+
+	switch fromFolder.LocalName {
+	case "trash":
+		err = uc.mailRepo.DeleteMessageForUser(userID, messageID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "delete message for user")
+		}
+		break
+	case "drafts":
+		err = uc.mailRepo.DeleteMessageFromMessages(messageID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "delete message full")
+		}
+
+		break
+	default:
+		err = uc.MoveMessageToFolder(userID, messageID, "trash")
+		if err != nil {
+			return pkgErrors.Wrap(err, "move message to trash folder")
+		}
+	}
+
+	return nil
+}
+
 func (uc *UseCase) ValidateRecipients(recipients []string) ([]string, []string) {
 	var validEmails []string
 	var invalidEmails []string
@@ -175,6 +343,128 @@ func (uc *UseCase) ValidateRecipients(recipients []string) ([]string, []string) 
 	}
 
 	return validEmails, invalidEmails
+}
+
+func (uc *UseCase) SaveDraft(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+	folder, err := uc.GetFolderInfo(fromUserID, "drafts")
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+	}
+
+	var user2folder []models.User2Folder
+	user2folder = append(user2folder, models.User2Folder{
+		UserID:   fromUserID,
+		FolderID: folder.FolderID,
+	})
+
+	for _, email := range message.Recipients {
+		recipient, err := uc.userUC.GetInfoByEmail(email)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+		}
+
+		folder, err = uc.GetFolderInfo(recipient.UserID, "inbox")
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+		}
+
+		user2folder = append(user2folder, models.User2Folder{
+			UserID:   recipient.UserID,
+			FolderID: folder.FolderID,
+		})
+	}
+
+	newMessage := models.MessageInfo{
+		Title:            message.Title,
+		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
+		Text:             message.Text,
+		ReplyToMessageID: message.ReplyToMessageID,
+		IsDraft:          true,
+	}
+
+	err = uc.mailRepo.InsertMessage(fromUserID, &newMessage, user2folder)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "send message : insert message")
+	}
+
+	return uc.GetMessage(fromUserID, newMessage.MessageID)
+}
+
+func (uc *UseCase) mapRecipients(newRecipients []string, oldMessage *models.MessageInfo) map[string]string {
+	recipients := make(map[string]string)
+
+	for _, recipient := range newRecipients {
+		recipients[recipient] = "add"
+	}
+
+	for _, recipient := range oldMessage.Recipients {
+		if _, ok := recipients[recipient.Email]; ok {
+			recipients[recipient.Email] = "save"
+		} else {
+			recipients[recipient.Email] = "del"
+		}
+	}
+
+	return recipients
+}
+
+func (uc *UseCase) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormMessage) (*models.MessageInfo, error) {
+	message, err := uc.GetMessage(fromUserID, messageID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get message")
+	}
+
+	recipients := uc.mapRecipients(formMessage.Recipients, message)
+	var toInsert []models.User2Folder
+	var toDelete []models.User2Folder
+
+	for email, value := range recipients {
+		switch value {
+		case "add":
+			recipient, err := uc.userUC.GetInfoByEmail(email)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+			}
+
+			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+			}
+
+			toInsert = append(toInsert, models.User2Folder{
+				UserID:   recipient.UserID,
+				FolderID: folder.FolderID,
+			})
+			break
+		case "del":
+			recipient, err := uc.userUC.GetInfoByEmail(email)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "edit draft : get user info by email")
+			}
+
+			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+			}
+
+			toDelete = append(toDelete, models.User2Folder{
+				UserID:   recipient.UserID,
+				FolderID: folder.FolderID,
+			})
+			break
+		}
+	}
+
+	message.Title = formMessage.Title
+	message.Text = formMessage.Text
+	message.ReplyToMessageID = formMessage.ReplyToMessageID
+	message.CreatedAt = common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat)
+
+	if err := uc.mailRepo.UpdateMessage(message, toInsert, toDelete); err != nil {
+		return nil, pkgErrors.Wrap(err, "edit draft : update message")
+	}
+
+	return uc.GetMessage(fromUserID, messageID)
 }
 
 func (uc *UseCase) SendMessage(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
@@ -243,7 +533,7 @@ func (uc *UseCase) SendWelcomeMessage(recipientEmail string) error {
 		Recipients: []string{recipientEmail},
 		Title:      "Добро пожаловать в почту Mailbox",
 		Text: "Это письмо создано автоматически сервером Mailbox.ru, отвечать на него не нужно.\n" +
-			"Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использванием!",
+			"Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использованием!",
 		ReplyToMessageID: nil,
 	}
 
@@ -280,4 +570,50 @@ func (uc *UseCase) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models
 	}
 
 	return uc.GetMessage(userID, messageID)
+}
+
+func (uc *UseCase) getFolderByMessage(userID uint64, messageID uint64) (*models.Folder, error) {
+	folder, err := uc.mailRepo.SelectFolderByUserNMessage(userID, messageID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select folder by message")
+	}
+
+	return folder, nil
+}
+
+func (uc *UseCase) MoveMessageToFolder(userID uint64, messageID uint64, folderSlug string) error {
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
+	}
+	if message == nil {
+		return pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
+	}
+
+	toFolder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get golder info")
+	}
+
+	fromFolder, err := uc.getFolderByMessage(userID, messageID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get folder by message")
+	}
+
+	if *fromFolder == *toFolder {
+		return pkgErrors.WithMessage(errors.ErrMoveToSameFolder, "new folder is equals with old folder")
+	}
+	if toFolder.LocalName == "drafts" {
+		return pkgErrors.WithMessage(errors.ErrMoveToDraftFolder, "new folder is equals draft folder")
+	}
+	if fromFolder.LocalName == "drafts" {
+		return pkgErrors.WithMessage(errors.ErrMoveFromDraftFolder, "old folder is equals draft folder")
+	}
+
+	err = uc.mailRepo.UpdateMessageFolder(userID, messageID, toFolder.FolderID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "update message folder")
+	}
+
+	return nil
 }

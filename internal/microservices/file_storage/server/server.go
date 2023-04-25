@@ -34,7 +34,7 @@ func (g *FStorageServerGRPC) Start(url string) error {
 	return g.grpcServer.Serve(lis)
 }
 
-func (g *FStorageServerGRPC) Get(ctx context.Context, params *fstorage_proto.GetFileParams) (*fstorage_proto.File, error) {
+func (g *FStorageServerGRPC) Get(_ context.Context, params *fstorage_proto.GetFileParams) (*fstorage_proto.File, error) {
 	file, err := g.fStorageUC.Get(params.BucketName, params.FileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "file storage - get")
@@ -42,7 +42,7 @@ func (g *FStorageServerGRPC) Get(ctx context.Context, params *fstorage_proto.Get
 	return utils.ProtoFileByModel(file), nil
 }
 
-func (g *FStorageServerGRPC) Upload(ctx context.Context, protoFile *fstorage_proto.File) (*fstorage_proto.Nothing, error) {
+func (g *FStorageServerGRPC) Upload(_ context.Context, protoFile *fstorage_proto.File) (*fstorage_proto.Nothing, error) {
 	if err := g.fStorageUC.Upload(utils.FileModelByProto(protoFile)); err != nil {
 		return nil, errors.Wrap(err, "file storage - upload")
 	}

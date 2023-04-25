@@ -25,7 +25,8 @@ type MessageInfo struct {
 	ReplyTo          *MessageInfo `json:"reply_to" gorm:"-"`
 	Seen             bool         `json:"seen"`
 	Favorite         bool         `json:"favorite"`
-	Deleted          bool         `json:"deleted"`
+	Deleted          bool         `json:"-"`
+	IsDraft          bool         `json:"is_draft"`
 }
 
 type User2Folder struct {
@@ -47,6 +48,14 @@ func (form *FormMessage) Sanitize() {
 	for i, s := range form.Recipients {
 		form.Recipients[i] = html.EscapeString(s)
 	}
+}
+
+type FormFolder struct {
+	Name string `json:"name"`
+}
+
+func (form *FormFolder) Sanitize() {
+	form.Name = html.EscapeString(form.Name)
 }
 
 type FolderResponse struct {
