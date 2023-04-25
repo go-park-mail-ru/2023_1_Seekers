@@ -34,6 +34,48 @@ func (m *MockMailRepoI) EXPECT() *MockMailRepoIMockRecorder {
 	return m.recorder
 }
 
+// DeleteFolder mocks base method.
+func (m *MockMailRepoI) DeleteFolder(folderID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteFolder", folderID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteFolder indicates an expected call of DeleteFolder.
+func (mr *MockMailRepoIMockRecorder) DeleteFolder(folderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFolder", reflect.TypeOf((*MockMailRepoI)(nil).DeleteFolder), folderID)
+}
+
+// DeleteMessageForUser mocks base method.
+func (m *MockMailRepoI) DeleteMessageForUser(userID, messageID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMessageForUser", userID, messageID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMessageForUser indicates an expected call of DeleteMessageForUser.
+func (mr *MockMailRepoIMockRecorder) DeleteMessageForUser(userID, messageID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessageForUser", reflect.TypeOf((*MockMailRepoI)(nil).DeleteMessageForUser), userID, messageID)
+}
+
+// DeleteMessageFromMessages mocks base method.
+func (m *MockMailRepoI) DeleteMessageFromMessages(messageID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMessageFromMessages", messageID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMessageFromMessages indicates an expected call of DeleteMessageFromMessages.
+func (mr *MockMailRepoIMockRecorder) DeleteMessageFromMessages(messageID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessageFromMessages", reflect.TypeOf((*MockMailRepoI)(nil).DeleteMessageFromMessages), messageID)
+}
+
 // InsertFolder mocks base method.
 func (m *MockMailRepoI) InsertFolder(folder *models.Folder) (uint64, error) {
 	m.ctrl.T.Helper()
@@ -63,34 +105,79 @@ func (mr *MockMailRepoIMockRecorder) InsertMessage(fromUserID, message, user2fol
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMessage", reflect.TypeOf((*MockMailRepoI)(nil).InsertMessage), fromUserID, message, user2folder)
 }
 
-// SelectFolderByUserNFolder mocks base method.
-func (m *MockMailRepoI) SelectFolderByUserNFolder(userID uint64, folderSlug string) (*models.Folder, error) {
+// SelectCustomFoldersByUser mocks base method.
+func (m *MockMailRepoI) SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SelectFolderByUserNFolder", userID, folderSlug)
+	ret := m.ctrl.Call(m, "SelectCustomFoldersByUser", userID, defaultLocalNames)
+	ret0, _ := ret[0].([]models.Folder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SelectCustomFoldersByUser indicates an expected call of SelectCustomFoldersByUser.
+func (mr *MockMailRepoIMockRecorder) SelectCustomFoldersByUser(userID, defaultLocalNames interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectCustomFoldersByUser", reflect.TypeOf((*MockMailRepoI)(nil).SelectCustomFoldersByUser), userID, defaultLocalNames)
+}
+
+// SelectFolderByUserNFolderName mocks base method.
+func (m *MockMailRepoI) SelectFolderByUserNFolderName(userID uint64, folderName string) (*models.Folder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectFolderByUserNFolderName", userID, folderName)
 	ret0, _ := ret[0].(*models.Folder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SelectFolderByUserNFolder indicates an expected call of SelectFolderByUserNFolder.
-func (mr *MockMailRepoIMockRecorder) SelectFolderByUserNFolder(userID, folderSlug interface{}) *gomock.Call {
+// SelectFolderByUserNFolderName indicates an expected call of SelectFolderByUserNFolderName.
+func (mr *MockMailRepoIMockRecorder) SelectFolderByUserNFolderName(userID, folderName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderByUserNFolder", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderByUserNFolder), userID, folderSlug)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderByUserNFolderName", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderByUserNFolderName), userID, folderName)
 }
 
-// SelectFolderMessagesByUserNFolder mocks base method.
-func (m *MockMailRepoI) SelectFolderMessagesByUserNFolder(userID, folderID uint64) ([]models.MessageInfo, error) {
+// SelectFolderByUserNFolderSlug mocks base method.
+func (m *MockMailRepoI) SelectFolderByUserNFolderSlug(userID uint64, folderSlug string) (*models.Folder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SelectFolderMessagesByUserNFolder", userID, folderID)
+	ret := m.ctrl.Call(m, "SelectFolderByUserNFolderSlug", userID, folderSlug)
+	ret0, _ := ret[0].(*models.Folder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SelectFolderByUserNFolderSlug indicates an expected call of SelectFolderByUserNFolderSlug.
+func (mr *MockMailRepoIMockRecorder) SelectFolderByUserNFolderSlug(userID, folderSlug interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderByUserNFolderSlug", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderByUserNFolderSlug), userID, folderSlug)
+}
+
+// SelectFolderByUserNMessage mocks base method.
+func (m *MockMailRepoI) SelectFolderByUserNMessage(userID, messageID uint64) (*models.Folder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectFolderByUserNMessage", userID, messageID)
+	ret0, _ := ret[0].(*models.Folder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SelectFolderByUserNMessage indicates an expected call of SelectFolderByUserNMessage.
+func (mr *MockMailRepoIMockRecorder) SelectFolderByUserNMessage(userID, messageID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderByUserNMessage", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderByUserNMessage), userID, messageID)
+}
+
+// SelectFolderMessagesByUserNFolderID mocks base method.
+func (m *MockMailRepoI) SelectFolderMessagesByUserNFolderID(userID, folderID uint64) ([]models.MessageInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectFolderMessagesByUserNFolderID", userID, folderID)
 	ret0, _ := ret[0].([]models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SelectFolderMessagesByUserNFolder indicates an expected call of SelectFolderMessagesByUserNFolder.
-func (mr *MockMailRepoIMockRecorder) SelectFolderMessagesByUserNFolder(userID, folderID interface{}) *gomock.Call {
+// SelectFolderMessagesByUserNFolderID indicates an expected call of SelectFolderMessagesByUserNFolderID.
+func (mr *MockMailRepoIMockRecorder) SelectFolderMessagesByUserNFolderID(userID, folderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderMessagesByUserNFolder", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderMessagesByUserNFolder), userID, folderID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderMessagesByUserNFolderID", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderMessagesByUserNFolderID), userID, folderID)
 }
 
 // SelectFoldersByUser mocks base method.
@@ -136,6 +223,48 @@ func (m *MockMailRepoI) SelectRecipientsByMessage(messageID, fromUserID uint64) 
 func (mr *MockMailRepoIMockRecorder) SelectRecipientsByMessage(messageID, fromUserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectRecipientsByMessage", reflect.TypeOf((*MockMailRepoI)(nil).SelectRecipientsByMessage), messageID, fromUserID)
+}
+
+// UpdateFolder mocks base method.
+func (m *MockMailRepoI) UpdateFolder(folder models.Folder) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFolder", folder)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFolder indicates an expected call of UpdateFolder.
+func (mr *MockMailRepoIMockRecorder) UpdateFolder(folder interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFolder", reflect.TypeOf((*MockMailRepoI)(nil).UpdateFolder), folder)
+}
+
+// UpdateMessage mocks base method.
+func (m *MockMailRepoI) UpdateMessage(message *models.MessageInfo, toInsert, toDelete []models.User2Folder) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMessage", message, toInsert, toDelete)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMessage indicates an expected call of UpdateMessage.
+func (mr *MockMailRepoIMockRecorder) UpdateMessage(message, toInsert, toDelete interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMessage", reflect.TypeOf((*MockMailRepoI)(nil).UpdateMessage), message, toInsert, toDelete)
+}
+
+// UpdateMessageFolder mocks base method.
+func (m *MockMailRepoI) UpdateMessageFolder(userID, messageID, folderID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMessageFolder", userID, messageID, folderID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMessageFolder indicates an expected call of UpdateMessageFolder.
+func (mr *MockMailRepoIMockRecorder) UpdateMessageFolder(userID, messageID, folderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMessageFolder", reflect.TypeOf((*MockMailRepoI)(nil).UpdateMessageFolder), userID, messageID, folderID)
 }
 
 // UpdateMessageState mocks base method.

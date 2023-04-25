@@ -144,4 +144,5 @@ service MailService {
   rpc SaveDraft(SaveDraftParams) returns (MessageInfo) {}
   rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
+  rpc GetCustomFolders(UID) returns (FoldersResponse) {}
 }

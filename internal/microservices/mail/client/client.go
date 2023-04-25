@@ -216,3 +216,12 @@ func (g MailClientGRPC) MoveMessageToFolder(userID, messageID uint64, folderSlug
 
 	return nil
 }
+
+func (g MailClientGRPC) GetCustomFolders(userID uint64) ([]models.Folder, error) {
+	protoFolderResp, err := g.mailClient.GetCustomFolders(context.TODO(), &mail_proto.UID{UID: userID})
+	if err != nil {
+		return nil, errors.Wrap(err, "mail client - GetCustomFolders")
+	}
+
+	return utils.FoldersModelByProto(protoFolderResp), nil
+}

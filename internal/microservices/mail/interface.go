@@ -4,6 +4,7 @@ import "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 
 type UseCaseI interface {
 	GetFolders(userID uint64) ([]models.Folder, error)
+	GetCustomFolders(userID uint64) ([]models.Folder, error)
 	GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error)
 	GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error)
 	CreateDefaultFolders(userID uint64) ([]models.Folder, error)

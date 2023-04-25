@@ -1467,7 +1467,7 @@ var file_mail_proto_rawDesc = []byte{
 	0x6f, 0x52, 0x0c, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x49, 0x6e, 0x66, 0x6f, 0x22,
 	0x1f, 0x0a, 0x07, 0x4e, 0x6f, 0x74, 0x68, 0x69, 0x6e, 0x67, 0x12, 0x14, 0x0a, 0x05, 0x64, 0x75,
 	0x6d, 0x6d, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x64, 0x75, 0x6d, 0x6d, 0x79,
-	0x32, 0xa2, 0x0a, 0x0a, 0x0b, 0x4d, 0x61, 0x69, 0x6c, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x32, 0xe6, 0x0a, 0x0a, 0x0b, 0x4d, 0x61, 0x69, 0x6c, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x12, 0x3c, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x73, 0x12, 0x0f,
 	0x2e, 0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x55, 0x49, 0x44, 0x1a,
 	0x1b, 0x2e, 0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x46, 0x6f, 0x6c,
@@ -1549,8 +1549,13 @@ var file_mail_proto_rawDesc = []byte{
 	0x2e, 0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x76, 0x65,
 	0x54, 0x6f, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x13,
 	0x2e, 0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4e, 0x6f, 0x74, 0x68,
-	0x69, 0x6e, 0x67, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x2e, 0x2f, 0x6d, 0x61, 0x69, 0x6c, 0x5f,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x6e, 0x67, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x43, 0x75, 0x73, 0x74,
+	0x6f, 0x6d, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x73, 0x12, 0x0f, 0x2e, 0x6d, 0x61, 0x69, 0x6c,
+	0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x55, 0x49, 0x44, 0x1a, 0x1b, 0x2e, 0x6d, 0x61, 0x69,
+	0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x73, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x2e, 0x2f, 0x6d,
+	0x61, 0x69, 0x6c, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -1621,26 +1626,28 @@ var file_mail_proto_depIdxs = []int32{
 	14, // 27: mail_proto.MailService.SaveDraft:input_type -> mail_proto.SaveDraftParams
 	16, // 28: mail_proto.MailService.EditDraft:input_type -> mail_proto.EditDraftParams
 	15, // 29: mail_proto.MailService.MoveMessageToFolder:input_type -> mail_proto.MoveToFolderParams
-	9,  // 30: mail_proto.MailService.GetFolders:output_type -> mail_proto.FoldersResponse
-	8,  // 31: mail_proto.MailService.GetFolderInfo:output_type -> mail_proto.Folder
-	20, // 32: mail_proto.MailService.GetFolderMessages:output_type -> mail_proto.MessagesInfoResponse
-	9,  // 33: mail_proto.MailService.CreateDefaultFolders:output_type -> mail_proto.FoldersResponse
-	18, // 34: mail_proto.MailService.GetMessage:output_type -> mail_proto.MessageInfo
-	19, // 35: mail_proto.MailService.ValidateRecipients:output_type -> mail_proto.ValidateRecipientsResponse
-	18, // 36: mail_proto.MailService.SendMessage:output_type -> mail_proto.MessageInfo
-	21, // 37: mail_proto.MailService.SendFailedSendingMessage:output_type -> mail_proto.Nothing
-	21, // 38: mail_proto.MailService.SendWelcomeMessage:output_type -> mail_proto.Nothing
-	18, // 39: mail_proto.MailService.MarkMessageAsSeen:output_type -> mail_proto.MessageInfo
-	18, // 40: mail_proto.MailService.MarkMessageAsUnseen:output_type -> mail_proto.MessageInfo
-	8,  // 41: mail_proto.MailService.CreateFolder:output_type -> mail_proto.Folder
-	21, // 42: mail_proto.MailService.DeleteFolder:output_type -> mail_proto.Nothing
-	8,  // 43: mail_proto.MailService.EditFolder:output_type -> mail_proto.Folder
-	21, // 44: mail_proto.MailService.DeleteMessage:output_type -> mail_proto.Nothing
-	18, // 45: mail_proto.MailService.SaveDraft:output_type -> mail_proto.MessageInfo
-	18, // 46: mail_proto.MailService.EditDraft:output_type -> mail_proto.MessageInfo
-	21, // 47: mail_proto.MailService.MoveMessageToFolder:output_type -> mail_proto.Nothing
-	30, // [30:48] is the sub-list for method output_type
-	12, // [12:30] is the sub-list for method input_type
+	0,  // 30: mail_proto.MailService.GetCustomFolders:input_type -> mail_proto.UID
+	9,  // 31: mail_proto.MailService.GetFolders:output_type -> mail_proto.FoldersResponse
+	8,  // 32: mail_proto.MailService.GetFolderInfo:output_type -> mail_proto.Folder
+	20, // 33: mail_proto.MailService.GetFolderMessages:output_type -> mail_proto.MessagesInfoResponse
+	9,  // 34: mail_proto.MailService.CreateDefaultFolders:output_type -> mail_proto.FoldersResponse
+	18, // 35: mail_proto.MailService.GetMessage:output_type -> mail_proto.MessageInfo
+	19, // 36: mail_proto.MailService.ValidateRecipients:output_type -> mail_proto.ValidateRecipientsResponse
+	18, // 37: mail_proto.MailService.SendMessage:output_type -> mail_proto.MessageInfo
+	21, // 38: mail_proto.MailService.SendFailedSendingMessage:output_type -> mail_proto.Nothing
+	21, // 39: mail_proto.MailService.SendWelcomeMessage:output_type -> mail_proto.Nothing
+	18, // 40: mail_proto.MailService.MarkMessageAsSeen:output_type -> mail_proto.MessageInfo
+	18, // 41: mail_proto.MailService.MarkMessageAsUnseen:output_type -> mail_proto.MessageInfo
+	8,  // 42: mail_proto.MailService.CreateFolder:output_type -> mail_proto.Folder
+	21, // 43: mail_proto.MailService.DeleteFolder:output_type -> mail_proto.Nothing
+	8,  // 44: mail_proto.MailService.EditFolder:output_type -> mail_proto.Folder
+	21, // 45: mail_proto.MailService.DeleteMessage:output_type -> mail_proto.Nothing
+	18, // 46: mail_proto.MailService.SaveDraft:output_type -> mail_proto.MessageInfo
+	18, // 47: mail_proto.MailService.EditDraft:output_type -> mail_proto.MessageInfo
+	21, // 48: mail_proto.MailService.MoveMessageToFolder:output_type -> mail_proto.Nothing
+	9,  // 49: mail_proto.MailService.GetCustomFolders:output_type -> mail_proto.FoldersResponse
+	31, // [31:50] is the sub-list for method output_type
+	12, // [12:31] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name

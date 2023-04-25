@@ -72,13 +72,6 @@ func ProtoMsgInfoResponseByModels(infos []models.MessageInfo) *mail_proto.Messag
 	return &mail_proto.MessagesInfoResponse{MessagesInfo: protoMessagesInfo}
 }
 
-func ProtoMsgInfoResponseByModel(info *models.MessageInfo) *mail_proto.MessagesInfoResponse {
-	var protoMessagesInfo []*mail_proto.MessageInfo
-	protoMessagesInfo = append(protoMessagesInfo, ProtoByMessageInfo(*info))
-
-	return &mail_proto.MessagesInfoResponse{MessagesInfo: protoMessagesInfo}
-}
-
 func UserInfoModelByProto(protoUserInfo *mail_proto.UserInfo) *models.UserInfo {
 	return &models.UserInfo{
 		FirstName: protoUserInfo.FirstName,
@@ -215,4 +208,8 @@ func ProtoEditDraftParamsByModels(uID, messageId uint64, form *models.FormMessag
 			ReplyToMessageID: replyMessageID,
 		},
 	}
+}
+
+func FormFolderModelByProto(protoForm *mail_proto.FormFolder) models.FormFolder {
+	return models.FormFolder{Name: protoForm.Name}
 }

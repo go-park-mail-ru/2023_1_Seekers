@@ -254,6 +254,17 @@ func (m mailRepository) InsertMessage(fromUserID uint64, message *models.Message
 	})
 }
 
+func (m mailRepository) SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error) {
+	var folders []models.Folder
+
+	tx := m.db.Where("user_id = ? AND local_name NOT IN ?", userID, defaultLocalNames).Order("name").Find(&folders)
+	if err := tx.Error; err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return folders, nil
+}
+
 func (m mailRepository) UpdateMessage(message *models.MessageInfo, toInsert []models.User2Folder, toDelete []models.User2Folder) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
 		err := m.updateMessageInMessages(message, tx)

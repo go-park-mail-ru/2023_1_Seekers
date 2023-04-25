@@ -36,6 +36,7 @@ type MailServiceClient interface {
 	SaveDraft(ctx context.Context, in *SaveDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
+	GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 }
 
 type mailServiceClient struct {
@@ -208,6 +209,15 @@ func (c *mailServiceClient) MoveMessageToFolder(ctx context.Context, in *MoveToF
 	return out, nil
 }
 
+func (c *mailServiceClient) GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error) {
+	out := new(FoldersResponse)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetCustomFolders", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -230,6 +240,7 @@ type MailServiceServer interface {
 	SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error)
 	EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error)
 	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
+	GetCustomFolders(context.Context, *UID) (*FoldersResponse, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -290,6 +301,9 @@ func (UnimplementedMailServiceServer) EditDraft(context.Context, *EditDraftParam
 }
 func (UnimplementedMailServiceServer) MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MoveMessageToFolder not implemented")
+}
+func (UnimplementedMailServiceServer) GetCustomFolders(context.Context, *UID) (*FoldersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCustomFolders not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -628,6 +642,24 @@ func _MailService_MoveMessageToFolder_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_GetCustomFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetCustomFolders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/GetCustomFolders",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetCustomFolders(ctx, req.(*UID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -706,6 +738,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MoveMessageToFolder",
 			Handler:    _MailService_MoveMessageToFolder_Handler,
+		},
+		{
+			MethodName: "GetCustomFolders",
+			Handler:    _MailService_GetCustomFolders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
