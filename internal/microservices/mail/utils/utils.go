@@ -44,9 +44,9 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		replyToInfo = ProtoByMessageInfo(*info.ReplyTo)
 	}
 
-	var replyMessageID uint64
+	var replyMessageID *mail_proto.UID = nil
 	if info.ReplyToMessageID != nil {
-		replyMessageID = *info.ReplyToMessageID
+		replyMessageID = &mail_proto.UID{UID: *info.ReplyToMessageID}
 	}
 
 	return &mail_proto.MessageInfo{
@@ -98,6 +98,11 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		replyToInfo = MessageInfoByProto(protoMessageInfo.ReplyTo)
 	}
 
+	var replyMessageID *uint64 = nil
+	if protoMessageInfo.ReplyToMessageID != nil {
+		replyMessageID = &protoMessageInfo.ReplyToMessageID.UID
+	}
+
 	return &models.MessageInfo{
 		MessageID:        protoMessageInfo.MessageID,
 		FromUser:         *UserInfoModelByProto(protoMessageInfo.FromUser),
@@ -105,7 +110,7 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		Title:            protoMessageInfo.Title,
 		CreatedAt:        protoMessageInfo.CreatedAt,
 		Text:             protoMessageInfo.Text,
-		ReplyToMessageID: &protoMessageInfo.ReplyToMessageID,
+		ReplyToMessageID: replyMessageID,
 		ReplyTo:          replyToInfo,
 		Seen:             protoMessageInfo.Seen,
 		Favorite:         protoMessageInfo.Favorite,
@@ -123,11 +128,16 @@ func MessagesInfoModelByProto(protoResponse *mail_proto.MessagesInfoResponse) []
 }
 
 func MessageModelByProto(protoMsg *mail_proto.Message) models.FormMessage {
+	var replyMessageID *uint64 = nil
+	if protoMsg.ReplyToMessageID != nil {
+		replyMessageID = &protoMsg.ReplyToMessageID.UID
+	}
+
 	return models.FormMessage{
 		Recipients:       protoMsg.Recipients,
 		Title:            protoMsg.Title,
 		Text:             protoMsg.Text,
-		ReplyToMessageID: &protoMsg.ReplyToMessageID,
+		ReplyToMessageID: replyMessageID,
 	}
 }
 
@@ -136,9 +146,9 @@ func MessageModelByProtoSendParams(protoParams *mail_proto.SendMessageParams) mo
 }
 
 func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_proto.SendMessageParams {
-	var replyMessageID uint64
+	var replyMessageID *mail_proto.UID = nil
 	if form.ReplyToMessageID != nil {
-		replyMessageID = *form.ReplyToMessageID
+		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
 	}
 
 	return &mail_proto.SendMessageParams{

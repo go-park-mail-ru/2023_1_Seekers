@@ -25,7 +25,7 @@ message Message {
   repeated string  Recipients = 1;
   string Title = 2;
   string Text = 3;
-  uint64 ReplyToMessageID = 4;
+  UID ReplyToMessageID = 4;
 }
 
 message SendMessageParams {
@@ -68,7 +68,7 @@ message MessageInfo {
   string Title = 4;
   string CreatedAt = 5;
   string Text = 6;
-  uint64 ReplyToMessageID = 7;
+  UID ReplyToMessageID = 7;
   MessageInfo ReplyTo = 8;
   bool Seen = 9;
   bool Favorite = 10;

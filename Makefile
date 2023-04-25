@@ -53,10 +53,18 @@ run-file_storage-service:
 	go run ./cmd/file_storage/main.go -config=./cmd/config/dev.yml
 
 docker-prune:
-	docker system prune
+	bash -c 'docker system prune'
 
-docker-prune-volumes:
-	docker volume rm $(docker volume ls -qf dangling=true)
+docker-stop:
+	@bash -c "docker kill $(shell eval docker ps -q)"
+	@bash -c "docker rm $(shell eval docker ps -a -q)"
+	@make docker-prune
+
+docker-rm-volumes:
+	bash -c "docker volume rm $(shell eval docker volume ls -qf dangling=true)"
+
+docker-rm-images:
+	@bash -c "docker rmi $(shell eval docker images -q)"
 
 cov:
 	mkdir -p ${COV_DIR}
