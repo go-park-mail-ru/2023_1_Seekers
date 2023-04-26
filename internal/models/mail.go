@@ -36,8 +36,8 @@ type User2Folder struct {
 
 type FormMessage struct {
 	Recipients       []string `json:"recipients" validate:"required"`
-	Title            string   `json:"title" validate:"required"`
-	Text             string   `json:"text" validate:"required"`
+	Title            string   `json:"title"`
+	Text             string   `json:"text"`
 	ReplyToMessageID *uint64  `json:"reply_to"`
 }
 
