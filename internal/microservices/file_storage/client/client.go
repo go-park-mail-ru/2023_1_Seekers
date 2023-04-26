@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/utils"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	pkgGrpc "github.com/go-park-mail-ru/2023_1_Seekers/pkg/grpc"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -23,7 +24,7 @@ func NewFstorageClientGRPC(cc *grpc.ClientConn) file_storage.UseCaseI {
 func (f *FStorageClientGRPC) Get(bName, fName string) (*models.S3File, error) {
 	file, err := f.fStorageClient.Get(context.TODO(), utils.ProtoGetParams(bName, fName))
 	if err != nil {
-		return nil, errors.Wrap(err, "fStorage client - Get")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "fStorage client - Get"))
 	}
 	return utils.FileModelByProto(file), nil
 }
@@ -31,7 +32,7 @@ func (f *FStorageClientGRPC) Get(bName, fName string) (*models.S3File, error) {
 func (f *FStorageClientGRPC) Upload(file *models.S3File) error {
 	_, err := f.fStorageClient.Upload(context.TODO(), utils.ProtoFileByModel(file))
 	if err != nil {
-		return errors.Wrap(err, "fStorage client - Upload")
+		return pkgGrpc.CauseError(errors.Wrap(err, "fStorage client - Upload"))
 	}
 	return nil
 }

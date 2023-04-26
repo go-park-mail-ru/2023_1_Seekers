@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -34,14 +35,8 @@ func (h *logHook) Levels() []logrus.Level {
 	return h.LogLevels
 }
 
-var logEntry *logrus.Entry
-
 type Logger struct {
 	*logrus.Entry
-}
-
-func Get() *Logger {
-	return &Logger{logEntry}
 }
 
 func (l *Logger) LoggerWithFields(fields map[string]any) *Logger {
@@ -52,7 +47,7 @@ func (l *Logger) LoggerWithField(key string, val any) *Logger {
 	return &Logger{l.WithField(key, val)}
 }
 
-func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, logsDir string) {
+func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, logsDir string) *Logger {
 	l := logrus.New()
 	loc, err := time.LoadLocation("Europe/Moscow")
 	if err != nil {
@@ -82,7 +77,8 @@ func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, 
 		},
 	})
 
-	if err = os.MkdirAll(logsDir, 0777); err != nil {
+	dirName := filepath.Dir(logsFName)
+	if err = os.MkdirAll(dirName, 0777); err != nil {
 		if os.IsExist(err) {
 			logrus.Fatalf("Error: Such path already exists")
 		}
@@ -109,7 +105,7 @@ func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, 
 
 	l.SetLevel(level)
 
-	logEntry = logrus.NewEntry(l)
+	return &Logger{logrus.NewEntry(l)}
 }
 
 type color uint8

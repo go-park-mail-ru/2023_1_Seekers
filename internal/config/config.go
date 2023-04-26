@@ -16,9 +16,14 @@ type Config struct {
 	} `yaml:"project"`
 
 	Logger struct {
-		LogsDir        string `yaml:"logs_dir" env-default:"logs/app/"`
-		LogsFileName   string `yaml:"logs_file_name" env-default:"server_"`
-		LogsTimeFormat string `yaml:"logs_time_format" env-default:"2006-01-02_15:04:05_MST"`
+		LogsDir                 string `yaml:"logs_dir" env-default:"logs/app/"`
+		LogsApiFileName         string `yaml:"logs_api_file_name"`
+		LogsAuthFileName        string `yaml:"logs_auth_file_name"`
+		LogsFileServiceFileName string `yaml:"logs_file_service_file_name"`
+		LogsUserFileName        string `yaml:"logs_user_file_name"`
+		LogsMailFileName        string `yaml:"logs_mail_file_name"`
+		LogsUseStdOut           *bool  `yaml:"logs_use_std_out" env-default:"true"`
+		LogsTimeFormat          string `yaml:"logs_time_format" env-default:"2006-01-02_15:04:05_MST"`
 	} `yaml:"logger"`
 
 	FileGPRCService struct {
@@ -75,7 +80,7 @@ type Config struct {
 	} `yaml:"sessions"`
 
 	Routes struct {
-		RoutePrefix string `yaml:"route_prefix" env-default:"/api/v1"`
+		RoutePrefix string `yaml:"route_prefix"`
 
 		//AuthRoutes
 		RouteSignin string `yaml:"route_signin" env-default:"/signin"`
@@ -126,9 +131,9 @@ type Config struct {
 	} `yaml:"mail"`
 
 	Cors struct {
-		AllowedHeaders []string `yaml:"allowed_headers" env-default:"Content-Type,Content-Length,X-Csrf-Token,application/json,text/xml"`
-		AllowedOrigins []string `yaml:"allowed_origins" env-default:"http://127.0.0.1:8002,http://localhost:8002,http://localhost,http://127.0.0.1,http://89.208.197.150:8002,https://mailbx.ru,https://www.mailbx.ru"`
-		AllowedMethods []string `yaml:"allowed_methods" env-default:"POST,GET,PUT,DELETE"`
+		AllowedHeaders []string `yaml:"allowed_headers"`
+		AllowedOrigins []string `yaml:"allowed_origins"`
+		AllowedMethods []string `yaml:"allowed_methods"`
 	} `yaml:"cors"`
 }
 

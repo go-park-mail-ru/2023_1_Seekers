@@ -24,6 +24,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	//globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsAuthFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
+
 	redisAddr := cfg.Redis.RedisHost + ":" + cfg.Redis.RedisPort
 	redisPw := cfg.Redis.RedisPassword
 

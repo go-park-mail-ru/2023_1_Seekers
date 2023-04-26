@@ -37,8 +37,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	logger.Init(log.InfoLevel, true, cfg.Logger.LogsFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
-	globalLogger := logger.Get()
+	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsApiFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 	router := mux.NewRouter()
 
 	authServiceCon, err := grpc.Dial(

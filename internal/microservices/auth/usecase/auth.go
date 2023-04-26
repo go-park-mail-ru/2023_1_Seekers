@@ -7,13 +7,10 @@ import (
 	authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository"
 	_user "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 //go:generate mockgen -destination=./mocks/mockauthusecase.go -package=mocks -source=../interface.go
@@ -83,14 +80,6 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 	user, err = u.userUC.Create(user)
 	if err != nil {
 		return nil, nil, pkgErrors.Wrap(err, "sign up")
-	}
-
-	col := image.GetRandColor()
-	label := common.GetFirstUtf(user.FirstName)
-	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
-	err = u.userUC.EditAvatar(user.UserID, &models.Image{Data: img}, false)
-	if err != nil {
-		log.Warn(err, "edit avatar")
 	}
 
 	session, err := u.CreateSession(user.UserID)

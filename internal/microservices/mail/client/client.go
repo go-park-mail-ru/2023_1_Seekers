@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/utils"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	pkgGrpc "github.com/go-park-mail-ru/2023_1_Seekers/pkg/grpc"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -23,7 +24,7 @@ func NewMailClientGRPC(cc *grpc.ClientConn) mail.UseCaseI {
 func (g MailClientGRPC) GetFolders(userID uint64) ([]models.Folder, error) {
 	folderResp, err := g.mailClient.GetFolders(context.TODO(), &mail_proto.UID{UID: userID})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - GetFolders")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetFolders"))
 	}
 
 	return utils.FoldersModelByProto(folderResp), nil
@@ -35,7 +36,7 @@ func (g MailClientGRPC) GetFolderInfo(userID uint64, folderSlug string) (*models
 		FolderSlug: folderSlug,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - GetFolderInfo")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetFolderInfo"))
 	}
 
 	return utils.FolderModelByProto(protoFolder), nil
@@ -47,7 +48,7 @@ func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]m
 		FolderSlug: folderSlug,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - GetFolderMessages")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetFolderMessages"))
 	}
 
 	return utils.MessagesInfoModelByProto(protoMsgInfo), nil
@@ -56,7 +57,7 @@ func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]m
 func (g MailClientGRPC) CreateDefaultFolders(userID uint64) ([]models.Folder, error) {
 	protoFolderResp, err := g.mailClient.CreateDefaultFolders(context.TODO(), &mail_proto.UID{UID: userID})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - CreateDefaultFolders")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - CreateDefaultFolders"))
 	}
 
 	return utils.FoldersModelByProto(protoFolderResp), nil
@@ -68,7 +69,7 @@ func (g MailClientGRPC) GetMessage(userID uint64, messageID uint64) (*models.Mes
 		MessageID: messageID,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - GetMessage")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetMessage"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -86,7 +87,7 @@ func (g MailClientGRPC) ValidateRecipients(recipients []string) ([]string, []str
 func (g MailClientGRPC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.SendMessage(context.TODO(), utils.ProtoSendParamsByUIDNMessage(userID, &message))
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - SendMessage")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendMessage"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -98,7 +99,7 @@ func (g MailClientGRPC) SendFailedSendingMessage(recipientEmail string, invalidE
 		InvalidEmails: invalidEmails,
 	})
 	if err != nil {
-		return errors.Wrap(err, "mail client - SendFailedSendingMessage")
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendFailedSendingMessage"))
 	}
 
 	return nil
@@ -107,7 +108,7 @@ func (g MailClientGRPC) SendFailedSendingMessage(recipientEmail string, invalidE
 func (g MailClientGRPC) SendWelcomeMessage(recipientEmail string) error {
 	_, err := g.mailClient.SendWelcomeMessage(context.TODO(), &mail_proto.RecipientEmail{RecipientEmail: recipientEmail})
 	if err != nil {
-		return errors.Wrap(err, "mail client - SendWelcomeMessage")
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendWelcomeMessage"))
 	}
 
 	return nil
@@ -119,7 +120,7 @@ func (g MailClientGRPC) MarkMessageAsSeen(userID uint64, messageID uint64) (*mod
 		MessageID: messageID,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - MarkMessageAsSeen")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - MarkMessageAsSeen"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -131,7 +132,7 @@ func (g MailClientGRPC) MarkMessageAsUnseen(userID uint64, messageID uint64) (*m
 		MessageID: messageID,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - MarkMessageAsUnseen")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - MarkMessageAsUnseen"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -143,7 +144,7 @@ func (g MailClientGRPC) CreateFolder(userID uint64, form models.FormFolder) (*mo
 		FormFolder: &mail_proto.FormFolder{Name: form.Name},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - CreateFolder")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - CreateFolder"))
 	}
 
 	return utils.FolderModelByProto(protoFolder), nil
@@ -155,7 +156,7 @@ func (g MailClientGRPC) DeleteFolder(userID uint64, folderSlug string) error {
 		FolderSlug: folderSlug,
 	})
 	if err != nil {
-		return errors.Wrap(err, "mail client - DeleteFolder")
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - DeleteFolder"))
 	}
 
 	return nil
@@ -168,7 +169,7 @@ func (g MailClientGRPC) EditFolder(userID uint64, folderSlug string, form models
 		FormFolder: &mail_proto.FormFolder{Name: form.Name},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - EditFolder")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - EditFolder"))
 	}
 
 	return utils.FolderModelByProto(protoFolder), nil
@@ -180,7 +181,7 @@ func (g MailClientGRPC) DeleteMessage(userID uint64, messageID uint64) error {
 		MessageID: messageID,
 	})
 	if err != nil {
-		return errors.Wrap(err, "mail client - DeleteMessage")
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - DeleteMessage"))
 	}
 
 	return nil
@@ -189,7 +190,7 @@ func (g MailClientGRPC) DeleteMessage(userID uint64, messageID uint64) error {
 func (g MailClientGRPC) SaveDraft(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.SaveDraft(context.TODO(), utils.ProtoSaveDraftParamsByModels(userID, &message))
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - SaveDraft")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - SaveDraft"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -198,7 +199,7 @@ func (g MailClientGRPC) SaveDraft(userID uint64, message models.FormMessage) (*m
 func (g MailClientGRPC) EditDraft(userID, messageID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.EditDraft(context.TODO(), utils.ProtoEditDraftParamsByModels(userID, messageID, &message))
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - EditDraft")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - EditDraft"))
 	}
 
 	return utils.MessageInfoByProto(protoMsgInfo), nil
@@ -211,7 +212,7 @@ func (g MailClientGRPC) MoveMessageToFolder(userID, messageID uint64, folderSlug
 		FolderSlug: folderSlug,
 	})
 	if err != nil {
-		return errors.Wrap(err, "mail client - MoveMessageToFolder")
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - MoveMessageToFolder"))
 	}
 
 	return nil
@@ -220,7 +221,7 @@ func (g MailClientGRPC) MoveMessageToFolder(userID, messageID uint64, folderSlug
 func (g MailClientGRPC) GetCustomFolders(userID uint64) ([]models.Folder, error) {
 	protoFolderResp, err := g.mailClient.GetCustomFolders(context.TODO(), &mail_proto.UID{UID: userID})
 	if err != nil {
-		return nil, errors.Wrap(err, "mail client - GetCustomFolders")
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetCustomFolders"))
 	}
 
 	return utils.FoldersModelByProto(protoFolderResp), nil

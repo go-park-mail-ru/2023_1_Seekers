@@ -14,6 +14,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"net/mail"
 	"path/filepath"
 )
@@ -51,6 +52,14 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	}
 	if _, ok := validMailAddress(user.Email); !ok {
 		return nil, errors.ErrInvalidEmail
+	}
+
+	col := image.GetRandColor()
+	label := common.GetFirstUtf(user.FirstName)
+	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
+	err = u.EditAvatar(user.UserID, &models.Image{Data: img}, false)
+	if err != nil {
+		log.Warn(err, "edit avatar")
 	}
 
 	return u.userRepo.Create(user)
@@ -197,7 +206,7 @@ func (u *useCase) EditPw(ID uint64, form *models.EditPasswordRequest) error {
 	}
 
 	if err := validation.Password(form.Password, u.cfg.Password.PasswordSaltLen); err != nil {
-		return pkgErrors.Wrap(err, "create")
+		return pkgErrors.Wrap(err, "edit password")
 	}
 	hashPw, err := crypto.HashPw(form.Password, u.cfg.Password.PasswordSaltLen)
 	if err != nil {

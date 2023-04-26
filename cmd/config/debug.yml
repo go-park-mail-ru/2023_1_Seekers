@@ -5,7 +5,12 @@ project:
   project_base_dir: 2023_1_Seekers
 logger:
   logs_dir: logs/app/
-  logs_file_name: server_
+  logs_api_file_name: api/debug_
+  logs_auth_file_name: auth/debug_
+  logs_file_service_file_name: file_service/debug_
+  logs_user_file_name: user/debug_
+  logs_mail_file_name: mail/debug_
+  logs_use_std_out: true
   logs_time_format: 2006-01-02_15:04:05_MST
 
 file_grpc_service:
