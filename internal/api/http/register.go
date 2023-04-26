@@ -21,9 +21,9 @@ func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, 
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserAvatar, m.CheckAuth(m.CheckCSRF(userH.EditAvatar))).Methods(http.MethodPut)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RoutePw, m.CheckAuth(m.CheckCSRF(userH.EditPw))).Methods(http.MethodPut)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserAvatar, userH.GetAvatar).
-		Methods(http.MethodGet).Queries(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserAvatarQueryEmail, "{email}")
+		Methods(http.MethodGet).Queries(cfg.Routes.RouteUserAvatarQueryEmail, "{email}")
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserInfo, userH.GetInfo).
-		Methods(http.MethodGet).Queries(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserInfoQueryEmail, "{email}")
+		Methods(http.MethodGet).Queries(cfg.Routes.RouteUserInfoQueryEmail, "{email}")
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteUserInfo, m.CheckAuth(userH.GetPersonalInfo)).Methods(http.MethodGet)
 
 	// Mail
