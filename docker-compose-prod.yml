@@ -93,7 +93,7 @@ services:
         ipv4_address: 172.28.0.7
     ports:
       - "8005:8005"
-    restart: "no"
+    restart: always
 
   user_service:
     env_file:
@@ -115,7 +115,7 @@ services:
         ipv4_address: 172.28.0.8
     ports:
       - "8006:8006"
-    restart: "no"
+    restart: always
 
   auth_service:
     env_file:
@@ -137,7 +137,7 @@ services:
         ipv4_address: 172.28.0.9
     ports:
       - "8007:8007"
-    restart: "no"
+    restart: always
 
   mail_service:
     env_file:
@@ -159,7 +159,7 @@ services:
         ipv4_address: 172.28.0.10
     ports:
       - "8008:8008"
-    restart: "no"
+    restart: always
 
 
 volumes:

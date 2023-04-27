@@ -11,3 +11,4 @@ cover2.out
 coverage.html
 vendor/
 .env-dev
+metrics/data/
