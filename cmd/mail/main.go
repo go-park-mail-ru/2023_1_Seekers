@@ -8,7 +8,10 @@ import (
 	_mailServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/server"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/usecase"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
+	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
+	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,6 +27,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsMailFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 
 	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
 		cfg.DB.DBUser, cfg.DB.DBPassword, cfg.DB.DBHost, cfg.DB.DBPort, cfg.DB.DBName, cfg.DB.DBSSLMode)
@@ -48,7 +53,17 @@ func main() {
 	mailRepo := _mailRepo.New(db)
 	mailUC := _mailUCase.New(cfg, mailRepo, userServiceClient)
 
-	grpcServer := grpc.NewServer()
+	metrics, err := promMetrics.NewMetricsGRPCServer("mail")
+	if err != nil {
+		log.Fatal("mail - failed create metrics server", err)
+	}
+	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+	)
+
+	//promMetrics.RunGRPCMetricsServer(":9004")
 	userGRPCServer := _mailServer.NewAuthServerGRPC(grpcServer, mailUC)
 
 	log.Info("mail server started")

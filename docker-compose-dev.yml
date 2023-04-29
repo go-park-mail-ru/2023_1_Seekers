@@ -66,9 +66,10 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.11
+    network_mode: "host"
+#    networks:
+#      my_network:
+#        ipv4_address: 172.28.0.16
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -77,8 +78,8 @@ services:
     volumes:
       - ./metrics/data/prometheus:/prometheus
       - ./metrics/config/prometheus:/etc/prometheus
-    ports:
-      - "9090:9090"
+#    ports:
+#      - "9090:9090"
     #    depends_on:
     #      - api
     restart: "no"
@@ -87,7 +88,7 @@ services:
     image: quay.io/prometheus/node-exporter:latest
     networks:
       my_network:
-        ipv4_address: 172.28.0.12
+        ipv4_address: 172.28.0.17
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -106,6 +107,24 @@ services:
     ports:
       - "9100:9100"
     restart: "no"
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./metrics/data/grafana:/var/lib/grafana
+      - ./metrics/config/grafana:/etc/grafana/provisioning/
+      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
+    env_file:
+      - .env
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.18
+    restart: "no"
+
 
 volumes:
   cache:

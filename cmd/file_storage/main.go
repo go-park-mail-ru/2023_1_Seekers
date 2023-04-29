@@ -8,7 +8,10 @@ import (
 	_fStorageRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/repository/S3"
 	_fStorageServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/server"
 	_fStorageUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/usecase"
+	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
+	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -24,6 +27,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsFileServiceFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
+
 	endpoint := aws.String(cfg.S3.S3Endpoint)
 	region := aws.String(cfg.S3.S3Region)
 	disableSSL := aws.Bool(true)
@@ -37,7 +42,18 @@ func main() {
 	fStorageRepo := _fStorageRepo.New(s3Session)
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 
-	grpcServer := grpc.NewServer()
+	metrics, err := promMetrics.NewMetricsGRPCServer("file_service")
+	if err != nil {
+		log.Fatal("file service - failed create metrics server", err)
+	}
+	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+	)
+
+	//promMetrics.RunGRPCMetricsServer(":9003")
+
 	fStorageGRPCServer := _fStorageServer.NewFStorageServerGRPC(grpcServer, fStorageUC)
 	log.Info("file storage server started")
 	err = fStorageGRPCServer.Start(":" + cfg.FileGPRCService.Port)

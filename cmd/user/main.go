@@ -8,7 +8,10 @@ import (
 	_userRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/repository/postgres"
 	_userServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/server"
 	_userUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase"
+	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
+	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,6 +27,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsUserFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 
 	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
 		cfg.DB.DBUser, cfg.DB.DBPassword, cfg.DB.DBHost, cfg.DB.DBPort, cfg.DB.DBName, cfg.DB.DBSSLMode)
@@ -48,7 +53,18 @@ func main() {
 	userRepo := _userRepo.New(db)
 	usersUC := _userUCase.New(cfg, userRepo, fStorageClient)
 
-	grpcServer := grpc.NewServer()
+	metrics, err := promMetrics.NewMetricsGRPCServer("mail")
+	if err != nil {
+		log.Fatal("mail - failed create metrics server", err)
+	}
+	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+	)
+
+	//promMetrics.RunGRPCMetricsServer(":9005")
+
 	userGRPCServer := _userServer.NewUserServerGRPC(grpcServer, usersUC)
 	log.Info("user server started")
 	err = userGRPCServer.Start(":" + cfg.UserGRPCService.Port)

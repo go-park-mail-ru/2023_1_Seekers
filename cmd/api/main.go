@@ -11,6 +11,7 @@ import (
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
+	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -69,16 +70,24 @@ func main() {
 	}
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
+	metrics, err := promMetrics.NewMetricsHttpServer("api")
+	if err != nil {
+		log.Fatal("failed create metrics server", err)
+	}
 
 	authH := _api.NewAuthHandlers(cfg, authServiceClient, mailServiceClient, userServiceClient)
 	mailH := _api.NewMailHandlers(cfg, mailServiceClient)
 	userH := _api.NewUserHandlers(cfg, userServiceClient)
-	middleware := _middleware.New(cfg, authServiceClient, globalLogger)
+	middleware := _middleware.NewHttpMiddleware(cfg, authServiceClient, globalLogger, metrics)
 
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	_api.RegisterHTTPRoutes(router, cfg, authH, userH, mailH, middleware)
 
-	router.Use(middleware.HandlerLogger)
+	router.Use(
+		middleware.HandlerLogger,
+		middleware.MetricsHttp,
+	)
+
 	corsRouter := middleware.Cors(router)
 
 	server := http.Server{
@@ -87,6 +96,14 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
+	// TODO to conf
+	go func() {
+		if err := promMetrics.RunHttpMetricsServer(":9001"); err != nil {
+			log.Fatal("api - failed run metrics server", err)
+		}
+
+	}()
 
 	go func() {
 		globalLogger.Info("server started")

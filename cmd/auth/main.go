@@ -7,7 +7,10 @@ import (
 	_authServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/server"
 	_authUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/usecase"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
+	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/connectors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
+	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsAuthFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
+	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsAuthFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 
 	redisAddr := cfg.Redis.RedisHost + ":" + cfg.Redis.RedisPort
 	redisPw := cfg.Redis.RedisPassword
@@ -48,8 +51,18 @@ func main() {
 
 	authUC := _authUCase.NewAuthUC(cfg, userServiceClient, sessionRepo)
 
-	grpcServer := grpc.NewServer()
+	metrics, err := promMetrics.NewMetricsGRPCServer("auth")
+	if err != nil {
+		log.Fatal("auth - failed create metrics server", err)
+	}
+	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+	)
 	authGRPCServer := _authServer.NewAuthServerGRPC(grpcServer, authUC)
+
+	//promMetrics.RunGRPCMetricsServer(":9002")
 
 	log.Info("auth server started")
 	err = authGRPCServer.Start(":" + cfg.AuthGRPCService.Port)

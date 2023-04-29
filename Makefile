@@ -80,3 +80,7 @@ doc:
 
 generate:
 	go generate ${ALL_PKG}
+
+
+perm-dirs:
+	sudo chmod -R 777 ./

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, userH UserHandlersI, mailH MailHandlersI, m *middleware.Middleware) {
+func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, userH UserHandlersI, mailH MailHandlersI, m *middleware.HttpMiddleware) {
 	// Auth
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteSignin, authH.SignIn).Methods(http.MethodPost)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteSignup, authH.SignUp).Methods(http.MethodPost)
