@@ -11,6 +11,7 @@ import (
 	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -135,7 +136,6 @@ func (m *GRPCMiddleware) MetricsGRPCUnaryInterceptor(ctx context.Context, req in
 	resp, err := uHandler(ctx, req)
 
 	errStatus, _ := status.FromError(err)
-
 	code := errStatus.Code()
 
 	if code != codes.OK {
@@ -143,8 +143,19 @@ func (m *GRPCMiddleware) MetricsGRPCUnaryInterceptor(ctx context.Context, req in
 	}
 
 	m.metric.Timings.WithLabelValues(code.String(), info.FullMethod).Observe(time.Since(start).Seconds())
-
 	m.metric.Hits.Inc()
+
+	return resp, err
+}
+
+func (m *GRPCMiddleware) LoggerGRPCUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, uHandler grpc.UnaryHandler) (interface{}, error) {
+	// TODO request ID to context and log
+	grpcLogger := m.log.WithFields(logrus.Fields{
+		"method": info.FullMethod,
+	})
+
+	ctx = context.WithValue(ctx, common.ContextHandlerLog, grpcLogger)
+	resp, err := uHandler(ctx, req)
 
 	return resp, err
 }

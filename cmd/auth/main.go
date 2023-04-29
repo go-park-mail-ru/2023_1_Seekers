@@ -58,11 +58,17 @@ func main() {
 	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
 
 	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
 	)
 	authGRPCServer := _authServer.NewAuthServerGRPC(grpcServer, authUC)
 
-	//promMetrics.RunGRPCMetricsServer(":9002")
+	// TODO to conf
+	//go func() {
+	//	if err := promMetrics.RunGRPCMetricsServer(":9002"); err != nil {
+	//		log.Fatal("auth - failed run metrics server", err)
+	//	}
+	//
+	//}()
 
 	log.Info("auth server started")
 	err = authGRPCServer.Start(":" + cfg.AuthGRPCService.Port)

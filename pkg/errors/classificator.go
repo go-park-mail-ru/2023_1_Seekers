@@ -3,6 +3,7 @@ package errors
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
 	"net/http"
 )
 
@@ -39,7 +40,7 @@ var (
 	ErrSomeEmailsAreInvalid = errors.New("some emails are invalid")
 )
 
-var Codes = map[string]int{
+var HttpCodes = map[string]int{
 	ErrInvalidForm.Error():          http.StatusForbidden,
 	ErrPwDontMatch.Error():          http.StatusUnauthorized,
 	ErrInvalidLogin.Error():         http.StatusUnauthorized,
@@ -70,6 +71,39 @@ var Codes = map[string]int{
 	ErrMoveToDraftFolder.Error():    http.StatusBadRequest,
 	ErrMoveFromDraftFolder.Error():  http.StatusBadRequest,
 	ErrSomeEmailsAreInvalid.Error(): http.StatusBadRequest,
+}
+
+var GRPCCodes = map[string]codes.Code{
+	ErrInvalidForm.Error():          codes.InvalidArgument,
+	ErrPwDontMatch.Error():          codes.InvalidArgument,
+	ErrInvalidLogin.Error():         codes.InvalidArgument,
+	ErrWrongPw.Error():              codes.Unauthenticated,
+	ErrUserExists.Error():           codes.Unauthenticated,
+	ErrFailedGetSession.Error():     codes.Unauthenticated,
+	ErrFailedDeleteSession.Error():  codes.Unauthenticated,
+	ErrInternal.Error():             codes.Internal,
+	ErrTooShortPw.Error():           codes.InvalidArgument,
+	ErrInvalidEmail.Error():         codes.Unauthenticated,
+	ErrUserNotFound.Error():         codes.NotFound,
+	ErrFailedGetUser.Error():        codes.Unauthenticated,
+	ErrGetFile.Error():              codes.InvalidArgument,
+	ErrNoKey.Error():                codes.InvalidArgument,
+	ErrNoBucket.Error():             codes.InvalidArgument,
+	ErrInvalidURL.Error():           codes.InvalidArgument,
+	ErrFolderNotFound.Error():       codes.NotFound,
+	ErrMessageNotFound.Error():      codes.NotFound,
+	ErrNoValidEmails.Error():        codes.InvalidArgument,
+	ErrWrongContentType.Error():     codes.InvalidArgument,
+	ErrFailedAuth.Error():           codes.Unauthenticated,
+	ErrWrongCSRF.Error():            codes.InvalidArgument,
+	ErrFolderAlreadyExists.Error():  codes.InvalidArgument,
+	ErrDeleteDefaultFolder.Error():  codes.InvalidArgument,
+	ErrEditDefaultFolder.Error():    codes.InvalidArgument,
+	ErrInvalidFolderName.Error():    codes.InvalidArgument,
+	ErrMoveToSameFolder.Error():     codes.InvalidArgument,
+	ErrMoveToDraftFolder.Error():    codes.InvalidArgument,
+	ErrMoveFromDraftFolder.Error():  codes.InvalidArgument,
+	ErrSomeEmailsAreInvalid.Error(): codes.InvalidArgument,
 }
 
 var LogLevels = map[string]logrus.Level{
@@ -105,10 +139,19 @@ var LogLevels = map[string]logrus.Level{
 	ErrSomeEmailsAreInvalid.Error(): logrus.WarnLevel,
 }
 
-func Code(err error) int {
-	code, ok := Codes[err.Error()]
+func HttpCode(err error) int {
+	code, ok := HttpCodes[err.Error()]
 	if !ok {
 		return http.StatusInternalServerError
+	}
+
+	return code
+}
+
+func GRPCCode(err error) codes.Code {
+	code, ok := GRPCCodes[err.Error()]
+	if !ok {
+		return codes.Internal
 	}
 
 	return code

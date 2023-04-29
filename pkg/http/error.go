@@ -11,7 +11,7 @@ import (
 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	causeErr := pkgErr.Cause(err)
-	code := errors.Code(causeErr)
+	code := errors.HttpCode(causeErr)
 	customErr := errors.New(code, causeErr)
 	logLevel := errors.LogLevel(causeErr)
 
