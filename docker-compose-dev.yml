@@ -112,17 +112,18 @@ services:
     image: grafana/grafana:latest
     depends_on:
       - prometheus
-    ports:
-      - "3000:3000"
     volumes:
       - ./metrics/data/grafana:/var/lib/grafana
-      - ./metrics/config/grafana:/etc/grafana/provisioning/
+      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
       - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
     env_file:
       - .env
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.18
+    network_mode: "host"
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      my_network:
+#        ipv4_address: 172.28.0.18
     restart: "no"
 
 
