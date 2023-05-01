@@ -54,6 +54,11 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 		return nil, errors.ErrInvalidEmail
 	}
 
+	user, err = u.userRepo.Create(user)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "Create user")
+	}
+
 	col := image.GetRandColor()
 	label := common.GetFirstUtf(user.FirstName)
 	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
@@ -62,7 +67,7 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 		log.Warn(err, "edit avatar")
 	}
 
-	return u.userRepo.Create(user)
+	return user, nil
 }
 
 func (u *useCase) GetInfo(ID uint64) (*models.UserInfo, error) {

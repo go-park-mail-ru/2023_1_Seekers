@@ -62,13 +62,12 @@ func main() {
 	)
 	authGRPCServer := _authServer.NewAuthServerGRPC(grpcServer, authUC)
 
-	// TODO to conf
-	//go func() {
-	//	if err := promMetrics.RunGRPCMetricsServer(":9002"); err != nil {
-	//		log.Fatal("auth - failed run metrics server", err)
-	//	}
-	//
-	//}()
+	//TODO to conf
+	go func() {
+		if err = promMetrics.RunGRPCMetricsServer(":9002"); err != nil {
+			log.Fatal("auth - failed run metrics server", err)
+		}
+	}()
 
 	log.Info("auth server started")
 	err = authGRPCServer.Start(":" + cfg.AuthGRPCService.Port)
