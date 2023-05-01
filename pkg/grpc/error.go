@@ -19,6 +19,7 @@ func HandleError(ctx context.Context, err error) error {
 	causeErr := pkgErr.Cause(err)
 
 	logLevel := errors.LogLevel(causeErr)
+
 	globalLogger, ok := ctx.Value(common.ContextHandlerLog).(*logger.Logger)
 	if !ok {
 		log.Error("failed to get logger from ctx")

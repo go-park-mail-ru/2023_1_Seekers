@@ -11,6 +11,7 @@ type MetricsHttp struct {
 	Errors  *prometheus.CounterVec
 	Hits    prometheus.Counter
 	Timings *prometheus.HistogramVec
+	Name    string
 }
 
 func NewMetricsHttpServer(name string) (*MetricsHttp, error) {
@@ -27,6 +28,7 @@ func NewMetricsHttpServer(name string) (*MetricsHttp, error) {
 			Name: name + "_timings",
 			Help: "measures duration of http request",
 		}, []string{"code", "path", "method"}),
+		Name: name,
 	}
 
 	if err := prometheus.Register(metrics.Hits); err != nil {
@@ -44,11 +46,11 @@ func NewMetricsHttpServer(name string) (*MetricsHttp, error) {
 	return metrics, nil
 }
 
-func RunHttpMetricsServer(address string) error {
+func (m MetricsHttp) RunHttpMetricsServer(address string) error {
 	//use separated ServeMux to prevent handling on the global Mux
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
-	log.Info("starting metrics server...")
+	log.Info(m.Name, ": starting metrics server...")
 
 	return http.ListenAndServe(address, mux)
 }

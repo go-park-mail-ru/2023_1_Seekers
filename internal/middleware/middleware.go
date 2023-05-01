@@ -30,14 +30,14 @@ type HttpMiddleware struct {
 type GRPCMiddleware struct {
 	cfg    *config.Config
 	log    *logger.Logger
-	metric *promMetrics.MetricsHttp
+	metric *promMetrics.MetricsGRPC
 }
 
 func NewHttpMiddleware(c *config.Config, sUC auth.UseCaseI, l *logger.Logger, m *promMetrics.MetricsHttp) *HttpMiddleware {
 	return &HttpMiddleware{c, sUC, l, m}
 }
 
-func NewGRPCMiddleware(c *config.Config, l *logger.Logger, m *promMetrics.MetricsHttp) *GRPCMiddleware {
+func NewGRPCMiddleware(c *config.Config, l *logger.Logger, m *promMetrics.MetricsGRPC) *GRPCMiddleware {
 	return &GRPCMiddleware{c, l, m}
 }
 
@@ -150,7 +150,7 @@ func (m *GRPCMiddleware) MetricsGRPCUnaryInterceptor(ctx context.Context, req in
 
 func (m *GRPCMiddleware) LoggerGRPCUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, uHandler grpc.UnaryHandler) (interface{}, error) {
 	// TODO request ID to context and log
-	grpcLogger := m.log.WithFields(logrus.Fields{
+	grpcLogger := m.log.LoggerWithFields(logrus.Fields{
 		"method": info.FullMethod,
 	})
 

@@ -1,5 +1,7 @@
 api:
   port: 8001
+  metrics_port: 9001
+  metrics_name: api
 
 project:
   project_base_dir: 2023_1_Seekers
@@ -16,18 +18,26 @@ logger:
 file_grpc_service:
   port: 8005
   host: 172.28.0.7
+  metrics_port: 9003
+  metrics_name: file_service
 
 user_grpc_service:
   port: 8006
   host: 172.28.0.8
+  metrics_port: 9005
+  metrics_name: user
 
 auth_grpc_service:
   port: 8007
   host: 172.28.0.9
+  metrics_port: 9002
+  metrics_name: auth
 
 mail_grpc_service:
   port: 8008
   host: 172.28.0.10
+  metrics_port: 9004
+  metrics_name: mail
 
 s3:
   s3_region: eu-west-2

@@ -53,17 +53,22 @@ func main() {
 	mailRepo := _mailRepo.New(db)
 	mailUC := _mailUCase.New(cfg, mailRepo, userServiceClient)
 
-	metrics, err := promMetrics.NewMetricsGRPCServer("mail")
+	metrics, err := promMetrics.NewMetricsGRPCServer(cfg.MailGRPCService.MetricsName)
 	if err != nil {
 		log.Fatal("mail - failed create metrics server", err)
 	}
 	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
 
 	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
 	)
 
-	//promMetrics.RunGRPCMetricsServer(":9004")
+	go func() {
+		if err = metrics.RunGRPCMetricsServer(":" + cfg.MailGRPCService.MetricsPort); err != nil {
+			log.Fatal("mail - failed run metrics server", err)
+		}
+	}()
+
 	userGRPCServer := _mailServer.NewAuthServerGRPC(grpcServer, mailUC)
 
 	log.Info("mail server started")

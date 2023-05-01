@@ -70,7 +70,7 @@ func main() {
 	}
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
-	metrics, err := promMetrics.NewMetricsHttpServer("api")
+	metrics, err := promMetrics.NewMetricsHttpServer(cfg.Api.MetricsName)
 	if err != nil {
 		log.Fatal("failed create metrics server", err)
 	}
@@ -97,9 +97,8 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// TODO to conf
 	go func() {
-		if err := promMetrics.RunHttpMetricsServer(":9001"); err != nil {
+		if err = metrics.RunHttpMetricsServer(":" + cfg.Api.MetricsPort); err != nil {
 			log.Fatal("api - failed run metrics server", err)
 		}
 

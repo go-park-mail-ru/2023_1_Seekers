@@ -11,10 +11,11 @@ type MetricsGRPC struct {
 	Errors  *prometheus.CounterVec
 	Hits    prometheus.Counter
 	Timings *prometheus.HistogramVec
+	Name    string
 }
 
-func NewMetricsGRPCServer(name string) (*MetricsHttp, error) {
-	metrics := &MetricsHttp{
+func NewMetricsGRPCServer(name string) (*MetricsGRPC, error) {
+	metrics := &MetricsGRPC{
 		Hits: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: name + "_hits",
 			Help: "counts all hits for microservice",
@@ -27,6 +28,7 @@ func NewMetricsGRPCServer(name string) (*MetricsHttp, error) {
 			Name: name + "_timings",
 			Help: "measures duration of microservice method",
 		}, []string{"code", "method"}),
+		Name: name,
 	}
 
 	if err := prometheus.Register(metrics.Hits); err != nil {
@@ -44,11 +46,11 @@ func NewMetricsGRPCServer(name string) (*MetricsHttp, error) {
 	return metrics, nil
 }
 
-func RunGRPCMetricsServer(address string) error {
+func (m MetricsGRPC) RunGRPCMetricsServer(address string) error {
 	//use separated ServeMux to prevent handling on the global Mux
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
-	log.Info("starting metrics server...")
+	log.Info(m.Name, ": starting metrics server...")
 
 	return http.ListenAndServe(address, mux)
 }

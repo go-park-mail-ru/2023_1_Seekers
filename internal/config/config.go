@@ -8,7 +8,9 @@ import (
 
 type Config struct {
 	Api struct {
-		Port string `yaml:"port" env-default:"8001"`
+		Port        string `yaml:"port" env-default:"8001"`
+		MetricsPort string `yaml:"metrics_port" env-default:"9001"`
+		MetricsName string `yaml:"metrics_name" env-default:"api"`
 	} `yaml:"api"`
 
 	Project struct {
@@ -27,23 +29,31 @@ type Config struct {
 	} `yaml:"logger"`
 
 	FileGPRCService struct {
-		Port string `yaml:"port" env-default:"8005"`
-		Host string `yaml:"host" env-default:"127.0.0.1"`
+		Port        string `yaml:"port" env-default:"8005"`
+		Host        string `yaml:"host" env-default:"127.0.0.1"`
+		MetricsPort string `yaml:"metrics_port" env-default:"9003"`
+		MetricsName string `yaml:"metrics_name" env-default:"file_service"`
 	} `yaml:"file_grpc_service"`
 
 	UserGRPCService struct {
-		Port string `yaml:"port" env-default:"8006"`
-		Host string `yaml:"host" env-default:"127.0.0.1"`
+		Port        string `yaml:"port" env-default:"8006"`
+		Host        string `yaml:"host" env-default:"127.0.0.1"`
+		MetricsPort string `yaml:"metrics_port" env-default:"9005"`
+		MetricsName string `yaml:"metrics_name" env-default:"user"`
 	} `yaml:"user_grpc_service"`
 
 	AuthGRPCService struct {
-		Port string `yaml:"port" env-default:"8007"`
-		Host string `yaml:"host" env-default:"127.0.0.1"`
+		Port        string `yaml:"port" env-default:"8007"`
+		Host        string `yaml:"host" env-default:"127.0.0.1"`
+		MetricsPort string `yaml:"metrics_port" env-default:"9002"`
+		MetricsName string `yaml:"metrics_name" env-default:"auth"`
 	} `yaml:"auth_grpc_service"`
 
 	MailGRPCService struct {
-		Port string `yaml:"port" env-default:"8008"`
-		Host string `yaml:"host" env-default:"127.0.0.1"`
+		Port        string `yaml:"port" env-default:"8008"`
+		Host        string `yaml:"host" env-default:"127.0.0.1"`
+		MetricsPort string `yaml:"metrics_port" env-default:"9004"`
+		MetricsName string `yaml:"metrics_name" env-default:"mail"`
 	} `yaml:"mail_grpc_service"`
 
 	DB struct {

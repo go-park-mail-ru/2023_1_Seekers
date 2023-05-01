@@ -42,17 +42,21 @@ func main() {
 	fStorageRepo := _fStorageRepo.New(s3Session)
 	fStorageUC := _fStorageUCase.New(fStorageRepo)
 
-	metrics, err := promMetrics.NewMetricsGRPCServer("file_service")
+	metrics, err := promMetrics.NewMetricsGRPCServer(cfg.FileGPRCService.MetricsName)
 	if err != nil {
 		log.Fatal("file service - failed create metrics server", err)
 	}
 	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
 
 	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(middleware.MetricsGRPCUnaryInterceptor),
+		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
 	)
 
-	//promMetrics.RunGRPCMetricsServer(":9003")
+	go func() {
+		if err = metrics.RunGRPCMetricsServer(":" + cfg.FileGPRCService.MetricsPort); err != nil {
+			log.Fatal("file storage - failed run metrics server", err)
+		}
+	}()
 
 	fStorageGRPCServer := _fStorageServer.NewFStorageServerGRPC(grpcServer, fStorageUC)
 	log.Info("file storage server started")

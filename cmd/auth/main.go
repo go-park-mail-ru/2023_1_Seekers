@@ -51,7 +51,7 @@ func main() {
 
 	authUC := _authUCase.NewAuthUC(cfg, userServiceClient, sessionRepo)
 
-	metrics, err := promMetrics.NewMetricsGRPCServer("auth")
+	metrics, err := promMetrics.NewMetricsGRPCServer(cfg.AuthGRPCService.MetricsName)
 	if err != nil {
 		log.Fatal("auth - failed create metrics server", err)
 	}
@@ -62,9 +62,8 @@ func main() {
 	)
 	authGRPCServer := _authServer.NewAuthServerGRPC(grpcServer, authUC)
 
-	//TODO to conf
 	go func() {
-		if err = promMetrics.RunGRPCMetricsServer(":9002"); err != nil {
+		if err = metrics.RunGRPCMetricsServer(":" + cfg.AuthGRPCService.MetricsPort); err != nil {
 			log.Fatal("auth - failed run metrics server", err)
 		}
 	}()
