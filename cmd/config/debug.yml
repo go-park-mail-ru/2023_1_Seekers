@@ -39,6 +39,18 @@ mail_grpc_service:
   metrics_port: 9004
   metrics_name: mail
 
+smtp_server:
+  port: 25
+  domain: mailbx
+  read_timeout: 10s
+  write_timeout_timeout: 10s
+  max_message_bytes: 1048576
+  max_recipients: 50
+  allow_insecure_auth: false
+  cert_file: /etc/letsencrypt/live/mailbx.ru/fullchain.pem
+  key_file: /etc/letsencrypt/live/mailbx.ru/privkey.pem
+  dkim_private_key_file: /home/ubuntu/dkim/priv.key
+
 s3:
   s3_region: eu-west-2
   s3_endpoint: https://hb.bizmrg.com
@@ -92,8 +104,8 @@ password:
   password_salt_len: 10
 
 mail:
-  post_domain: "mailbox.ru"
-  post_at_domain: "@mailbox.ru"
+  post_domain: "mailbx.ru"
+  post_at_domain: "@mailbx.ru"
 
 cors:
   allowed_headers:

@@ -7,8 +7,8 @@ CREATE TABLE mail.users
     is_deleted       boolean                  NOT NULL DEFAULT false,
     email            text                     NOT NULL,
     password         bytea                    NOT NULL,
-    first_name       text                     NOT NULL,
-    last_name        text                     NOT NULL,
+    first_name       text,
+    last_name        text,
     avatar           text                     NOT NULL,
     is_custom_avatar bool                     NOT NULL DEFAULT false,
     CONSTRAINT pk_users PRIMARY KEY (user_id)
