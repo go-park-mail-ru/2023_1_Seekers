@@ -437,6 +437,37 @@ paths:
       summary: EditDraft
       tags:
       - messages
+  /message/{id}/move:
+    post:
+      consumes:
+      - application/json
+      description: move message to folder
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success changed message's folder
+        "400":
+          description: can't move message from draft folder
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: folder not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: MoveToFolder
+      tags:
+      - messages
   /message/{id}/read:
     post:
       consumes:
@@ -474,7 +505,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: move message to folder
+      description: Message
       parameters:
       - description: id
         in: path
@@ -485,20 +516,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: success changed message's folder
+          description: success unread message
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
         "400":
-          description: can't move message from draft folder
+          description: invalid url address
           schema:
             $ref: '#/definitions/errors.JSONError'
         "404":
-          description: folder not found
+          description: message not found
           schema:
             $ref: '#/definitions/errors.JSONError'
         "500":
           description: internal server error
           schema:
             $ref: '#/definitions/errors.JSONError'
-      summary: MoveToFolder
+      summary: UnreadMessage
       tags:
       - messages
   /message/save:
