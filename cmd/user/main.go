@@ -45,7 +45,7 @@ func main() {
 
 	fStorageClient := _fStorageClient.NewFstorageClientGRPC(fServiceCon)
 
-	userRepo := _userRepo.New(db)
+	userRepo := _userRepo.New(cfg, db)
 	usersUC := _userUCase.New(cfg, userRepo, fStorageClient)
 
 	grpcServer := grpc.NewServer()

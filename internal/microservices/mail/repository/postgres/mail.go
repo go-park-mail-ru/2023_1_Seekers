@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -9,7 +10,8 @@ import (
 )
 
 type mailRepository struct {
-	db *gorm.DB
+	cfg *config.Config
+	db  *gorm.DB
 }
 
 type Box struct {
@@ -22,8 +24,8 @@ type Box struct {
 	IsDraft   bool
 }
 
-func (Box) TableName() string {
-	return "mail.boxes"
+func (Box) TableName(schemaName string) string {
+	return schemaName + ".boxes"
 }
 
 type Message struct {
@@ -35,13 +37,14 @@ type Message struct {
 	ReplyToMessageID *uint64
 }
 
-func (Message) TableName() string {
-	return "mail.messages"
+func (Message) TableName(schemaName string) string {
+	return schemaName + ".messages"
 }
 
-func New(db *gorm.DB) repository.MailRepoI {
+func New(c *config.Config, db *gorm.DB) repository.MailRepoI {
 	return &mailRepository{
-		db: db,
+		cfg: c,
+		db:  db,
 	}
 }
 
@@ -101,7 +104,7 @@ func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint
 func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
-	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
+	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
 		Where("user_id = ? AND folder_id = ? AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false)", userID, folderID).Order("created_at DESC").Scan(&messages)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
@@ -168,7 +171,7 @@ func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID u
 func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
 	var message *models.MessageInfo
 
-	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName()+" using(message_id)").
+	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
 		Where("user_id = ? AND message_id = ? AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false)", userID, messageID).
 		Scan(&message)
 	if err := tx.Error; err != nil {

@@ -45,7 +45,7 @@ func main() {
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
 
-	mailRepo := _mailRepo.New(db)
+	mailRepo := _mailRepo.New(cfg, db)
 	mailUC := _mailUCase.New(cfg, mailRepo, userServiceClient)
 
 	grpcServer := grpc.NewServer()
