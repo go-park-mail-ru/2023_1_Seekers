@@ -106,11 +106,14 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	folders := make([]models.Folder, 0)
+	var folders []models.Folder
 
 	isCustom, err := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
 	if isCustom {
 		folders, err = h.uc.GetCustomFolders(userID)
+		if len(folders) == 0 || folders == nil {
+			folders = make([]models.Folder, 0)
+		}
 	} else {
 		folders, err = h.uc.GetFolders(userID)
 	}
@@ -119,21 +122,6 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		pkgHttp.HandleError(w, r, err)
 		return
 	}
-
-	debug, _ := json.Marshal(models.FoldersResponse{
-		Folders: folders,
-		Count:   len(folders),
-	})
-
-	fmt.Println("DEBUG")
-	fmt.Println(string(debug))
-
-	debug2, _ := json.Marshal(models.FoldersResponse{
-		Folders: make([]models.Folder, 0),
-		Count:   0,
-	})
-	fmt.Println("DEBUG2")
-	fmt.Println(string(debug2))
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
 		Folders: folders,
