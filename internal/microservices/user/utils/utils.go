@@ -7,23 +7,25 @@ import (
 
 func UserModelByProto(proto *user_proto.User) *models.User {
 	return &models.User{
-		UserID:    proto.UID,
-		Email:     proto.Email,
-		Password:  string(proto.Password),
-		FirstName: proto.FirstName,
-		LastName:  proto.LastName,
-		Avatar:    proto.Avatar,
+		UserID:     proto.UID,
+		Email:      proto.Email,
+		Password:   string(proto.Password),
+		FirstName:  proto.FirstName,
+		LastName:   proto.LastName,
+		Avatar:     proto.Avatar,
+		IsExternal: proto.IsExternal,
 	}
 }
 
 func ProtoByUserModel(user *models.User) *user_proto.User {
 	return &user_proto.User{
-		UID:       user.UserID,
-		Email:     user.Email,
-		Password:  []byte(user.Password),
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Avatar:    user.Avatar,
+		UID:        user.UserID,
+		Email:      user.Email,
+		Password:   []byte(user.Password),
+		FirstName:  user.FirstName,
+		LastName:   user.LastName,
+		Avatar:     user.Avatar,
+		IsExternal: user.IsExternal,
 	}
 }
 

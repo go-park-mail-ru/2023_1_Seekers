@@ -14,6 +14,7 @@ message User {
   string FirstName = 4;
   string LastName = 5;
   string Avatar = 6;
+  bool IsExternal = 7;
 }
 
 message Email {
