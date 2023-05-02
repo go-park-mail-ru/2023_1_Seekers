@@ -26,7 +26,7 @@ build-dev-env:
 	sudo systemctl stop postgresql || true 
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
-	docker-compose -f docker-compose-dev.yml up -d --build --remove-orphans
+	docker-compose up -d --build --remove-orphans
 
 run-dev:
 	@make build-dev-env
@@ -36,19 +36,19 @@ run-all-services:
 	make -j 5 run-api-service run-auth-service run-file_storage-service run-mail-service run-user-service
 
 run-auth-service:
-	go run ./cmd/auth/main.go -config=./cmd/config/dev.yml
+	go run ./cmd/auth/main.go -config=./cmd/config/debug.yml
 
 run-api-service:
-	go run ./cmd/api/main.go -config=./cmd/config/dev.yml
+	go run ./cmd/api/main.go -config=./cmd/config/debug.yml
 
 run-user-service:
-	go run ./cmd/user/main.go -config=./cmd/config/dev.yml
+	go run ./cmd/user/main.go -config=./cmd/config/debug.yml
 
 run-mail-service:
-	go run ./cmd/mail/main.go -config=./cmd/config/dev.yml
+	go run ./cmd/mail/main.go -config=./cmd/config/debug.yml
 
 run-file_storage-service:
-	go run ./cmd/file_storage/main.go -config=./cmd/config/dev.yml
+	go run ./cmd/file_storage/main.go -config=./cmd/config/debug.yml
 
 docker-prune:
 	@bash -c 'docker system prune'
