@@ -89,8 +89,6 @@ func (s *Session) Data(r io.Reader) error {
 		return errors.New("auth required")
 	}
 
-	fmt.Println("here")
-
 	var signedMail []byte
 	if domainFrom == s.cfg.Mail.PostDomain {
 		//2. sign DKIM
@@ -196,6 +194,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	var batchRecipients []string
 
+	log.Debug("Starting sending")
 	for _, to := range s.to {
 		// 3. dial and send
 		domainTo, err := pkgSmtp.ParseDomain(to)
@@ -209,6 +208,7 @@ func (s *Session) Data(r io.Reader) error {
 			if err != nil {
 				return err
 			}
+			log.Debug("success send")
 		} else {
 			batchRecipients = append(batchRecipients, to)
 		}
