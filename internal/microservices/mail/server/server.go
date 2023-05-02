@@ -123,7 +123,7 @@ func (g *AuthServerGRPC) MarkMessageAsSeen(ctx context.Context, protoId *mail_pr
 }
 
 func (g *AuthServerGRPC) MarkMessageAsUnseen(ctx context.Context, protoId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {
-	info, err := g.mailUC.MarkMessageAsSeen(protoId.UID, protoId.MessageID)
+	info, err := g.mailUC.MarkMessageAsUnseen(protoId.UID, protoId.MessageID)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
