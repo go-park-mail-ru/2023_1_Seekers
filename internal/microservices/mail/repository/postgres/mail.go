@@ -259,7 +259,7 @@ func (m mailRepository) SelectCustomFoldersByUser(userID uint64, defaultLocalNam
 
 	tx := m.db.Where("user_id = ? AND local_name NOT IN ?", userID, defaultLocalNames).Order("name").Find(&folders)
 	if err := tx.Error; err != nil {
-		return []models.Folder{}, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return folders, nil
