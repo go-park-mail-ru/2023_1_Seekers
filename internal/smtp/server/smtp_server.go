@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func New(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI) error {
+func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI) error {
 	smtpBackend := backend.NewSmtpBackend(cfg, mailClient, userClient, authClient)
 
 	s := smtp.NewServer(smtpBackend)

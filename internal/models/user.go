@@ -8,11 +8,12 @@ type User struct {
 	UserID uint64 `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	//HereSince time.Time `json:"hereSince" gorm:"column:here_since"`
 	//IsDeleted bool   `json:"isDeleted" gorm:"column:is_deleted"`
-	Email     string `json:"email" validate:"required"`
-	Password  string `json:"password" validate:"required"`
-	FirstName string `json:"firstName" validate:"required"`
-	LastName  string `json:"lastName" validate:"required"`
-	Avatar    string `json:"avatar,omitempty"`
+	Email      string `json:"email" validate:"required"`
+	Password   string `json:"password" validate:"required"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Avatar     string `json:"avatar,omitempty"`
+	IsExternal bool   `json:"is_external"`
 }
 
 type FormSignUp struct {

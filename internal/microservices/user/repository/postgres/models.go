@@ -8,11 +8,12 @@ type User struct {
 	UserID uint64 `sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	//HereSince time.Time `json:"hereSince" gorm:"column:here_since"`
 	//IsDeleted bool   `json:"isDeleted" gorm:"column:is_deleted"`
-	Email     string `validate:"required"`
-	Password  []byte `validate:"required"`
-	FirstName string `validate:"required"`
-	LastName  string `validate:"required"`
-	Avatar    string
+	Email      string
+	Password   []byte
+	FirstName  string
+	LastName   string
+	Avatar     string
+	IsExternal bool
 	//IsCustomAvatar bool
 }
 
@@ -26,6 +27,7 @@ func (u *User) FromModel(user *models.User) {
 	u.FirstName = user.FirstName
 	u.LastName = user.LastName
 	u.Avatar = user.Avatar
+	u.IsExternal = user.IsExternal
 }
 
 type IsCustomAvatar struct {

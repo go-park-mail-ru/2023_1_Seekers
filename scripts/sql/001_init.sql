@@ -11,6 +11,7 @@ CREATE TABLE mail.users
     last_name        text,
     avatar           text                     NOT NULL,
     is_custom_avatar bool                     NOT NULL DEFAULT false,
+    is_external      bool                     NOT NULL DEFAULT false,
     CONSTRAINT pk_users PRIMARY KEY (user_id)
 );
 

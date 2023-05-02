@@ -2,7 +2,6 @@ package backend
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-msgauth/dkim"
@@ -16,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"strings"
 )
 
 type SmtpBackend struct {
@@ -118,40 +118,99 @@ func (s *Session) Data(r io.Reader) error {
 		}
 	}
 
-	// trying to get info about sender, sometimes its not defined and errors can be ignored
-	entity, _ := message.Read(bytes.NewReader(bytesMail))
-	addr, _ := mail.ParseAddress(entity.Header.Get("From"))
-	fmt.Println(addr)
-
+	// validate recipients (anti spam)
 	for _, to := range s.to {
-		// 3. dial and send
-		domain, err := pkgSmtp.ParseDomain(to)
+		domainTo, err := pkgSmtp.ParseDomain(to)
 		if err != nil {
 			return errors.Wrap(err, "send - failed get domain")
 		}
 
-		if domain != s.cfg.Mail.PostDomain {
+		if domainTo == s.cfg.Mail.PostDomain {
+			if _, err := s.userClient.GetInfoByEmail(to); err != nil {
+				return errors.Wrap(err, "failed to send mail")
+			}
+		}
+	}
+
+	var fromUser *models.User
+	var subject, messageBody string
+	if domainFrom == s.cfg.Mail.PostDomain {
+		entity, err := message.Read(bytes.NewReader(bytesMail))
+		if err != nil {
+			return errors.Wrap(err, "failed read message")
+		}
+		subject = entity.Header.Get("Subject")
+		bytesBody, err := io.ReadAll(entity.Body)
+		if err != nil {
+			return errors.Wrap(err, "failed read body")
+		}
+
+		messageBody = string(bytesBody)
+
+		fromUser, err = s.userClient.GetByEmail(s.from)
+		if err != nil {
+			// trying to get info about sender, sometimes its not defined and errors can be ignored
+			addr, _ := mail.ParseAddress(entity.Header.Get("From"))
+			personalInfo := strings.Split(addr.Name, " ")
+
+			var firstName, lastName string
+			if len(personalInfo) >= 2 {
+				firstName = personalInfo[0]
+				lastName = personalInfo[0]
+			}
+
+			fromUser, err = s.userClient.Create(&models.User{
+				Email:      s.from,
+				Password:   "______",
+				FirstName:  firstName,
+				LastName:   lastName,
+				IsExternal: true,
+			})
+			if err != nil {
+				return errors.Wrap(err, "failed create external user")
+			}
+		}
+	}
+
+	var batchRecipients []string
+
+	for _, to := range s.to {
+		// 3. dial and send
+		domainTo, err := pkgSmtp.ParseDomain(to)
+		if err != nil {
+			return errors.Wrap(err, "send - failed get domain")
+		}
+
+		if domainTo != s.cfg.Mail.PostDomain {
 			log.Debug("sending to other service ....")
 			err = s.DialAndSend(signedMail, to)
 			if err != nil {
 				return err
 			}
 		} else {
-			log.Debug("store this letter to mailbx service ...")
-			// TODO create mailUC method and correct save external
-			//userInfo, err := s.userClient.GetInfoByEmail(to)
-			//if err != nil {
-			//	return errors.Wrap(err, "failed to send mail")
-			//}
-			//message := models.FormMessage{}
-			//s.mailClient.SendMessage(userInfo.UserID)
+			batchRecipients = append(batchRecipients, to)
 		}
 	}
 
+	if batchRecipients != nil {
+		log.Debug("store this letter to mailbx service ...")
+
+		message := models.FormMessage{
+			Recipients:       batchRecipients,
+			Title:            subject,
+			Text:             messageBody,
+			ReplyToMessageID: nil,
+		}
+		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
+		if err != nil {
+			return errors.Wrap(err, "failed send message to mailbx service")
+		}
+	}
 	return nil
 }
 
-func (s *Session) Reset() {}
+func (s *Session) Reset() {
+}
 
 func (s *Session) Logout() error {
 	s.username = ""
