@@ -336,11 +336,19 @@ func (uc *mailUC) ValidateRecipients(recipients []string) ([]string, []string) {
 	var invalidEmails []string
 
 	for _, email := range recipients {
-		_, err := uc.userUC.GetInfoByEmail(email)
-		if err != nil {
-			invalidEmails = append(invalidEmails, email)
+		if strings.Contains(email, uc.cfg.Mail.PostDomain) {
+			_, err := uc.userUC.GetInfoByEmail(email)
+			if err != nil {
+				invalidEmails = append(invalidEmails, email)
+			} else {
+				validEmails = append(validEmails, email)
+			}
 		} else {
-			validEmails = append(validEmails, email)
+			if err := validation.ValidateEmail(email); err != nil {
+				invalidEmails = append(invalidEmails, email)
+			} else {
+				validEmails = append(validEmails, email)
+			}
 		}
 	}
 
