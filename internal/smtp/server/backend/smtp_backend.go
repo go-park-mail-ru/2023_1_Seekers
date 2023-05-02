@@ -82,7 +82,6 @@ func (s *Session) Data(r io.Reader) error {
 
 	domainFrom, err := pkgSmtp.ParseDomain(s.from)
 	if err != nil {
-		log.Debug("failed parse domain from", err, s.from)
 		return errors.New("failed to parse domain from:" + err.Error())
 	}
 
@@ -90,6 +89,7 @@ func (s *Session) Data(r io.Reader) error {
 		return errors.New("auth required")
 	}
 
+	fmt.Println("SIGN")
 	var signedMail []byte
 	if domainFrom == s.cfg.Mail.PostDomain {
 		//2. sign DKIM
@@ -121,6 +121,8 @@ func (s *Session) Data(r io.Reader) error {
 		}
 	}
 
+	fmt.Println("VALIDATE")
+
 	// validate recipients (anti spam)
 	for _, to := range s.to {
 		domainTo, err := pkgSmtp.ParseDomain(to)
@@ -138,7 +140,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	var fromUser *models.User
 	var subject, messageBody string
-	log.Debug("Verification")
+	fmt.Println("VERIF")
 	if domainFrom != s.cfg.Mail.PostDomain {
 		entity, err := message.Read(bytes.NewReader(bytesMail))
 		if err != nil {
