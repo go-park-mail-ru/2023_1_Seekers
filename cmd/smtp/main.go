@@ -18,7 +18,7 @@ import (
 func main() {
 	var configFile string
 
-	flag.StringVar(&configFile, "config", "cmd/config/debug.yml", "-config=./cmd/config/debug.yml")
+	flag.StringVar(&configFile, "config", "./cmd/config/debug.yml", "-config=./cmd/config/debug.yml")
 	flag.Parse()
 
 	cfg, err := config.Parse(configFile)

@@ -67,7 +67,7 @@ type Config struct {
 		CertFile           string        `yaml:"cert_file"`
 		KeyFile            string        `yaml:"key_file"`
 		DkimPrivateKeyFile string        `yaml:"dkim_private_key_file"`
-	}
+	} `yaml:"smtp_server"`
 
 	DB struct {
 		DBUser       string `env:"POSTGRES_USER"`
