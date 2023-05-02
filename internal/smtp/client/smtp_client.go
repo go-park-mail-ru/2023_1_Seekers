@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
 	"time"
@@ -24,6 +25,8 @@ func Address2Slice(addrs []*mail.Address) []string {
 
 func SendMail(from *models.User, to, subject, message, smtpDomain string) error {
 	var b bytes.Buffer
+	log.Info("PARAMS")
+	log.Info(from, to, subject, message, smtpDomain)
 
 	login, err := pkgSmtp.ParseLogin(from.Email)
 	if err != nil {
@@ -32,7 +35,7 @@ func SendMail(from *models.User, to, subject, message, smtpDomain string) error 
 
 	auth := sasl.NewPlainClient("", login, from.Password)
 
-	addrFrom := []*mail.Address{{from.FirstName + from.LastName, from.Email}}
+	addrFrom := []*mail.Address{{from.FirstName + " " + from.LastName, from.Email}}
 	addrTo := []*mail.Address{{Address: to}}
 
 	// Create our mail header
