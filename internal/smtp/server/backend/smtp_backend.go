@@ -127,7 +127,7 @@ func (s *Session) Data(r io.Reader) error {
 	for _, to := range s.to {
 		domainTo, err := pkgSmtp.ParseDomain(to)
 		if err != nil {
-			log.Debug("failed parse domain", err, to)
+			fmt.Println("failed parse domain", err, to)
 			return errors.Wrap(err, "send - failed get domain")
 		}
 
