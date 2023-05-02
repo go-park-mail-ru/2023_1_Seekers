@@ -45,7 +45,7 @@ type Session struct {
 }
 
 func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
-	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, authClient: bkd.authClient}, nil
+	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, userClient: bkd.userClient, authClient: bkd.authClient}, nil
 }
 
 func (s *Session) AuthPlain(username, password string) error {
