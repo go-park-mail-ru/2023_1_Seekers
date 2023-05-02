@@ -26,7 +26,11 @@ func Address2Slice(addrs []*mail.Address) []string {
 func SendMail(from *models.User, to, subject, message, smtpDomain string) error {
 	var b bytes.Buffer
 	log.Info("PARAMS")
-	log.Info(from, to, subject, message, smtpDomain)
+	fmt.Println(from)
+	fmt.Println(to)
+	fmt.Println(subject)
+	fmt.Println(message)
+	fmt.Println(smtpDomain)
 
 	login, err := pkgSmtp.ParseLogin(from.Email)
 	if err != nil {
