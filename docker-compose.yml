@@ -1,40 +1,14 @@
 version: "3.8"
 
 services:
-  api:
-    env_file:
-      - .env
-    depends_on:
-      file_storage_service:
-        condition: service_started
-      user_service:
-        condition: service_started
-      auth_service:
-        condition: service_started
-      mail_service:
-        condition: service_started
-    volumes:
-      # - ${VENDOR}:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build:
-      context: .
-      dockerfile: ./cmd/api/Dockerfile
-    command: sh -c "./main -config=./cmd/config/debug.yml"
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.2
-    ports:
-      - "8001:8001"
-    restart: "no"
-
   db:
     env_file:
       - .env
     image: postgres:latest
-    command: ["postgres",
-              "-c", "log_directory=/var/log/postgresql",
-#              "-c", "logging_collector=on",
-              "-c", "log_statement=all"]
+    command: [ "postgres",
+               "-c", "log_directory=/var/log/postgresql",
+               "-c", "logging_collector=on",
+               "-c", "log_statement=all" ]
     networks:
       my_network:
         ipv4_address: 172.28.0.3
@@ -85,95 +59,74 @@ services:
     networks:
       my_network:
         ipv4_address: 172.28.0.6
-    depends_on:
-      - api
     ports:
       - "443:443"
       - "80:80"
     restart: "no"
 
-  file_storage_service:
-    env_file:
-      - .env
+  prometheus:
+    image: prom/prometheus:latest
+    network_mode: "host"
+    #    networks:
+    #      my_network:
+    #        ipv4_address: 172.28.0.16
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=2d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
     volumes:
-      # - ${VENDOR}:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build:
-      context: .
-      dockerfile: ./cmd/file_storage/Dockerfile
-    command: sh -c "./main -config=./cmd/config/debug.yml"
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.7
-    ports:
-      - "8005:8005"
+      - ./metrics/data/prometheus:/prometheus
+      - ./metrics/config/prometheus:/etc/prometheus
+    #    ports:
+    #      - "9090:9090"
+    #    depends_on:
+    #      - api
     restart: "no"
 
-  user_service:
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      file_storage_service:
-        condition: service_started
-    volumes:
-      # - ${VENDOR}:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build:
-      context: .
-      dockerfile: ./cmd/user/Dockerfile
-    command: sh -c "./main -config=./cmd/config/debug.yml"
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
     networks:
       my_network:
-        ipv4_address: 172.28.0.8
+        ipv4_address: 172.28.0.17
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    user: root
+    privileged: true
+    deploy:
+      mode: global
     ports:
-      - "8006:8006"
+      - "9100:9100"
     restart: "no"
 
-  auth_service:
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    volumes:
+      - ./metrics/data/grafana:/var/lib/grafana
+      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
+      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
     env_file:
       - .env
-    depends_on:
-      user_service:
-        condition: service_started
-      cache:
-        condition: service_started
-    volumes:
-      # - ${VENDOR}:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build:
-      context: .
-      dockerfile: ./cmd/auth/Dockerfile
-    command: sh -c "./main -config=./cmd/config/debug.yml"
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.9
-    ports:
-      - "8007:8007"
+    network_mode: "host"
+    #    ports:
+    #      - "3000:3000"
+    #    networks:
+    #      my_network:
+    #        ipv4_address: 172.28.0.18
     restart: "no"
 
-  mail_service:
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      user_service:
-        condition: service_started
-    volumes:
-      # - ${VENDOR}:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build:
-      context: .
-      dockerfile: ./cmd/mail/Dockerfile
-    command: sh -c "./main -config=./cmd/config/debug.yml"
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.10
-    ports:
-      - "8008:8008"
-    restart: "no"
 
 volumes:
   cache:

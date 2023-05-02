@@ -5,13 +5,13 @@ services:
     env_file:
       - .env
     depends_on:
-      file_storage_service:
+      file_storage:
         condition: service_started
-      user_service:
+      user:
         condition: service_started
-      auth_service:
+      auth:
         condition: service_started
-      mail_service:
+      mail:
         condition: service_started
     volumes:
       # - ${VENDOR}:/go/pkg/
@@ -25,6 +25,7 @@ services:
         ipv4_address: 172.28.0.2
     ports:
       - "8001:8001"
+      - "9001:9001"
     restart: always
 
   db:
@@ -78,7 +79,7 @@ services:
       - cache:/data
     restart: always
 
-  file_storage_service:
+  file_storage:
     env_file:
       - .env
     volumes:
@@ -93,15 +94,16 @@ services:
         ipv4_address: 172.28.0.7
     ports:
       - "8005:8005"
+      - "9003:9003"
     restart: always
 
-  user_service:
+  user:
     env_file:
       - .env
     depends_on:
       db:
         condition: service_healthy
-      file_storage_service:
+      file_storage:
         condition: service_started
     volumes:
       # - ${VENDOR}:/go/pkg/
@@ -115,13 +117,14 @@ services:
         ipv4_address: 172.28.0.8
     ports:
       - "8006:8006"
+      - "9005:9005"
     restart: always
 
-  auth_service:
+  auth:
     env_file:
       - .env
     depends_on:
-      user_service:
+      user:
         condition: service_started
       cache:
         condition: service_started
@@ -137,15 +140,16 @@ services:
         ipv4_address: 172.28.0.9
     ports:
       - "8007:8007"
+      - "9002:9002"
     restart: always
 
-  mail_service:
+  mail:
     env_file:
       - .env
     depends_on:
       db:
         condition: service_healthy
-      user_service:
+      user:
         condition: service_started
     volumes:
       # - ${VENDOR}:/go/pkg/
@@ -159,8 +163,69 @@ services:
         ipv4_address: 172.28.0.10
     ports:
       - "8008:8008"
+      - "9004:9004"
     restart: always
 
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.16
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=2d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./metrics/data/prometheus:/prometheus
+      - ./metrics/config/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    restart: always
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.17
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    user: root
+    privileged: true
+    deploy:
+      mode: global
+    ports:
+      - "9100:9100"
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    volumes:
+      - ./metrics/data/grafana:/var/lib/grafana
+      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
+      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.18
+    restart: always
 
 volumes:
   db_data:
