@@ -2,7 +2,6 @@ package server
 
 import (
 	"crypto/tls"
-	"fmt"
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
@@ -26,7 +25,6 @@ func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user
 	s.MaxRecipients = cfg.SmtpServer.MaxRecipients
 	s.AllowInsecureAuth = cfg.SmtpServer.AllowInsecureAuth
 
-	fmt.Println(cfg.SmtpServer.CertFile, cfg.SmtpServer.KeyFile)
 	cert, err := tls.LoadX509KeyPair(cfg.SmtpServer.CertFile, cfg.SmtpServer.KeyFile)
 	if err != nil {
 		return errors.Wrap(err, "failed load tls keys")
