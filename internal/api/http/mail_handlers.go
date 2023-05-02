@@ -106,7 +106,7 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var folders []models.Folder
+	folders := make([]models.Folder, 0)
 
 	isCustom, err := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
 	if isCustom {
