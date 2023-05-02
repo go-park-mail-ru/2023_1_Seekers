@@ -93,7 +93,6 @@ func (s *Session) Data(r io.Reader) error {
 		return errors.New("auth required")
 	}
 
-	fmt.Println("SIGN")
 	var signedMail []byte
 	if domainFrom == s.cfg.Mail.PostDomain {
 		//2. sign DKIM
@@ -125,13 +124,10 @@ func (s *Session) Data(r io.Reader) error {
 		}
 	}
 
-	fmt.Println("VALIDATE")
-
 	// validate recipients (anti spam)
 	for _, to := range s.to {
 		domainTo, err := pkgSmtp.ParseDomain(to)
 		if err != nil {
-			fmt.Println("failed parse domain", err, to)
 			return errors.Wrap(err, "send - failed get domain")
 		}
 
@@ -144,7 +140,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	var fromUser *models.User
 	var subject, messageBody string
-	fmt.Println("VERIF")
+
 	if domainFrom != s.cfg.Mail.PostDomain {
 		entity, err := message.Read(bytes.NewReader(bytesMail))
 		if err != nil {
@@ -161,7 +157,7 @@ func (s *Session) Data(r io.Reader) error {
 
 		messageBody, err = pkgSmtp.GetMessageBody(bytesMail)
 		if err != nil {
-			log.Debug("message not multipart")
+			log.Info("message not multipart")
 			bytesBody, err := io.ReadAll(entity.Body)
 			if err != nil {
 				return errors.Wrap(err, "failed read body")
@@ -170,8 +166,7 @@ func (s *Session) Data(r io.Reader) error {
 		}
 
 		fromUser, err = s.userClient.GetByEmail(s.from)
-		fmt.Println("DEBUG FROM USER")
-		fmt.Println(fromUser, err)
+
 		if err != nil {
 			// trying to get info about sender, sometimes its not defined and errors can be ignored
 			addr, _ := mail.ParseAddress(entity.Header.Get("From"))
@@ -191,10 +186,6 @@ func (s *Session) Data(r io.Reader) error {
 				IsExternal: true,
 			})
 
-			fmt.Println("DEBUG")
-			fmt.Println("CREATE USER")
-			fmt.Println(fromUser, err)
-
 			if err != nil {
 				return errors.Wrap(err, "failed create external user")
 			}
@@ -212,7 +203,6 @@ func (s *Session) Data(r io.Reader) error {
 		}
 
 		if domainTo != s.cfg.Mail.PostDomain {
-			fmt.Println("sending to other service ....")
 			err = s.DialAndSend(signedMail, to)
 			if err != nil {
 				return err
@@ -232,8 +222,7 @@ func (s *Session) Data(r io.Reader) error {
 			Text:             messageBody,
 			ReplyToMessageID: nil,
 		}
-		fmt.Println("DEBUG")
-		fmt.Println("SENDING LETTER")
+
 		fmt.Println(fromUser.UserID, message)
 		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
 		if err != nil {

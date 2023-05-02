@@ -32,7 +32,7 @@ func SendMail(from *models.User, to, subject, message, smtpDomain string) error 
 
 	auth := sasl.NewPlainClient("", login, from.Password)
 
-	addrFrom := []*mail.Address{{from.FirstName + from.LastName, login}}
+	addrFrom := []*mail.Address{{from.FirstName + from.LastName, from.Email}}
 	addrTo := []*mail.Address{{Address: to}}
 
 	// Create our mail header
