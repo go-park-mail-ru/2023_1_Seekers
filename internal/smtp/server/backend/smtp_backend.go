@@ -212,7 +212,7 @@ func (s *Session) Data(r io.Reader) error {
 		}
 
 		if domainTo != s.cfg.Mail.PostDomain {
-			log.Debug("sending to other service ....")
+			fmt.Println("sending to other service ....")
 			err = s.DialAndSend(signedMail, to)
 			if err != nil {
 				return err
