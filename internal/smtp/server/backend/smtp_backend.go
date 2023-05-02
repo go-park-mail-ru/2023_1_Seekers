@@ -52,6 +52,8 @@ func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 }
 
 func (s *Session) AuthPlain(username, password string) error {
+	fmt.Println(password)
+	fmt.Println(s.cfg.SmtpServer.SecretPassword)
 	if password != s.cfg.SmtpServer.SecretPassword {
 		_, _, err := s.authClient.SignIn(&models.FormLogin{
 			Login:    username,
