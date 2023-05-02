@@ -307,7 +307,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "api_timings_sum",
+          "expr": "api_timings_sum/api_timings_count",
           "legendFormat": "{{code}} {{method}} {{path}}",
           "range": true,
           "refId": "A"
@@ -383,7 +383,32 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "auth"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -596,7 +621,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "auth_timings_sum",
+          "expr": "auth_timings_sum/auth_timings_count",
           "legendFormat": "{{code}} {{method}}",
           "range": true,
           "refId": "A"
@@ -886,7 +911,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "file_service_timings_sum",
+          "expr": "file_service_timings_sum/file_service_timings_count",
           "legendFormat": "{{code}} {{method}}",
           "range": true,
           "refId": "A"
@@ -1176,7 +1201,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "mail_timings_sum",
+          "expr": "mail_timings_sum/mail_timings_count",
           "legendFormat": "{{code}} {{method}}",
           "range": true,
           "refId": "A"
@@ -1467,7 +1492,7 @@
           },
           "editorMode": "code",
           "expr": "user_timings_sum",
-          "legendFormat": "__auto",
+          "legendFormat": "{{code}} {{method}}",
           "range": true,
           "refId": "A"
         }
@@ -1522,13 +1547,13 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "App monitoring",
   "uid": "b78ba543-36d9-41eb-a86e-13a872db6fd0",
-  "version": 18,
+  "version": 25,
   "weekStart": ""
 }

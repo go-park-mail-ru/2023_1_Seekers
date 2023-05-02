@@ -179,7 +179,7 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     volumes:
       - ./metrics/data/prometheus:/prometheus
-      - ./metrics/config/prometheus:/etc/prometheus
+      - ./metrics/config/prometheus/prod:/etc/prometheus
     ports:
       - "9090:9090"
     depends_on:
