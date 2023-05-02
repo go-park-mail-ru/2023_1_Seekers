@@ -120,6 +120,21 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	debug, _ := json.Marshal(models.FoldersResponse{
+		Folders: folders,
+		Count:   len(folders),
+	})
+
+	fmt.Println("DEBUG")
+	fmt.Println(string(debug))
+
+	debug2, _ := json.Marshal(models.FoldersResponse{
+		Folders: make([]models.Folder, 0),
+		Count:   0,
+	})
+	fmt.Println("DEBUG2")
+	fmt.Println(string(debug2))
+
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
 		Folders: folders,
 		Count:   len(folders),
