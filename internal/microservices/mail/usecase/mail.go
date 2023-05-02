@@ -537,7 +537,7 @@ func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails 
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
 		Title:      "Ваше сообщение не доставлено",
-		Text: "Это письмо создано автоматически сервером Mailbox.ru, отвечать на него не нужно.\n\n" +
+		Text: "Это письмо создано автоматически сервером Mailbx.ru, отвечать на него не нужно.\n\n" +
 			"К сожалению, Ваше письмо не может быть доставлено одному или нескольким получателям:\n" +
 			strings.Join(invalidEmails, "\n") + "\n\nРекомендуем Вам проверить корректность указания адресов получателей.",
 		ReplyToMessageID: nil,
@@ -549,8 +549,8 @@ func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails 
 func (uc *mailUC) SendWelcomeMessage(recipientEmail string) error {
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
-		Title:      "Добро пожаловать в почту Mailbox",
-		Text: "Это письмо создано автоматически сервером Mailbox.ru, отвечать на него не нужно.\n" +
+		Title:      "Добро пожаловать в почту Mailbx",
+		Text: "Это письмо создано автоматически сервером Mailbx.ru, отвечать на него не нужно.\n" +
 			"Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использованием!",
 		ReplyToMessageID: nil,
 	}
@@ -569,7 +569,7 @@ func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) error {
 }
 
 func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {
-	return uc.userUC.GetInfoByEmail("support@mailbox.ru")
+	return uc.userUC.GetInfoByEmail("support@mailbx.ru")
 }
 
 func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) {

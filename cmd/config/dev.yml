@@ -57,7 +57,7 @@ s3:
   s3_avatar_bucket: avatars_mailbox_vkcloud
 
 sessions:
-  cookie_name: MailBoxSession
+  cookie_name: MailBxSession
   cookie_ttl: 2400h0m0s
   cookie_path: /
   csrf_header: Csrf-Token
