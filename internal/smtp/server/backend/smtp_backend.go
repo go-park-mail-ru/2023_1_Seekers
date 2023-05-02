@@ -13,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -70,9 +71,10 @@ func (s *Session) Mail(from string, _ *smtp.MailOptions) error {
 }
 
 func (s *Session) Rcpt(to string) error {
-	fmt.Println("add recipient", to)
-	s.to = append(s.to, to)
-	fmt.Println(s.to)
+	if err := validation.ValidateEmail(to); err != nil {
+		s.to = append(s.to, to)
+	}
+
 	return nil
 }
 
