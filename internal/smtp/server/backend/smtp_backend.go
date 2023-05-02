@@ -71,7 +71,7 @@ func (s *Session) Mail(from string, _ *smtp.MailOptions) error {
 }
 
 func (s *Session) Rcpt(to string) error {
-	if err := validation.ValidateEmail(to); err != nil {
+	if err := validation.ValidateEmail(to); err == nil {
 		s.to = append(s.to, to)
 	}
 
