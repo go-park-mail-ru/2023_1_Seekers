@@ -80,7 +80,6 @@ func (s *Session) Data(r io.Reader) error {
 		return errors.Wrap(err, "failed read message")
 	}
 
-	fmt.Println(s.from)
 	domainFrom, err := pkgSmtp.ParseDomain(s.from)
 	if err != nil {
 		return errors.New("failed to parse domain from:" + err.Error())
@@ -89,6 +88,8 @@ func (s *Session) Data(r io.Reader) error {
 	if !s.isAuth && domainFrom == s.cfg.Mail.PostDomain {
 		return errors.New("auth required")
 	}
+
+	fmt.Println("here")
 
 	var signedMail []byte
 	if domainFrom == s.cfg.Mail.PostDomain {
