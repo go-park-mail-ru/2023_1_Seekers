@@ -70,7 +70,9 @@ func (s *Session) Mail(from string, _ *smtp.MailOptions) error {
 }
 
 func (s *Session) Rcpt(to string) error {
+	fmt.Println("add recipient", to)
 	s.to = append(s.to, to)
+	fmt.Println(s.to)
 	return nil
 }
 
