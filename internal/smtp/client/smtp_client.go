@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-sasl"
 	"github.com/emersion/go-smtp"
@@ -92,6 +93,7 @@ func SendMail(from *models.User, to, subject, message, smtpDomain string) error 
 	if err != nil {
 		errors.Wrap(err, "failed to send mail")
 	}
+	fmt.Println("send")
 
 	return nil
 }
