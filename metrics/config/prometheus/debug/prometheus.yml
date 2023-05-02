@@ -7,31 +7,31 @@ scrape_configs:
     scrape_interval: 10s
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'api:9001' ]
+      - targets: [ 'localhost:9001' ]
 
   - job_name: auth
     scrape_interval: 10s
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'auth:9002' ]
+      - targets: [ 'localhost:9002' ]
 
   - job_name: file_storage
     scrape_interval: 10s
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'file_storage:9003' ]
+      - targets: [ 'localhost:9003' ]
 
   - job_name: mail
     scrape_interval: 10s
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'mail:9004' ]
+      - targets: [ 'localhost:9004' ]
 
   - job_name: user
     scrape_interval: 10s
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'user:9005' ]
+      - targets: [ 'localhost:9005' ]
 
 
   - job_name: node
