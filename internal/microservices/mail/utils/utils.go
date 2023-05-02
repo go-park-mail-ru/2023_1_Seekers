@@ -55,7 +55,7 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Recipients:       protoRecipients,
 		Title:            info.Title,
 		CreatedAt:        info.CreatedAt,
-		Text:             info.CreatedAt,
+		Text:             info.Text,
 		ReplyToMessageID: replyMessageID,
 		ReplyTo:          replyToInfo,
 		Seen:             info.Seen,

@@ -152,6 +152,7 @@ func (s *Session) Data(r io.Reader) error {
 
 		messageBody, err = pkgSmtp.GetMessageBody(bytesMail)
 		if err != nil {
+			log.Debug("message not multipart")
 			bytesBody, err := io.ReadAll(entity.Body)
 			if err != nil {
 				return errors.Wrap(err, "failed read body")
