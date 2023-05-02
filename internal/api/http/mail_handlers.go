@@ -115,6 +115,9 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		folders, err = h.uc.GetFolders(userID)
 	}
 
+	fmt.Println("____")
+	fmt.Println(folders)
+
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
