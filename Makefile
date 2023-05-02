@@ -13,8 +13,8 @@ build:
 	docker-compose up -d --build --remove-orphans
 
 build-prod:
-	sudo systemctl stop nginx.service
-	sudo systemctl stop postgresql
+	sudo systemctl stop nginx.service || true
+	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
 	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
