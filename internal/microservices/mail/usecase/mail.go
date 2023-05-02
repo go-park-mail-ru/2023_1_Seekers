@@ -643,7 +643,7 @@ func (uc *mailUC) GetCustomFolders(userID uint64) ([]models.Folder, error) {
 	}
 
 	folders, err := uc.mailRepo.SelectCustomFoldersByUser(userID, localNames)
-	if err != nil {
+	if folders == nil || err != nil {
 		return []models.Folder{}, pkgErrors.Wrap(err, "get folders")
 	}
 
