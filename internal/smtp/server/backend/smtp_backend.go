@@ -136,6 +136,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	var fromUser *models.User
 	var subject, messageBody string
+	log.Debug("Verification")
 	if domainFrom != s.cfg.Mail.PostDomain {
 		entity, err := message.Read(bytes.NewReader(bytesMail))
 		if err != nil {
