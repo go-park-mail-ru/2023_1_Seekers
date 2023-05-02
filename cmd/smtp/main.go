@@ -7,6 +7,7 @@ import (
 	_mailClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/client"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/server"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -16,6 +17,7 @@ import (
 // sudo go run cmd/smtp/main.go -config=./cmd/configs/debug.yml
 
 func main() {
+	godotenv.Load(".env")
 	var configFile string
 
 	flag.StringVar(&configFile, "config", "./cmd/config/debug.yml", "-config=./cmd/config/debug.yml")
