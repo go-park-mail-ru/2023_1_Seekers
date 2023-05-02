@@ -194,7 +194,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	var batchRecipients []string
 
-	log.Debug("Starting sending")
+	fmt.Println("Starting sending")
 	for _, to := range s.to {
 		// 3. dial and send
 		domainTo, err := pkgSmtp.ParseDomain(to)
