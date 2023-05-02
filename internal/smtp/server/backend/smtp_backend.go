@@ -79,6 +79,8 @@ func (s *Session) Rcpt(to string) error {
 }
 
 func (s *Session) Data(r io.Reader) error {
+	fmt.Println("DATA")
+
 	bytesMail, err := io.ReadAll(r)
 	if err != nil {
 		return errors.Wrap(err, "failed read message")
