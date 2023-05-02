@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-msgauth/dkim"
@@ -148,6 +149,8 @@ func (s *Session) Data(r io.Reader) error {
 		messageBody = string(bytesBody)
 
 		fromUser, err = s.userClient.GetByEmail(s.from)
+		fmt.Println("DEBUG FROM USER")
+		fmt.Println(fromUser, err)
 		if err != nil {
 			// trying to get info about sender, sometimes its not defined and errors can be ignored
 			addr, _ := mail.ParseAddress(entity.Header.Get("From"))
@@ -166,6 +169,11 @@ func (s *Session) Data(r io.Reader) error {
 				LastName:   lastName,
 				IsExternal: true,
 			})
+
+			fmt.Println("DEBUG")
+			fmt.Println("CREATE USER")
+			fmt.Println(fromUser, err)
+
 			if err != nil {
 				return errors.Wrap(err, "failed create external user")
 			}
@@ -201,6 +209,9 @@ func (s *Session) Data(r io.Reader) error {
 			Text:             messageBody,
 			ReplyToMessageID: nil,
 		}
+		fmt.Println("DEBUG")
+		fmt.Println("SENDING LETTER")
+		fmt.Println(fromUser.UserID, message)
 		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
