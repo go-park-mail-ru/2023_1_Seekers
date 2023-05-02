@@ -63,7 +63,7 @@ type Config struct {
 		WriteTimeout       time.Duration `yaml:"write_timeout_timeout" env-default:"10s"`
 		MaxMessageBytes    int           `yaml:"max_message_bytes" env-default:"1048576"` //1024 * 1024
 		MaxRecipients      int           `yaml:"max_recipients" env-default:"50"`
-		AllowInsecureAuth  *bool         `yaml:"allow_insecure_auth" env-default:"false"`
+		AllowInsecureAuth  bool          `yaml:"allow_insecure_auth" env-default:"false"`
 		CertFile           string        `yaml:"cert_file"`
 		KeyFile            string        `yaml:"key_file"`
 		DkimPrivateKeyFile string        `yaml:"dkim_private_key_file"`

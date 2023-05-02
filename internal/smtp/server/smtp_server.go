@@ -23,7 +23,7 @@ func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user
 	s.WriteTimeout = cfg.SmtpServer.WriteTimeout
 	s.MaxMessageBytes = cfg.SmtpServer.MaxMessageBytes
 	s.MaxRecipients = cfg.SmtpServer.MaxRecipients
-	s.AllowInsecureAuth = *cfg.SmtpServer.AllowInsecureAuth
+	s.AllowInsecureAuth = cfg.SmtpServer.AllowInsecureAuth
 
 	cert, err := tls.LoadX509KeyPair(cfg.SmtpServer.CertFile, cfg.SmtpServer.KeyFile)
 	if err != nil {
@@ -33,7 +33,8 @@ func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user
 
 	log.Println("Starting server at", s.Addr)
 	if err = s.ListenAndServe(); err != nil {
-		errors.Wrap(err, "failed serve")
+		return errors.Wrap(err, "failed serve")
 	}
+
 	return errors.New("server stopped")
 }

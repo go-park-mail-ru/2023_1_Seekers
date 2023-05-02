@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -456,6 +457,7 @@ func (h *mailHandlers) DeleteFolder(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	folderSlug, ok := vars["slug"]
+	fmt.Println(folderSlug)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
 		return

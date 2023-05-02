@@ -210,7 +210,7 @@ func (u *useCase) EditPw(ID uint64, form *models.EditPasswordRequest) error {
 		return errors.ErrWrongPw
 	}
 
-	if err := validation.Password(form.Password, u.cfg.Password.PasswordSaltLen); err != nil {
+	if err := validation.Password(form.Password, u.cfg.Password.PasswordMinLen); err != nil {
 		return pkgErrors.Wrap(err, "edit password")
 	}
 	hashPw, err := crypto.HashPw(form.Password, u.cfg.Password.PasswordSaltLen)
