@@ -123,6 +123,11 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(json.Marshal(models.FoldersResponse{
+		Folders: folders,
+		Count:   len(folders),
+	}))
+
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.FoldersResponse{
 		Folders: folders,
 		Count:   len(folders),
