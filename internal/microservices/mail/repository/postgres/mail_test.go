@@ -144,11 +144,11 @@ func TestRepository_SelectFolderMessagesByUserNFolderID(t *testing.T) {
 	}
 
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "boxes" JOIN mail.messages using(message_id) WHERE user_id = $1
-AND folder_id = $2 AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false) ORDER BY created_at DESC`)).
-		WithArgs(userID, folderID).WillReturnRows(rows)
+AND folder_id = $2 AND is_draft = $3 ORDER BY created_at DESC`)).
+		WithArgs(userID, folderID, false).WillReturnRows(rows)
 
 	mailRepo := New(cfg, gormDB)
-	response, err := mailRepo.SelectFolderMessagesByUserNFolderID(userID, folderID)
+	response, err := mailRepo.SelectFolderMessagesByUserNFolderID(userID, folderID, false)
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {

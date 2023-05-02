@@ -53,7 +53,7 @@ routes:
 
   route_message: /message/{id:[0-9]+}
   route_send_message: /message/send
-  route_save_draft_message: message/save
+  route_save_draft_message: /message/save
   route_read_message: /message/{id:[0-9]+}/read
   route_unread_message: /message/{id:[0-9]+}/unread
   route_move_to_folder: /message/{id:[0-9]+}/move

@@ -37,6 +37,7 @@ var (
 	ErrMoveToDraftFolder    = errors.New("can't move message to draft folder")
 	ErrMoveFromDraftFolder  = errors.New("can't move message from draft folder")
 	ErrSomeEmailsAreInvalid = errors.New("some emails are invalid")
+	ErrCantEditSentMessage  = errors.New("can't edit sent message")
 )
 
 var Codes = map[string]int{

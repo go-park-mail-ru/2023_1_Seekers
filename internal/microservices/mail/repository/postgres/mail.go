@@ -101,11 +101,11 @@ func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint
 	return &folder, nil
 }
 
-func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64) ([]models.MessageInfo, error) {
+func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
-		Where("user_id = ? AND folder_id = ? AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false)", userID, folderID).Order("created_at DESC").Scan(&messages)
+		Where("user_id = ? AND folder_id = ? AND is_draft = ?", userID, folderID, isDraft).Order("created_at DESC").Scan(&messages)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}

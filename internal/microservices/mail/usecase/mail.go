@@ -65,7 +65,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
-	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID)
+	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, folderSlug == "drafts")
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -195,7 +195,7 @@ func (uc *mailUC) DeleteFolder(userID uint64, folderSlug string) error {
 		return pkgErrors.Wrap(err, "get folder info")
 	}
 
-	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID)
+	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, false)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -412,6 +412,9 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	message, err := uc.GetMessage(fromUserID, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message")
+	}
+	if !message.IsDraft {
+		return nil, pkgErrors.WithMessage(errors.ErrCantEditSentMessage, "can't edit not draft message")
 	}
 
 	recipients := uc.mapRecipients(formMessage.Recipients, message)
