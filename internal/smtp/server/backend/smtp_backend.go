@@ -82,6 +82,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	domainFrom, err := pkgSmtp.ParseDomain(s.from)
 	if err != nil {
+		log.Debug("failed parse domain from", err, s.from)
 		return errors.New("failed to parse domain from:" + err.Error())
 	}
 
