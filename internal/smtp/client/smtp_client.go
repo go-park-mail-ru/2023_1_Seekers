@@ -2,14 +2,12 @@ package client
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-sasl"
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
 	"time"
@@ -23,21 +21,15 @@ func Address2Slice(addrs []*mail.Address) []string {
 	return result
 }
 
-func SendMail(from *models.User, to, subject, message, smtpDomain string) error {
+func SendMail(from *models.User, to, subject, message, smtpDomain, secret string) error {
 	var b bytes.Buffer
-	log.Info("PARAMS")
-	fmt.Println(from)
-	fmt.Println(to)
-	fmt.Println(subject)
-	fmt.Println(message)
-	fmt.Println(smtpDomain)
 
 	login, err := pkgSmtp.ParseLogin(from.Email)
 	if err != nil {
 		return errors.Wrap(err, "failed get login from email")
 	}
 
-	auth := sasl.NewPlainClient("", login, from.Password)
+	auth := sasl.NewPlainClient("", login, secret)
 
 	addrFrom := []*mail.Address{{from.FirstName + " " + from.LastName, from.Email}}
 	addrTo := []*mail.Address{{Address: to}}
@@ -100,7 +92,6 @@ func SendMail(from *models.User, to, subject, message, smtpDomain string) error 
 	if err != nil {
 		errors.Wrap(err, "failed to send mail")
 	}
-	fmt.Println("send")
 
 	return nil
 }

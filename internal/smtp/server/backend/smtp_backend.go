@@ -52,12 +52,14 @@ func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 }
 
 func (s *Session) AuthPlain(username, password string) error {
-	_, _, err := s.authClient.SignIn(&models.FormLogin{
-		Login:    username,
-		Password: password,
-	})
-	if err != nil {
-		return errors.Wrap(err, "failed smtp auth")
+	if password != s.cfg.SmtpServer.SecretPassword {
+		_, _, err := s.authClient.SignIn(&models.FormLogin{
+			Login:    username,
+			Password: password,
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed smtp auth")
+		}
 	}
 	s.username = username
 	s.password = password

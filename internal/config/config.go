@@ -67,6 +67,7 @@ type Config struct {
 		CertFile           string        `yaml:"cert_file"`
 		KeyFile            string        `yaml:"key_file"`
 		DkimPrivateKeyFile string        `yaml:"dkim_private_key_file"`
+		SecretPassword     string        `env:"SMTP_SECRET_PASSWORD"`
 	} `yaml:"smtp_server"`
 
 	DB struct {

@@ -507,7 +507,7 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 			return nil, pkgErrors.Wrap(err, "send message - failed get recipient domain")
 		}
 		if toDomain != uc.cfg.Mail.PostDomain {
-			err := client.SendMail(fromUser, recipient, message.Title, message.Text, uc.cfg.Mail.PostDomain)
+			err := client.SendMail(fromUser, recipient, message.Title, message.Text, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword)
 			if err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : to other mail service")
 			}
