@@ -50,6 +50,9 @@ run-mail-service:
 run-file_storage-service:
 	go run ./cmd/file_storage/main.go -config=./cmd/config/debug.yml
 
+run-smtp-server:
+	sudo go run cmd/smtp/main.go -config=./cmd/config/debug.yml
+
 docker-prune:
 	@bash -c 'docker system prune'
 
