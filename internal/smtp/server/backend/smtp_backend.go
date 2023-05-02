@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"mime"
 	"strings"
 )
 
@@ -141,12 +142,22 @@ func (s *Session) Data(r io.Reader) error {
 			return errors.Wrap(err, "failed read message")
 		}
 		subject = entity.Header.Get("Subject")
-		bytesBody, err := io.ReadAll(entity.Body)
-		if err != nil {
-			return errors.Wrap(err, "failed read body")
+
+		decoder := &mime.WordDecoder{CharsetReader: message.CharsetReader}
+		decodedSubject, err := decoder.Decode(subject)
+		if err == nil {
+			//if subject was utf-8
+			subject = decodedSubject
 		}
 
-		messageBody = string(bytesBody)
+		messageBody, err = pkgSmtp.GetMessageBody(bytesMail)
+		if err != nil {
+			bytesBody, err := io.ReadAll(entity.Body)
+			if err != nil {
+				return errors.Wrap(err, "failed read body")
+			}
+			messageBody = string(bytesBody)
+		}
 
 		fromUser, err = s.userClient.GetByEmail(s.from)
 		fmt.Println("DEBUG FROM USER")
