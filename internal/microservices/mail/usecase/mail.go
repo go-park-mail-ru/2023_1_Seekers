@@ -161,9 +161,10 @@ func (uc *mailUC) CreateFolder(userID uint64, form models.FormFolder) (*models.F
 		return nil, pkgErrors.Wrap(err, "get last local folder id")
 	}
 
+	localName := strconv.FormatUint(lastLocalID+1, 10)
 	folder = &models.Folder{
 		UserID:    userID,
-		LocalName: strconv.FormatUint(lastLocalID+1, 10),
+		LocalName: localName,
 		Name:      form.Name,
 	}
 
@@ -172,7 +173,7 @@ func (uc *mailUC) CreateFolder(userID uint64, form models.FormFolder) (*models.F
 		return nil, pkgErrors.Wrap(err, "insert folder")
 	}
 
-	return folder, nil
+	return uc.GetFolderInfo(userID, localName)
 }
 
 func (uc *mailUC) isDefaultFolder(folderSlug string) bool {
@@ -422,34 +423,24 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	var toDelete []models.User2Folder
 
 	for email, value := range recipients {
+		recipient, err := uc.userUC.GetInfoByEmail(email)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+		}
+
+		folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+		}
+
 		switch value {
 		case "add":
-			recipient, err := uc.userUC.GetInfoByEmail(email)
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : get user info by email")
-			}
-
-			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
-			}
-
 			toInsert = append(toInsert, models.User2Folder{
 				UserID:   recipient.UserID,
 				FolderID: folder.FolderID,
 			})
 			break
 		case "del":
-			recipient, err := uc.userUC.GetInfoByEmail(email)
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "edit draft : get user info by email")
-			}
-
-			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
-			}
-
 			toDelete = append(toDelete, models.User2Folder{
 				UserID:   recipient.UserID,
 				FolderID: folder.FolderID,

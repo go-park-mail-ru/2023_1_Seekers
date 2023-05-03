@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -142,6 +143,7 @@ func (m mailRepository) DeleteMessageFromMessages(messageID uint64) error {
 func (m mailRepository) UpdateFolder(folder models.Folder) error {
 	tx := m.db.Updates(folder)
 	if err := tx.Error; err != nil {
+		fmt.Println(err)
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -193,12 +195,13 @@ func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *mode
 }
 
 func (m mailRepository) updateMessageInMessages(message *models.MessageInfo, tx *gorm.DB) error {
-	tx = m.db.Model(Message{}).Omit("message_id", "from_user_id", "size").Where("message_id = ?", message.MessageID).Updates(&message)
+	tx = tx.Model(Message{}).Omit("message_id", "from_user_id", "size").Where("message_id = ?", message.MessageID).Updates(&message)
 	if err := tx.Error; err != nil {
+		fmt.Println(err)
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 	if message.ReplyToMessageID == nil {
-		tx = m.db.Model(Message{}).Select("reply_to_message_id").Where("message_id = ?", message.MessageID).
+		tx = tx.Model(Message{}).Select("reply_to_message_id").Where("message_id = ?", message.MessageID).
 			Updates(&map[string]interface{}{"reply_to_message_id": nil})
 	}
 
