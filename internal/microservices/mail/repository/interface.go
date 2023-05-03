@@ -21,5 +21,5 @@ type MailRepoI interface {
 	UpdateMessage(message *models.MessageInfo, toInsert []models.User2Folder, toDelete []models.User2Folder) error
 	InsertFolder(folder *models.Folder) (uint64, error)
 	UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error
-	UpdateMessageFolder(userID uint64, messageID uint64, folderID uint64) error
+	UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error
 }

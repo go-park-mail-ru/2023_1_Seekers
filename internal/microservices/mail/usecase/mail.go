@@ -604,7 +604,7 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, folderSlu
 		return pkgErrors.WithMessage(errors.ErrMoveFromDraftFolder, "old folder is equals draft folder")
 	}
 
-	err = uc.mailRepo.UpdateMessageFolder(userID, messageID, toFolder.FolderID)
+	err = uc.mailRepo.UpdateMessageFolder(userID, messageID, fromFolder.FolderID, toFolder.FolderID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "update message folder")
 	}

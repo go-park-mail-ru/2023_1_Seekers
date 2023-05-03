@@ -327,8 +327,8 @@ func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stat
 	return nil
 }
 
-func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, folderID uint64) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update("folder_id", folderID)
+func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error {
+	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, oldFolderID).Update("folder_id", newFolderID)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}

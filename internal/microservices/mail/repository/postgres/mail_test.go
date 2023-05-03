@@ -600,7 +600,8 @@ func TestRepository_UpdateMessageFolder(t *testing.T) {
 
 	userID := uint64(1)
 	messageID := uint64(1)
-	folderID := uint64(1)
+	oldFolderID := uint64(1)
+	newFolderID := uint64(1)
 
 	db, gormDB, mock, err := mockDB()
 	if err != nil {
@@ -609,12 +610,12 @@ func TestRepository_UpdateMessageFolder(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "boxes" SET "folder_id"=$1 WHERE user_id = $2 AND message_id = $3`)).
-		WithArgs(folderID, userID, messageID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "boxes" SET "folder_id"=$1 WHERE user_id = $2 AND message_id = $3 AND folder_id = $4`)).
+		WithArgs(newFolderID, userID, messageID, oldFolderID).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectCommit()
 
 	mailRepo := New(cfg, gormDB)
-	err = mailRepo.UpdateMessageFolder(userID, messageID, folderID)
+	err = mailRepo.UpdateMessageFolder(userID, messageID, oldFolderID, newFolderID)
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {

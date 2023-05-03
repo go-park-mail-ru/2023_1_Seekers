@@ -254,17 +254,17 @@ func (mr *MockMailRepoIMockRecorder) UpdateMessage(message, toInsert, toDelete i
 }
 
 // UpdateMessageFolder mocks base method.
-func (m *MockMailRepoI) UpdateMessageFolder(userID, messageID, folderID uint64) error {
+func (m *MockMailRepoI) UpdateMessageFolder(userID, messageID, oldFolderID, newFolderID uint64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateMessageFolder", userID, messageID, folderID)
+	ret := m.ctrl.Call(m, "UpdateMessageFolder", userID, messageID, oldFolderID, newFolderID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateMessageFolder indicates an expected call of UpdateMessageFolder.
-func (mr *MockMailRepoIMockRecorder) UpdateMessageFolder(userID, messageID, folderID interface{}) *gomock.Call {
+func (mr *MockMailRepoIMockRecorder) UpdateMessageFolder(userID, messageID, oldFolderID, newFolderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMessageFolder", reflect.TypeOf((*MockMailRepoI)(nil).UpdateMessageFolder), userID, messageID, folderID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMessageFolder", reflect.TypeOf((*MockMailRepoI)(nil).UpdateMessageFolder), userID, messageID, oldFolderID, newFolderID)
 }
 
 // UpdateMessageState mocks base method.
