@@ -547,7 +547,7 @@ func (h *mailHandlers) EditFolder(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} errors.JSONError "message not found"
 // @Failure 404 {object} errors.JSONError "folder not found"
 // @Failure 500 {object} errors.JSONError "internal server error"
-// @Router   /message/{id}/move [post]
+// @Router   /message/{id}/move [put]
 func (h *mailHandlers) MoveToFolder(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {

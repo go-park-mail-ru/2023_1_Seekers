@@ -26,6 +26,7 @@ func createConfig() *config.Config {
 	cfg.Mail.PostAtDomain = "@mailbx.ru"
 	cfg.Routes.RouteUserAvatarQueryEmail = "email"
 	cfg.Routes.RouteUserInfoQueryEmail = "email"
+	cfg.Routes.RouteMoveToFolderQueryFolderSlug = "folderSlug"
 
 	return cfg
 }

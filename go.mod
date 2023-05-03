@@ -6,8 +6,6 @@ require (
 	github.com/aws/aws-sdk-go v1.44.224
 	github.com/emersion/go-message v0.16.0
 	github.com/emersion/go-msgauth v0.6.6
-	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21
-	github.com/emersion/go-smtp v0.16.0
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-redis/redismock/v9 v9.0.3
@@ -15,7 +13,6 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/ilyakaznacheev/cleanenv v1.4.2
-	github.com/joho/godotenv v1.4.0
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.0
@@ -57,6 +54,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

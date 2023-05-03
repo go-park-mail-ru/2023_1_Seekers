@@ -20,6 +20,7 @@ type inputCase struct {
 	folderSlug  string
 	messageID   uint64
 	messageForm models.FormMessage
+	folderForm  models.FormFolder
 }
 
 type outputCase struct {
@@ -162,6 +163,48 @@ func TestDelivery_GetMessage(t *testing.T) {
 	}
 }
 
+func TestDelivery_DeleteMessage(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:    1,
+				messageID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest("DELETE", "/api/message", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().DeleteMessage(test.input.userID, test.input.messageID).Return(nil)
+
+		mailH.DeleteMessage(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
 func TestDelivery_SendMessage(t *testing.T) {
 	cfg := createConfig()
 
@@ -219,6 +262,70 @@ func TestDelivery_SendMessage(t *testing.T) {
 		mailUC.EXPECT().SendMessage(test.input.userID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
 
 		mailH.SendMessage(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_SaveDraft(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "one recipient",
+			input: inputCase{
+				userID: 1,
+				messageForm: models.FormMessage{
+					Recipients:       []string{"valera@mailbox.ru"},
+					Title:            "title test message",
+					Text:             "text test message",
+					ReplyToMessageID: nil,
+				},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+		{
+			name: "several recipient",
+			input: inputCase{
+				userID: 1,
+				messageForm: models.FormMessage{
+					Recipients:       []string{"valera@mailbox.ru", "max@mailbox.ru"},
+					Title:            "title test message",
+					Text:             "text test message",
+					ReplyToMessageID: nil,
+				},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		body, err := json.Marshal(test.input.messageForm)
+		if err != nil {
+			t.Fatalf("error while marshaling to json: %v", err)
+		}
+
+		r := httptest.NewRequest("POST", "/api/message/save", bytes.NewReader(body))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
+		mailUC.EXPECT().SaveDraft(test.input.userID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
+
+		mailH.SaveDraft(w, r)
 
 		if w.Code != test.output.status {
 			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
@@ -303,6 +410,239 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
 
 		mailH.UnreadMessage(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_CreateFolder(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:     1,
+				folderForm: models.FormFolder{Name: "test"},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		body, err := json.Marshal(test.input.folderForm)
+		if err != nil {
+			t.Fatalf("error while marshaling to json: %v", err)
+		}
+
+		r := httptest.NewRequest("POST", "/folder/create", bytes.NewReader(body))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().CreateFolder(test.input.userID, test.input.folderForm).Return(&models.Folder{}, nil)
+
+		mailH.CreateFolder(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_DeleteFolder(t *testing.T) {
+	cfg := createConfig()
+	var tests = []testCases{
+		{
+			name: "custom folder",
+			input: inputCase{
+				userID:     1,
+				folderSlug: "1",
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest("DELETE", "/api/folder/", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"slug": test.input.folderSlug,
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().DeleteFolder(test.input.userID, test.input.folderSlug).Return(nil)
+		mailH.DeleteFolder(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_EditFolder(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:     1,
+				folderSlug: "1",
+				folderForm: models.FormFolder{Name: "test"},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		body, err := json.Marshal(test.input.folderForm)
+		if err != nil {
+			t.Fatalf("error while marshaling to json: %v", err)
+		}
+
+		r := httptest.NewRequest("PUT", "/folder/", bytes.NewReader(body))
+		vars := map[string]string{
+			"slug": test.input.folderSlug,
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().EditFolder(test.input.userID, test.input.folderSlug, test.input.folderForm).Return(&models.Folder{}, nil)
+
+		mailH.EditFolder(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_MoveToFolder(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:     1,
+				messageID:  1,
+				folderSlug: "trash",
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest("GET", "/api/message/move", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+
+		q := r.URL.Query()
+		q.Add(cfg.Routes.RouteMoveToFolderQueryFolderSlug, test.input.folderSlug)
+		r.URL.RawQuery = q.Encode()
+
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().MoveMessageToFolder(test.input.userID, test.input.messageID, test.input.folderSlug).Return(nil)
+
+		mailH.MoveToFolder(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_EditDraft(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standart test",
+			input: inputCase{
+				userID:    1,
+				messageID: 1,
+				messageForm: models.FormMessage{
+					Recipients:       []string{"valera@mailbox.ru"},
+					Title:            "title test message",
+					Text:             "text test message",
+					ReplyToMessageID: nil,
+				},
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		body, err := json.Marshal(test.input.messageForm)
+		if err != nil {
+			t.Fatalf("error while marshaling to json: %v", err)
+		}
+
+		r := httptest.NewRequest("POST", "/api/message/send", bytes.NewReader(body))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.messageID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
+		mailUC.EXPECT().EditDraft(test.input.userID, test.input.messageID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
+
+		mailH.EditDraft(w, r)
 
 		if w.Code != test.output.status {
 			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
