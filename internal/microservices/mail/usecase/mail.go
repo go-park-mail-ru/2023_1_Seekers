@@ -6,10 +6,8 @@ import (
 	mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/client"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
 	"sort"
@@ -487,49 +485,31 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 
 	var user2folder []models.User2Folder
 
-	fromUser, err := uc.userUC.GetByID(fromUserID)
+	folder, err := uc.GetFolderInfo(fromUserID, "outbox")
 	if err != nil {
-		return nil, pkgErrors.Wrap(err, "send message")
+		return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 	}
 
-	if !fromUser.IsExternal {
-		folder, err := uc.GetFolderInfo(fromUserID, "outbox")
+	user2folder = append(user2folder, models.User2Folder{
+		UserID:   fromUserID,
+		FolderID: folder.FolderID,
+	})
+
+	for _, recipient := range message.Recipients {
+		recipient, err := uc.userUC.GetInfoByEmail(recipient)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+		}
+
+		folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 		}
 
 		user2folder = append(user2folder, models.User2Folder{
-			UserID:   fromUserID,
+			UserID:   recipient.UserID,
 			FolderID: folder.FolderID,
 		})
-	}
-
-	for _, recipient := range message.Recipients {
-		toDomain, err := pkgSmtp.ParseDomain(recipient)
-		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message - failed get recipient domain")
-		}
-		if toDomain != uc.cfg.Mail.PostDomain {
-			err := client.SendMail(fromUser, recipient, message.Title, message.Text, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword)
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : to other mail service")
-			}
-		} else {
-			recipient, err := uc.userUC.GetInfoByEmail(recipient)
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : get user info by email")
-			}
-
-			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
-			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
-			}
-
-			user2folder = append(user2folder, models.User2Folder{
-				UserID:   recipient.UserID,
-				FolderID: folder.FolderID,
-			})
-		}
 	}
 
 	newMessage := models.MessageInfo{
@@ -551,7 +531,7 @@ func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails 
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
 		Title:      "Ваше сообщение не доставлено",
-		Text: "Это письмо создано автоматически сервером Mailbx.ru, отвечать на него не нужно.\n\n" +
+		Text: "Это письмо создано автоматически сервером mailbx.ru, отвечать на него не нужно.\n\n" +
 			"К сожалению, Ваше письмо не может быть доставлено одному или нескольким получателям:\n" +
 			strings.Join(invalidEmails, "\n") + "\n\nРекомендуем Вам проверить корректность указания адресов получателей.",
 		ReplyToMessageID: nil,

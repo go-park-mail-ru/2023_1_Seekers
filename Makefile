@@ -69,7 +69,7 @@ docker-rm-images:
 
 cov:
 	mkdir -p ${COV_DIR}
-	go test -race -coverpkg=${INTERNAL_PKG} -coverprofile ${COV_DIR}/cover.out ${INTERNAL_PKG}; cat ${COV_DIR}/cover.out | fgrep -v "test.go" | fgrep -v "register.go"| fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" > ${COV_DIR}/cover2.out
+	go test -race -coverpkg=${INTERNAL_PKG} -coverprofile ${COV_DIR}/cover.out ${INTERNAL_PKG}; cat ${COV_DIR}/cover.out | fgrep -v "test.go" | fgrep -v "register.go"| fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" | fgrep -v "config" > ${COV_DIR}/cover2.out
 	go tool cover -func ${COV_DIR}/cover2.out
 	go tool cover -html ${COV_DIR}/cover2.out -o ${COV_DIR}/coverage.html
 
