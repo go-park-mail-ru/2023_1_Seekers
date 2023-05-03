@@ -96,7 +96,7 @@ type Config struct {
 	} `yaml:"s3"`
 
 	Sessions struct {
-		CookieName string        `yaml:"cookie_name" env-default:"MailBoxSession"`
+		CookieName string        `yaml:"cookie_name" env-default:"MailBxSession"`
 		CookieTTL  time.Duration `yaml:"cookie_ttl" env-default:"2400h0m0s"` //time.Hour * 24 * 100 // 100 days
 		CookiePath string        `yaml:"cookie_path" env-default:"/"`
 		CSRFHeader string        `yaml:"csrf_header" env-default:"Csrf-Token"`

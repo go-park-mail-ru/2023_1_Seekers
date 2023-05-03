@@ -19,11 +19,11 @@ import (
 func createConfig() *config.Config {
 	cfg := new(config.Config)
 	cfg.Password.PasswordSaltLen = 10
-	cfg.Sessions.CookieName = "MailBoxSession"
+	cfg.Sessions.CookieName = "MailBxSession"
 	ttl, _ := time.ParseDuration("2400h0m0s")
 	cfg.Sessions.CookieTTL = ttl
 	cfg.Sessions.CookieLen = 32
-	cfg.Mail.PostAtDomain = "@mailbox.ru"
+	cfg.Mail.PostAtDomain = "@mailbx.ru"
 	cfg.Routes.RouteUserAvatarQueryEmail = "email"
 	cfg.Routes.RouteUserInfoQueryEmail = "email"
 

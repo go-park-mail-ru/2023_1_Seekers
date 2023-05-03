@@ -171,7 +171,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
-					Recipients:       []string{"valera@mailbox.ru"},
+					Recipients:       []string{"valera@mailbx.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
 					ReplyToMessageID: nil,
@@ -186,7 +186,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
-					Recipients:       []string{"valera@mailbox.ru", "max@mailbox.ru"},
+					Recipients:       []string{"valera@mailbx.ru", "max@mailbx.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
 					ReplyToMessageID: nil,

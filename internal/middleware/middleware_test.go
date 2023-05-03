@@ -20,7 +20,7 @@ import (
 
 func createConfig() *config.Config {
 	cfg := new(config.Config)
-	cfg.Sessions.CookieName = "MailBoxSession"
+	cfg.Sessions.CookieName = "MailBxSession"
 	cfg.Sessions.CookieLen = 32
 	cfg.Sessions.CSRFHeader = "Csrf-Token"
 	logsUseStdOut := true
