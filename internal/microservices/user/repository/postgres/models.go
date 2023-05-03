@@ -17,8 +17,8 @@ type User struct {
 	//IsCustomAvatar bool
 }
 
-func (*User) TableName() string {
-	return "mail.users"
+func (*User) TableName(schemaName string) string {
+	return schemaName + ".users"
 }
 
 func (u *User) FromModel(user *models.User) {

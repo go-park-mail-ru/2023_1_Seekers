@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -9,12 +10,14 @@ import (
 )
 
 type userDB struct {
-	db *gorm.DB
+	cfg *config.Config
+	db  *gorm.DB
 }
 
-func New(db *gorm.DB) repository.UserRepoI {
+func New(c *config.Config, db *gorm.DB) repository.UserRepoI {
 	return &userDB{
-		db: db,
+		cfg: c,
+		db:  db,
 	}
 }
 
@@ -142,7 +145,7 @@ func (uDB *userDB) GetInfoByEmail(email string) (*models.UserInfo, error) {
 
 func (uDB *userDB) IsCustomAvatar(ID uint64) (bool, error) {
 	result := IsCustomAvatar{}
-	tx := uDB.db.Where("user_id = ?", ID).Take(&result)
+	tx := uDB.db.Model(User{}).Where("user_id = ?", ID).Take(&result)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return false, pkgErrors.WithMessage(errors.ErrUserNotFound, err.Error())

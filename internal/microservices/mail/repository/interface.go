@@ -10,7 +10,7 @@ type MailRepoI interface {
 	SelectFoldersByUser(userID uint64) ([]models.Folder, error)
 	SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error)
 	SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error)
-	SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64) ([]models.MessageInfo, error)
+	SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error)
 	DeleteFolder(folderID uint64) error
 	DeleteMessageFromMessages(messageID uint64) error
 	DeleteMessageForUser(userID uint64, messageID uint64) error

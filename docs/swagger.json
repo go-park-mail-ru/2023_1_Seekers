@@ -551,6 +551,53 @@
                 }
             }
         },
+        "/message/{id}/move": {
+            "post": {
+                "description": "move message to folder",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "MoveToFolder",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success changed message's folder"
+                    },
+                    "400": {
+                        "description": "can't move message from draft folder",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "folder not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/message/{id}/read": {
             "post": {
                 "description": "Message",
@@ -603,7 +650,7 @@
         },
         "/message/{id}/unread": {
             "post": {
-                "description": "move message to folder",
+                "description": "Message",
                 "consumes": [
                     "application/json"
                 ],
@@ -613,7 +660,7 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "MoveToFolder",
+                "summary": "UnreadMessage",
                 "parameters": [
                     {
                         "type": "integer",
@@ -625,16 +672,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "success changed message's folder"
+                        "description": "success unread message",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
                     },
                     "400": {
-                        "description": "can't move message from draft folder",
+                        "description": "invalid url address",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
                     },
                     "404": {
-                        "description": "folder not found",
+                        "description": "message not found",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
