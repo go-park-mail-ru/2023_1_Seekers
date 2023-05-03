@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package user_proto;
+option go_package = "./user_proto";
+
+message UID {
+  uint64 uID = 1;
+}
+
+message User {
+  uint64 UID = 1;
+  string Email = 2;
+  bytes Password = 3;
+  string FirstName = 4;
+  string LastName = 5;
+  string Avatar = 6;
+  bool IsExternal = 7;
+}
+
+message Email {
+  string email = 1;
+}
+
+message UserInfo {
+  uint64 UID = 1;
+  string Email = 2;
+  string FirstName = 3;
+  string LastName = 4;
+}
+
+message UserInfoResponse {
+  uint64 ID = 1;
+  string Email = 2;
+  string FirstName = 3;
+  string LastName = 4;
+}
+
+message EditInfoParams {
+  uint64 UID = 1;
+  UserInfo EditInfo = 2;
+}
+
+message Image {
+  string Name = 1;
+  bytes Data = 2;
+}
+
+message EditAvatarParams {
+  uint64 UID = 1;
+  Image NewImage = 2;
+  bool IsCustom = 3;
+}
+
+message EditPasswordParams {
+  uint64 UID = 1;
+  string PasswordOld = 2;
+  string Password = 3;
+  string RepeatPw = 4;
+}
+
+message Nothing {
+  bool dummy = 1;
+}
+
+service UserService {
+  rpc Create(User) returns (User) {}
+  rpc Delete(UID) returns (Nothing) {}
+  rpc GetByID(UID) returns (User) {}
+  rpc GetByEmail(Email) returns  (User) {}
+  rpc GetInfo(UID) returns (UserInfo) {}
+  rpc GetInfoByEmail(Email) returns (UserInfo) {}
+  rpc EditInfo(EditInfoParams) returns (UserInfo) {}
+  rpc EditAvatar(EditAvatarParams) returns (Nothing) {}
+  rpc GetAvatar(Email) returns (Image) {}
+  rpc EditPw(EditPasswordParams) returns (Nothing) {}
+}

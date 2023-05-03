@@ -1,33 +1,14 @@
 version: "3.8"
 
 services:
-  app:
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      cache:
-        condition: service_started
-    volumes:
-      - $GOPATH/pkg/mod:/go/pkg/
-      - ./logs/app:/app/logs/app
-    build: ./
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.2
-    ports:
-      - "8001:8001"
-    restart: "no"
-
   db:
     env_file:
       - .env
     image: postgres:latest
-    command: ["postgres",
-              "-c", "log_directory=/var/log/postgresql",
-#              "-c", "logging_collector=on",
-              "-c", "log_statement=all"]
+    command: [ "postgres",
+               "-c", "log_directory=/var/log/postgresql",
+               "-c", "logging_collector=on",
+               "-c", "log_statement=all" ]
     networks:
       my_network:
         ipv4_address: 172.28.0.3
@@ -71,12 +52,89 @@ services:
       - cache:/data
     restart: "no"
 
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx-local-net.conf:/etc/nginx/nginx.conf
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.6
+    ports:
+      - "443:443"
+      - "80:80"
+    restart: "no"
+
+  prometheus:
+    image: prom/prometheus:latest
+    network_mode: "host"
+    #    networks:
+    #      my_network:
+    #        ipv4_address: 172.28.0.16
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=2d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./metrics/data/prometheus:/prometheus
+      - ./metrics/config/prometheus/debug:/etc/prometheus
+    #    ports:
+    #      - "9090:9090"
+    #    depends_on:
+    #      - api
+    restart: "no"
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    networks:
+      my_network:
+        ipv4_address: 172.28.0.17
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    user: root
+    privileged: true
+    deploy:
+      mode: global
+    ports:
+      - "9100:9100"
+    restart: "no"
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    volumes:
+      - ./metrics/data/grafana:/var/lib/grafana
+      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
+      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
+    env_file:
+      - .env
+    network_mode: "host"
+    #    ports:
+    #      - "3000:3000"
+    #    networks:
+    #      my_network:
+    #        ipv4_address: 172.28.0.18
+    restart: "no"
+
+
 volumes:
   cache:
     driver: local
 
 networks:
   my_network:
+    name: seekers_network
     ipam:
       config:
         - subnet: 172.28.0.0/16

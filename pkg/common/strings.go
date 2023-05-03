@@ -6,3 +6,10 @@ func GetFirstUtf(str string) string {
 	}
 	return ""
 }
+
+func GetFirstRune(str string) rune {
+	for _, c := range str {
+		return c
+	}
+	return ' '
+}
