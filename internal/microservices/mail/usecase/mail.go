@@ -202,7 +202,7 @@ func (uc *mailUC) DeleteFolder(userID uint64, folderSlug string) error {
 	}
 
 	for _, message := range messages {
-		err = uc.MoveMessageToFolder(userID, message.MessageID, "trash")
+		err = uc.MoveMessageToFolder(userID, message.MessageID, folder.LocalName, "trash")
 		if err != nil {
 			return pkgErrors.Wrap(err, "move message to trash folder")
 		}
@@ -292,23 +292,31 @@ func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageIn
 	return firstMessage, nil
 }
 
-func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64) error {
-	curMessage, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64, folderSlug string) error {
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
 	}
-	if curMessage == nil {
+	if message == nil {
 		return pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
 	}
 
-	fromFolder, err := uc.getFolderByMessage(userID, messageID)
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
-		return pkgErrors.Wrap(err, "get folder by message")
+		return pkgErrors.Wrap(err, "get folder info")
 	}
 
-	switch fromFolder.LocalName {
+	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "check existing box")
+	}
+	if !boxExists {
+		return pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
+	}
+
+	switch folder.LocalName {
 	case "trash":
-		err = uc.mailRepo.DeleteMessageForUser(userID, messageID)
+		err = uc.mailRepo.DeleteBox(userID, messageID, folder.FolderID)
 		if err != nil {
 			return pkgErrors.Wrap(err, "delete message for user")
 		}
@@ -321,7 +329,7 @@ func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64) error {
 
 		break
 	default:
-		err = uc.MoveMessageToFolder(userID, messageID, "trash")
+		err = uc.MoveMessageToFolder(userID, messageID, folder.LocalName, "trash")
 		if err != nil {
 			return pkgErrors.Wrap(err, "move message to trash folder")
 		}
@@ -548,8 +556,38 @@ func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {
 	return uc.userUC.GetInfoByEmail("support@mailbox.ru")
 }
 
-func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
-	err := uc.mailRepo.UpdateMessageState(userID, messageID, "seen", true)
+func (uc *mailUC) checkExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error) {
+	boxExists, err := uc.mailRepo.CheckExistingBox(userID, messageID, folderID)
+	if err != nil {
+		return false, pkgErrors.Wrap(err, "check existing box")
+	}
+
+	return boxExists, nil
+}
+
+func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
+	}
+	if message == nil {
+		return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
+	}
+
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get folder info")
+	}
+
+	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "check existing box")
+	}
+	if !boxExists {
+		return nil, pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
+	}
+
+	err = uc.mailRepo.UpdateMessageState(userID, messageID, folder.FolderID, "seen", true)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message seen : update state")
 	}
@@ -557,8 +595,29 @@ func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.Me
 	return uc.GetMessage(userID, messageID)
 }
 
-func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
-	err := uc.mailRepo.UpdateMessageState(userID, messageID, "seen", false)
+func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
+	}
+	if message == nil {
+		return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
+	}
+
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get folder info")
+	}
+
+	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "check existing box")
+	}
+	if !boxExists {
+		return nil, pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
+	}
+
+	err = uc.mailRepo.UpdateMessageState(userID, messageID, folder.FolderID, "seen", false)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message unseen : update state")
 	}
@@ -575,7 +634,7 @@ func (uc *mailUC) getFolderByMessage(userID uint64, messageID uint64) (*models.F
 	return folder, nil
 }
 
-func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, folderSlug string) error {
+func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolderSlug string, toFolderSlug string) error {
 	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
@@ -584,29 +643,50 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, folderSlu
 		return pkgErrors.WithMessage(errors.ErrMessageNotFound, "get message")
 	}
 
-	toFolder, err := uc.GetFolderInfo(userID, folderSlug)
+	fromFolder, err := uc.GetFolderInfo(userID, fromFolderSlug)
 	if err != nil {
-		return pkgErrors.Wrap(err, "get golder info")
+		return pkgErrors.Wrap(err, "get fromFolder info")
 	}
 
-	fromFolder, err := uc.getFolderByMessage(userID, messageID)
+	boxExists, err := uc.checkExistingBox(userID, messageID, fromFolder.FolderID)
 	if err != nil {
-		return pkgErrors.Wrap(err, "get folder by message")
+		return pkgErrors.Wrap(err, "check existing box")
+	}
+	if !boxExists {
+		return pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
 	}
 
-	if *fromFolder == *toFolder {
-		return pkgErrors.WithMessage(errors.ErrMoveToSameFolder, "new folder is equals with old folder")
+	if fromFolderSlug == toFolderSlug {
+		return pkgErrors.WithMessage(errors.ErrMoveToSameFolder, "new fromFolder is equals with old fromFolder")
 	}
+
+	if fromFolderSlug == "drafts" {
+		return pkgErrors.WithMessage(errors.ErrMoveFromDraftFolder, "old fromFolder is equals draft fromFolder")
+	}
+
+	toFolder, err := uc.GetFolderInfo(userID, toFolderSlug)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get golder info (to fromFolder slug)")
+	}
+
 	if toFolder.LocalName == "drafts" {
-		return pkgErrors.WithMessage(errors.ErrMoveToDraftFolder, "new folder is equals draft folder")
-	}
-	if fromFolder.LocalName == "drafts" {
-		return pkgErrors.WithMessage(errors.ErrMoveFromDraftFolder, "old folder is equals draft folder")
+		return pkgErrors.WithMessage(errors.ErrMoveToDraftFolder, "new fromFolder is equals draft fromFolder")
 	}
 
-	err = uc.mailRepo.UpdateMessageFolder(userID, messageID, fromFolder.FolderID, toFolder.FolderID)
+	boxExists, err = uc.checkExistingBox(userID, messageID, toFolder.FolderID)
 	if err != nil {
-		return pkgErrors.Wrap(err, "update message folder")
+		return pkgErrors.Wrap(err, "check existing box")
+	}
+	if boxExists {
+		err = uc.mailRepo.DeleteBox(userID, messageID, fromFolder.FolderID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "delete message for user")
+		}
+	} else {
+		err = uc.mailRepo.UpdateMessageFolder(userID, messageID, fromFolder.FolderID, toFolder.FolderID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "update message fromFolder")
+		}
 	}
 
 	return nil

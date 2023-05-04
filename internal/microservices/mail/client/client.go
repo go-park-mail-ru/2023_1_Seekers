@@ -114,10 +114,11 @@ func (g MailClientGRPC) SendWelcomeMessage(recipientEmail string) error {
 	return nil
 }
 
-func (g MailClientGRPC) MarkMessageAsSeen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
-	protoMsgInfo, err := g.mailClient.MarkMessageAsSeen(context.TODO(), &mail_proto.UIDMessageID{
-		UID:       userID,
-		MessageID: messageID,
+func (g MailClientGRPC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
+	protoMsgInfo, err := g.mailClient.MarkMessageAsSeen(context.TODO(), &mail_proto.UIDMessageIDFolderSlug{
+		UID:        userID,
+		MessageID:  messageID,
+		FolderSlug: folderSlug,
 	})
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - MarkMessageAsSeen"))
@@ -126,10 +127,11 @@ func (g MailClientGRPC) MarkMessageAsSeen(userID uint64, messageID uint64) (*mod
 	return utils.MessageInfoByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) MarkMessageAsUnseen(userID uint64, messageID uint64) (*models.MessageInfo, error) {
-	protoMsgInfo, err := g.mailClient.MarkMessageAsUnseen(context.TODO(), &mail_proto.UIDMessageID{
-		UID:       userID,
-		MessageID: messageID,
+func (g MailClientGRPC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
+	protoMsgInfo, err := g.mailClient.MarkMessageAsUnseen(context.TODO(), &mail_proto.UIDMessageIDFolderSlug{
+		UID:        userID,
+		MessageID:  messageID,
+		FolderSlug: folderSlug,
 	})
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - MarkMessageAsUnseen"))
@@ -175,10 +177,11 @@ func (g MailClientGRPC) EditFolder(userID uint64, folderSlug string, form models
 	return utils.FolderModelByProto(protoFolder), nil
 }
 
-func (g MailClientGRPC) DeleteMessage(userID uint64, messageID uint64) error {
-	_, err := g.mailClient.DeleteMessage(context.TODO(), &mail_proto.UIDMessageID{
-		UID:       userID,
-		MessageID: messageID,
+func (g MailClientGRPC) DeleteMessage(userID uint64, messageID uint64, folderSlug string) error {
+	_, err := g.mailClient.DeleteMessage(context.TODO(), &mail_proto.UIDMessageIDFolderSlug{
+		UID:        userID,
+		MessageID:  messageID,
+		FolderSlug: folderSlug,
 	})
 	if err != nil {
 		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - DeleteMessage"))
@@ -205,11 +208,12 @@ func (g MailClientGRPC) EditDraft(userID, messageID uint64, message models.FormM
 	return utils.MessageInfoByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) MoveMessageToFolder(userID, messageID uint64, folderSlug string) error {
+func (g MailClientGRPC) MoveMessageToFolder(userID, messageID uint64, fromFolderSlug string, toFolderSlug string) error {
 	_, err := g.mailClient.MoveMessageToFolder(context.TODO(), &mail_proto.MoveToFolderParams{
-		UID:        userID,
-		MessageID:  messageID,
-		FolderSlug: folderSlug,
+		UID:            userID,
+		MessageID:      messageID,
+		FromFolderSlug: fromFolderSlug,
+		ToFolderSlug:   toFolderSlug,
 	})
 	if err != nil {
 		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - MoveMessageToFolder"))

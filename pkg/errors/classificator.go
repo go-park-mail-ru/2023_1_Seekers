@@ -38,6 +38,7 @@ var (
 	ErrMoveFromDraftFolder  = errors.New("can't move message from draft folder")
 	ErrSomeEmailsAreInvalid = errors.New("some emails are invalid")
 	ErrCantEditSentMessage  = errors.New("can't edit sent message")
+	ErrBoxNotFound          = errors.New("box not found")
 )
 
 var Codes = map[string]int{
@@ -71,6 +72,7 @@ var Codes = map[string]int{
 	ErrMoveToDraftFolder.Error():    http.StatusBadRequest,
 	ErrMoveFromDraftFolder.Error():  http.StatusBadRequest,
 	ErrSomeEmailsAreInvalid.Error(): http.StatusBadRequest,
+	ErrBoxNotFound.Error():          http.StatusBadRequest,
 }
 
 var LogLevels = map[string]logrus.Level{
@@ -104,6 +106,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrMoveToDraftFolder.Error():    logrus.WarnLevel,
 	ErrMoveFromDraftFolder.Error():  logrus.WarnLevel,
 	ErrSomeEmailsAreInvalid.Error(): logrus.WarnLevel,
+	ErrBoxNotFound.Error():          logrus.WarnLevel,
 }
 
 func Code(err error) int {

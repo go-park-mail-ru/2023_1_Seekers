@@ -10,21 +10,21 @@ import (
 	"net"
 )
 
-type AuthServerGRPC struct {
+type MailServerGRPC struct {
 	mail_proto.UnimplementedMailServiceServer
 
 	grpcServer *grpc.Server
 	mailUC     mail.UseCaseI
 }
 
-func NewAuthServerGRPC(g *grpc.Server, mUC mail.UseCaseI) *AuthServerGRPC {
-	return &AuthServerGRPC{
+func NewAuthServerGRPC(g *grpc.Server, mUC mail.UseCaseI) *MailServerGRPC {
+	return &MailServerGRPC{
 		grpcServer: g,
 		mailUC:     mUC,
 	}
 }
 
-func (g *AuthServerGRPC) Start(url string) error {
+func (g *MailServerGRPC) Start(url string) error {
 	lis, err := net.Listen("tcp", url)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (g *AuthServerGRPC) Start(url string) error {
 	return g.grpcServer.Serve(lis)
 }
 
-func (g *AuthServerGRPC) GetFolders(ctx context.Context, protoUID *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
+func (g *MailServerGRPC) GetFolders(ctx context.Context, protoUID *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
 	folders, err := g.mailUC.GetFolders(protoUID.UID)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -42,7 +42,7 @@ func (g *AuthServerGRPC) GetFolders(ctx context.Context, protoUID *mail_proto.UI
 	return utils.ProtoByFoldersModels(folders), nil
 }
 
-func (g *AuthServerGRPC) GetFolderInfo(ctx context.Context, protoFolder *mail_proto.UserFolder) (*mail_proto.Folder, error) {
+func (g *MailServerGRPC) GetFolderInfo(ctx context.Context, protoFolder *mail_proto.UserFolder) (*mail_proto.Folder, error) {
 	folder, err := g.mailUC.GetFolderInfo(protoFolder.UID, protoFolder.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -51,7 +51,7 @@ func (g *AuthServerGRPC) GetFolderInfo(ctx context.Context, protoFolder *mail_pr
 	return utils.ProtoByFolder(folder), nil
 }
 
-func (g *AuthServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mail_proto.UserFolder) (*mail_proto.MessagesInfoResponse, error) {
+func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mail_proto.UserFolder) (*mail_proto.MessagesInfoResponse, error) {
 	msfInfos, err := g.mailUC.GetFolderMessages(protoFolder.UID, protoFolder.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -60,7 +60,7 @@ func (g *AuthServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mai
 	return utils.ProtoMsgInfoResponseByModels(msfInfos), nil
 }
 
-func (g *AuthServerGRPC) CreateDefaultFolders(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
+func (g *MailServerGRPC) CreateDefaultFolders(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
 	folders, err := g.mailUC.CreateDefaultFolders(protoUid.UID)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -69,7 +69,7 @@ func (g *AuthServerGRPC) CreateDefaultFolders(ctx context.Context, protoUid *mai
 	return utils.ProtoByFoldersModels(folders), nil
 }
 
-func (g *AuthServerGRPC) GetMessage(ctx context.Context, protoMId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {
+func (g *MailServerGRPC) GetMessage(ctx context.Context, protoMId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {
 	msfInfo, err := g.mailUC.GetMessage(protoMId.UID, protoMId.MessageID)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -78,7 +78,7 @@ func (g *AuthServerGRPC) GetMessage(ctx context.Context, protoMId *mail_proto.UI
 	return utils.ProtoByMessageInfo(*msfInfo), nil
 }
 
-func (g *AuthServerGRPC) ValidateRecipients(ctx context.Context, protoRecipients *mail_proto.Recipients) (*mail_proto.ValidateRecipientsResponse, error) {
+func (g *MailServerGRPC) ValidateRecipients(ctx context.Context, protoRecipients *mail_proto.Recipients) (*mail_proto.ValidateRecipientsResponse, error) {
 	valid, invalid := g.mailUC.ValidateRecipients(protoRecipients.Recipients)
 	return &mail_proto.ValidateRecipientsResponse{
 		ValidEmails:   valid,
@@ -86,7 +86,7 @@ func (g *AuthServerGRPC) ValidateRecipients(ctx context.Context, protoRecipients
 	}, nil
 }
 
-func (g *AuthServerGRPC) SendMessage(ctx context.Context, protoParams *mail_proto.SendMessageParams) (*mail_proto.MessageInfo, error) {
+func (g *MailServerGRPC) SendMessage(ctx context.Context, protoParams *mail_proto.SendMessageParams) (*mail_proto.MessageInfo, error) {
 	info, err := g.mailUC.SendMessage(protoParams.UID, utils.MessageModelByProtoSendParams(protoParams))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -95,7 +95,7 @@ func (g *AuthServerGRPC) SendMessage(ctx context.Context, protoParams *mail_prot
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *AuthServerGRPC) SendFailedSendingMessage(ctx context.Context, protoParams *mail_proto.FailedEmailsParams) (*mail_proto.Nothing, error) {
+func (g *MailServerGRPC) SendFailedSendingMessage(ctx context.Context, protoParams *mail_proto.FailedEmailsParams) (*mail_proto.Nothing, error) {
 	err := g.mailUC.SendFailedSendingMessage(protoParams.Recipient, protoParams.InvalidEmails)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -104,7 +104,7 @@ func (g *AuthServerGRPC) SendFailedSendingMessage(ctx context.Context, protoPara
 	return &mail_proto.Nothing{}, nil
 }
 
-func (g *AuthServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mail_proto.RecipientEmail) (*mail_proto.Nothing, error) {
+func (g *MailServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mail_proto.RecipientEmail) (*mail_proto.Nothing, error) {
 	err := g.mailUC.SendWelcomeMessage(protoEmail.RecipientEmail)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -113,8 +113,8 @@ func (g *AuthServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mai
 	return &mail_proto.Nothing{}, nil
 }
 
-func (g *AuthServerGRPC) MarkMessageAsSeen(ctx context.Context, protoId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {
-	info, err := g.mailUC.MarkMessageAsSeen(protoId.UID, protoId.MessageID)
+func (g *MailServerGRPC) MarkMessageAsSeen(ctx context.Context, protoId *mail_proto.UIDMessageIDFolderSlug) (*mail_proto.MessageInfo, error) {
+	info, err := g.mailUC.MarkMessageAsSeen(protoId.UID, protoId.MessageID, protoId.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
@@ -122,8 +122,8 @@ func (g *AuthServerGRPC) MarkMessageAsSeen(ctx context.Context, protoId *mail_pr
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *AuthServerGRPC) MarkMessageAsUnseen(ctx context.Context, protoId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {
-	info, err := g.mailUC.MarkMessageAsUnseen(protoId.UID, protoId.MessageID)
+func (g *MailServerGRPC) MarkMessageAsUnseen(ctx context.Context, protoId *mail_proto.UIDMessageIDFolderSlug) (*mail_proto.MessageInfo, error) {
+	info, err := g.mailUC.MarkMessageAsUnseen(protoId.UID, protoId.MessageID, protoId.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
@@ -131,7 +131,7 @@ func (g *AuthServerGRPC) MarkMessageAsUnseen(ctx context.Context, protoId *mail_
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *AuthServerGRPC) CreateFolder(ctx context.Context, protoParams *mail_proto.CreateFolderParams) (*mail_proto.Folder, error) {
+func (g *MailServerGRPC) CreateFolder(ctx context.Context, protoParams *mail_proto.CreateFolderParams) (*mail_proto.Folder, error) {
 	folder, err := g.mailUC.CreateFolder(protoParams.UID, utils.FormFolderModelByProto(protoParams.FormFolder))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -140,7 +140,7 @@ func (g *AuthServerGRPC) CreateFolder(ctx context.Context, protoParams *mail_pro
 	return utils.ProtoByFolder(folder), nil
 }
 
-func (g *AuthServerGRPC) DeleteFolder(ctx context.Context, protoParams *mail_proto.DeleteFolderParams) (*mail_proto.Nothing, error) {
+func (g *MailServerGRPC) DeleteFolder(ctx context.Context, protoParams *mail_proto.DeleteFolderParams) (*mail_proto.Nothing, error) {
 	err := g.mailUC.DeleteFolder(protoParams.UID, protoParams.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -149,7 +149,7 @@ func (g *AuthServerGRPC) DeleteFolder(ctx context.Context, protoParams *mail_pro
 	return &mail_proto.Nothing{}, nil
 }
 
-func (g *AuthServerGRPC) EditFolder(ctx context.Context, protoParams *mail_proto.EditFolderParams) (*mail_proto.Folder, error) {
+func (g *MailServerGRPC) EditFolder(ctx context.Context, protoParams *mail_proto.EditFolderParams) (*mail_proto.Folder, error) {
 	folder, err := g.mailUC.EditFolder(protoParams.UID, protoParams.FolderSlug, utils.FormFolderModelByProto(protoParams.FormFolder))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -158,8 +158,8 @@ func (g *AuthServerGRPC) EditFolder(ctx context.Context, protoParams *mail_proto
 	return utils.ProtoByFolder(folder), nil
 }
 
-func (g *AuthServerGRPC) DeleteMessage(ctx context.Context, protoParams *mail_proto.UIDMessageID) (*mail_proto.Nothing, error) {
-	err := g.mailUC.DeleteMessage(protoParams.UID, protoParams.MessageID)
+func (g *MailServerGRPC) DeleteMessage(ctx context.Context, protoParams *mail_proto.UIDMessageIDFolderSlug) (*mail_proto.Nothing, error) {
+	err := g.mailUC.DeleteMessage(protoParams.UID, protoParams.MessageID, protoParams.FolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
@@ -167,7 +167,7 @@ func (g *AuthServerGRPC) DeleteMessage(ctx context.Context, protoParams *mail_pr
 	return &mail_proto.Nothing{}, nil
 }
 
-func (g *AuthServerGRPC) SaveDraft(ctx context.Context, protoParams *mail_proto.SaveDraftParams) (*mail_proto.MessageInfo, error) {
+func (g *MailServerGRPC) SaveDraft(ctx context.Context, protoParams *mail_proto.SaveDraftParams) (*mail_proto.MessageInfo, error) {
 	info, err := g.mailUC.SaveDraft(protoParams.UID, utils.MessageModelByProto(protoParams.Message))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -176,7 +176,7 @@ func (g *AuthServerGRPC) SaveDraft(ctx context.Context, protoParams *mail_proto.
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *AuthServerGRPC) EditDraft(ctx context.Context, protoParams *mail_proto.EditDraftParams) (*mail_proto.MessageInfo, error) {
+func (g *MailServerGRPC) EditDraft(ctx context.Context, protoParams *mail_proto.EditDraftParams) (*mail_proto.MessageInfo, error) {
 	info, err := g.mailUC.EditDraft(protoParams.UID, protoParams.MessageID, utils.MessageModelByProto(protoParams.Message))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
@@ -185,8 +185,8 @@ func (g *AuthServerGRPC) EditDraft(ctx context.Context, protoParams *mail_proto.
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *AuthServerGRPC) MoveMessageToFolder(ctx context.Context, protoParams *mail_proto.MoveToFolderParams) (*mail_proto.Nothing, error) {
-	err := g.mailUC.MoveMessageToFolder(protoParams.UID, protoParams.MessageID, protoParams.FolderSlug)
+func (g *MailServerGRPC) MoveMessageToFolder(ctx context.Context, protoParams *mail_proto.MoveToFolderParams) (*mail_proto.Nothing, error) {
+	err := g.mailUC.MoveMessageToFolder(protoParams.UID, protoParams.MessageID, protoParams.FromFolderSlug, protoParams.ToFolderSlug)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
@@ -194,7 +194,7 @@ func (g *AuthServerGRPC) MoveMessageToFolder(ctx context.Context, protoParams *m
 	return &mail_proto.Nothing{}, nil
 }
 
-func (g *AuthServerGRPC) GetCustomFolders(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
+func (g *MailServerGRPC) GetCustomFolders(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
 	folders, err := g.mailUC.GetCustomFolders(protoUid.UID)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
