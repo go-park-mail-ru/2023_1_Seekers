@@ -102,6 +102,21 @@ func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint
 	return &folder, nil
 }
 
+func (m mailRepository) CheckExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error) {
+	var box Box
+
+	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).First(&box)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+
+		return false, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return true, nil
+}
+
 func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
@@ -123,8 +138,8 @@ func (m mailRepository) DeleteFolder(folderID uint64) error {
 	return nil
 }
 
-func (m mailRepository) DeleteMessageForUser(userID uint64, messageID uint64) error {
-	tx := m.db.Where("user_id = ? AND message_id = ?", userID, messageID).Delete(&Box{})
+func (m mailRepository) DeleteBox(userID uint64, messageID uint64, folderID uint64) error {
+	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Delete(&Box{})
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -318,8 +333,8 @@ func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) {
 	return folder.FolderID, nil
 }
 
-func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update(stateName, stateValue)
+func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error {
+	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Update(stateName, stateValue)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -327,8 +342,8 @@ func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stat
 	return nil
 }
 
-func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, folderID uint64) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update("folder_id", folderID)
+func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error {
+	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, oldFolderID).Update("folder_id", newFolderID)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}

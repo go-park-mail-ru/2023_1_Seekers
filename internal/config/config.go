@@ -114,18 +114,19 @@ type Config struct {
 		RouteCSRF   string `yaml:"route_csrf" env-default:"/csrf"`
 
 		// MailRoutes
-		RouteMessage                     string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
-		RouteSendMessage                 string `yaml:"route_send_message" env-default:"/message/send"`
-		RouteSaveDraftMessage            string `yaml:"route_save_draft_message" env-default:"/message/save"`
-		RouteReadMessage                 string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`
-		RouteUnreadMessage               string `yaml:"route_unread_message" env-default:"/message/{id:[0-9]+}/unread"`
-		RouteMoveToFolder                string `yaml:"route_move_to_folder" env-default:"/message/{id:[0-9]+}/move"`
-		RouteMoveToFolderQueryFolderSlug string `yaml:"route_move_to_folder_query_folder_slug" env-default:"folderSlug"`
-		RouteGetFolders                  string `yaml:"route_get_folders" env-default:"/folders"`
-		RouteFolder                      string `yaml:"route_folder" env-default:"/folder/{slug}"`
-		RouteCreateFolder                string `yaml:"route_create_folder" env-default:"/folder/create"`
-		RouteEditFolder                  string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
-		RouteGetFoldersIsCustom          string `yaml:"route_get_folders_is_custom" env-default:"custom"`
+		RouteMessage                       string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
+		RouteSendMessage                   string `yaml:"route_send_message" env-default:"/message/send"`
+		RouteSaveDraftMessage              string `yaml:"route_save_draft_message" env-default:"/message/save"`
+		RouteReadMessage                   string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`
+		RouteUnreadMessage                 string `yaml:"route_unread_message" env-default:"/message/{id:[0-9]+}/unread"`
+		RouteMoveToFolder                  string `yaml:"route_move_to_folder" env-default:"/message/{id:[0-9]+}/move"`
+		RouteQueryFromFolderSlug           string `yaml:"route_move_to_folder_query_from_folder" env-default:"fromFolder"`
+		RouteMoveToFolderQueryToFolderSlug string `yaml:"route_move_to_folder_query_to_folder" env-default:"toFolder"`
+		RouteGetFolders                    string `yaml:"route_get_folders" env-default:"/folders"`
+		RouteFolder                        string `yaml:"route_folder" env-default:"/folder/{slug}"`
+		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
+		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
+		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`
 
 		// UserRoutes
 		RouteUser                 string `yaml:"route_user" env-default:"/user"`

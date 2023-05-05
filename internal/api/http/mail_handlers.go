@@ -194,7 +194,9 @@ func (h *mailHandlers) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.uc.DeleteMessage(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	err = h.uc.DeleteMessage(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -341,7 +343,9 @@ func (h *mailHandlers) ReadMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := h.uc.MarkMessageAsSeen(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	message, err := h.uc.MarkMessageAsSeen(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -379,7 +383,9 @@ func (h *mailHandlers) UnreadMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := h.uc.MarkMessageAsUnseen(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	message, err := h.uc.MarkMessageAsUnseen(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -562,9 +568,10 @@ func (h *mailHandlers) MoveToFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	folderSlug := r.URL.Query().Get(h.cfg.Routes.RouteMoveToFolderQueryFolderSlug)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+	toFolder := r.URL.Query().Get(h.cfg.Routes.RouteMoveToFolderQueryToFolderSlug)
 
-	err = h.uc.MoveMessageToFolder(userID, messageID, folderSlug)
+	err = h.uc.MoveMessageToFolder(userID, messageID, fromFolder, toFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return

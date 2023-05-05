@@ -1119,7 +1119,7 @@ func TestUseCase_MoveMessageToFolder(t *testing.T) {
 	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, fakeMessage.MessageID).Return(fakeMessage, nil)
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeToFolder.LocalName).Return(fakeToFolder, nil)
 	mailRepo.EXPECT().SelectFolderByUserNMessage(userID, fakeMessage.MessageID).Return(fakeFromFolder, nil)
-	mailRepo.EXPECT().UpdateMessageFolder(userID, fakeMessage.MessageID, fakeToFolder.FolderID).Return(nil)
+	mailRepo.EXPECT().UpdateMessageFolder(userID, fakeMessage.MessageID, fakeFromFolder.FolderID, fakeToFolder.FolderID).Return(nil)
 
 	err := mailH.MoveMessageToFolder(userID, fakeMessage.MessageID, fakeToFolder.LocalName)
 	causeErr := pkgErr.Cause(err)

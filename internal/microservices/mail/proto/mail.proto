@@ -17,6 +17,12 @@ message UIDMessageID {
   uint64 MessageID = 2;
 }
 
+message UIDMessageIDFolderSlug {
+  uint64 UID = 1;
+  uint64 MessageID = 2;
+  string FolderSlug = 3;
+}
+
 message Recipients {
   repeated string Recipients = 1;
 }
@@ -83,7 +89,8 @@ message SaveDraftParams {
 message MoveToFolderParams{
   uint64 UID = 1;
   uint64 MessageID = 2;
-  string FolderSlug = 3;
+  string FromFolderSlug = 3;
+  string ToFolderSlug = 4;
 }
 
 message EditDraftParams {
@@ -135,12 +142,12 @@ service MailService {
   rpc SendMessage(SendMessageParams) returns (MessageInfo) {}
   rpc SendFailedSendingMessage(FailedEmailsParams) returns (Nothing) {}
   rpc SendWelcomeMessage(RecipientEmail) returns (Nothing) {}
-  rpc MarkMessageAsSeen(UIDMessageID) returns (MessageInfo) {}
-  rpc MarkMessageAsUnseen(UIDMessageID) returns (MessageInfo) {}
+  rpc MarkMessageAsSeen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
+  rpc MarkMessageAsUnseen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
   rpc CreateFolder(CreateFolderParams) returns (Folder) {}
   rpc DeleteFolder(DeleteFolderParams) returns (Nothing) {}
   rpc EditFolder(EditFolderParams) returns (Folder) {}
-  rpc DeleteMessage(UIDMessageID) returns (Nothing) {}
+  rpc DeleteMessage(UIDMessageIDFolderSlug) returns (Nothing) {}
   rpc SaveDraft(SaveDraftParams) returns (MessageInfo) {}
   rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}

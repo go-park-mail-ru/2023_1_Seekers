@@ -39,6 +39,7 @@ var (
 	ErrMoveFromDraftFolder  = errors.New("can't move message from draft folder")
 	ErrSomeEmailsAreInvalid = errors.New("some emails are invalid")
 	ErrCantEditSentMessage  = errors.New("can't edit sent message")
+	ErrBoxNotFound          = errors.New("box not found")
 )
 
 var HttpCodes = map[string]int{
@@ -72,6 +73,7 @@ var HttpCodes = map[string]int{
 	ErrMoveToDraftFolder.Error():    http.StatusBadRequest,
 	ErrMoveFromDraftFolder.Error():  http.StatusBadRequest,
 	ErrSomeEmailsAreInvalid.Error(): http.StatusBadRequest,
+	ErrBoxNotFound.Error():          http.StatusBadRequest,
 }
 
 var GRPCCodes = map[string]codes.Code{
@@ -138,6 +140,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrMoveToDraftFolder.Error():    logrus.WarnLevel,
 	ErrMoveFromDraftFolder.Error():  logrus.WarnLevel,
 	ErrSomeEmailsAreInvalid.Error(): logrus.WarnLevel,
+	ErrBoxNotFound.Error():          logrus.WarnLevel,
 }
 
 func HttpCode(err error) int {

@@ -10,16 +10,17 @@ type MailRepoI interface {
 	SelectFoldersByUser(userID uint64) ([]models.Folder, error)
 	SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error)
 	SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error)
+	CheckExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error)
 	SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error)
 	DeleteFolder(folderID uint64) error
 	DeleteMessageFromMessages(messageID uint64) error
-	DeleteMessageForUser(userID uint64, messageID uint64) error
+	DeleteBox(userID uint64, messageID uint64, folderID uint64) error
 	UpdateFolder(folder models.Folder) error
 	SelectRecipientsByMessage(messageID uint64, fromUserID uint64) ([]uint64, error)
 	SelectMessageByUserNMessage(userID uint64, messageID uint64) (*models.MessageInfo, error)
 	InsertMessage(fromUserID uint64, message *models.MessageInfo, user2folder []models.User2Folder) error
 	UpdateMessage(message *models.MessageInfo, toInsert []models.User2Folder, toDelete []models.User2Folder) error
 	InsertFolder(folder *models.Folder) (uint64, error)
-	UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error
-	UpdateMessageFolder(userID uint64, messageID uint64, folderID uint64) error
+	UpdateMessageState(userID uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error
+	UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error
 }
