@@ -57,9 +57,22 @@ func GetMessageBody(mailBody []byte) (string, error) {
 				messageBody = string(bytesBody)
 			}
 		}
+	} else {
+		t, _, err := m.Header.ContentType()
+		if err != nil {
+			return "", errors.Wrap(err, "failed get content type of non multipart message")
+		}
+		if t == "text/plain" || t == "text/html" {
+			bytesBody, err := io.ReadAll(m.Body)
+			if err != nil {
+				return "", errors.Wrap(err, "failed read non multipart message body")
+			}
+
+			messageBody = string(bytesBody)
+		}
 	}
 
-	if len(messageBody) == 0 {
+	if len(messageBody) == 0 && len(htmlBody) > 0 {
 		messageBody = htmlBody
 	}
 
