@@ -379,7 +379,21 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 	for _, email := range message.Recipients {
 		recipient, err := uc.userUC.GetInfoByEmail(email)
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+			exUser, err := uc.userUC.Create(&models.User{
+				Email:      email,
+				Password:   uc.cfg.UserService.ExternalUserPassword,
+				IsExternal: true,
+			})
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message : create external user")
+			}
+
+			recipient = &models.UserInfo{
+				UserID:    exUser.UserID,
+				FirstName: exUser.FirstName,
+				LastName:  exUser.LastName,
+				Email:     exUser.Email,
+			}
 		}
 
 		folder, err = uc.GetFolderInfo(recipient.UserID, "inbox")

@@ -142,6 +142,7 @@ type Config struct {
 		UserFormNewAvatar     string `yaml:"user_form_new_avatar" env-default:"avatar"`
 		UserDefaultAvatarSize int    `yaml:"user_default_avatar_size" env-default:"46"`
 		DefaultAvatar         string `yaml:"default_avatar" env-default:"default_avatar.png"`
+		ExternalUserPassword  string `env:"EXTERNAL_USER_PASSWORD"`
 		AvatarTTFPath         string `yaml:"avatar_ttf_path" env-default:"./cmd/config/wqy-zenhei.ttf"`
 	} `yaml:"user_service"`
 

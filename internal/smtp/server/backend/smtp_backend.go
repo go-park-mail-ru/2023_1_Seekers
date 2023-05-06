@@ -140,7 +140,7 @@ func (s *Session) Data(r io.Reader) error {
 
 			fromUser, err = s.userClient.Create(&models.User{
 				Email:      s.from,
-				Password:   "______",
+				Password:   s.cfg.UserService.ExternalUserPassword,
 				FirstName:  firstName,
 				LastName:   lastName,
 				IsExternal: true,

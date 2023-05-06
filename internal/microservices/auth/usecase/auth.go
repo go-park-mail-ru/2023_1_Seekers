@@ -35,7 +35,7 @@ func (u *authUC) SignIn(form *models.FormLogin) (*models.AuthResponse, *models.S
 		return nil, nil, errors.ErrInvalidLogin
 	}
 	user, err := u.userUC.GetByEmail(email)
-	if err != nil {
+	if err != nil || user.IsExternal {
 		return nil, nil, errors.ErrWrongPw
 	}
 
@@ -61,7 +61,7 @@ func (u *authUC) SignUp(form *models.FormSignUp) (*models.AuthResponse, *models.
 	}
 
 	email, err := validation.Login(form.Login, u.cfg.Mail.PostAtDomain)
-	if err != nil || len(form.Login) > 30 || len(form.Login) < 3 {
+	if err != nil {
 		return nil, nil, errors.ErrInvalidLogin
 	}
 

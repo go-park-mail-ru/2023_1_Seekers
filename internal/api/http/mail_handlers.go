@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	pkgErrors "github.com/pkg/errors"
@@ -298,13 +299,13 @@ func (h *mailHandlers) SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	form.Sanitize()
 
-	validEmails, invalidEmails := h.uc.ValidateRecipients(form.Recipients)
-	if len(invalidEmails) != 0 {
-		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
-		return
+	for _, email := range form.Recipients {
+		if err := validation.ValidateEmail(email); err != nil {
+			pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
+			return
+		}
 	}
 
-	form.Recipients = validEmails
 	message, err := h.uc.SaveDraft(userID, form)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
