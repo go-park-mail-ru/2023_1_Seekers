@@ -146,6 +146,11 @@ func (s *Session) Data(r io.Reader) error {
 				IsExternal: true,
 			})
 
+			_, err = s.mailClient.CreateDefaultFolders(fromUser.UserID)
+			if err != nil {
+				return errors.Wrap(err, "smtp send message : create external user")
+			}
+
 			if err != nil {
 				return errors.Wrap(err, "failed create external user")
 			}

@@ -388,6 +388,11 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 				return nil, pkgErrors.Wrap(err, "send message : create external user")
 			}
 
+			_, err = uc.CreateDefaultFolders(exUser.UserID)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message : create external user")
+			}
+
 			recipient = &models.UserInfo{
 				UserID:    exUser.UserID,
 				FirstName: exUser.FirstName,
