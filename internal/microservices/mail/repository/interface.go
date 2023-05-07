@@ -12,6 +12,8 @@ type MailRepoI interface {
 	SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error)
 	CheckExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error)
 	SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error)
+	SearchMessages(userId uint64, fromUser, toUser, filter string) ([]models.MessageInfo, error)
+	SearchRecipients(userId uint64) ([]models.UserInfo, error)
 	DeleteFolder(folderID uint64) error
 	DeleteMessageFromMessages(messageID uint64) error
 	DeleteBox(userID uint64, messageID uint64, folderID uint64) error

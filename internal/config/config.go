@@ -124,6 +124,8 @@ type Config struct {
 		RouteMoveToFolderQueryToFolderSlug string `yaml:"route_move_to_folder_query_to_folder" env-default:"toFolder"`
 		RouteGetFolders                    string `yaml:"route_get_folders" env-default:"/folders"`
 		RouteFolder                        string `yaml:"route_folder" env-default:"/folder/{slug}"`
+		RouteSearch                        string `yaml:"route_search" env-default:"/messages/search"`
+		RouteRecipients                    string `yaml:"route_recipients" env-default:"/recipients/search"`
 		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
 		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
 		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`

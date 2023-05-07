@@ -81,6 +81,8 @@ routes:
   route_move_to_folder_query_folder_slug: folderSlug
   route_get_folders: /folders
   route_folder: /folder/{slug}
+  route_search: /messages/search
+  route_recipients: /recipients/search
   route_create_folder: /folder/create
   route_edit_folder: /folder/{slug}/edit
   route_get_folders_is_custom: custom

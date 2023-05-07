@@ -99,6 +99,50 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 	return messages, nil
 }
 
+func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, filter string) ([]models.MessageInfo, error) {
+	var messages []models.MessageInfo
+
+	messages, err := uc.mailRepo.SearchMessages(userID, fromUser, toUser, filter)
+	if err != nil {
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : msg by user and folder")
+	}
+
+	for i, message := range messages {
+		messageID := message.MessageID
+
+		fromUser, err := uc.userUC.GetInfo(message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+		}
+
+		messages[i].FromUser = *fromUser
+		recipientsIDs, err := uc.mailRepo.SelectRecipientsByMessage(messageID, message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get recipients by msg")
+		}
+
+		for _, recipientsID := range recipientsIDs {
+			profile, err := uc.userUC.GetInfo(recipientsID)
+			if err != nil {
+				return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+			}
+
+			messages[i].Recipients = append(message.Recipients, *profile)
+		}
+	}
+
+	return messages, nil
+}
+
+func (uc *mailUC) SearchRecipients(userID uint64) ([]models.UserInfo, error) {
+	recipesInfo, err := uc.mailRepo.SearchRecipients(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "search recipients")
+	}
+
+	return recipesInfo, nil
+}
+
 func (uc *mailUC) CreateDefaultFolders(userID uint64) ([]models.Folder, error) {
 	for key, value := range defaultFolderNames {
 		currentFolder := models.Folder{

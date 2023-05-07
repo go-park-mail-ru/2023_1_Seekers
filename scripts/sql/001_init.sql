@@ -224,3 +224,24 @@ CREATE TRIGGER update_cnt_after_delete
     ON mail.boxes
     FOR EACH ROW
     EXECUTE PROCEDURE update_count_messages_after_delete();
+
+-- для поиска сообщений по тексту, получателю и отправителю
+CREATE OR REPLACE FUNCTION get_messages(from_id bigint, from_email text, to_email text, filter_text text)
+    RETURNS TABLE
+            (
+                id bigint
+            )
+AS
+$$
+BEGIN
+RETURN QUERY (SELECT messages.message_id --, messages.text, messages.title, boxes.user_id, users.email
+                  from mail.messages
+                           JOIN mail.boxes on boxes.message_id = messages.message_id AND boxes.user_id = from_id
+                           JOIN mail.users on users.user_id = messages.from_user_id
+                  WHERE email ilike '%' || from_email || '%'
+                    AND email ilike '%' || to_email || '%'
+                    AND (email ilike '%' || filter_text || '%'
+                      OR title ilike '%' || filter_text || '%'
+                      OR text ilike '%' || filter_text || '%'));
+end
+$$ language 'plpgsql';

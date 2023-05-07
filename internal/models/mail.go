@@ -29,6 +29,10 @@ type MessageInfo struct {
 	IsDraft          bool         `json:"is_draft"`
 }
 
+type Recipients struct {
+	Users []UserInfo `json:"users"`
+}
+
 type User2Folder struct {
 	UserID   uint64
 	FolderID uint64
@@ -39,6 +43,12 @@ type FormMessage struct {
 	Title            string   `json:"title"`
 	Text             string   `json:"text"`
 	ReplyToMessageID *uint64  `json:"reply_to"`
+}
+
+type FormSearchMessages struct {
+	FromUser string `json:"fromUser"`
+	ToUser   string `json:"toUser"`
+	Filter   string `json:"filter"`
 }
 
 func (form *FormMessage) Sanitize() {
@@ -60,6 +70,10 @@ func (form *FormFolder) Sanitize() {
 
 type FolderResponse struct {
 	Folder   Folder        `json:"folder"`
+	Messages []MessageInfo `json:"messages"`
+}
+
+type MessagesResponse struct {
 	Messages []MessageInfo `json:"messages"`
 }
 

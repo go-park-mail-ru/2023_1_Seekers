@@ -60,6 +60,33 @@ func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mai
 	return utils.ProtoMsgInfoResponseByModels(msfInfos), nil
 }
 
+func (g *MailServerGRPC) SearchMessages(ctx context.Context, protoParams *mail_proto.SearchMailParams) (*mail_proto.MessagesInfoResponse, error) {
+	msfInfos, err := g.mailUC.SearchMessages(protoParams.UID, protoParams.FromUser, protoParams.ToUser, protoParams.Filter)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return utils.ProtoMsgInfoResponseByModels(msfInfos), nil
+}
+
+func (g *MailServerGRPC) SearchRecipients(ctx context.Context, protoParams *mail_proto.UID) (*mail_proto.SearchRecipientsResponse, error) {
+	recipesInfo, err := g.mailUC.SearchRecipients(protoParams.UID)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	var protoUsers []*mail_proto.UserInfo
+	for _, r := range recipesInfo {
+		protoUsers = append(protoUsers, &mail_proto.UserInfo{
+			Email:     r.Email,
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+		})
+	}
+
+	return &mail_proto.SearchRecipientsResponse{UsersInfo: protoUsers}, nil
+}
+
 func (g *MailServerGRPC) CreateDefaultFolders(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.FoldersResponse, error) {
 	folders, err := g.mailUC.CreateDefaultFolders(protoUid.UID)
 	if err != nil {

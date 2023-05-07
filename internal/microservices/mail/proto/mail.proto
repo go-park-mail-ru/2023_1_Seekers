@@ -105,6 +105,10 @@ message UserInfo {
   string LastName = 3;
 }
 
+message SearchRecipientsResponse {
+  repeated UserInfo UsersInfo= 1;
+}
+
 message MessageInfo {
   uint64 MessageID = 1;
   UserInfo FromUser = 2;
@@ -128,6 +132,13 @@ message MessagesInfoResponse {
   repeated MessageInfo MessagesInfo = 1;
 }
 
+message SearchMailParams{
+  uint64 UID = 1;
+  string FromUser = 2;
+  string ToUser = 3;
+  string Filter = 4;
+}
+
 message Nothing {
   bool dummy = 1;
 }
@@ -136,6 +147,8 @@ service MailService {
   rpc GetFolders(UID) returns (FoldersResponse) {}
   rpc GetFolderInfo(UserFolder) returns (Folder){}
   rpc GetFolderMessages(UserFolder) returns (MessagesInfoResponse) {}
+  rpc SearchMessages(SearchMailParams) returns (MessagesInfoResponse) {}
+  rpc SearchRecipients(UID) returns (SearchRecipientsResponse) {}
   rpc CreateDefaultFolders(UID) returns (FoldersResponse) {}
   rpc GetMessage(UIDMessageID) returns (MessageInfo) {}
   rpc ValidateRecipients(Recipients) returns (ValidateRecipientsResponse) {}

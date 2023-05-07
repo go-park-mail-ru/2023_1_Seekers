@@ -19,6 +19,8 @@ import (
 
 type MailHandlersI interface {
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
+	SearchMessages(w http.ResponseWriter, r *http.Request)
+	SearchRecipients(w http.ResponseWriter, r *http.Request)
 	GetFolders(w http.ResponseWriter, r *http.Request)
 	GetMessage(w http.ResponseWriter, r *http.Request)
 	DeleteMessage(w http.ResponseWriter, r *http.Request)
@@ -87,6 +89,68 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.FolderResponse{
 		Folder:   *folder,
 		Messages: messages,
+	})
+}
+
+// SearchMessages godoc
+// @Summary      SearchMessages
+// @Description  list of filtered messages
+// @Tags     	 folders
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} MessagesResponse "success get filtered messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /messages/search [get]
+func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	form := models.FormSearchMessages{}
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		return
+	}
+
+	messages, err := h.uc.SearchMessages(userID, form.FromUser, form.ToUser, form.Filter)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessagesResponse{
+		Messages: messages,
+	})
+}
+
+// SearchRecipients godoc
+// @Summary      SearchRecipients
+// @Description  list recipients for user
+// @Tags     	 recipients
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []UserInfo "success get recipients"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /recipients/search [get]
+func (h *mailHandlers) SearchRecipients(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	usersInfo, err := h.uc.SearchRecipients(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.Recipients{
+		Users: usersInfo,
 	})
 }
 
