@@ -109,13 +109,10 @@ func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := models.FormSearchMessages{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
-		return
-	}
+	filter := r.URL.Query().Get("filter")
+	folder := r.URL.Query().Get("folder")
 
-	messages, err := h.uc.SearchMessages(userID, form.FromUser, form.ToUser, form.Folder, form.Filter)
+	messages, err := h.uc.SearchMessages(userID, "", "", folder, filter)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
