@@ -248,7 +248,9 @@ RETURN QUERY(SELECT messages.message_id --, messages.text, messages.title, boxes
                       AND email ilike '%' || to_email || '%')
                     AND (email ilike '%' || filter_text || '%'
                       OR title ilike '%' || filter_text || '%'
-                      OR text ilike '%' || filter_text || '%'));
+                      OR text ilike '%' || filter_text || '%')
+    ORDER BY messages.message_id DESC);
+);
 end
 $$
 language 'plpgsql';
