@@ -54,11 +54,12 @@ func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]m
 	return utils.MessagesInfoModelByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) SearchMessages(userId uint64, fromUser, toUser, filter string) ([]models.MessageInfo, error) {
+func (g MailClientGRPC) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.SearchMessages(context.TODO(), &mail_proto.SearchMailParams{
 		UID:      userId,
 		FromUser: fromUser,
 		ToUser:   toUser,
+		Folder:   folder,
 		Filter:   filter,
 	})
 	if err != nil {

@@ -99,10 +99,10 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 	return messages, nil
 }
 
-func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, filter string) ([]models.MessageInfo, error) {
+func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
-	messages, err := uc.mailRepo.SearchMessages(userID, fromUser, toUser, filter)
+	messages, err := uc.mailRepo.SearchMessages(userID, fromUser, toUser, folder, filter)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : msg by user and folder")
 	}

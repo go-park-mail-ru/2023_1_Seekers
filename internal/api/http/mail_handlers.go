@@ -115,7 +115,7 @@ func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages, err := h.uc.SearchMessages(userID, form.FromUser, form.ToUser, form.Filter)
+	messages, err := h.uc.SearchMessages(userID, form.FromUser, form.ToUser, form.Folder, form.Filter)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return

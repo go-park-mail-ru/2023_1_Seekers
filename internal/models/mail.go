@@ -48,6 +48,7 @@ type FormMessage struct {
 type FormSearchMessages struct {
 	FromUser string `json:"fromUser"`
 	ToUser   string `json:"toUser"`
+	Folder   string `json:"folder"`
 	Filter   string `json:"filter"`
 }
 

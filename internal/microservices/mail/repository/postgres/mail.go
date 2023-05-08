@@ -144,11 +144,11 @@ func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folde
 	return messages, nil
 }
 
-func (m mailRepository) SearchMessages(userId uint64, fromUser, toUser, filter string) ([]models.MessageInfo, error) {
+func (m mailRepository) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 	var messagesIds []uint64
 
-	tx := m.db.Raw("SELECT get_messages($1, $2, $3, $4);", userId, fromUser, toUser, filter).Scan(&messagesIds)
+	tx := m.db.Raw("SELECT get_messages($1, $2, $3, $4, $5);", userId, fromUser, toUser, folder, filter).Scan(&messagesIds)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}

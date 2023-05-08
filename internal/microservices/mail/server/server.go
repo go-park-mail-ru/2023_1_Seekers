@@ -61,7 +61,7 @@ func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mai
 }
 
 func (g *MailServerGRPC) SearchMessages(ctx context.Context, protoParams *mail_proto.SearchMailParams) (*mail_proto.MessagesInfoResponse, error) {
-	msfInfos, err := g.mailUC.SearchMessages(protoParams.UID, protoParams.FromUser, protoParams.ToUser, protoParams.Filter)
+	msfInfos, err := g.mailUC.SearchMessages(protoParams.UID, protoParams.FromUser, protoParams.ToUser, protoParams.Folder, protoParams.Filter)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}

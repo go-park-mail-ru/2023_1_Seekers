@@ -136,7 +136,8 @@ message SearchMailParams{
   uint64 UID = 1;
   string FromUser = 2;
   string ToUser = 3;
-  string Filter = 4;
+  string Folder = 4;
+  string Filter = 5;
 }
 
 message Nothing {
