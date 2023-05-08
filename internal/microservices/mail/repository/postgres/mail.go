@@ -92,11 +92,7 @@ func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, err
 
 func (m mailRepository) SearchRecipients(userId uint64) ([]models.UserInfo, error) {
 	var result []models.UserInfo
-	tx := m.db.Raw("select users.user_id, users.first_name, users.last_name, users.email from mail.messages "+
-		"join mail.boxes on boxes.message_id = messages.message_id "+
-		"join mail.users on boxes.user_id = users.user_id "+
-		"where from_user_id = $1 and users.user_id != $1 "+
-		" order by messages.message_id desc ", userId).Scan(&result)
+	tx := m.db.Raw("SELECT * FROM get_recipes( $1 );", userId).Scan(&result)
 
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
@@ -148,7 +144,7 @@ func (m mailRepository) SearchMessages(userId uint64, fromUser, toUser, folder, 
 	var messages []models.MessageInfo
 	var messagesIds []uint64
 
-	tx := m.db.Raw("SELECT get_messages($1, $2, $3, $4, $5);", userId, fromUser, toUser, folder, filter).Scan(&messagesIds)
+	tx := m.db.Raw("SELECT * FROM get_messages($1, $2, $3, $4, $5);", userId, fromUser, toUser, folder, filter).Scan(&messagesIds)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}

@@ -253,3 +253,32 @@ RETURN QUERY(SELECT messages.message_id --, messages.text, messages.title, boxes
 end
 $$
 language 'plpgsql';
+
+-- для поиска получателей для конкретного пользователя, сначала недавние
+CREATE
+OR REPLACE FUNCTION get_recipes(from_id bigint)
+    RETURNS TABLE
+            (
+                user_id    bigint,
+                first_name text,
+                last_name  text,
+                email      text
+            )
+AS
+$$
+#variable_conflict use_column
+BEGIN
+RETURN QUERY(SELECT user_id, first_name, last_name, email FROM (select DISTINCT on (users.user_id) users.user_id,
+                                                           users.first_name,
+                                                           users.last_name,
+                                                           users.email,
+                                                           messages.message_id
+                        from mail.messages
+                                 join mail.boxes on boxes.message_id = messages.message_id
+                                 join mail.users on boxes.user_id = users.user_id
+                        where from_user_id = from_id
+                          and users.user_id != from_id) as all_recipes
+                  order by all_recipes.message_id desc);
+end
+$$
+language 'plpgsql';
