@@ -12,6 +12,7 @@ import (
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-playground/validator/v10"
+	"github.com/mailru/easyjson"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -73,7 +74,7 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormSignUp{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -142,7 +143,7 @@ func (h *authHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormLogin{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}

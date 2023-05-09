@@ -10,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	pkgErrors "github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -295,7 +296,7 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormMessage{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -359,7 +360,7 @@ func (h *mailHandlers) SaveDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormMessage{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -498,7 +499,7 @@ func (h *mailHandlers) CreateFolder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormFolder{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -598,7 +599,7 @@ func (h *mailHandlers) EditFolder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormFolder{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -700,7 +701,7 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := models.FormMessage{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}

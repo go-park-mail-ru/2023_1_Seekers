@@ -10,6 +10,7 @@ import (
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/image"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"github.com/microcosm-cc/bluemonday"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -156,7 +157,7 @@ func (h *userHandlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := &models.UserInfo{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -277,7 +278,7 @@ func (h *userHandlers) EditPw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := &models.EditPasswordRequest{}
-	if err := form.UnmarshalJSON(body); err != nil {
+	if err := easyjson.Unmarshal(body, form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
