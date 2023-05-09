@@ -27,7 +27,7 @@ func TestDelivery_Delete(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("DELETE", "/api/user/", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodDelete, "/api/user/", bytes.NewReader([]byte{}))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
@@ -60,7 +60,7 @@ func TestDelivery_GetInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/", bytes.NewReader([]byte{}))
 	vars := map[string]string{
 		cfg.Routes.RouteUserInfoQueryEmail: email,
 	}
@@ -98,7 +98,7 @@ func TestDelivery_GetPersonalInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/info", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/info", bytes.NewReader([]byte{}))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
@@ -131,7 +131,7 @@ func TestDelivery_EditInfo(t *testing.T) {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/user/info", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/user/info", bytes.NewReader(body))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, fakeUserInfo.UserID))
 	w := httptest.NewRecorder()
 
@@ -205,7 +205,7 @@ func TestDelivery_GetAvatar(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/avatar", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/avatar", bytes.NewReader([]byte{}))
 	q := r.URL.Query()
 	q.Add(cfg.Routes.RouteUserAvatarQueryEmail, email)
 	r.URL.RawQuery = q.Encode()
@@ -240,7 +240,7 @@ func TestDelivery_EditPw(t *testing.T) {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/user/pw", bytes.NewReader(body))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 

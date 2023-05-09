@@ -65,7 +65,7 @@ func (t *MXRecords) SendToMostPriortyRecord(fnCbSendmail func(hostMostpriorty st
 				isSend, err := fnCbSendmail(host)
 				if err != nil {
 					return err
-				} else if isSend == true {
+				} else if isSend {
 					return nil
 				}
 			}
@@ -75,7 +75,7 @@ func (t *MXRecords) SendToMostPriortyRecord(fnCbSendmail func(hostMostpriorty st
 				isSend, err := fnCbSendmail(sHost)
 				if err != nil {
 					return err
-				} else if isSend == true {
+				} else if isSend {
 					return nil
 				}
 			}

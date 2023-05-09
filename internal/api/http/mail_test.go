@@ -18,6 +18,8 @@ import (
 type inputCase struct {
 	userID      uint64
 	folderSlug  string
+	fromFolder  string
+	toFolder    string
 	messageID   uint64
 	messageForm models.FormMessage
 	folderForm  models.FormFolder
@@ -66,7 +68,7 @@ func TestDelivery_GetFolderMessages(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("GET", "/api/folder/", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodGet, "/api/folder/", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"slug": test.input.folderSlug,
 		}
@@ -107,7 +109,7 @@ func TestDelivery_GetFolders(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("GET", "/api/folders", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodGet, "/api/folders", bytes.NewReader([]byte{}))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
@@ -145,7 +147,7 @@ func TestDelivery_GetMessage(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("GET", "/api/message", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodGet, "/api/message", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
@@ -187,7 +189,7 @@ func TestDelivery_DeleteMessage(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("DELETE", "/api/message", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodDelete, "/api/message", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
@@ -195,7 +197,7 @@ func TestDelivery_DeleteMessage(t *testing.T) {
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().DeleteMessage(test.input.userID, test.input.messageID).Return(nil)
+		mailUC.EXPECT().DeleteMessage(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(nil)
 
 		mailH.DeleteMessage(w, r)
 
@@ -254,7 +256,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
 
-		r := httptest.NewRequest("POST", "/api/message/send", bytes.NewReader(body))
+		r := httptest.NewRequest(http.MethodPost, "/api/message/send", bytes.NewReader(body))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
@@ -318,7 +320,7 @@ func TestDelivery_SaveDraft(t *testing.T) {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
 
-		r := httptest.NewRequest("POST", "/api/message/save", bytes.NewReader(body))
+		r := httptest.NewRequest(http.MethodPost, "/api/message/save", bytes.NewReader(body))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
@@ -357,7 +359,7 @@ func TestDelivery_ReadMessage(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("POST", "/api/v1/message/read", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodPost, "/api/v1/message/read", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
@@ -365,7 +367,7 @@ func TestDelivery_ReadMessage(t *testing.T) {
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
+		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(&models.MessageInfo{}, nil)
 
 		mailH.ReadMessage(w, r)
 
@@ -399,7 +401,7 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("POST", "/api/v1/message/unread", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodPost, "/api/v1/message/unread", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
@@ -407,7 +409,7 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID).Return(&models.MessageInfo{}, nil)
+		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(&models.MessageInfo{}, nil)
 
 		mailH.UnreadMessage(w, r)
 
@@ -446,7 +448,7 @@ func TestDelivery_CreateFolder(t *testing.T) {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
 
-		r := httptest.NewRequest("POST", "/folder/create", bytes.NewReader(body))
+		r := httptest.NewRequest(http.MethodPost, "/folder/create", bytes.NewReader(body))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
@@ -483,7 +485,7 @@ func TestDelivery_DeleteFolder(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("DELETE", "/api/folder/", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodDelete, "/api/folder/", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"slug": test.input.folderSlug,
 		}
@@ -530,7 +532,7 @@ func TestDelivery_EditFolder(t *testing.T) {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
 
-		r := httptest.NewRequest("PUT", "/folder/", bytes.NewReader(body))
+		r := httptest.NewRequest(http.MethodPut, "/folder/", bytes.NewReader(body))
 		vars := map[string]string{
 			"slug": test.input.folderSlug,
 		}
@@ -557,7 +559,8 @@ func TestDelivery_MoveToFolder(t *testing.T) {
 			input: inputCase{
 				userID:     1,
 				messageID:  1,
-				folderSlug: "trash",
+				fromFolder: "inbox",
+				toFolder:   "trash",
 			},
 			output: outputCase{
 				status: http.StatusOK,
@@ -573,20 +576,21 @@ func TestDelivery_MoveToFolder(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		r := httptest.NewRequest("GET", "/api/message/move", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodGet, "/api/message/move", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
 		r = mux.SetURLVars(r, vars)
 
 		q := r.URL.Query()
-		q.Add(cfg.Routes.RouteMoveToFolderQueryFolderSlug, test.input.folderSlug)
+		q.Add(cfg.Routes.RouteMoveToFolderQueryToFolderSlug, test.input.toFolder)
+		q.Add(cfg.Routes.RouteQueryFromFolderSlug, test.input.fromFolder)
 		r.URL.RawQuery = q.Encode()
 
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().MoveMessageToFolder(test.input.userID, test.input.messageID, test.input.folderSlug).Return(nil)
+		mailUC.EXPECT().MoveMessageToFolder(test.input.userID, test.input.messageID, test.input.fromFolder, test.input.toFolder).Return(nil)
 
 		mailH.MoveToFolder(w, r)
 
@@ -631,7 +635,7 @@ func TestDelivery_EditDraft(t *testing.T) {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
 
-		r := httptest.NewRequest("POST", "/api/message/send", bytes.NewReader(body))
+		r := httptest.NewRequest(http.MethodPost, "/api/message/send", bytes.NewReader(body))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}

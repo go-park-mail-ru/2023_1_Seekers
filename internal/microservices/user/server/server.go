@@ -35,7 +35,6 @@ func (g *UserServerGRPC) Start(url string) error {
 }
 
 func (g *UserServerGRPC) Create(ctx context.Context, protoUser *user_proto.User) (*user_proto.User, error) {
-
 	user, err := g.userUC.Create(utils.UserModelByProto(protoUser))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)

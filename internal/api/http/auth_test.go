@@ -26,7 +26,8 @@ func createConfig() *config.Config {
 	cfg.Mail.PostAtDomain = "@mailbx.ru"
 	cfg.Routes.RouteUserAvatarQueryEmail = "email"
 	cfg.Routes.RouteUserInfoQueryEmail = "email"
-	cfg.Routes.RouteMoveToFolderQueryFolderSlug = "folderSlug"
+	cfg.Routes.RouteQueryFromFolderSlug = "fromFolder"
+	cfg.Routes.RouteMoveToFolderQueryToFolderSlug = "toFolder"
 
 	return cfg
 }
@@ -74,7 +75,7 @@ func TestDelivery_SignUp(t *testing.T) {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/signup", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/signup", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 
 	authUC.EXPECT().SignUp(fakeForm).Return(fakeAuthResponse, fakeSession, nil)
@@ -113,7 +114,7 @@ func TestDelivery_SignIn(t *testing.T) {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/signin", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 
 	authUC.EXPECT().SignIn(fakeForm).Return(fakeAuthResponse, fakeSession, nil)
@@ -138,7 +139,7 @@ func TestDelivery_Logout(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	authH := NewAuthHandlers(cfg, authUC, mailUC, userUC)
 
-	r := httptest.NewRequest("POST", "/api/signin", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodPost, "/api/signin", bytes.NewReader([]byte{}))
 	w := httptest.NewRecorder()
 
 	authH.Logout(w, r)
@@ -162,7 +163,7 @@ func TestDelivery_Auth(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	authH := NewAuthHandlers(cfg, authUC, mailUC, userUC)
 
-	r := httptest.NewRequest("GET", "/api/auth", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/auth", bytes.NewReader([]byte{}))
 	w := httptest.NewRecorder()
 
 	authH.Auth(w, r)
@@ -188,7 +189,7 @@ func TestDelivery_GetCSRF(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	authH := NewAuthHandlers(cfg, authUC, mailUC, userUC)
 
-	r := httptest.NewRequest("POST", "/api/create_csrf", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodPost, "/api/create_csrf", bytes.NewReader([]byte{}))
 	r.AddCookie(&http.Cookie{
 		Name:     cfg.Sessions.CookieName,
 		Value:    fakeSession.SessionID,

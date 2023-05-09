@@ -9,4 +9,8 @@ const (
 	ContentTypeJPEG   = "image/jpeg"
 	ContentTypeWEBP   = "image/wepb"
 	ContentTypeSVG    = "image/svg+xml"
+	ActionSave        = "save"
+	ActionAdd         = "add"
+	ActionDelete      = "del"
+	FolderDrafts      = "drafts"
 )

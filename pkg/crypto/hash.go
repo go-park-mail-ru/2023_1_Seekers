@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func GetSalt(len int) ([]byte, error) {
-	salt, err := rand.String(len)
+func GetSalt(saltLen int) ([]byte, error) {
+	salt, err := rand.String(saltLen)
 	if err != nil {
 		return nil, err
 	}

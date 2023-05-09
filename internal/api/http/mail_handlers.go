@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -170,7 +169,8 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 
 	var folders []models.Folder
 
-	isCustom, err := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
+	var err error
+	isCustom, _ := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
 	if isCustom {
 		folders, err = h.uc.GetCustomFolders(userID)
 		if len(folders) == 0 || folders == nil {
@@ -528,7 +528,6 @@ func (h *mailHandlers) DeleteFolder(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	folderSlug, ok := vars["slug"]
-	fmt.Println(folderSlug)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
 		return

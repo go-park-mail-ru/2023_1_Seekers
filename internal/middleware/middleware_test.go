@@ -81,7 +81,7 @@ func TestMiddleware_CheckAuth(t *testing.T) {
 	defer ctrl.Finish()
 
 	sUC := mockSessionUC.NewMockUseCaseI(ctrl)
-	metrics, err := promMetrics.NewMetricsHttpServer(cfg.Api.MetricsName)
+	metrics, _ := promMetrics.NewMetricsHttpServer(cfg.Api.MetricsName)
 	globalLogger := logger.Init(logrus.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsApiFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 	middleware := NewHttpMiddleware(cfg, sUC, globalLogger, metrics)
 
@@ -90,7 +90,7 @@ func TestMiddleware_CheckAuth(t *testing.T) {
 	})
 
 	for _, test := range testCases {
-		r := httptest.NewRequest("POST", "/", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte{}))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextHandlerLog, globalLogger))
 
 		if test.createSession && !test.noCookie {
@@ -186,7 +186,7 @@ func TestMiddleware_CheckCSRF(t *testing.T) {
 	middleware := NewHttpMiddleware(cfg, sUC, globalLogger, metrics)
 
 	for _, test := range testCases {
-		r := httptest.NewRequest("POST", "/", bytes.NewReader([]byte{}))
+		r := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte{}))
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextHandlerLog, globalLogger))
 
 		r.Header.Set(cfg.Sessions.CSRFHeader, test.token)

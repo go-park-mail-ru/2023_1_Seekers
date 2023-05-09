@@ -288,7 +288,7 @@ func TestUseCase_CreateDefaultFolders(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	mailH := New(cfg, mailRepo, userUC)
 
-	for i, _ := range output {
+	for i := range output {
 		mailRepo.EXPECT().InsertFolder(&output[i]).Return(uint64(i+1), nil)
 	}
 	mailRepo.EXPECT().SelectFoldersByUser(userID).Return(output, nil)
@@ -508,10 +508,11 @@ func TestUseCase_DeleteMessage(t *testing.T) {
 		fakeFolder.LocalName = test.input.folderSlug
 		mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageID).Return(mockMessageResponse, nil).AnyTimes()
 		mailRepo.EXPECT().SelectFolderByUserNMessage(userID, messageID).Return(fakeFolder, nil).AnyTimes()
-		mailRepo.EXPECT().DeleteMessageForUser(userID, messageID).Return(nil).AnyTimes()
+		//mailRepo.EXPECT().DeleteBox(userID, messageID).Return(nil).AnyTimes()
 		mailRepo.EXPECT().DeleteMessageFromMessages(messageID).Return(nil).AnyTimes()
 
-		err := mailH.DeleteMessage(userID, messageID)
+		// TODO
+		err := mailH.DeleteMessage(userID, messageID, "TODO:folderslug")
 		causeErr := pkgErr.Cause(err)
 
 		if causeErr != test.output.err {
@@ -708,13 +709,11 @@ func TestUseCase_EditDraft(t *testing.T) {
 				UserID:   mockUserResponse[2].UserID,
 				FolderID: mockFolderResponse[0].FolderID,
 			})
-			break
 		case "del":
 			toDelete = append(toDelete, models.User2Folder{
 				UserID:   mockUserResponse[0].UserID,
 				FolderID: mockFolderResponse[1].FolderID,
 			})
-			break
 		}
 	}
 	mailRepo.EXPECT().UpdateMessage(mockMessageResponse, toInsert, toDelete).Return(nil)
@@ -992,6 +991,7 @@ func TestUseCase_MarkMessageAsSeen(t *testing.T) {
 
 	userID := uint64(1)
 	messageID := uint64(1)
+	folderID := uint64(1)
 	state := "seen"
 	stateValue := true
 
@@ -1027,13 +1027,14 @@ func TestUseCase_MarkMessageAsSeen(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	mailH := New(cfg, mailRepo, userUC)
 
-	mailRepo.EXPECT().UpdateMessageState(userID, messageID, state, stateValue).Return(nil)
+	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
 	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
 	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
 
-	response, err := mailH.MarkMessageAsSeen(userID, messageID)
+	// TODO
+	response, err := mailH.MarkMessageAsSeen(userID, messageID, "TODO FOLDER SLUG")
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
@@ -1048,6 +1049,7 @@ func TestUseCase_MarkMessageAsUnseen(t *testing.T) {
 
 	userID := uint64(1)
 	messageID := uint64(1)
+	folderID := uint64(1)
 	state := "seen"
 	stateValue := false
 
@@ -1083,13 +1085,14 @@ func TestUseCase_MarkMessageAsUnseen(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	mailH := New(cfg, mailRepo, userUC)
 
-	mailRepo.EXPECT().UpdateMessageState(userID, messageID, state, stateValue).Return(nil)
+	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
 	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
 	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
 
-	response, err := mailH.MarkMessageAsUnseen(userID, messageID)
+	// TODO
+	response, err := mailH.MarkMessageAsUnseen(userID, messageID, "TODO FOLDER SLUG")
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
@@ -1121,7 +1124,8 @@ func TestUseCase_MoveMessageToFolder(t *testing.T) {
 	mailRepo.EXPECT().SelectFolderByUserNMessage(userID, fakeMessage.MessageID).Return(fakeFromFolder, nil)
 	mailRepo.EXPECT().UpdateMessageFolder(userID, fakeMessage.MessageID, fakeFromFolder.FolderID, fakeToFolder.FolderID).Return(nil)
 
-	err := mailH.MoveMessageToFolder(userID, fakeMessage.MessageID, fakeToFolder.LocalName)
+	// TODO
+	err := mailH.MoveMessageToFolder(userID, fakeMessage.MessageID, "TODO FROM FOLDER", "TODO TO FOLDER")
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {

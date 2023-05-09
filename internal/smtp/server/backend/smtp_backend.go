@@ -32,7 +32,6 @@ type Session struct {
 	mailClient _mail.UseCaseI
 	userClient user.UseCaseI
 	authClient auth.UseCaseI
-	port       string
 	username   string
 	password   string
 	isAuth     bool
@@ -145,10 +144,13 @@ func (s *Session) Data(r io.Reader) error {
 				LastName:   lastName,
 				IsExternal: true,
 			})
+			if err != nil {
+				return errors.Wrap(err, "smtp send message : create external user")
+			}
 
 			_, err = s.mailClient.CreateDefaultFolders(fromUser.UserID)
 			if err != nil {
-				return errors.Wrap(err, "smtp send message : create external user")
+				return errors.Wrap(err, "smtp send message : create default folders for external user")
 			}
 
 			if err != nil {
@@ -202,9 +204,7 @@ func (s *Session) Logout() error {
 }
 
 func (s *Session) DialAndSend(email []byte, to string) error {
-	var err error
-
-	err = pkgSmtp.MxRecordSendMostPriority(to, func(sHostName string) (isSend bool, err error) {
+	err := pkgSmtp.MxRecordSendMostPriority(to, func(sHostName string) (isSend bool, err error) {
 		err = pkgSmtp.SendMailRaw(sHostName, s.cfg.SmtpServer.Port, s.heloDomain, nil, s.from, to, &email)
 		if err != nil {
 			return false, errors.Wrap(err, "failed to send raw mail")

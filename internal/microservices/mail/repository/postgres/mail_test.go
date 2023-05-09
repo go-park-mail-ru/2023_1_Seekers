@@ -180,7 +180,7 @@ func TestRepository_SelectFolderMessagesByUserNFolderID(t *testing.T) {
 
 	var fakeMessages []models.MessageInfo
 	generateFakeData(&fakeMessages)
-	for i, _ := range fakeMessages {
+	for i := range fakeMessages {
 		fakeMessages[i].IsDraft = false
 		fakeMessages[i].Recipients = nil
 		fakeMessages[i].FromUser.Email = ""
@@ -250,6 +250,7 @@ func TestRepository_DeleteMessageForUser(t *testing.T) {
 
 	userID := uint64(1)
 	messageID := uint64(1)
+	folderID := uint64(1)
 
 	db, gormDB, mock, err := mockDB()
 	if err != nil {
@@ -263,7 +264,7 @@ func TestRepository_DeleteMessageForUser(t *testing.T) {
 	mock.ExpectCommit()
 
 	mailRepo := New(cfg, gormDB)
-	err = mailRepo.DeleteMessageForUser(userID, messageID)
+	err = mailRepo.DeleteBox(userID, messageID, folderID)
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
@@ -567,6 +568,7 @@ func TestRepository_UpdateMessageState(t *testing.T) {
 
 	userID := uint64(1)
 	messageID := uint64(1)
+	folderID := uint64(1)
 	stateName := "seen"
 	stateValue := false
 
@@ -587,7 +589,7 @@ func TestRepository_UpdateMessageState(t *testing.T) {
 	mock.ExpectCommit()
 
 	mailRepo := New(cfg, gormDB)
-	err = mailRepo.UpdateMessageState(userID, messageID, stateName, stateValue)
+	err = mailRepo.UpdateMessageState(userID, messageID, folderID, stateName, stateValue)
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {

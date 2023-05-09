@@ -101,7 +101,6 @@ func main() {
 		if err = metrics.RunHttpMetricsServer(":" + cfg.Api.MetricsPort); err != nil {
 			log.Fatal("api - failed run metrics server", err)
 		}
-
 	}()
 
 	go func() {
@@ -122,5 +121,4 @@ func main() {
 	if err = server.Shutdown(ctx); err != nil {
 		globalLogger.Errorf("failed to gracefully shutdown server")
 	}
-
 }

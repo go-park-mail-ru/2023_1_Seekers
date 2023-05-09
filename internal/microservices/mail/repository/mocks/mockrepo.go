@@ -120,6 +120,36 @@ func (mr *MockMailRepoIMockRecorder) InsertMessage(fromUserID, message, user2fol
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMessage", reflect.TypeOf((*MockMailRepoI)(nil).InsertMessage), fromUserID, message, user2folder)
 }
 
+// SearchMessages mocks base method.
+func (m *MockMailRepoI) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchMessages", userId, fromUser, toUser, folder, filter)
+	ret0, _ := ret[0].([]models.MessageInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchMessages indicates an expected call of SearchMessages.
+func (mr *MockMailRepoIMockRecorder) SearchMessages(userId, fromUser, toUser, folder, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockMailRepoI)(nil).SearchMessages), userId, fromUser, toUser, folder, filter)
+}
+
+// SearchRecipients mocks base method.
+func (m *MockMailRepoI) SearchRecipients(userId uint64) ([]models.UserInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchRecipients", userId)
+	ret0, _ := ret[0].([]models.UserInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchRecipients indicates an expected call of SearchRecipients.
+func (mr *MockMailRepoIMockRecorder) SearchRecipients(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchRecipients", reflect.TypeOf((*MockMailRepoI)(nil).SearchRecipients), userId)
+}
+
 // SelectCustomFoldersByUser mocks base method.
 func (m *MockMailRepoI) SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error) {
 	m.ctrl.T.Helper()

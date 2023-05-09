@@ -13,10 +13,12 @@ build:
 	docker-compose up -d --build --remove-orphans
 
 build-prod:
+	make docker-stop-back
 	sudo systemctl stop nginx.service || true
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
+	make perm-dirs
 	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
@@ -56,7 +58,21 @@ run-smtp-server:
 docker-prune:
 	@bash -c 'docker system prune'
 
-docker-stop:
+docker-stop-back:
+	docker container stop 2023_1_seekers_grafana_1
+	docker container stop 2023_1_seekers_prometheus_1
+	docker container stop 2023_1_seekers_api_1
+	docker container stop 2023_1_seekers_mail_1
+	docker container stop 2023_1_seekers_auth_1
+	docker container stop 2023_1_seekers_user_1
+	docker container stop 2023_1_seekers_admin_db_1
+	docker container stop 2023_1_seekers_db_1
+	docker container stop 2023_1_seekers_cache_1
+	docker container stop 2023_1_seekers_file_storage_1
+	docker container stop 2023_1_seekers_node_exporter_1
+	@make docker-prune
+
+docker-stop-all:
 	@bash -c "docker kill $(shell eval docker ps -q)"
 	@bash -c "docker rm $(shell eval docker ps -a -q)"
 	@make docker-prune
@@ -87,3 +103,6 @@ generate:
 
 perm-dirs:
 	sudo chmod -R 777 ./
+
+lint:
+	golangci-lint run -c ./.golangci.yml

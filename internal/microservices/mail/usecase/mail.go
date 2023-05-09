@@ -34,11 +34,11 @@ func New(c *config.Config, mR mailRepo.MailRepoI, uUC user.UseCaseI) mail.UseCas
 }
 
 var defaultFolderNames = map[string]string{
-	"inbox":  "Входящие",
-	"outbox": "Исходящие",
-	"trash":  "Корзина",
-	"drafts": "Черновики",
-	"spam":   "Спам",
+	"inbox":             "Входящие",
+	"outbox":            "Исходящие",
+	"trash":             "Корзина",
+	common.FolderDrafts: "Черновики",
+	"spam":              "Спам",
 }
 
 func (uc *mailUC) GetFolders(userID uint64) ([]models.Folder, error) {
@@ -67,7 +67,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
-	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, folderSlug == "drafts")
+	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, folderSlug == common.FolderDrafts)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -197,7 +197,7 @@ func (uc *mailUC) CreateFolder(userID uint64, form models.FormFolder) (*models.F
 		return nil, pkgErrors.Wrap(err, "validate folder name")
 	}
 
-	folder, err := uc.mailRepo.SelectFolderByUserNFolderName(userID, form.Name)
+	_, err := uc.mailRepo.SelectFolderByUserNFolderName(userID, form.Name)
 	if !pkgErrors.Is(err, errors.ErrFolderNotFound) {
 		return nil, pkgErrors.WithMessage(errors.ErrFolderAlreadyExists, "select folder by user and name")
 	}
@@ -208,7 +208,7 @@ func (uc *mailUC) CreateFolder(userID uint64, form models.FormFolder) (*models.F
 	}
 
 	localName := strconv.FormatUint(lastLocalID+1, 10)
-	folder = &models.Folder{
+	folder := &models.Folder{
 		UserID:    userID,
 		LocalName: localName,
 		Name:      form.Name,
@@ -366,14 +366,11 @@ func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64, folderSlug stri
 		if err != nil {
 			return pkgErrors.Wrap(err, "delete message for user")
 		}
-		break
-	case "drafts":
+	case common.FolderDrafts:
 		err = uc.mailRepo.DeleteMessageFromMessages(messageID)
 		if err != nil {
 			return pkgErrors.Wrap(err, "delete message full")
 		}
-
-		break
 	default:
 		err = uc.MoveMessageToFolder(userID, messageID, folder.LocalName, "trash")
 		if err != nil {
@@ -409,7 +406,7 @@ func (uc *mailUC) ValidateRecipients(recipients []string) ([]string, []string) {
 }
 
 func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
-	folder, err := uc.GetFolderInfo(fromUserID, "drafts")
+	folder, err := uc.GetFolderInfo(fromUserID, common.FolderDrafts)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 	}
@@ -476,14 +473,14 @@ func (uc *mailUC) mapRecipients(newRecipients []string, oldMessage *models.Messa
 	recipients := make(map[string]string)
 
 	for _, recipient := range newRecipients {
-		recipients[recipient] = "add"
+		recipients[recipient] = common.ActionAdd
 	}
 
 	for _, recipient := range oldMessage.Recipients {
 		if _, ok := recipients[recipient.Email]; ok {
-			recipients[recipient.Email] = "save"
+			recipients[recipient.Email] = common.ActionSave
 		} else {
-			recipients[recipient.Email] = "del"
+			recipients[recipient.Email] = common.ActionDelete
 		}
 	}
 
@@ -515,18 +512,16 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 		}
 
 		switch value {
-		case "add":
+		case common.ActionAdd:
 			toInsert = append(toInsert, models.User2Folder{
 				UserID:   recipient.UserID,
 				FolderID: folder.FolderID,
 			})
-			break
-		case "del":
+		case common.ActionDelete:
 			toDelete = append(toDelete, models.User2Folder{
 				UserID:   recipient.UserID,
 				FolderID: folder.FolderID,
 			})
-			break
 		}
 	}
 
@@ -752,7 +747,7 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolde
 		return pkgErrors.WithMessage(errors.ErrMoveToSameFolder, "new fromFolder is equals with old fromFolder")
 	}
 
-	if fromFolderSlug == "drafts" {
+	if fromFolderSlug == common.FolderDrafts {
 		return pkgErrors.WithMessage(errors.ErrMoveFromDraftFolder, "old fromFolder is equals draft fromFolder")
 	}
 
@@ -761,7 +756,7 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolde
 		return pkgErrors.Wrap(err, "get golder info (to fromFolder slug)")
 	}
 
-	if toFolder.LocalName == "drafts" {
+	if toFolder.LocalName == common.FolderDrafts {
 		return pkgErrors.WithMessage(errors.ErrMoveToDraftFolder, "new fromFolder is equals draft fromFolder")
 	}
 
