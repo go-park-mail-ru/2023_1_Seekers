@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
@@ -11,7 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
-	httpPkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -67,15 +66,21 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormSignUp{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+	if err := form.UnmarshalJSON(body); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
@@ -83,30 +88,30 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	response, session, err := h.authUC.SignUp(&form)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	user, err := h.userUC.GetInfoByEmail(response.Email)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	_, err = h.mailUC.CreateDefaultFolders(user.UserID)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	err = h.mailUC.SendWelcomeMessage(response.Email)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	h.setNewCookie(w, session)
-	httpPkg.SendJSON(w, r, http.StatusOK, response)
+	pkgHttp.SendJSON(w, r, http.StatusOK, response)
 }
 
 // SignIn godoc
@@ -129,22 +134,27 @@ func (h *authHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := models.FormLogin{}
 
-	err := json.NewDecoder(r.Body).Decode(&form)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
+	form := models.FormLogin{}
+	if err := form.UnmarshalJSON(body); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
 
 	response, session, err := h.authUC.SignIn(&form)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
 	h.setNewCookie(w, session)
-	httpPkg.SendJSON(w, r, http.StatusOK, response)
+	pkgHttp.SendJSON(w, r, http.StatusOK, response)
 }
 
 // Auth godoc
@@ -185,13 +195,13 @@ func (h *authHandlers) Logout(w http.ResponseWriter, _ *http.Request) {
 func (h *authHandlers) GetCSRF(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(h.cfg.Sessions.CookieName)
 	if err != nil {
-		httpPkg.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
 		return
 	}
 
 	csrfToken, err := crypto.CreateCSRF(cookie.Value)
 	if err != nil {
-		httpPkg.HandleError(w, r, err)
+		pkgHttp.HandleError(w, r, err)
 		return
 	}
 	w.Header().Set(h.cfg.Sessions.CSRFHeader, csrfToken)

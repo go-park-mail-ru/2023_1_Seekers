@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
 	pkgErr "github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -37,5 +38,9 @@ func ComparePw2Hash(password, hash string, saultLen int) bool {
 	}
 	salt := hash[0:saultLen]
 	newHash := Hash([]byte(salt), password)
+
+	log.Error(hash)
+	log.Error(string(newHash))
+	log.Error("areEqual", bytes.Equal(newHash, []byte(hash)))
 	return bytes.Equal(newHash, []byte(hash))
 }

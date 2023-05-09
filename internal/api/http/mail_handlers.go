@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -12,6 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	pkgErrors "github.com/pkg/errors"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -288,8 +288,14 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -346,8 +352,14 @@ func (h *mailHandlers) SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -479,8 +491,14 @@ func (h *mailHandlers) CreateFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormFolder{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -573,8 +591,14 @@ func (h *mailHandlers) EditFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormFolder{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -669,8 +693,14 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}

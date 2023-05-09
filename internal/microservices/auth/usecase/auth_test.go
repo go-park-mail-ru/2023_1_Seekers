@@ -3,6 +3,8 @@ package usecase
 import (
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	"strings"
+
 	//"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
 	mockSessionRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository/mocks"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase/mocks"
@@ -17,14 +19,14 @@ import (
 func generateFakeData(data any) {
 	_ = faker.SetRandomMapAndSliceMaxSize(10)
 	_ = faker.SetRandomMapAndSliceMinSize(1)
-	_ = faker.SetRandomStringLength(30)
+	_ = faker.SetRandomStringLength(20)
 
 	_ = faker.FakeData(data)
 }
 
 func createConfig() *config.Config {
 	cfg := new(config.Config)
-	cfg.Mail.PostAtDomain = "@mailbox.ru"
+	cfg.Mail.PostAtDomain = "@mailbx.ru"
 	cfg.Password.PasswordSaltLen = 0
 	cfg.UserService.DefaultAvatar = "default_avatar.png"
 
@@ -40,12 +42,12 @@ func TestUseCase_SignIn(t *testing.T) {
 	generateFakeData(&fakeForm)
 	generateFakeData(&fakeSession)
 	generateFakeData(&fakeUser)
+	fakeForm.Login = strings.ToLower(fakeForm.Login)
 	fakeUser.Email = fakeForm.Login + cfg.Mail.PostAtDomain
-	var err error
-	fakeUser.Password, err = crypto.HashPw(fakeForm.Password, cfg.Password.PasswordSaltLen)
-	if err != nil {
-		t.Fatalf("error while hashing pw")
-	}
+	fakeUser.IsExternal = false
+
+	fakeUser.Password = string(crypto.Hash([]byte{}, fakeForm.Password))
+
 	fakeAuthResponse := &models.AuthResponse{
 		Email:     fakeUser.Email,
 		FirstName: fakeUser.FirstName,
@@ -67,7 +69,7 @@ func TestUseCase_SignIn(t *testing.T) {
 	causeErr := pkgErr.Cause(err)
 
 	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, err)
 	} else {
 		require.Equal(t, fakeAuthResponse, responseAuth)
 		require.Equal(t, fakeSession, responseSession)
@@ -80,6 +82,7 @@ func TestUseCase_SignUp(t *testing.T) {
 	var fakeForm *models.FormSignUp
 	generateFakeData(&fakeForm)
 	fakeForm.RepeatPw = fakeForm.Password
+	fakeForm.Login = strings.ToLower(fakeForm.Login)
 	email := fakeForm.Login + cfg.Mail.PostAtDomain
 	hashPW, err := crypto.HashPw(fakeForm.Password, cfg.Password.PasswordSaltLen)
 	if err != nil {

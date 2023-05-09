@@ -32,8 +32,9 @@ func NewAuthUC(c *config.Config, uUC _user.UseCaseI, sr authRepo.SessionRepoI) a
 func (u *authUC) SignIn(form *models.FormLogin) (*models.AuthResponse, *models.Session, error) {
 	email, err := validation.Login(form.Login, u.cfg.Mail.PostAtDomain)
 	if err != nil {
-		return nil, nil, errors.ErrInvalidLogin
+		return nil, nil, pkgErrors.WithMessage(errors.ErrInvalidLogin, err.Error())
 	}
+
 	user, err := u.userUC.GetByEmail(email)
 	if err != nil || user.IsExternal {
 		return nil, nil, errors.ErrWrongPw

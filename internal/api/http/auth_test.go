@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"encoding/json"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	mockAuthUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/usecase/mocks"
@@ -10,6 +9,7 @@ import (
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/golang/mock/gomock"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -70,7 +70,7 @@ func TestDelivery_SignUp(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	authH := NewAuthHandlers(cfg, authUC, mailUC, userUC)
 
-	body, err := json.Marshal(fakeForm)
+	body, err := easyjson.Marshal(fakeForm)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
@@ -109,7 +109,7 @@ func TestDelivery_SignIn(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	authH := NewAuthHandlers(cfg, authUC, mailUC, userUC)
 
-	body, err := json.Marshal(fakeForm)
+	body, err := easyjson.Marshal(fakeForm)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}

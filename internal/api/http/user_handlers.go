@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -149,10 +148,15 @@ func (h *userHandlers) EditInfo(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := &models.UserInfo{}
 
-	err := json.NewDecoder(r.Body).Decode(form)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
+	form := &models.UserInfo{}
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -265,10 +269,15 @@ func (h *userHandlers) EditPw(w http.ResponseWriter, r *http.Request) {
 			log.Error(fmt.Errorf("failed to close request: %w", err))
 		}
 	}(r.Body)
-	form := &models.EditPasswordRequest{}
 
-	err := json.NewDecoder(r.Body).Decode(&form)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
+	form := &models.EditPasswordRequest{}
+	if err := form.UnmarshalJSON(body); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}

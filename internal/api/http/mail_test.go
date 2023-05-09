@@ -3,12 +3,12 @@ package http
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	mockMailUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -172,8 +172,9 @@ func TestDelivery_DeleteMessage(t *testing.T) {
 		{
 			name: "standard test",
 			input: inputCase{
-				userID:    1,
-				messageID: 1,
+				userID:     1,
+				messageID:  1,
+				fromFolder: "outbox",
 			},
 			output: outputCase{
 				status: http.StatusOK,
@@ -192,12 +193,17 @@ func TestDelivery_DeleteMessage(t *testing.T) {
 		r := httptest.NewRequest(http.MethodDelete, "/api/message", bytes.NewReader([]byte{}))
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
+			//"fromFolder": test.input.fromFolder,
 		}
+		q := r.URL.Query()
+		q.Set("fromFolder", test.input.fromFolder)
+		r.URL.RawQuery = q.Encode()
 		r = mux.SetURLVars(r, vars)
+
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().DeleteMessage(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(nil)
+		mailUC.EXPECT().DeleteMessage(test.input.userID, test.input.messageID, test.input.fromFolder).Return(nil)
 
 		mailH.DeleteMessage(w, r)
 
@@ -251,7 +257,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		body, err := json.Marshal(test.input.messageForm)
+		body, err := easyjson.Marshal(test.input.messageForm)
 		if err != nil {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
@@ -315,7 +321,7 @@ func TestDelivery_SaveDraft(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		body, err := json.Marshal(test.input.messageForm)
+		body, err := easyjson.Marshal(test.input.messageForm)
 		if err != nil {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
@@ -324,7 +330,6 @@ func TestDelivery_SaveDraft(t *testing.T) {
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
 		mailUC.EXPECT().SaveDraft(test.input.userID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
 
 		mailH.SaveDraft(w, r)
@@ -342,8 +347,9 @@ func TestDelivery_ReadMessage(t *testing.T) {
 		{
 			name: "standard test",
 			input: inputCase{
-				userID:    1,
-				messageID: 1,
+				userID:     1,
+				messageID:  1,
+				fromFolder: "outbox",
 			},
 			output: outputCase{
 				status: http.StatusOK,
@@ -363,11 +369,15 @@ func TestDelivery_ReadMessage(t *testing.T) {
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
+
+		q := r.URL.Query()
+		q.Set("fromFolder", test.input.fromFolder)
+		r.URL.RawQuery = q.Encode()
 		r = mux.SetURLVars(r, vars)
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(&models.MessageInfo{}, nil)
+		mailUC.EXPECT().MarkMessageAsSeen(test.input.userID, test.input.messageID, test.input.fromFolder).Return(&models.MessageInfo{}, nil)
 
 		mailH.ReadMessage(w, r)
 
@@ -384,8 +394,9 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 		{
 			name: "standard test",
 			input: inputCase{
-				userID:    1,
-				messageID: 1,
+				userID:     1,
+				messageID:  1,
+				fromFolder: "outbox",
 			},
 			output: outputCase{
 				status: http.StatusOK,
@@ -405,11 +416,16 @@ func TestDelivery_UnreadMessage(t *testing.T) {
 		vars := map[string]string{
 			"id": strconv.FormatUint(test.input.messageID, 10),
 		}
+
+		q := r.URL.Query()
+		q.Set("fromFolder", test.input.fromFolder)
+		r.URL.RawQuery = q.Encode()
 		r = mux.SetURLVars(r, vars)
+
 		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
 		w := httptest.NewRecorder()
 
-		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID, "TODO FOLDER SLUG").Return(&models.MessageInfo{}, nil)
+		mailUC.EXPECT().MarkMessageAsUnseen(test.input.userID, test.input.messageID, test.input.fromFolder).Return(&models.MessageInfo{}, nil)
 
 		mailH.UnreadMessage(w, r)
 
@@ -443,7 +459,7 @@ func TestDelivery_CreateFolder(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		body, err := json.Marshal(test.input.folderForm)
+		body, err := easyjson.Marshal(test.input.folderForm)
 		if err != nil {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
@@ -527,7 +543,7 @@ func TestDelivery_EditFolder(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		body, err := json.Marshal(test.input.folderForm)
+		body, err := easyjson.Marshal(test.input.folderForm)
 		if err != nil {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}
@@ -630,7 +646,7 @@ func TestDelivery_EditDraft(t *testing.T) {
 	mailH := NewMailHandlers(cfg, mailUC)
 
 	for _, test := range tests {
-		body, err := json.Marshal(test.input.messageForm)
+		body, err := easyjson.Marshal(test.input.messageForm)
 		if err != nil {
 			t.Fatalf("error while marshaling to json: %v", err)
 		}

@@ -1,5 +1,7 @@
 package models
 
+//go:generate easyjson -all
+
 type Image struct {
 	Name string
 	Data []byte

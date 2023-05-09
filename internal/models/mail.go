@@ -5,6 +5,8 @@ import (
 	"html"
 )
 
+//go:generate easyjson -all
+
 type Folder struct {
 	FolderID       uint64 `json:"folder_id" gorm:"primaryKey"`
 	UserID         uint64 `json:"-"`

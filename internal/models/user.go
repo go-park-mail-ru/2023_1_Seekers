@@ -4,6 +4,8 @@ import (
 	"html"
 )
 
+//go:generate easyjson -all
+
 type User struct {
 	UserID uint64 `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	//HereSince time.Time `json:"hereSince" gorm:"column:here_since"`

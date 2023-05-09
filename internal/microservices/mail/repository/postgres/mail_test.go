@@ -259,8 +259,8 @@ func TestRepository_DeleteMessageForUser(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "boxes" WHERE user_id = $1 AND message_id = $2`)).
-		WithArgs(userID, messageID).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "boxes" WHERE user_id = $1 AND message_id = $2 AND folder_id = $3`)).
+		WithArgs(userID, messageID, folderID).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
 	mailRepo := New(cfg, gormDB)
@@ -583,9 +583,9 @@ func TestRepository_UpdateMessageState(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(fmt.Sprintf(`UPDATE "boxes" SET "%s"=$1 WHERE user_id = $2 AND message_id = $3`,
+	mock.ExpectExec(regexp.QuoteMeta(fmt.Sprintf(`UPDATE "boxes" SET "%s"=$1 WHERE user_id = $2 AND message_id = $3 AND folder_id = $4`,
 		stateName))).
-		WithArgs(stateValue, userID, messageID).WillReturnResult(sqlmock.NewResult(0, 0))
+		WithArgs(stateValue, userID, messageID, folderID).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectCommit()
 
 	mailRepo := New(cfg, gormDB)

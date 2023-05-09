@@ -3,12 +3,12 @@ package http
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -126,7 +126,7 @@ func TestDelivery_EditInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	body, err := json.Marshal(fakeUserInfo)
+	body, err := easyjson.Marshal(fakeUserInfo)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
@@ -235,7 +235,7 @@ func TestDelivery_EditPw(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	body, err := json.Marshal(fakeForm)
+	body, err := easyjson.Marshal(fakeForm)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
