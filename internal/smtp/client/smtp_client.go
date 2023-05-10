@@ -21,7 +21,7 @@ func Address2Slice(addrs []*mail.Address) []string {
 	return result
 }
 
-func SendMail(from *models.User, to, subject, message, smtpDomain, secret string) error {
+func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDomain, secret string) error {
 	var b bytes.Buffer
 
 	login, err := pkgSmtp.ParseLogin(from.Email)
@@ -39,7 +39,7 @@ func SendMail(from *models.User, to, subject, message, smtpDomain, secret string
 	h.SetDate(time.Now())
 	h.SetAddressList("From", addrFrom)
 	h.SetAddressList("To", addrTo)
-	h.SetSubject(subject)
+	h.SetSubject(message.Title)
 
 	mailWriter, err := mail.CreateWriter(&b, h)
 	if err != nil {
@@ -69,23 +69,27 @@ func SendMail(from *models.User, to, subject, message, smtpDomain, secret string
 		return errors.Wrap(err, "failed create part of message")
 	}
 	//пока без html поэтому обрамим сообщение в заголовок
-	io.WriteString(partWriter, "<h1>"+message+"</h1>")
+	io.WriteString(partWriter, "<h1>"+message.Text+"</h1>")
 
 	partWriter.Close()
 	textWriter.Close()
 
-	// Create an attachment
-	var attachHeader mail.AttachmentHeader
-	attachHeader.Set("Content-Type", "plain/text; charset=utf-8")
-	attachHeader.SetFilename("mailbox.txt")
-	attachWriter, err := mailWriter.CreateAttachment(attachHeader)
-	if err != nil {
-		return errors.Wrap(err, "failed create attach")
+	for _, attach := range message.Attachments {
+		// Create an attachment
+		var attachHeader mail.AttachmentHeader
+
+		attachHeader.Set("Content-Type", attach.Type)
+		//attachHeader.Set("Content-Transfer-Encoding", "base64")
+		attachHeader.SetFilename(attach.FileName)
+		attachWriter, err := mailWriter.CreateAttachment(attachHeader)
+		if err != nil {
+			return errors.Wrap(err, "failed create attach")
+		}
+
+		attachWriter.Write(attach.FileData)
+		attachWriter.Close()
 	}
 
-	attachWriter.Write([]byte("Здравствуйте, наш почтовый сервис работает в тестовом режиме, данное сообщение пришло с целью тестирования вложений.\nХорошего дня!"))
-
-	attachWriter.Close()
 	mailWriter.Close()
 
 	err = smtp.SendMail(smtpDomain+":25", auth, from.Email, Address2Slice(addrTo), strings.NewReader(b.String()))

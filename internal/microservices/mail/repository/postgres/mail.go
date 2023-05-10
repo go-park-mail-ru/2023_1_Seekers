@@ -235,6 +235,15 @@ func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *mode
 		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
+	for _, v := range message.Attachments {
+		var attachID uint64
+		tx = tx.Raw("INSERT INTO mail.attaches(message_id, type, filename, s3_fname) VALUES ($1, $2, $3, $4) RETURNING attach_id;", convMsg.MessageID, v.Type, v.FileName, v.S3FName).Scan(&attachID)
+		if err := tx.Error; err != nil {
+			return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+		}
+		v.AttachID = attachID
+	}
+
 	return convMsg.MessageID, nil
 }
 

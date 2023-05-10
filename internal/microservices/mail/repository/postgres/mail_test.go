@@ -187,6 +187,7 @@ func TestRepository_SelectFolderMessagesByUserNFolderID(t *testing.T) {
 		fakeMessages[i].FromUser.FirstName = ""
 		fakeMessages[i].FromUser.LastName = ""
 		fakeMessages[i].ReplyTo = nil
+		fakeMessages[i].Attachments = nil
 	}
 
 	userID := uint64(1)
@@ -375,6 +376,7 @@ func TestRepository_SelectMessageByUserNMessage(t *testing.T) {
 	fakeMessage.FromUser.FirstName = ""
 	fakeMessage.FromUser.LastName = ""
 	fakeMessage.ReplyTo = nil
+	fakeMessage.Attachments = nil
 
 	userID := uint64(1)
 	messageID := uint64(1)
@@ -415,6 +417,7 @@ func TestRepository_InsertMessage(t *testing.T) {
 	fakeMessage.MessageID = messageID
 	fakeMessage.Recipients = fakeMessage.Recipients[:1]
 	fakeMessage.Seen = true
+	fakeMessage.Attachments = nil
 	user2folder := []models.User2Folder{
 		{
 			UserID:   fakeMessage.FromUser.UserID,

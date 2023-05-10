@@ -398,6 +398,29 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels4(in *
 				}
 				in.Delim(']')
 			}
+		case "attachments":
+			if in.IsNull() {
+				in.Skip()
+				out.Attachments = nil
+			} else {
+				in.Delim('[')
+				if out.Attachments == nil {
+					if !in.IsDelim(']') {
+						out.Attachments = make([]AttachmentInfo, 0, 1)
+					} else {
+						out.Attachments = []AttachmentInfo{}
+					}
+				} else {
+					out.Attachments = (out.Attachments)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v8 AttachmentInfo
+					(v8).UnmarshalEasyJSON(in)
+					out.Attachments = append(out.Attachments, v8)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		case "title":
 			out.Title = string(in.String())
 		case "created_at":
@@ -451,11 +474,27 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels4(out 
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v8, v9 := range in.Recipients {
-				if v8 > 0 {
+			for v9, v10 := range in.Recipients {
+				if v9 > 0 {
 					out.RawByte(',')
 				}
-				(v9).MarshalEasyJSON(out)
+				(v10).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"attachments\":"
+		out.RawString(prefix)
+		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v11, v12 := range in.Attachments {
+				if v11 > 0 {
+					out.RawByte(',')
+				}
+				(v12).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -647,9 +686,9 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels6(in *
 					out.Recipients = (out.Recipients)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v10 string
-					v10 = string(in.String())
-					out.Recipients = append(out.Recipients, v10)
+					var v13 string
+					v13 = string(in.String())
+					out.Recipients = append(out.Recipients, v13)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -667,6 +706,29 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels6(in *
 					out.ReplyToMessageID = new(uint64)
 				}
 				*out.ReplyToMessageID = uint64(in.Uint64())
+			}
+		case "attachments":
+			if in.IsNull() {
+				in.Skip()
+				out.Attachments = nil
+			} else {
+				in.Delim('[')
+				if out.Attachments == nil {
+					if !in.IsDelim(']') {
+						out.Attachments = make([]Attachment, 0, 2)
+					} else {
+						out.Attachments = []Attachment{}
+					}
+				} else {
+					out.Attachments = (out.Attachments)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v14 Attachment
+					(v14).UnmarshalEasyJSON(in)
+					out.Attachments = append(out.Attachments, v14)
+					in.WantComma()
+				}
+				in.Delim(']')
 			}
 		default:
 			in.SkipRecursive()
@@ -689,11 +751,11 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels6(out 
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Recipients {
-				if v11 > 0 {
+			for v15, v16 := range in.Recipients {
+				if v15 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v16))
 			}
 			out.RawByte(']')
 		}
@@ -715,6 +777,22 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels6(out 
 			out.RawString("null")
 		} else {
 			out.Uint64(uint64(*in.ReplyToMessageID))
+		}
+	}
+	{
+		const prefix string = ",\"attachments\":"
+		out.RawString(prefix)
+		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v17, v18 := range in.Attachments {
+				if v17 > 0 {
+					out.RawByte(',')
+				}
+				(v18).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
 		}
 	}
 	out.RawByte('}')
@@ -844,9 +922,9 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels8(in *
 					out.Folders = (out.Folders)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v13 Folder
-					(v13).UnmarshalEasyJSON(in)
-					out.Folders = append(out.Folders, v13)
+					var v19 Folder
+					(v19).UnmarshalEasyJSON(in)
+					out.Folders = append(out.Folders, v19)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -874,11 +952,11 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels8(out 
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v14, v15 := range in.Folders {
-				if v14 > 0 {
+			for v20, v21 := range in.Folders {
+				if v20 > 0 {
 					out.RawByte(',')
 				}
-				(v15).MarshalEasyJSON(out)
+				(v21).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -951,9 +1029,9 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels9(in *
 					out.Messages = (out.Messages)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v16 MessageInfo
-					(v16).UnmarshalEasyJSON(in)
-					out.Messages = append(out.Messages, v16)
+					var v22 MessageInfo
+					(v22).UnmarshalEasyJSON(in)
+					out.Messages = append(out.Messages, v22)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -984,11 +1062,11 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels9(out 
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v17, v18 := range in.Messages {
-				if v17 > 0 {
+			for v23, v24 := range in.Messages {
+				if v23 > 0 {
 					out.RawByte(',')
 				}
-				(v18).MarshalEasyJSON(out)
+				(v24).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -1112,4 +1190,157 @@ func (v *Folder) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Folder) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels10(l, v)
+}
+func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels11(in *jlexer.Lexer, out *AttachmentInfo) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "attachID":
+			out.AttachID = uint64(in.Uint64())
+		case "fileName":
+			out.FileName = string(in.String())
+		case "type":
+			out.Type = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels11(out *jwriter.Writer, in AttachmentInfo) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"attachID\":"
+		out.RawString(prefix[1:])
+		out.Uint64(uint64(in.AttachID))
+	}
+	{
+		const prefix string = ",\"fileName\":"
+		out.RawString(prefix)
+		out.String(string(in.FileName))
+	}
+	{
+		const prefix string = ",\"type\":"
+		out.RawString(prefix)
+		out.String(string(in.Type))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AttachmentInfo) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels11(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AttachmentInfo) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels11(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AttachmentInfo) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels11(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *AttachmentInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels11(l, v)
+}
+func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels12(in *jlexer.Lexer, out *Attachment) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "fileName":
+			out.FileName = string(in.String())
+		case "fileData":
+			out.FileData = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels12(out *jwriter.Writer, in Attachment) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"fileName\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.FileName))
+	}
+	{
+		const prefix string = ",\"fileData\":"
+		out.RawString(prefix)
+		out.String(string(in.FileData))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Attachment) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels12(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Attachment) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels12(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Attachment) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels12(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels12(l, v)
 }

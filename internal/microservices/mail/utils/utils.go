@@ -49,6 +49,16 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		replyMessageID = &mail_proto.UID{UID: *info.ReplyToMessageID}
 	}
 
+	protoAttaches := make([]*mail_proto.AttachmentInfo, len(info.Attachments))
+	for i, a := range info.Attachments {
+		protoAttaches[i] = &mail_proto.AttachmentInfo{
+			AttachID: a.AttachID,
+			FileName: a.FileName,
+			FileData: a.FileData,
+			Type:     a.Type,
+		}
+	}
+
 	return &mail_proto.MessageInfo{
 		MessageID:        info.MessageID,
 		FromUser:         ProtoByUserInfo(info.FromUser),
@@ -61,6 +71,7 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Seen:             info.Seen,
 		Favorite:         info.Favorite,
 		Deleted:          info.Deleted,
+		Attachments:      protoAttaches,
 	}
 }
 
@@ -96,6 +107,16 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		replyMessageID = &protoMessageInfo.ReplyToMessageID.UID
 	}
 
+	attaches := make([]models.AttachmentInfo, len(protoMessageInfo.Attachments))
+	for i, a := range protoMessageInfo.Attachments {
+		attaches[i] = models.AttachmentInfo{
+			AttachID: a.AttachID,
+			FileName: a.FileName,
+			FileData: a.FileData,
+			Type:     a.Type,
+		}
+	}
+
 	return &models.MessageInfo{
 		MessageID:        protoMessageInfo.MessageID,
 		FromUser:         *UserInfoModelByProto(protoMessageInfo.FromUser),
@@ -108,6 +129,7 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		Seen:             protoMessageInfo.Seen,
 		Favorite:         protoMessageInfo.Favorite,
 		Deleted:          protoMessageInfo.Deleted,
+		Attachments:      attaches,
 	}
 }
 
@@ -126,11 +148,20 @@ func MessageModelByProto(protoMsg *mail_proto.Message) models.FormMessage {
 		replyMessageID = &protoMsg.ReplyToMessageID.UID
 	}
 
+	attaches := make([]models.Attachment, len(protoMsg.Attachments))
+	for i, a := range protoMsg.Attachments {
+		attaches[i] = models.Attachment{
+			FileName: a.FileName,
+			FileData: a.FileData,
+		}
+	}
+
 	return models.FormMessage{
 		Recipients:       protoMsg.Recipients,
 		Title:            protoMsg.Title,
 		Text:             protoMsg.Text,
 		ReplyToMessageID: replyMessageID,
+		Attachments:      attaches,
 	}
 }
 
@@ -144,6 +175,14 @@ func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_pr
 		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
 	}
 
+	attaches := make([]*mail_proto.Attachment, len(form.Attachments))
+	for i, a := range form.Attachments {
+		attaches[i] = &mail_proto.Attachment{
+			FileName: a.FileName,
+			FileData: a.FileData,
+		}
+	}
+
 	return &mail_proto.SendMessageParams{
 		UID: uID,
 		Message: &mail_proto.Message{
@@ -151,6 +190,7 @@ func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_pr
 			Title:            form.Title,
 			Text:             form.Text,
 			ReplyToMessageID: replyMessageID,
+			Attachments:      attaches,
 		},
 	}
 }

@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	"encoding/base64"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
@@ -9,9 +11,12 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/client"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/rand"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	pkgErrors "github.com/pkg/errors"
+	"net/http"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,13 +28,15 @@ type mailUC struct {
 	cfg      *config.Config
 	mailRepo mailRepo.MailRepoI
 	userUC   user.UseCaseI
+	fileUC   file_storage.UseCaseI
 }
 
-func New(c *config.Config, mR mailRepo.MailRepoI, uUC user.UseCaseI) mail.UseCaseI {
+func New(c *config.Config, mR mailRepo.MailRepoI, uUC user.UseCaseI, fUC file_storage.UseCaseI) mail.UseCaseI {
 	return &mailUC{
 		cfg:      c,
 		mailRepo: mR,
 		userUC:   uUC,
+		fileUC:   fUC,
 	}
 }
 
@@ -561,14 +568,37 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		})
 	}
 
+	attachesInfo := make([]models.AttachmentInfo, len(message.Attachments))
+	for i, a := range message.Attachments {
+		raw, err := base64.StdEncoding.DecodeString(a.FileData)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "failed base64 decode attach")
+		}
+
+		contentType := http.DetectContentType(raw)
+		attachesInfo[i] = models.AttachmentInfo{
+			FileName: a.FileName,
+			FileData: raw,
+			S3FName:  rand.FileName("", filepath.Ext(a.FileName)),
+			Type:     contentType,
+		}
+	}
+
+	newMessage := models.MessageInfo{
+		Title:            message.Title,
+		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
+		Text:             message.Text,
+		Attachments:      attachesInfo,
+		ReplyToMessageID: message.ReplyToMessageID,
+	}
+
 	for _, recipient := range message.Recipients {
 		toDomain, err := pkgSmtp.ParseDomain(recipient)
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "send message - failed get recipient domain")
 		}
 		if toDomain != uc.cfg.Mail.PostDomain {
-			err := client.SendMail(fromUser, recipient, message.Title, message.Text, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword)
-			if err != nil {
+			if err := client.SendMail(fromUser, recipient, &newMessage, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword); err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : to other mail service")
 			}
 		} else {
@@ -589,16 +619,19 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		}
 	}
 
-	newMessage := models.MessageInfo{
-		Title:            message.Title,
-		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
-		Text:             message.Text,
-		ReplyToMessageID: message.ReplyToMessageID,
-	}
-
 	err = uc.mailRepo.InsertMessage(fromUserID, &newMessage, user2folder)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : insert message")
+	}
+
+	for _, a := range newMessage.Attachments {
+		if err := uc.fileUC.Upload(&models.S3File{
+			Bucket: uc.cfg.S3.S3AttachBucket,
+			Name:   a.S3FName,
+			Data:   a.FileData,
+		}); err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : put to s3")
+		}
 	}
 
 	return uc.GetMessage(fromUserID, newMessage.MessageID)

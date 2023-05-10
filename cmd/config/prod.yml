@@ -55,6 +55,7 @@ s3:
   s3_region: eu-west-2
   s3_endpoint: https://hb.bizmrg.com
   s3_avatar_bucket: avatars_mailbox_vkcloud
+  s3_attach_bucket: attachs_mailbox_vkcloud
 
 sessions:
   cookie_name: MailBxSession

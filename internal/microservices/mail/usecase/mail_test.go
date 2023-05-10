@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	mockFileUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/usecase/mocks"
 	mockMailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository/mocks"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -95,7 +96,8 @@ func TestUseCase_GetFolders(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	for _, test := range tests {
 		mailRepo.EXPECT().SelectFoldersByUser(test.input.userID).Return(test.fromMock.content, test.fromMock.err)
@@ -155,7 +157,8 @@ func TestUseCase_GetFolderInfo(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	for _, test := range tests {
 		mailRepo.EXPECT().SelectFolderByUserNFolderSlug(test.input.userID, test.input.folderSlug).Return(test.fromMock.content, test.fromMock.err)
@@ -228,7 +231,8 @@ func TestUseCase_GetFolderMessages(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, folderSlug).Return(mockFolderResponse, nil)
 	mailRepo.EXPECT().SelectFolderMessagesByUserNFolderID(userID, mockFolderResponse.FolderID, false).Return(mockFolderMessagesResponse, nil)
@@ -285,7 +289,8 @@ func TestUseCase_CreateDefaultFolders(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	for i := range output {
 		mailRepo.EXPECT().InsertFolder(&output[i]).Return(uint64(i+1), nil)
@@ -324,7 +329,8 @@ func TestUseCase_CreateFolder(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderName(userID, fakeForm.Name).Return(nil, errors.ErrFolderNotFound)
 	mailRepo.EXPECT().SelectFoldersByUser(userID).Return(fakeFolders, nil)
@@ -355,7 +361,8 @@ func TestUseCase_DeleteFolder(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeFolder.LocalName).Return(fakeFolder, nil)
 	mailRepo.EXPECT().SelectFolderMessagesByUserNFolderID(userID, fakeFolder.FolderID, false).Return([]models.MessageInfo{}, nil)
@@ -383,7 +390,8 @@ func TestUseCase_EditFolder(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeFolder.LocalName).Return(fakeFolder, nil).AnyTimes()
 	mailRepo.EXPECT().SelectFolderByUserNFolderName(userID, fakeForm.Name).Return(nil, errors.ErrFolderNotFound)
@@ -446,7 +454,8 @@ func TestUseCase_GetMessage(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageID).Return(mockMessageResponse, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
@@ -502,7 +511,8 @@ func TestUseCase_DeleteMessage(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailUCase := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailUCase := New(cfg, mailRepo, userUC, fileUC)
 
 	for _, test := range tests {
 		fakeFolder.LocalName = test.input.folderSlug
@@ -546,7 +556,8 @@ func TestUseCase_ValidateRecipients(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	userUC.EXPECT().GetInfoByEmail(emails[0]).Return(&users[0], nil)
 	userUC.EXPECT().GetInfoByEmail(emails[1]).Return(&users[1], nil)
@@ -620,7 +631,8 @@ func TestUseCase_SaveDraft(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, "drafts").Return(&mockFolderResponse[0], nil)
 	userUC.EXPECT().GetInfoByEmail(formMessage.Recipients[0]).Return(&mockUserResponse[1], nil)
@@ -692,7 +704,8 @@ func TestUseCase_EditDraft(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageID).Return(mockMessageResponse, nil).AnyTimes()
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil).AnyTimes()
@@ -1154,7 +1167,8 @@ func TestUseCase_GetCustomFolders(t *testing.T) {
 
 	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	mailH := New(cfg, mailRepo, userUC)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
 
 	mailRepo.EXPECT().SelectCustomFoldersByUser(userID, gomock.Any()).Return([]models.Folder{}, nil)
 

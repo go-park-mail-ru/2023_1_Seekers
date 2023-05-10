@@ -93,6 +93,7 @@ type Config struct {
 		//-----VK cloud solutions--------
 		S3Endpoint     string `yaml:"s3_endpoint"`
 		S3AvatarBucket string `yaml:"s3_avatar_bucket"`
+		S3AttachBucket string `yaml:"s3_attach_bucket"`
 	} `yaml:"s3"`
 
 	Sessions struct {

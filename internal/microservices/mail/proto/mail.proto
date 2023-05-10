@@ -27,11 +27,17 @@ message Recipients {
   repeated string Recipients = 1;
 }
 
+message Attachment {
+  string FileName = 1;
+  string FileData = 2;
+}
+
 message Message {
   repeated string  Recipients = 1;
   string Title = 2;
   string Text = 3;
   UID ReplyToMessageID = 4;
+  repeated Attachment Attachments = 5;
 }
 
 message SendMessageParams {
@@ -106,7 +112,14 @@ message UserInfo {
 }
 
 message SearchRecipientsResponse {
-  repeated UserInfo UsersInfo= 1;
+  repeated UserInfo UsersInfo = 1;
+}
+
+message AttachmentInfo {
+  uint64 AttachID = 1;
+  string   FileName = 2;
+  bytes FileData = 3 ;
+  string Type = 4;
 }
 
 message MessageInfo {
@@ -121,6 +134,7 @@ message MessageInfo {
   bool Seen = 9;
   bool Favorite = 10;
   bool Deleted = 11;
+  repeated AttachmentInfo Attachments = 12;
 }
 
 message ValidateRecipientsResponse {

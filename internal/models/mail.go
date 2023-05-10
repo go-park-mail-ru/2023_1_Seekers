@@ -17,18 +17,19 @@ type Folder struct {
 }
 
 type MessageInfo struct {
-	MessageID        uint64       `json:"message_id"`
-	FromUser         UserInfo     `json:"from_user_id" gorm:"embedded;embeddedPrefix:from_"`
-	Recipients       []UserInfo   `json:"recipients" gorm:"-"`
-	Title            string       `json:"title"`
-	CreatedAt        string       `json:"created_at"`
-	Text             string       `json:"text"`
-	ReplyToMessageID *uint64      `json:"-" gorm:"null"`
-	ReplyTo          *MessageInfo `json:"reply_to" gorm:"-"`
-	Seen             bool         `json:"seen"`
-	Favorite         bool         `json:"favorite"`
-	Deleted          bool         `json:"-"`
-	IsDraft          bool         `json:"is_draft"`
+	MessageID        uint64           `json:"message_id"`
+	FromUser         UserInfo         `json:"from_user_id" gorm:"embedded;embeddedPrefix:from_"`
+	Recipients       []UserInfo       `json:"recipients" gorm:"-"`
+	Attachments      []AttachmentInfo `json:"attachments" gorm:"-"`
+	Title            string           `json:"title"`
+	CreatedAt        string           `json:"created_at"`
+	Text             string           `json:"text"`
+	ReplyToMessageID *uint64          `json:"-" gorm:"null"`
+	ReplyTo          *MessageInfo     `json:"reply_to" gorm:"-"`
+	Seen             bool             `json:"seen"`
+	Favorite         bool             `json:"favorite"`
+	Deleted          bool             `json:"-"`
+	IsDraft          bool             `json:"is_draft"`
 }
 
 type Recipients struct {
@@ -40,11 +41,25 @@ type User2Folder struct {
 	FolderID uint64
 }
 
+type Attachment struct {
+	FileName string `json:"fileName"`
+	FileData string `json:"fileData"`
+}
+
+type AttachmentInfo struct {
+	AttachID uint64 `json:"attachID"`
+	FileName string `json:"fileName"`
+	FileData []byte `json:"-"`
+	S3FName  string `json:"-"`
+	Type     string `json:"type"`
+}
+
 type FormMessage struct {
-	Recipients       []string `json:"recipients" validate:"required"`
-	Title            string   `json:"title"`
-	Text             string   `json:"text"`
-	ReplyToMessageID *uint64  `json:"reply_to"`
+	Recipients       []string     `json:"recipients" validate:"required"`
+	Title            string       `json:"title"`
+	Text             string       `json:"text"`
+	ReplyToMessageID *uint64      `json:"reply_to"`
+	Attachments      []Attachment `json:"attachments"`
 }
 
 type FormSearchMessages struct {

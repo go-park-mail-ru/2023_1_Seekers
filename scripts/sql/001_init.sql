@@ -45,14 +45,6 @@ CREATE TYPE mail.recipient AS
     email text
     );
 
-CREATE TYPE mail.attach AS
-    (
-    type text,
-    filename text,
-    size integer,
-    raw_data bytea
-    );
-
 CREATE TABLE mail.messages
 (
     message_id          bigserial NOT NULL,
@@ -76,6 +68,18 @@ CREATE TABLE mail.messages
         REFERENCES mail.messages ON DELETE restrict
 );
 
+CREATE TABLE mail.attaches
+(
+    attach_id bigserial NOT NULL,
+    message_id bigint  NOT NULL,
+    type text,
+    filename text,
+    s3_fname text,
+
+    CONSTRAINT pk_attaches PRIMARY KEY (attach_id),
+    CONSTRAINT fk_attaches_messages_message_id FOREIGN KEY (message_id)
+        REFERENCES mail.messages ON DELETE cascade
+);
 
 CREATE TABLE mail.boxes
 (

@@ -59,17 +59,17 @@ docker-prune:
 	@bash -c 'docker system prune'
 
 docker-stop-back:
-	docker container stop 2023_1_seekers_grafana_1
-	docker container stop 2023_1_seekers_prometheus_1
-	docker container stop 2023_1_seekers_api_1
-	docker container stop 2023_1_seekers_mail_1
-	docker container stop 2023_1_seekers_auth_1
-	docker container stop 2023_1_seekers_user_1
-	docker container stop 2023_1_seekers_admin_db_1
-	docker container stop 2023_1_seekers_db_1
-	docker container stop 2023_1_seekers_cache_1
-	docker container stop 2023_1_seekers_file_storage_1
-	docker container stop 2023_1_seekers_node_exporter_1
+	docker container stop 2023_1_seekers_grafana_1 || true
+	docker container stop 2023_1_seekers_prometheus_1 || true
+	docker container stop 2023_1_seekers_api_1 || true
+	docker container stop 2023_1_seekers_mail_1 || true
+	docker container stop 2023_1_seekers_auth_1 || true
+	docker container stop 2023_1_seekers_user_1 || true
+	docker container stop 2023_1_seekers_admin_db_1 || true
+	docker container stop 2023_1_seekers_db_1 || true
+	docker container stop 2023_1_seekers_cache_1 || true
+	docker container stop 2023_1_seekers_file_storage_1 || true
+	docker container stop 2023_1_seekers_node_exporter_1 || true
 	@make docker-prune
 
 docker-stop-all:
@@ -85,7 +85,7 @@ docker-rm-images:
 
 cov:
 	mkdir -p ${COV_DIR}
-	go test -race -coverpkg=${INTERNAL_PKG} -coverprofile ${COV_DIR}/cover.out ${INTERNAL_PKG}; cat ${COV_DIR}/cover.out | fgrep -v "test.go" | fgrep -v "register.go"| fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" | fgrep -v "config" > ${COV_DIR}/cover2.out
+	go test -race -coverpkg=${INTERNAL_PKG} -coverprofile ${COV_DIR}/cover.out ${INTERNAL_PKG}; cat ${COV_DIR}/cover.out | fgrep -v "test.go" | fgrep -v "register.go"| fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "mock" | fgrep -v "config" | fgrep -v "_easyjson.go" > ${COV_DIR}/cover2.out
 	go tool cover -func ${COV_DIR}/cover2.out
 	go tool cover -html ${COV_DIR}/cover2.out -o ${COV_DIR}/coverage.html
 
@@ -106,3 +106,6 @@ perm-dirs:
 
 lint:
 	golangci-lint run -c ./.golangci.yml
+
+test:
+	go test ./...
