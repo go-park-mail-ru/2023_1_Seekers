@@ -236,6 +236,7 @@ func TestUseCase_GetFolderMessages(t *testing.T) {
 
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, folderSlug).Return(mockFolderResponse, nil)
 	mailRepo.EXPECT().SelectFolderMessagesByUserNFolderID(userID, mockFolderResponse.FolderID, false).Return(mockFolderMessagesResponse, nil)
+	mailRepo.EXPECT().GetMessageAttachments(mockFolderMessagesResponse[0].MessageID).Return(nil, nil)
 	userUC.EXPECT().GetInfo(mockFolderMessagesResponse[0].FromUser.UserID).Return(&mockUserResponse[0], nil)
 	mailRepo.EXPECT().SelectRecipientsByMessage(mockFolderMessagesResponse[0].MessageID, mockFolderMessagesResponse[0].FromUser.UserID).
 		Return(mockRecipientsResponse, nil)

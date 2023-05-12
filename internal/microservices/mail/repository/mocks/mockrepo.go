@@ -91,6 +91,36 @@ func (mr *MockMailRepoIMockRecorder) DeleteMessageFromMessages(messageID interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessageFromMessages", reflect.TypeOf((*MockMailRepoI)(nil).DeleteMessageFromMessages), messageID)
 }
 
+// GetAttach mocks base method.
+func (m *MockMailRepoI) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttach", attachID, userID)
+	ret0, _ := ret[0].(*models.AttachmentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAttach indicates an expected call of GetAttach.
+func (mr *MockMailRepoIMockRecorder) GetAttach(attachID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttach", reflect.TypeOf((*MockMailRepoI)(nil).GetAttach), attachID, userID)
+}
+
+// GetMessageAttachments mocks base method.
+func (m *MockMailRepoI) GetMessageAttachments(messageID uint64) ([]models.AttachmentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMessageAttachments", messageID)
+	ret0, _ := ret[0].([]models.AttachmentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMessageAttachments indicates an expected call of GetMessageAttachments.
+func (mr *MockMailRepoIMockRecorder) GetMessageAttachments(messageID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessageAttachments", reflect.TypeOf((*MockMailRepoI)(nil).GetMessageAttachments), messageID)
+}
+
 // InsertFolder mocks base method.
 func (m *MockMailRepoI) InsertFolder(folder *models.Folder) (uint64, error) {
 	m.ctrl.T.Helper()

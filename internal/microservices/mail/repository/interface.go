@@ -25,4 +25,6 @@ type MailRepoI interface {
 	InsertFolder(folder *models.Folder) (uint64, error)
 	UpdateMessageState(userID uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error
 	UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error
+	GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error)
+	GetMessageAttachments(messageID uint64) ([]models.AttachmentInfo, error)
 }

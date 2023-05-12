@@ -39,6 +39,7 @@ type MailServiceClient interface {
 	EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 	GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
+	GetAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error)
 }
 
 type mailServiceClient struct {
@@ -238,6 +239,15 @@ func (c *mailServiceClient) GetCustomFolders(ctx context.Context, in *UID, opts 
 	return out, nil
 }
 
+func (c *mailServiceClient) GetAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error) {
+	out := new(AttachmentInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetAttach", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -263,6 +273,7 @@ type MailServiceServer interface {
 	EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error)
 	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
 	GetCustomFolders(context.Context, *UID) (*FoldersResponse, error)
+	GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -332,6 +343,9 @@ func (UnimplementedMailServiceServer) MoveMessageToFolder(context.Context, *Move
 }
 func (UnimplementedMailServiceServer) GetCustomFolders(context.Context, *UID) (*FoldersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCustomFolders not implemented")
+}
+func (UnimplementedMailServiceServer) GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttach not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -724,6 +738,24 @@ func _MailService_GetCustomFolders_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_GetAttach_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttNUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetAttach(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/GetAttach",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetAttach(ctx, req.(*AttNUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -814,6 +846,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCustomFolders",
 			Handler:    _MailService_GetCustomFolders_Handler,
+		},
+		{
+			MethodName: "GetAttach",
+			Handler:    _MailService_GetAttach_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

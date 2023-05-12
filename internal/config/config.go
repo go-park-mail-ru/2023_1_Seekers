@@ -116,6 +116,7 @@ type Config struct {
 
 		// MailRoutes
 		RouteMessage                       string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
+		RouteAttach                        string `yaml:"route_attach" env-default:"/attach/{id:[0-9]+}"`
 		RouteSendMessage                   string `yaml:"route_send_message" env-default:"/message/send"`
 		RouteSaveDraftMessage              string `yaml:"route_save_draft_message" env-default:"/message/save"`
 		RouteReadMessage                   string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`

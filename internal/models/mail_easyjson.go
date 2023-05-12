@@ -406,7 +406,7 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels4(in *
 				in.Delim('[')
 				if out.Attachments == nil {
 					if !in.IsDelim(']') {
-						out.Attachments = make([]AttachmentInfo, 0, 1)
+						out.Attachments = make([]AttachmentInfo, 0, 0)
 					} else {
 						out.Attachments = []AttachmentInfo{}
 					}

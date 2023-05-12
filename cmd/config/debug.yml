@@ -74,6 +74,7 @@ routes:
   route_csrf: /csrf
 
   route_message: /message/{id:[0-9]+}
+  route_attach: /attach/{id:[0-9]+}
   route_send_message: /message/send
   route_save_draft_message: /message/save
   route_read_message: /message/{id:[0-9]+}/read

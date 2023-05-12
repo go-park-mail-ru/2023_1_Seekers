@@ -105,7 +105,7 @@ func (g *MailServerGRPC) GetMessage(ctx context.Context, protoMId *mail_proto.UI
 	return utils.ProtoByMessageInfo(*msfInfo), nil
 }
 
-func (g *MailServerGRPC) ValidateRecipients(ctx context.Context, protoRecipients *mail_proto.Recipients) (*mail_proto.ValidateRecipientsResponse, error) {
+func (g *MailServerGRPC) ValidateRecipients(_ context.Context, protoRecipients *mail_proto.Recipients) (*mail_proto.ValidateRecipientsResponse, error) {
 	valid, invalid := g.mailUC.ValidateRecipients(protoRecipients.Recipients)
 	return &mail_proto.ValidateRecipientsResponse{
 		ValidEmails:   valid,
@@ -228,4 +228,13 @@ func (g *MailServerGRPC) GetCustomFolders(ctx context.Context, protoUid *mail_pr
 	}
 
 	return utils.ProtoByFoldersModels(folders), nil
+}
+
+func (g *MailServerGRPC) GetAttach(ctx context.Context, protoAttach *mail_proto.AttNUser) (*mail_proto.AttachmentInfo, error) {
+	attach, err := g.mailUC.GetAttach(protoAttach.AttachID, protoAttach.UserID)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return utils.ProtoAttachByModel(attach), nil
 }

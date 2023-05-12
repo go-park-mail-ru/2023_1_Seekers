@@ -118,8 +118,9 @@ message SearchRecipientsResponse {
 message AttachmentInfo {
   uint64 AttachID = 1;
   string   FileName = 2;
-  bytes FileData = 3 ;
-  string Type = 4;
+  bytes FileData = 3;
+  string S3FName = 4;
+  string Type = 5;
 }
 
 message MessageInfo {
@@ -154,6 +155,11 @@ message SearchMailParams{
   string Filter = 5;
 }
 
+message AttNUser {
+  uint64 AttachID = 1;
+  uint64 UserID = 2;
+}
+
 message Nothing {
   bool dummy = 1;
 }
@@ -180,4 +186,5 @@ service MailService {
   rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
   rpc GetCustomFolders(UID) returns (FoldersResponse) {}
+  rpc GetAttach(AttNUser) returns (AttachmentInfo) {}
 }

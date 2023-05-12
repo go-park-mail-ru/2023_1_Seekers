@@ -263,3 +263,16 @@ func (g MailClientGRPC) GetCustomFolders(userID uint64) ([]models.Folder, error)
 
 	return utils.FoldersModelByProto(protoFolderResp), nil
 }
+
+func (g MailClientGRPC) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	protoAttach, err := g.mailClient.GetAttach(context.TODO(), &mail_proto.AttNUser{
+		AttachID: attachID,
+		UserID:   userID,
+	})
+
+	if err != nil {
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetAttach"))
+	}
+
+	return utils.ModelAttachByProto(protoAttach), nil
+}

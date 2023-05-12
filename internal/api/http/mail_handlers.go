@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -33,6 +34,7 @@ type MailHandlersI interface {
 	EditFolder(w http.ResponseWriter, r *http.Request)
 	MoveToFolder(w http.ResponseWriter, r *http.Request)
 	EditDraft(w http.ResponseWriter, r *http.Request)
+	DownloadAttach(w http.ResponseWriter, r *http.Request)
 }
 
 type mailHandlers struct {
@@ -81,6 +83,9 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 	}
 
 	messages, err := h.uc.GetFolderMessages(userID, folderSlug)
+	//for _, v := range messages {
+	//	fmt.Println("HANDLER ATTACH", v.Attachments)
+	//}
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -735,4 +740,46 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{
 		Message: *message,
 	})
+}
+
+// DownloadAttach godoc
+// @Summary      DownloadAttach
+// @Description  download attach, get attachID, check relation for attach and user
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id} [get]
+func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+	w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
 }

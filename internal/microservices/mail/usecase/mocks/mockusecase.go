@@ -122,6 +122,21 @@ func (mr *MockUseCaseIMockRecorder) EditFolder(userID, folderSlug, form interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditFolder", reflect.TypeOf((*MockUseCaseI)(nil).EditFolder), userID, folderSlug, form)
 }
 
+// GetAttach mocks base method.
+func (m *MockUseCaseI) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttach", attachID, userID)
+	ret0, _ := ret[0].(*models.AttachmentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAttach indicates an expected call of GetAttach.
+func (mr *MockUseCaseIMockRecorder) GetAttach(attachID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttach", reflect.TypeOf((*MockUseCaseI)(nil).GetAttach), attachID, userID)
+}
+
 // GetCustomFolders mocks base method.
 func (m *MockUseCaseI) GetCustomFolders(userID uint64) ([]models.Folder, error) {
 	m.ctrl.T.Helper()

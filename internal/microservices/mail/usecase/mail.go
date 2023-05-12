@@ -101,6 +101,13 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 
 			messages[i].Recipients = append(message.Recipients, *profile)
 		}
+
+		attaches, err := uc.mailRepo.GetMessageAttachments(messageID)
+		if err != nil {
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get message attachments")
+		}
+
+		messages[i].Attachments = attaches
 	}
 
 	return messages, nil
@@ -824,4 +831,20 @@ func (uc *mailUC) GetCustomFolders(userID uint64) ([]models.Folder, error) {
 	}
 
 	return folders, nil
+}
+
+func (uc *mailUC) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	attach, err := uc.mailRepo.GetAttach(attachID, userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get attach")
+	}
+
+	file, err := uc.fileUC.Get(uc.cfg.S3.S3AttachBucket, attach.S3FName)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get data from s3")
+	}
+
+	attach.FileData = file.Data
+
+	return attach, nil
 }

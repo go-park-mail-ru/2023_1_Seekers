@@ -26,4 +26,5 @@ type UseCaseI interface {
 	MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MoveMessageToFolder(userID uint64, messageID uint64, fromFolder string, toFolder string) error
+	GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error)
 }
