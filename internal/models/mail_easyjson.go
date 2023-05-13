@@ -670,6 +670,8 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels6(in *
 			continue
 		}
 		switch key {
+		case "from_user":
+			out.FromUser = string(in.String())
 		case "recipients":
 			if in.IsNull() {
 				in.Skip()
@@ -745,8 +747,13 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels6(out 
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"recipients\":"
+		const prefix string = ",\"from_user\":"
 		out.RawString(prefix[1:])
+		out.String(string(in.FromUser))
+	}
+	{
+		const prefix string = ",\"recipients\":"
+		out.RawString(prefix)
 		if in.Recipients == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {

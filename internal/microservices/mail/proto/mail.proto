@@ -33,16 +33,16 @@ message Attachment {
 }
 
 message Message {
-  repeated string  Recipients = 1;
-  string Title = 2;
-  string Text = 3;
-  UID ReplyToMessageID = 4;
-  repeated Attachment Attachments = 5;
+  string FromUser = 1;
+  repeated string  Recipients = 2;
+  string Title = 3;
+  string Text = 4;
+  UID ReplyToMessageID = 5;
+  repeated Attachment Attachments = 6;
 }
 
 message SendMessageParams {
-  uint64 UID = 1;
-  Message Message = 2;
+  Message Message = 1;
 }
 
 message FailedEmailsParams {

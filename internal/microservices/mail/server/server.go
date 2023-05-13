@@ -114,7 +114,7 @@ func (g *MailServerGRPC) ValidateRecipients(_ context.Context, protoRecipients *
 }
 
 func (g *MailServerGRPC) SendMessage(ctx context.Context, protoParams *mail_proto.SendMessageParams) (*mail_proto.MessageInfo, error) {
-	info, err := g.mailUC.SendMessage(protoParams.UID, utils.MessageModelByProtoSendParams(protoParams))
+	info, err := g.mailUC.SendMessage(utils.MessageModelByProtoSendParams(protoParams))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}

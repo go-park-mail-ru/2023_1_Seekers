@@ -55,6 +55,7 @@ type AttachmentInfo struct {
 }
 
 type FormMessage struct {
+	FromUser         string       `json:"from_user" validate:"required"`
 	Recipients       []string     `json:"recipients" validate:"required"`
 	Title            string       `json:"title"`
 	Text             string       `json:"text"`
