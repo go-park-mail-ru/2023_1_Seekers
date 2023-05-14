@@ -311,11 +311,6 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Println(form.Attachments)
-	//for _, v := range form.Attachments {
-	//	fmt.Println(v)
-	//}
-
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))

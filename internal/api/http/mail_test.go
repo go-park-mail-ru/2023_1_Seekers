@@ -288,6 +288,7 @@ func TestDelivery_SaveDraft(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
+					FromUser:         "max@mailbx.ru",
 					Recipients:       []string{"valera@mailbox.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
@@ -303,6 +304,7 @@ func TestDelivery_SaveDraft(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
+					FromUser:         "test@mailbx.ru",
 					Recipients:       []string{"valera@mailbox.ru", "max@mailbox.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
@@ -628,6 +630,7 @@ func TestDelivery_EditDraft(t *testing.T) {
 				userID:    1,
 				messageID: 1,
 				messageForm: models.FormMessage{
+					FromUser:         "max@mailbx.ru",
 					Recipients:       []string{"valera@mailbox.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
