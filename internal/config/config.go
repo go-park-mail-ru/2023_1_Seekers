@@ -130,6 +130,8 @@ type Config struct {
 		RouteRecipients                    string `yaml:"route_recipients" env-default:"/recipients/search"`
 		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
 		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
+		RouteWS                            string `yaml:"route_ws" env-default:"/ws"`
+		RouteWsQueryEmail                  string `yaml:"route_ws_query_email" env-default:"email"'`
 		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`
 
 		// UserRoutes

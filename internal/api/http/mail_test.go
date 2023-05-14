@@ -222,6 +222,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
+					FromUser:         "max@mailbx.ru",
 					Recipients:       []string{"valera@mailbx.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
@@ -237,6 +238,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 			input: inputCase{
 				userID: 1,
 				messageForm: models.FormMessage{
+					FromUser:         "max@mailbx.ru",
 					Recipients:       []string{"valera@mailbx.ru", "max@mailbx.ru"},
 					Title:            "title test message",
 					Text:             "text test message",
@@ -267,7 +269,7 @@ func TestDelivery_SendMessage(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
-		mailUC.EXPECT().SendMessage(test.input.userID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
+		mailUC.EXPECT().SendMessage(test.input.messageForm).Return(&models.MessageInfo{}, nil)
 
 		mailH.SendMessage(w, r)
 

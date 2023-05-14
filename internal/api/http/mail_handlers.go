@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -35,17 +36,24 @@ type MailHandlersI interface {
 	MoveToFolder(w http.ResponseWriter, r *http.Request)
 	EditDraft(w http.ResponseWriter, r *http.Request)
 	DownloadAttach(w http.ResponseWriter, r *http.Request)
+	WSMessageHandler(w http.ResponseWriter, r *http.Request)
+	//File(w http.ResponseWriter, r *http.Request)
 }
 
 type mailHandlers struct {
 	cfg *config.Config
 	uc  mail.UseCaseI
+	hub *ws.Hub
 }
 
 func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
+	hub := ws.NewHub()
+	go hub.Run()
+
 	return &mailHandlers{
 		cfg: c,
 		uc:  uc,
+		hub: hub,
 	}
 }
 
@@ -285,7 +293,7 @@ func (h *mailHandlers) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /message/send [post]
 func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	_, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -319,7 +327,7 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	validEmails, invalidEmails := h.uc.ValidateRecipients(form.Recipients)
 	form.Recipients = validEmails
 
-	message, err := h.uc.SendMessage(userID, form)
+	message, err := h.uc.SendMessage(form)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -780,3 +788,14 @@ func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *mailHandlers) WSMessageHandler(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get(h.cfg.Routes.RouteWsQueryEmail)
+	ws.ServeWs(w, r, email, h.hub, h.uc)
+
+	w.Header().Set("Upgrade", "websocket")
+}
+
+//func (h *mailHandlers) File(w http.ResponseWriter, r *http.Request) {
+//	http.ServeFile(w, r, "cmd/index.html")
+//}

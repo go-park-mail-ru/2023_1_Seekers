@@ -188,6 +188,7 @@ func TestRepository_SelectFolderMessagesByUserNFolderID(t *testing.T) {
 		fakeMessages[i].FromUser.LastName = ""
 		fakeMessages[i].ReplyTo = nil
 		fakeMessages[i].Attachments = nil
+		fakeMessages[i].AttachmentsSize = ""
 	}
 
 	userID := uint64(1)
@@ -377,6 +378,7 @@ func TestRepository_SelectMessageByUserNMessage(t *testing.T) {
 	fakeMessage.FromUser.LastName = ""
 	fakeMessage.ReplyTo = nil
 	fakeMessage.Attachments = nil
+	fakeMessage.AttachmentsSize = ""
 
 	userID := uint64(1)
 	messageID := uint64(1)

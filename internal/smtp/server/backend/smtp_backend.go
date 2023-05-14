@@ -180,13 +180,14 @@ func (s *Session) Data(r io.Reader) error {
 
 	if batchRecipients != nil {
 		message := models.FormMessage{
+			FromUser:         fromUser.Email,
 			Recipients:       batchRecipients,
 			Title:            msgData.Subject,
 			Text:             msgData.Body,
 			ReplyToMessageID: nil,
 		}
 
-		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
+		_, err = s.mailClient.SendMessage(message)
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}

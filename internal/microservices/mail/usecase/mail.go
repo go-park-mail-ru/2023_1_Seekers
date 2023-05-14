@@ -566,26 +566,26 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	return uc.GetMessage(fromUserID, messageID)
 }
 
-func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) SendMessage(message models.FormMessage) (*models.MessageInfo, error) {
 	if len(message.Recipients) == 0 {
 		return nil, pkgErrors.WithMessage(errors.ErrNoValidEmails, "send message")
 	}
 
 	var user2folder []models.User2Folder
 
-	fromUser, err := uc.userUC.GetByID(fromUserID)
+	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message")
 	}
 
 	if !fromUser.IsExternal {
-		folder, err := uc.GetFolderInfo(fromUserID, "outbox")
+		folder, err := uc.GetFolderInfo(fromUser.UserID, "outbox")
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 		}
 
 		user2folder = append(user2folder, models.User2Folder{
-			UserID:   fromUserID,
+			UserID:   fromUser.UserID,
 			FolderID: folder.FolderID,
 		})
 	}
@@ -649,7 +649,7 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		}
 	}
 
-	err = uc.mailRepo.InsertMessage(fromUserID, &newMessage, user2folder)
+	err = uc.mailRepo.InsertMessage(fromUser.UserID, &newMessage, user2folder)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : insert message")
 	}
@@ -664,7 +664,7 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		}
 	}
 
-	return uc.GetMessage(fromUserID, newMessage.MessageID)
+	return uc.GetMessage(fromUser.UserID, newMessage.MessageID)
 }
 
 func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
@@ -698,7 +698,8 @@ func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) error {
 		return pkgErrors.Wrap(err, "send support message : get support account")
 	}
 
-	_, err = uc.SendMessage(supportAccount.UserID, message)
+	message.FromUser = supportAccount.Email
+	_, err = uc.SendMessage(message)
 	return err
 }
 

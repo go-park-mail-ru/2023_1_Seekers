@@ -173,6 +173,7 @@ func MessageModelByProto(protoMsg *mail_proto.Message) models.FormMessage {
 	}
 
 	return models.FormMessage{
+		FromUser:         protoMsg.FromUser,
 		Recipients:       protoMsg.Recipients,
 		Title:            protoMsg.Title,
 		Text:             protoMsg.Text,
@@ -185,7 +186,7 @@ func MessageModelByProtoSendParams(protoParams *mail_proto.SendMessageParams) mo
 	return MessageModelByProto(protoParams.Message)
 }
 
-func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_proto.SendMessageParams {
+func ProtoSendParamsByUIDNMessage(form *models.FormMessage) *mail_proto.SendMessageParams {
 	var replyMessageID *mail_proto.UID = nil
 	if form.ReplyToMessageID != nil {
 		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
@@ -200,8 +201,8 @@ func ProtoSendParamsByUIDNMessage(uID uint64, form *models.FormMessage) *mail_pr
 	}
 
 	return &mail_proto.SendMessageParams{
-		UID: uID,
 		Message: &mail_proto.Message{
+			FromUser:         form.FromUser,
 			Recipients:       form.Recipients,
 			Title:            form.Title,
 			Text:             form.Text,

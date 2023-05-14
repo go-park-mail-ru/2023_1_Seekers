@@ -215,12 +215,13 @@ func TestUseCase_GetFolderMessages(t *testing.T) {
 
 	output := outputCase{
 		content: []models.MessageInfo{{
-			MessageID:  mockFolderMessagesResponse[0].MessageID,
-			FromUser:   mockUserResponse[0],
-			Recipients: append([]models.UserInfo{}, mockUserResponse[1]),
-			Title:      mockFolderMessagesResponse[0].Title,
-			CreatedAt:  mockFolderMessagesResponse[0].CreatedAt,
-			Text:       mockFolderMessagesResponse[0].Text,
+			MessageID:       mockFolderMessagesResponse[0].MessageID,
+			FromUser:        mockUserResponse[0],
+			Recipients:      append([]models.UserInfo{}, mockUserResponse[1]),
+			Title:           mockFolderMessagesResponse[0].Title,
+			CreatedAt:       mockFolderMessagesResponse[0].CreatedAt,
+			Text:            mockFolderMessagesResponse[0].Text,
+			AttachmentsSize: "0 Б",
 		}},
 		err: nil,
 	}
@@ -439,12 +440,13 @@ func TestUseCase_GetMessage(t *testing.T) {
 
 	output := outputCase{
 		content: &models.MessageInfo{
-			MessageID:  messageID,
-			FromUser:   mockUserResponse[0],
-			Recipients: append([]models.UserInfo{}, mockUserResponse[1]),
-			Title:      mockMessageResponse.Title,
-			CreatedAt:  mockMessageResponse.CreatedAt,
-			Text:       mockMessageResponse.Text,
+			MessageID:       messageID,
+			FromUser:        mockUserResponse[0],
+			Recipients:      append([]models.UserInfo{}, mockUserResponse[1]),
+			Title:           mockMessageResponse.Title,
+			CreatedAt:       mockMessageResponse.CreatedAt,
+			Text:            mockMessageResponse.Text,
+			AttachmentsSize: "0 Б",
 		},
 		err: nil,
 	}
@@ -662,13 +664,14 @@ func TestUseCase_EditDraft(t *testing.T) {
 	messageID := uint64(1)
 
 	mockMessageResponse := &models.MessageInfo{
-		FromUser:   models.UserInfo{UserID: 2},
-		MessageID:  messageID,
-		Recipients: nil,
-		Title:      "test",
-		CreatedAt:  pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
-		Text:       "test text",
-		IsDraft:    true,
+		FromUser:        models.UserInfo{UserID: 2},
+		MessageID:       messageID,
+		Recipients:      nil,
+		Title:           "test",
+		CreatedAt:       pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
+		Text:            "test text",
+		IsDraft:         true,
+		AttachmentsSize: "0 Б",
 	}
 	mockUserResponse := []models.UserInfo{
 		{
@@ -712,6 +715,7 @@ func TestUseCase_EditDraft(t *testing.T) {
 
 	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageID).Return(mockMessageResponse, nil).AnyTimes()
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil).AnyTimes()
+	mailRepo.EXPECT().GetMessageAttachments(messageID).Return(nil, nil).AnyTimes()
 	mailRepo.EXPECT().SelectRecipientsByMessage(messageID, mockUserResponse[0].UserID).
 		Return(mockRecipientsResponse, nil).AnyTimes()
 	userUC.EXPECT().GetInfo(mockRecipientsResponse[0]).Return(&mockUserResponse[1], nil).AnyTimes()
