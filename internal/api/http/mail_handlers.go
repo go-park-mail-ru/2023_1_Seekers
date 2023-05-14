@@ -329,17 +329,20 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(invalidEmails) != 0 {
-		err = h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
-
+		failedMessage, err := h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
 		if err != nil {
 			pkgHttp.HandleError(w, r, err)
 			return
 		}
+
+		h.hub.SendNotifications(failedMessage)
 	}
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{
 		Message: *message,
 	})
+
+	h.hub.SendNotifications(message)
 }
 
 // SaveDraft godoc
@@ -786,7 +789,7 @@ func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
 
 func (h *mailHandlers) WSMessageHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get(h.cfg.Routes.RouteWsQueryEmail)
-	ws.ServeWs(w, r, email, h.hub, h.uc)
+	ws.ServeWs(w, r, email, h.hub)
 
 	w.Header().Set("Upgrade", "websocket")
 }

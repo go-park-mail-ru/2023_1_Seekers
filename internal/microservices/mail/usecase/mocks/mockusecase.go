@@ -302,11 +302,12 @@ func (mr *MockUseCaseIMockRecorder) SearchRecipients(userID interface{}) *gomock
 }
 
 // SendFailedSendingMessage mocks base method.
-func (m *MockUseCaseI) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
+func (m *MockUseCaseI) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendFailedSendingMessage", recipientEmail, invalidEmails)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*models.MessageInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SendFailedSendingMessage indicates an expected call of SendFailedSendingMessage.

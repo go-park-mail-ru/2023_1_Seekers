@@ -1,5 +1,7 @@
 package ws
 
+import "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+
 type Subscription struct {
 	conn      *connection
 	UserEmail string
@@ -60,5 +62,20 @@ func (h *Hub) Run() {
 				}
 			}
 		}
+	}
+}
+
+func (h *Hub) SendNotifications(message *models.MessageInfo) {
+	item := WsItem{
+		messageInfo: *message,
+		userEmail:   message.FromUser.Email,
+	}
+
+	h.broadcast <- item
+	item.messageInfo.Seen = false
+
+	for _, recipient := range item.messageInfo.Recipients {
+		item.userEmail = recipient.Email
+		h.broadcast <- item
 	}
 }

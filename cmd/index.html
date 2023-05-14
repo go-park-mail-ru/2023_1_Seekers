@@ -6,7 +6,7 @@
         window.onload = function () {
             let conn;
 
-            let email = "gena@mailbx.ru"
+            let email = "test@mailbx.ru"
 
             document.getElementById("header").innerHTML = "Login by " + email
             let recipient = document.getElementById("recipient")
@@ -23,19 +23,33 @@
             }
 
             document.getElementById("form").onsubmit = function () {
-                if (!conn) {
-                    return false;
-                }
-                if (!text.value) {
-                    return false;
-                }
-                conn.send(JSON.stringify({
-                    from_user: email,
-                    recipients: recipient.value.split(','),
-                    title: title.value,
-                    text: text.value,
-                }));
-                text.value = "";
+                console.log(1111)
+                const request = new Request(
+                    "http://" + document.location.host + '/api/v1/message/send',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(
+                            {
+                                from_user: email,
+                                recipients: recipient.value.split(','),
+                                title: title.value,
+                                text: text.value,
+                            }
+                        )
+                    }
+                )
+
+                fetch(request).then(
+                    response_raw => response_raw.json().then(
+                        response_json => {
+                            console.log(response_json)
+                        }
+                    )
+                )
                 return false;
             };
 

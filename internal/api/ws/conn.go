@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"net/http"
 	"time"
@@ -34,55 +33,6 @@ type connection struct {
 	send chan WsItem
 }
 
-func (s Subscription) readPump(hub *Hub, mailUC mail.UseCaseI) {
-	c := s.conn
-	defer func() {
-		hub.unregister <- s
-		c.ws.Close()
-	}()
-
-	c.ws.SetReadLimit(maxMessageSize)
-	if err := c.ws.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-		return
-	}
-	c.ws.SetPongHandler(func(string) error {
-		if err := c.ws.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-			return nil
-		}
-		return nil
-	})
-	for {
-		var form models.FormMessage
-
-		err := c.ws.ReadJSON(&form)
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				//log.Printf("error: %v", err)
-			}
-
-			break
-		}
-
-		message, err := mailUC.SendMessage(form)
-		if err != nil {
-			return
-		}
-
-		item := WsItem{
-			messageInfo: *message,
-			userEmail:   message.FromUser.Email,
-		}
-
-		hub.broadcast <- item
-		item.messageInfo.Seen = false
-
-		for _, recipient := range item.messageInfo.Recipients {
-			item.userEmail = recipient.Email
-			hub.broadcast <- item
-		}
-	}
-}
-
 func (c *connection) write(msg models.MessageInfo) error {
 	if err := c.ws.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 		return c.ws.WriteJSON(msg)
@@ -98,7 +48,7 @@ func (c *connection) writeType(mt int) error {
 	return c.ws.WriteMessage(mt, []byte{})
 }
 
-func (s Subscription) writePump(_ *Hub) {
+func (s Subscription) writePump() {
 	c := s.conn
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -127,7 +77,7 @@ func (s Subscription) writePump(_ *Hub) {
 	}
 }
 
-func ServeWs(w http.ResponseWriter, r *http.Request, userEmail string, hub *Hub, mailUC mail.UseCaseI) {
+func ServeWs(w http.ResponseWriter, r *http.Request, userEmail string, hub *Hub) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		//log.Println(err.Error())
@@ -144,6 +94,5 @@ func ServeWs(w http.ResponseWriter, r *http.Request, userEmail string, hub *Hub,
 	}
 	hub.register <- sub
 
-	go sub.writePump(hub)
-	go sub.readPump(hub, mailUC)
+	go sub.writePump()
 }

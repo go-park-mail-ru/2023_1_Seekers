@@ -177,7 +177,7 @@ service MailService {
   rpc GetMessage(UIDMessageID) returns (MessageInfo) {}
   rpc ValidateRecipients(Recipients) returns (ValidateRecipientsResponse) {}
   rpc SendMessage(SendMessageParams) returns (MessageInfo) {}
-  rpc SendFailedSendingMessage(FailedEmailsParams) returns (Nothing) {}
+  rpc SendFailedSendingMessage(FailedEmailsParams) returns (MessageInfo) {}
   rpc SendWelcomeMessage(RecipientEmail) returns (Nothing) {}
   rpc MarkMessageAsSeen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
   rpc MarkMessageAsUnseen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
