@@ -83,9 +83,6 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 	}
 
 	messages, err := h.uc.GetFolderMessages(userID, folderSlug)
-	//for _, v := range messages {
-	//	fmt.Println("HANDLER ATTACH", v.Attachments)
-	//}
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return

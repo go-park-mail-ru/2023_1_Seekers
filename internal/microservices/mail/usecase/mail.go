@@ -348,6 +348,12 @@ func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageIn
 		replyToMsgID = curMessage.ReplyToMessageID
 		prevMessage = curMessage
 	}
+	attaches, err := uc.mailRepo.GetMessageAttachments(messageID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get folder messages : get message attachments")
+	}
+
+	firstMessage.Attachments = attaches
 
 	return firstMessage, nil
 }
