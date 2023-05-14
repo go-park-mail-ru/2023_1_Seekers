@@ -35,21 +35,25 @@ func ProtoByUserInfo(info models.UserInfo) *mail_proto.UserInfo {
 
 func ModelAttachByProto(attach *mail_proto.AttachmentInfo) *models.AttachmentInfo {
 	return &models.AttachmentInfo{
-		AttachID: attach.AttachID,
-		FileName: attach.FileName,
-		FileData: attach.FileData,
-		Type:     attach.Type,
-		S3FName:  attach.S3FName,
+		AttachID:  attach.AttachID,
+		FileName:  attach.FileName,
+		FileData:  attach.FileData,
+		Type:      attach.Type,
+		S3FName:   attach.S3FName,
+		SizeCount: attach.SizeCount,
+		SizeStr:   attach.SizeStr,
 	}
 }
 
 func ProtoAttachByModel(info *models.AttachmentInfo) *mail_proto.AttachmentInfo {
 	return &mail_proto.AttachmentInfo{
-		AttachID: info.AttachID,
-		FileName: info.FileName,
-		FileData: info.FileData,
-		Type:     info.Type,
-		S3FName:  info.S3FName,
+		AttachID:  info.AttachID,
+		FileName:  info.FileName,
+		FileData:  info.FileData,
+		Type:      info.Type,
+		S3FName:   info.S3FName,
+		SizeCount: info.SizeCount,
+		SizeStr:   info.SizeStr,
 	}
 }
 
@@ -87,6 +91,7 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Favorite:         info.Favorite,
 		Deleted:          info.Deleted,
 		Attachments:      protoAttaches,
+		AttachmentsSize:  info.AttachmentsSize,
 	}
 }
 
@@ -140,6 +145,7 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		Favorite:         protoMessageInfo.Favorite,
 		Deleted:          protoMessageInfo.Deleted,
 		Attachments:      attaches,
+		AttachmentsSize:  protoMessageInfo.AttachmentsSize,
 	}
 }
 

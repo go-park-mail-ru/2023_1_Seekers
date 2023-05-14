@@ -421,6 +421,8 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels4(in *
 				}
 				in.Delim(']')
 			}
+		case "attachmentsSize":
+			out.AttachmentsSize = string(in.String())
 		case "title":
 			out.Title = string(in.String())
 		case "created_at":
@@ -498,6 +500,11 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels4(out 
 			}
 			out.RawByte(']')
 		}
+	}
+	{
+		const prefix string = ",\"attachmentsSize\":"
+		out.RawString(prefix)
+		out.String(string(in.AttachmentsSize))
 	}
 	{
 		const prefix string = ",\"title\":"
@@ -1216,6 +1223,10 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels11(in 
 			out.FileName = string(in.String())
 		case "type":
 			out.Type = string(in.String())
+		case "sizeStr":
+			out.SizeStr = string(in.String())
+		case "sizeCount":
+			out.SizeCount = int64(in.Int64())
 		default:
 			in.SkipRecursive()
 		}
@@ -1244,6 +1255,16 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels11(out
 		const prefix string = ",\"type\":"
 		out.RawString(prefix)
 		out.String(string(in.Type))
+	}
+	{
+		const prefix string = ",\"sizeStr\":"
+		out.RawString(prefix)
+		out.String(string(in.SizeStr))
+	}
+	{
+		const prefix string = ",\"sizeCount\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.SizeCount))
 	}
 	out.RawByte('}')
 }

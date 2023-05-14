@@ -106,8 +106,13 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 		if err != nil {
 			return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get message attachments")
 		}
+		var sumSize int64 = 0
+		for _, v := range attaches {
+			sumSize += v.SizeCount
+		}
 
 		messages[i].Attachments = attaches
+		messages[i].AttachmentsSize = common.ByteSize2Str(sumSize)
 	}
 
 	return messages, nil
@@ -352,9 +357,13 @@ func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageIn
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get folder messages : get message attachments")
 	}
+	var sumSize int64 = 0
+	for _, v := range attaches {
+		sumSize += v.SizeCount
+	}
 
 	firstMessage.Attachments = attaches
-
+	firstMessage.AttachmentsSize = common.ByteSize2Str(sumSize)
 	return firstMessage, nil
 }
 
@@ -589,12 +598,19 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		}
 
 		contentType := http.DetectContentType(raw)
+		fileSize := int64(len(raw))
 		attachesInfo[i] = models.AttachmentInfo{
-			FileName: a.FileName,
-			FileData: raw,
-			S3FName:  rand.FileName("", filepath.Ext(a.FileName)),
-			Type:     contentType,
+			FileName:  a.FileName,
+			FileData:  raw,
+			S3FName:   rand.FileName("", filepath.Ext(a.FileName)),
+			Type:      contentType,
+			SizeStr:   common.ByteSize2Str(fileSize),
+			SizeCount: fileSize,
 		}
+	}
+	var sumSize int64 = 0
+	for _, v := range attachesInfo {
+		sumSize += v.SizeCount
 	}
 
 	newMessage := models.MessageInfo{
@@ -602,6 +618,7 @@ func (uc *mailUC) SendMessage(fromUserID uint64, message models.FormMessage) (*m
 		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
 		Text:             message.Text,
 		Attachments:      attachesInfo,
+		AttachmentsSize:  common.ByteSize2Str(sumSize),
 		ReplyToMessageID: message.ReplyToMessageID,
 	}
 

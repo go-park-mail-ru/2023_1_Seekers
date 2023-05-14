@@ -32,7 +32,7 @@ CREATE TABLE mail.folders
 
     CONSTRAINT check_non_empty_name CHECK (
         name != ''
-) ,
+        ),
     CONSTRAINT check_folder_id_natural CHECK (folder_id > 0),
     CONSTRAINT pk_folders PRIMARY KEY (folder_id),
     CONSTRAINT fk_folders_user_id_users FOREIGN KEY (user_id)
@@ -40,10 +40,10 @@ CREATE TABLE mail.folders
 );
 
 CREATE TYPE mail.recipient AS
-    (
-    name text,
+(
+    name  text,
     email text
-    );
+);
 
 CREATE TABLE mail.messages
 (
@@ -70,11 +70,14 @@ CREATE TABLE mail.messages
 
 CREATE TABLE mail.attaches
 (
-    attach_id bigserial NOT NULL,
-    message_id bigint  NOT NULL,
-    type text,
-    filename text,
-    s3_fname text,
+    attach_id  bigserial NOT NULL,
+    message_id bigint    NOT NULL,
+    type       text,
+    filename   text,
+    s3_fname   text,
+    size_str   text,
+    size_count bigint,
+
 
     CONSTRAINT pk_attaches PRIMARY KEY (attach_id),
     CONSTRAINT fk_attaches_messages_message_id FOREIGN KEY (message_id)
@@ -103,27 +106,28 @@ CREATE TABLE mail.boxes
 
 -- триггер на увеличение непрочитанного и общего числа сообщений
 CREATE
-OR REPLACE FUNCTION increment_count_messages()
+    OR REPLACE FUNCTION increment_count_messages()
     RETURNS TRIGGER
 AS
 $BODY$
 BEGIN
-UPDATE mail.folders
-SET messages_count  =
-        CASE
-            WHEN local_name = 'drafts' OR NEW.is_draft = false THEN messages_count + 1
-            ELSE messages_count
-            END,
-    messages_unseen =
+    UPDATE mail.folders
+    SET messages_count  =
             CASE
-                WHEN local_name != 'outbox' AND (local_name = 'drafts' OR NEW.is_draft = false) AND NEW.seen = false THEN messages_unseen + 1
+                WHEN local_name = 'drafts' OR NEW.is_draft = false THEN messages_count + 1
+                ELSE messages_count
+                END,
+        messages_unseen =
+            CASE
+                WHEN local_name != 'outbox' AND (local_name = 'drafts' OR NEW.is_draft = false) AND NEW.seen = false
+                    THEN messages_unseen + 1
                 ELSE messages_unseen
-END
-WHERE folders.folder_id = NEW.folder_id;
-RETURN NEW;
+                END
+    WHERE folders.folder_id = NEW.folder_id;
+    RETURN NEW;
 END;
 $BODY$
-LANGUAGE plpgsql;
+    LANGUAGE plpgsql;
 
 
 -- срабатывает после вставки записей в boxes
@@ -131,27 +135,27 @@ CREATE TRIGGER inc_cnt_after_ins_box
     AFTER INSERT
     ON mail.boxes
     FOR EACH ROW
-    EXECUTE PROCEDURE increment_count_messages();
+EXECUTE PROCEDURE increment_count_messages();
 
 
 -- триггер на изменение (+1 или -1) количества непрочитанных сообщений при прочитывании (или наоборот) сообщения
 CREATE
-OR REPLACE FUNCTION update_count_messages_after_seen()
+    OR REPLACE FUNCTION update_count_messages_after_seen()
     RETURNS TRIGGER
 AS
 $BODY$
 BEGIN
-UPDATE mail.folders
-SET messages_unseen =
-        CASE
-            WHEN NEW.seen = true THEN messages_unseen - 1
-            ELSE messages_unseen + 1
-            END
-WHERE folders.folder_id = NEW.folder_id;
-RETURN NEW;
+    UPDATE mail.folders
+    SET messages_unseen =
+            CASE
+                WHEN NEW.seen = true THEN messages_unseen - 1
+                ELSE messages_unseen + 1
+                END
+    WHERE folders.folder_id = NEW.folder_id;
+    RETURN NEW;
 END;
 $BODY$
-LANGUAGE plpgsql;
+    LANGUAGE plpgsql;
 
 -- срабатывает после обновления столбца seen в boxes
 CREATE TRIGGER update_cnt_after_update_seen
@@ -163,32 +167,32 @@ EXECUTE PROCEDURE update_count_messages_after_seen();
 
 -- триггер на изменение (+1 или -1) количества непрочитанных сообщений при переносе сообщения в другую папку
 CREATE
-OR REPLACE FUNCTION update_count_messages_after_move()
+    OR REPLACE FUNCTION update_count_messages_after_move()
     RETURNS TRIGGER
 AS
 $BODY$
 BEGIN
-UPDATE mail.folders
-SET messages_count  = messages_count + 1,
-    messages_unseen =
-        CASE
-            WHEN NEW.seen = false THEN messages_unseen + 1
-            ELSE messages_unseen
-            END
-WHERE folders.folder_id = NEW.folder_id;
+    UPDATE mail.folders
+    SET messages_count  = messages_count + 1,
+        messages_unseen =
+            CASE
+                WHEN NEW.seen = false THEN messages_unseen + 1
+                ELSE messages_unseen
+                END
+    WHERE folders.folder_id = NEW.folder_id;
 
-UPDATE mail.folders
-SET messages_count  = messages_count - 1,
-    messages_unseen =
-        CASE
-            WHEN OLD.seen = false THEN messages_unseen - 1
-            ELSE messages_unseen
-            END
-WHERE folders.folder_id = OLD.folder_id;
-RETURN NEW;
+    UPDATE mail.folders
+    SET messages_count  = messages_count - 1,
+        messages_unseen =
+            CASE
+                WHEN OLD.seen = false THEN messages_unseen - 1
+                ELSE messages_unseen
+                END
+    WHERE folders.folder_id = OLD.folder_id;
+    RETURN NEW;
 END;
 $BODY$
-LANGUAGE plpgsql;
+    LANGUAGE plpgsql;
 
 -- срабатывает после обновления столбца folder_id в boxes
 CREATE TRIGGER update_cnt_after_update_move
@@ -200,38 +204,38 @@ EXECUTE PROCEDURE update_count_messages_after_move();
 
 -- триггер по уменьшению количества сообщение после удаления
 CREATE
-OR REPLACE FUNCTION update_count_messages_after_delete()
+    OR REPLACE FUNCTION update_count_messages_after_delete()
     RETURNS TRIGGER
 AS
 $BODY$
 BEGIN
-UPDATE mail.folders
-SET messages_count  =
-        CASE
-            WHEN local_name = 'drafts' OR OLD.is_draft = false THEN messages_count - 1
-            ELSE messages_count
-            END,
-    messages_unseen =
-        CASE
-            WHEN OLD.seen = false AND (local_name = 'drafts' OR OLD.is_draft = false) THEN messages_unseen - 1
-            ELSE messages_unseen
-            END
-WHERE folders.folder_id = OLD.folder_id;
-RETURN NEW;
+    UPDATE mail.folders
+    SET messages_count  =
+            CASE
+                WHEN local_name = 'drafts' OR OLD.is_draft = false THEN messages_count - 1
+                ELSE messages_count
+                END,
+        messages_unseen =
+            CASE
+                WHEN OLD.seen = false AND (local_name = 'drafts' OR OLD.is_draft = false) THEN messages_unseen - 1
+                ELSE messages_unseen
+                END
+    WHERE folders.folder_id = OLD.folder_id;
+    RETURN NEW;
 END;
 $BODY$
-LANGUAGE plpgsql;
+    LANGUAGE plpgsql;
 
 -- срабатывает после удаления столбца записи из boxes
 CREATE TRIGGER update_cnt_after_delete
     AFTER DELETE
     ON mail.boxes
     FOR EACH ROW
-    EXECUTE PROCEDURE update_count_messages_after_delete();
+EXECUTE PROCEDURE update_count_messages_after_delete();
 
 -- для поиска сообщений по тексту, получателю и отправителю
 CREATE
-OR REPLACE FUNCTION get_messages(from_id bigint, from_email text, to_email text, folder text, filter_text text)
+    OR REPLACE FUNCTION get_messages(from_id bigint, from_email text, to_email text, folder text, filter_text text)
     RETURNS TABLE
             (
                 id bigint
@@ -239,7 +243,7 @@ OR REPLACE FUNCTION get_messages(from_id bigint, from_email text, to_email text,
 AS
 $$
 BEGIN
-RETURN QUERY(SELECT messages.message_id --, messages.text, messages.title, boxes.user_id, users.email
+    RETURN QUERY (SELECT messages.message_id --, messages.text, messages.title, boxes.user_id, users.email
                   from mail.messages
                            JOIN mail.folders on folders.user_id = from_id
                            JOIN mail.boxes
@@ -253,14 +257,14 @@ RETURN QUERY(SELECT messages.message_id --, messages.text, messages.title, boxes
                     AND (email ilike '%' || filter_text || '%'
                       OR title ilike '%' || filter_text || '%'
                       OR text ilike '%' || filter_text || '%')
-    ORDER BY messages.message_id DESC);
+                  ORDER BY messages.message_id DESC);
 end
 $$
-language 'plpgsql';
+    language 'plpgsql';
 
 -- для поиска получателей для конкретного пользователя, сначала недавние
 CREATE
-OR REPLACE FUNCTION get_recipes(from_id bigint)
+    OR REPLACE FUNCTION get_recipes(from_id bigint)
     RETURNS TABLE
             (
                 user_id    bigint,
@@ -270,9 +274,10 @@ OR REPLACE FUNCTION get_recipes(from_id bigint)
             )
 AS
 $$
-#variable_conflict use_column
+    # variable_conflict use_column
 BEGIN
-RETURN QUERY(SELECT user_id, first_name, last_name, email FROM (select DISTINCT on (users.user_id) users.user_id,
+    RETURN QUERY (SELECT user_id, first_name, last_name, email
+                  FROM (select DISTINCT on (users.user_id) users.user_id,
                                                            users.first_name,
                                                            users.last_name,
                                                            users.email,
@@ -285,4 +290,4 @@ RETURN QUERY(SELECT user_id, first_name, last_name, email FROM (select DISTINCT 
                   order by all_recipes.message_id desc);
 end
 $$
-language 'plpgsql';
+    language 'plpgsql';

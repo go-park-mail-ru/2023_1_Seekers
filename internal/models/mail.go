@@ -21,6 +21,7 @@ type MessageInfo struct {
 	FromUser         UserInfo         `json:"from_user_id" gorm:"embedded;embeddedPrefix:from_"`
 	Recipients       []UserInfo       `json:"recipients" gorm:"-"`
 	Attachments      []AttachmentInfo `json:"attachments" gorm:"-"`
+	AttachmentsSize  string           `json:"attachmentsSize" gorm:"-"`
 	Title            string           `json:"title"`
 	CreatedAt        string           `json:"created_at"`
 	Text             string           `json:"text"`
@@ -47,11 +48,13 @@ type Attachment struct {
 }
 
 type AttachmentInfo struct {
-	AttachID uint64 `json:"attachID"`
-	FileName string `json:"fileName"`
-	FileData []byte `json:"-"`
-	S3FName  string `json:"-"`
-	Type     string `json:"type"`
+	AttachID  uint64 `json:"attachID"`
+	FileName  string `json:"fileName"`
+	FileData  []byte `json:"-"`
+	S3FName   string `json:"-"`
+	Type      string `json:"type"`
+	SizeStr   string `json:"sizeStr"`
+	SizeCount int64  `json:"sizeCount"`
 }
 
 type FormMessage struct {

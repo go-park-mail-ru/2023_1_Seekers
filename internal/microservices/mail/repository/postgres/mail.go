@@ -237,7 +237,7 @@ func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *mode
 
 	for _, v := range message.Attachments {
 		var attachID uint64
-		tx = tx.Raw("INSERT INTO mail.attaches(message_id, type, filename, s3_fname) VALUES ($1, $2, $3, $4) RETURNING attach_id;", convMsg.MessageID, v.Type, v.FileName, v.S3FName).Scan(&attachID)
+		tx = tx.Raw("INSERT INTO mail.attaches(message_id, type, filename, s3_fname, size_str, size_count) VALUES ($1, $2, $3, $4, $5, $6) RETURNING attach_id;", convMsg.MessageID, v.Type, v.FileName, v.S3FName, v.SizeStr, v.SizeCount).Scan(&attachID)
 		if err := tx.Error; err != nil {
 			return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 		}
@@ -390,13 +390,15 @@ func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, old
 
 func (m mailRepository) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
 	type Result struct {
-		Type     string
-		Filename string
-		S3FName  string `gorm:"column:s3_fname"`
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
 	}
 	var res Result
 
-	tx := m.db.Raw("SELECT type, filename, s3_fname from mail.attaches "+
+	tx := m.db.Raw("SELECT type, filename, s3_fname, size_str, size_count from mail.attaches "+
 		"JOIN mail.boxes b on attaches.message_id = b.message_id "+
 		"WHERE attach_id = $1 AND user_id = $2;", attachID, userID).Scan(&res)
 	if err := tx.Error; err != nil {
@@ -404,23 +406,27 @@ func (m mailRepository) GetAttach(attachID, userID uint64) (*models.AttachmentIn
 	}
 
 	return &models.AttachmentInfo{
-		AttachID: attachID,
-		FileName: res.Filename,
-		S3FName:  res.S3FName,
-		Type:     res.Type,
+		AttachID:  attachID,
+		FileName:  res.Filename,
+		S3FName:   res.S3FName,
+		Type:      res.Type,
+		SizeStr:   res.SizeStr,
+		SizeCount: res.SizeCount,
 	}, nil
 }
 
 func (m mailRepository) GetMessageAttachments(messageID uint64) ([]models.AttachmentInfo, error) {
 	type Result struct {
-		AttachID uint64
-		Type     string
-		Filename string
-		S3FName  string `gorm:"column:s3_fname"`
+		AttachID  uint64
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
 	}
 	var res []Result
 
-	tx := m.db.Raw("SELECT attach_id, type, filename, s3_fname from mail.attaches "+
+	tx := m.db.Raw("SELECT attach_id, type, filename, s3_fname, size_str, size_count from mail.attaches "+
 		"JOIN mail.messages m on attaches.message_id = m.message_id "+
 		"WHERE m.message_id = $1;", messageID).Scan(&res)
 	if err := tx.Error; err != nil {
@@ -430,10 +436,12 @@ func (m mailRepository) GetMessageAttachments(messageID uint64) ([]models.Attach
 	response := make([]models.AttachmentInfo, len(res))
 	for i, v := range res {
 		response[i] = models.AttachmentInfo{
-			AttachID: v.AttachID,
-			FileName: v.Filename,
-			S3FName:  v.S3FName,
-			Type:     v.Type,
+			AttachID:  v.AttachID,
+			FileName:  v.Filename,
+			S3FName:   v.S3FName,
+			Type:      v.Type,
+			SizeStr:   v.SizeStr,
+			SizeCount: v.SizeCount,
 		}
 	}
 	return response, nil

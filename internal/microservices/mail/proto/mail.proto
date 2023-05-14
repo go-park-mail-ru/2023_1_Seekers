@@ -121,6 +121,8 @@ message AttachmentInfo {
   bytes FileData = 3;
   string S3FName = 4;
   string Type = 5;
+  string SizeStr = 6;
+  int64  SizeCount = 7;
 }
 
 message MessageInfo {
@@ -136,6 +138,7 @@ message MessageInfo {
   bool Favorite = 10;
   bool Deleted = 11;
   repeated AttachmentInfo Attachments = 12;
+  string  AttachmentsSize = 13;
 }
 
 message ValidateRecipientsResponse {

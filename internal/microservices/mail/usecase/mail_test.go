@@ -462,6 +462,7 @@ func TestUseCase_GetMessage(t *testing.T) {
 	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
 	mailRepo.EXPECT().SelectRecipientsByMessage(messageID, mockUserResponse[0].UserID).
 		Return(mockRecipientsResponse, nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageID).Return(nil, nil)
 	userUC.EXPECT().GetInfo(mockRecipientsResponse[0]).Return(&mockUserResponse[1], nil)
 
 	response, err := mailH.GetMessage(userID, messageID)
@@ -576,19 +577,19 @@ func TestUseCase_SaveDraft(t *testing.T) {
 
 	var formMessage models.FormMessage
 	generateFakeData(&formMessage)
-	formMessage.Recipients = []string{"max@mailbox.ru"}
+	formMessage.Recipients = []string{"max@mailbx.ru"}
 	mockUserResponse := []models.UserInfo{
 		{
 			UserID:    userID,
 			FirstName: "valera",
 			LastName:  "vinokurshin",
-			Email:     "valera03@mailbox.ru",
+			Email:     "valera03@mailbx.ru",
 		},
 		{
 			UserID:    2,
 			FirstName: "max",
 			LastName:  "vlasov",
-			Email:     "max03@mailbox.ru",
+			Email:     "max03@mailbx.ru",
 		},
 	}
 	mockFolderResponse := []models.Folder{
@@ -640,6 +641,7 @@ func TestUseCase_SaveDraft(t *testing.T) {
 	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "inbox").Return(&mockFolderResponse[1], nil)
 	mailRepo.EXPECT().InsertMessage(userID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
 	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageSelected.MessageID).Return(&messageSelected, nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return(nil, nil)
 	userUC.EXPECT().GetInfo(userID).Return(&mockUserResponse[0], nil)
 	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, userID).Return([]uint64{mockUserResponse[1].UserID}, nil)
 	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[0], nil)
@@ -673,19 +675,19 @@ func TestUseCase_EditDraft(t *testing.T) {
 			UserID:    2,
 			FirstName: "max",
 			LastName:  "vlasov",
-			Email:     "max03@mailbox.ru",
+			Email:     "max03@mailbx.ru",
 		},
 		{
 			UserID:    userID,
 			FirstName: "valera",
 			LastName:  "vinokurshin",
-			Email:     "valera03@mailbox.ru",
+			Email:     "valera03@mailbx.ru",
 		},
 		{
 			UserID:    3,
 			FirstName: "oleg",
 			LastName:  "kotkov",
-			Email:     "oleg@mailbox.ru",
+			Email:     "oleg@mailbx.ru",
 		},
 	}
 	mockRecipientsResponse := []uint64{userID}
