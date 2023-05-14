@@ -644,7 +644,7 @@ func (uc *mailUC) SendMessage(message models.FormMessage) (*models.MessageInfo, 
 	return uc.GetMessage(fromUser.UserID, newMessage.MessageID)
 }
 
-func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
+func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {
 	formMessage := models.FormMessage{
 		Recipients: []string{recipientEmail},
 		Title:      "Ваше сообщение не доставлено",
@@ -666,18 +666,18 @@ func (uc *mailUC) SendWelcomeMessage(recipientEmail string) error {
 		ReplyToMessageID: nil,
 	}
 
-	return uc.sendMessageFromSupport(formMessage)
+	_, err := uc.sendMessageFromSupport(formMessage)
+	return err
 }
 
-func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) error {
+func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) (*models.MessageInfo, error) {
 	supportAccount, err := uc.getSupportAccount()
 	if err != nil {
-		return pkgErrors.Wrap(err, "send support message : get support account")
+		return nil, pkgErrors.Wrap(err, "send support message : get support account")
 	}
 
 	message.FromUser = supportAccount.Email
-	_, err = uc.SendMessage(message)
-	return err
+	return uc.SendMessage(message)
 }
 
 func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {

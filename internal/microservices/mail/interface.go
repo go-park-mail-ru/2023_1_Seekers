@@ -21,7 +21,7 @@ type UseCaseI interface {
 	SendMessage(message models.FormMessage) (*models.MessageInfo, error)
 	SaveDraft(userID uint64, message models.FormMessage) (*models.MessageInfo, error)
 	EditDraft(userID uint64, messageID uint64, message models.FormMessage) (*models.MessageInfo, error)
-	SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error
+	SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error)
 	SendWelcomeMessage(recipientEmail string) error
 	MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)

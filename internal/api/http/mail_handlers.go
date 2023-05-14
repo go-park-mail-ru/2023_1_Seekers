@@ -337,12 +337,13 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(invalidEmails) != 0 {
-		err = h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
-
+		failedMessage, err := h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
 		if err != nil {
 			pkgHttp.HandleError(w, r, err)
 			return
 		}
+
+		h.hub.SendNotifications(failedMessage)
 	}
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{

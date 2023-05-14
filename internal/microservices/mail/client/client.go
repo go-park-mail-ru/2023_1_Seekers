@@ -126,16 +126,16 @@ func (g MailClientGRPC) SendMessage(message models.FormMessage) (*models.Message
 	return utils.MessageInfoByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
-	_, err := g.mailClient.SendFailedSendingMessage(context.TODO(), &mail_proto.FailedEmailsParams{
+func (g MailClientGRPC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {
+	protoMsgInfo, err := g.mailClient.SendFailedSendingMessage(context.TODO(), &mail_proto.FailedEmailsParams{
 		Recipient:     recipientEmail,
 		InvalidEmails: invalidEmails,
 	})
 	if err != nil {
-		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendFailedSendingMessage"))
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendFailedSendingMessage"))
 	}
 
-	return nil
+	return utils.MessageInfoByProto(protoMsgInfo), nil
 }
 
 func (g MailClientGRPC) SendWelcomeMessage(recipientEmail string) error {

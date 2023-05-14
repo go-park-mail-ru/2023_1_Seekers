@@ -56,7 +56,7 @@ type MailServiceClient interface {
 	GetMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
 	ValidateRecipients(ctx context.Context, in *Recipients, opts ...grpc.CallOption) (*ValidateRecipientsResponse, error)
 	SendMessage(ctx context.Context, in *SendMessageParams, opts ...grpc.CallOption) (*MessageInfo, error)
-	SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*Nothing, error)
+	SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	SendWelcomeMessage(ctx context.Context, in *RecipientEmail, opts ...grpc.CallOption) (*Nothing, error)
 	MarkMessageAsSeen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error)
 	MarkMessageAsUnseen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error)
@@ -160,8 +160,8 @@ func (c *mailServiceClient) SendMessage(ctx context.Context, in *SendMessagePara
 	return out, nil
 }
 
-func (c *mailServiceClient) SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*Nothing, error) {
-	out := new(Nothing)
+func (c *mailServiceClient) SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*MessageInfo, error) {
+	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, MailService_SendFailedSendingMessage_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -290,7 +290,7 @@ type MailServiceServer interface {
 	GetMessage(context.Context, *UIDMessageID) (*MessageInfo, error)
 	ValidateRecipients(context.Context, *Recipients) (*ValidateRecipientsResponse, error)
 	SendMessage(context.Context, *SendMessageParams) (*MessageInfo, error)
-	SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*Nothing, error)
+	SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*MessageInfo, error)
 	SendWelcomeMessage(context.Context, *RecipientEmail) (*Nothing, error)
 	MarkMessageAsSeen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error)
 	MarkMessageAsUnseen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error)
@@ -337,7 +337,7 @@ func (UnimplementedMailServiceServer) ValidateRecipients(context.Context, *Recip
 func (UnimplementedMailServiceServer) SendMessage(context.Context, *SendMessageParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedMailServiceServer) SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*Nothing, error) {
+func (UnimplementedMailServiceServer) SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFailedSendingMessage not implemented")
 }
 func (UnimplementedMailServiceServer) SendWelcomeMessage(context.Context, *RecipientEmail) (*Nothing, error) {

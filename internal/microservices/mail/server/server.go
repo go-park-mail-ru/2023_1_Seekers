@@ -122,13 +122,13 @@ func (g *MailServerGRPC) SendMessage(ctx context.Context, protoParams *mail_prot
 	return utils.ProtoByMessageInfo(*info), nil
 }
 
-func (g *MailServerGRPC) SendFailedSendingMessage(ctx context.Context, protoParams *mail_proto.FailedEmailsParams) (*mail_proto.Nothing, error) {
-	err := g.mailUC.SendFailedSendingMessage(protoParams.Recipient, protoParams.InvalidEmails)
+func (g *MailServerGRPC) SendFailedSendingMessage(ctx context.Context, protoParams *mail_proto.FailedEmailsParams) (*mail_proto.MessageInfo, error) {
+	info, err := g.mailUC.SendFailedSendingMessage(protoParams.Recipient, protoParams.InvalidEmails)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
 
-	return &mail_proto.Nothing{}, nil
+	return utils.ProtoByMessageInfo(*info), nil
 }
 
 func (g *MailServerGRPC) SendWelcomeMessage(ctx context.Context, protoEmail *mail_proto.RecipientEmail) (*mail_proto.Nothing, error) {
