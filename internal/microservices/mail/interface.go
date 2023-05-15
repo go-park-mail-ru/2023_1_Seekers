@@ -18,7 +18,7 @@ type UseCaseI interface {
 	GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error)
 	DeleteMessage(userID uint64, messageID uint64, folderSlug string) error
 	ValidateRecipients(recipients []string) ([]string, []string)
-	SendMessage(message models.FormMessage) (*models.MessageInfo, error)
+	SendMessage(userId uint64, message models.FormMessage) (*models.MessageInfo, error)
 	SaveDraft(userID uint64, message models.FormMessage) (*models.MessageInfo, error)
 	EditDraft(userID uint64, messageID uint64, message models.FormMessage) (*models.MessageInfo, error)
 	SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error)

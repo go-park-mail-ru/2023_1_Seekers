@@ -317,18 +317,18 @@ func (mr *MockUseCaseIMockRecorder) SendFailedSendingMessage(recipientEmail, inv
 }
 
 // SendMessage mocks base method.
-func (m *MockUseCaseI) SendMessage(message models.FormMessage) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) SendMessage(userId uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendMessage", message)
+	ret := m.ctrl.Call(m, "SendMessage", userId, message)
 	ret0, _ := ret[0].(*models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendMessage indicates an expected call of SendMessage.
-func (mr *MockUseCaseIMockRecorder) SendMessage(message interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) SendMessage(userId, message interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCaseI)(nil).SendMessage), message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCaseI)(nil).SendMessage), userId, message)
 }
 
 // SendWelcomeMessage mocks base method.

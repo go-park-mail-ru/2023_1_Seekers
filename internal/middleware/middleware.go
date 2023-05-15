@@ -12,6 +12,7 @@ import (
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/negroni"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -109,12 +110,12 @@ func (m *HttpMiddleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 
 func (m *HttpMiddleware) MetricsHttp(h http.Handler) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rWriterWithCode := pkgHttp.NewResponseWriterCode(w)
+		rWriterWithCode := negroni.NewResponseWriter(w)
 
 		start := time.Now()
 		h.ServeHTTP(rWriterWithCode, r)
 
-		code := rWriterWithCode.StatusCode
+		code := rWriterWithCode.Status()
 
 		m.metric.Timings.WithLabelValues(strconv.Itoa(code), r.URL.String(), r.Method).Observe(time.Since(start).Seconds())
 		m.metric.Hits.Inc()

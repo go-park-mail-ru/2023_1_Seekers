@@ -293,7 +293,7 @@ func (h *mailHandlers) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /message/send [post]
 func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value(common.ContextUser).(uint64)
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
 		return
@@ -322,7 +322,7 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	validEmails, invalidEmails := h.uc.ValidateRecipients(form.Recipients)
 	form.Recipients = validEmails
 
-	message, err := h.uc.SendMessage(form)
+	message, err := h.uc.SendMessage(userID, form)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return

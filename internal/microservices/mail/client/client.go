@@ -117,8 +117,8 @@ func (g MailClientGRPC) ValidateRecipients(recipients []string) ([]string, []str
 	return protoRc.ValidEmails, protoRc.InvalidEmails
 }
 
-func (g MailClientGRPC) SendMessage(message models.FormMessage) (*models.MessageInfo, error) {
-	protoMsgInfo, err := g.mailClient.SendMessage(context.TODO(), utils.ProtoSendParamsByUIDNMessage(&message))
+func (g MailClientGRPC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+	protoMsgInfo, err := g.mailClient.SendMessage(context.TODO(), utils.ProtoSendParamsByUIDNMessage(userID, &message))
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - SendMessage"))
 	}

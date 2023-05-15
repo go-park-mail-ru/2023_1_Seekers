@@ -42,7 +42,8 @@ message Message {
 }
 
 message SendMessageParams {
-  Message Message = 1;
+  uint64 UID = 1;
+  Message Message = 2;
 }
 
 message FailedEmailsParams {

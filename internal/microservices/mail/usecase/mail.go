@@ -566,7 +566,12 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	return uc.GetMessage(fromUserID, messageID)
 }
 
-func (uc *mailUC) SendMessage(message models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+	usr, err := uc.userUC.GetByEmail(message.FromUser)
+	if usr.UserID != userID || err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - invalid sender field")
+	}
+
 	if len(message.Recipients) == 0 {
 		return nil, pkgErrors.WithMessage(errors.ErrNoValidEmails, "send message")
 	}
@@ -700,7 +705,7 @@ func (uc *mailUC) sendMessageFromSupport(message models.FormMessage) (*models.Me
 	}
 
 	message.FromUser = supportAccount.Email
-	return uc.SendMessage(message)
+	return uc.SendMessage(supportAccount.UserID, message)
 }
 
 func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {

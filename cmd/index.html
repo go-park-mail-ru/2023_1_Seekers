@@ -54,7 +54,7 @@
             };
 
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://" + document.location.host + "/api/v1/ws?email=" + email);
+                conn = new WebSocket("ws://localhost:8001/api/v1/ws?email=" + email);
                 conn.onclose = function (evt) {
                     let item = document.createElement("div");
                     item.innerHTML = "<b>Connection closed.</b>";

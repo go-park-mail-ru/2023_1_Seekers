@@ -85,7 +85,7 @@ func main() {
 
 	router.Use(
 		middleware.HandlerLogger,
-		//middleware.MetricsHttp,
+		middleware.MetricsHttp,
 	)
 
 	corsRouter := middleware.Cors(router)

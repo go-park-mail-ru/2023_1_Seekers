@@ -187,7 +187,7 @@ func (s *Session) Data(r io.Reader) error {
 			ReplyToMessageID: nil,
 		}
 
-		_, err = s.mailClient.SendMessage(message)
+		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}
