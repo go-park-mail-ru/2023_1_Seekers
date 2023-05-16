@@ -1,6 +1,10 @@
 package ws
 
-import "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+import (
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
+)
 
 type Subscription struct {
 	conn      *connection
@@ -8,18 +12,20 @@ type Subscription struct {
 }
 
 type Hub struct {
+	cfg        *config.Config
 	rooms      map[string]map[*connection]bool
 	broadcast  chan WsItem
 	register   chan Subscription
 	unregister chan Subscription
 }
 
-func NewHub() *Hub {
+func NewHub(c *config.Config) *Hub {
 	return &Hub{
 		broadcast:  make(chan WsItem),
 		register:   make(chan Subscription),
 		unregister: make(chan Subscription),
 		rooms:      make(map[string]map[*connection]bool),
+		cfg:        c,
 	}
 }
 
@@ -70,12 +76,26 @@ func (h *Hub) SendNotifications(message *models.MessageInfo) {
 		messageInfo: *message,
 		userEmail:   message.FromUser.Email,
 	}
+	domain, err := pkgSmtp.ParseDomain(message.FromUser.Email)
+	if err != nil {
+		return
+	}
 
-	h.broadcast <- item
+	if domain == h.cfg.Mail.PostDomain {
+		h.broadcast <- item
+	}
+
 	item.messageInfo.Seen = false
 
 	for _, recipient := range item.messageInfo.Recipients {
-		item.userEmail = recipient.Email
-		h.broadcast <- item
+		domain, err = pkgSmtp.ParseDomain(recipient.Email)
+		if err != nil {
+			return
+		}
+
+		if domain == h.cfg.Mail.PostDomain {
+			item.userEmail = recipient.Email
+			h.broadcast <- item
+		}
 	}
 }

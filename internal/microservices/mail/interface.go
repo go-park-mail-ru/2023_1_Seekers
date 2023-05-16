@@ -1,6 +1,9 @@
 package mail
 
-import "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+import (
+	"context"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+)
 
 //go:generate mockgen -destination=./usecase/mocks/mockusecase.go -source=./interface.go -package=mocks
 
@@ -23,6 +26,7 @@ type UseCaseI interface {
 	EditDraft(userID uint64, messageID uint64, message models.FormMessage) (*models.MessageInfo, error)
 	SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error)
 	SendWelcomeMessage(recipientEmail string) error
+	InitHub(ctx context.Context) error
 	MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MoveMessageToFolder(userID uint64, messageID uint64, fromFolder string, toFolder string) error

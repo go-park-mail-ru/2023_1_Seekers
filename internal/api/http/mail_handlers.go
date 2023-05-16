@@ -47,14 +47,27 @@ type mailHandlers struct {
 }
 
 func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
-	hub := ws.NewHub()
+	hub := ws.NewHub(c)
 	go hub.Run()
-
+	fmt.Println(hub)
 	return &mailHandlers{
 		cfg: c,
 		uc:  uc,
 		hub: hub,
 	}
+	//
+	//h := &mailHandlers{
+	//	cfg: c,
+	//	uc:  uc,
+	//	hub: hub,
+	//}
+	//ctx := context.WithValue(context.Background(), h.cfg.Api.MailHubCtx, hub)
+	//fmt.Println("API", ctx.Value("hub"))
+	//if err := h.uc.InitHub(ctx); err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//return h
 }
 
 // GetFolderMessages godoc

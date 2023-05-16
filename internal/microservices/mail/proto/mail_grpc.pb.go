@@ -36,6 +36,7 @@ type MailServiceClient interface {
 	EditFolder(ctx context.Context, in *EditFolderParams, opts ...grpc.CallOption) (*Folder, error)
 	DeleteMessage(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*Nothing, error)
 	SaveDraft(ctx context.Context, in *SaveDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
+	InitHub(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (*Nothing, error)
 	EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 	GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
@@ -212,6 +213,15 @@ func (c *mailServiceClient) SaveDraft(ctx context.Context, in *SaveDraftParams, 
 	return out, nil
 }
 
+func (c *mailServiceClient) InitHub(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (*Nothing, error) {
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/InitHub", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mailServiceClient) EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error) {
 	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/EditDraft", in, out, opts...)
@@ -270,6 +280,7 @@ type MailServiceServer interface {
 	EditFolder(context.Context, *EditFolderParams) (*Folder, error)
 	DeleteMessage(context.Context, *UIDMessageIDFolderSlug) (*Nothing, error)
 	SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error)
+	InitHub(context.Context, *Nothing) (*Nothing, error)
 	EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error)
 	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
 	GetCustomFolders(context.Context, *UID) (*FoldersResponse, error)
@@ -334,6 +345,9 @@ func (UnimplementedMailServiceServer) DeleteMessage(context.Context, *UIDMessage
 }
 func (UnimplementedMailServiceServer) SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveDraft not implemented")
+}
+func (UnimplementedMailServiceServer) InitHub(context.Context, *Nothing) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitHub not implemented")
 }
 func (UnimplementedMailServiceServer) EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditDraft not implemented")
@@ -684,6 +698,24 @@ func _MailService_SaveDraft_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_InitHub_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Nothing)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).InitHub(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/InitHub",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).InitHub(ctx, req.(*Nothing))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MailService_EditDraft_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EditDraftParams)
 	if err := dec(in); err != nil {
@@ -834,6 +866,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveDraft",
 			Handler:    _MailService_SaveDraft_Handler,
+		},
+		{
+			MethodName: "InitHub",
+			Handler:    _MailService_InitHub_Handler,
 		},
 		{
 			MethodName: "EditDraft",

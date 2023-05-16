@@ -11,6 +11,7 @@ type Config struct {
 		Port        string `yaml:"port" env-default:"8001"`
 		MetricsPort string `yaml:"metrics_port" env-default:"9001"`
 		MetricsName string `yaml:"metrics_name" env-default:"api"`
+		MailHubCtx  string `yaml:"mail_hub_ctx" env-default:"hub"`
 	} `yaml:"api"`
 
 	Project struct {
@@ -131,7 +132,7 @@ type Config struct {
 		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
 		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
 		RouteWS                            string `yaml:"route_ws" env-default:"/ws"`
-		RouteWsQueryEmail                  string `yaml:"route_ws_query_email" env-default:"email"'`
+		RouteWsQueryEmail                  string `yaml:"route_ws_query_email" env-default:"email"`
 		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`
 
 		// UserRoutes

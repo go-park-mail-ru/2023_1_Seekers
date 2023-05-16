@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	models "github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
@@ -210,6 +211,20 @@ func (m *MockUseCaseI) GetMessage(userID, messageID uint64) (*models.MessageInfo
 func (mr *MockUseCaseIMockRecorder) GetMessage(userID, messageID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessage", reflect.TypeOf((*MockUseCaseI)(nil).GetMessage), userID, messageID)
+}
+
+// InitHub mocks base method.
+func (m *MockUseCaseI) InitHub(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InitHub", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InitHub indicates an expected call of InitHub.
+func (mr *MockUseCaseIMockRecorder) InitHub(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitHub", reflect.TypeOf((*MockUseCaseI)(nil).InitHub), ctx)
 }
 
 // MarkMessageAsSeen mocks base method.

@@ -2,6 +2,7 @@ api:
   port: 8001
   metrics_port: 9001
   metrics_name: api
+  mail_hub_ctx: hub
 
 project:
   project_base_dir: 2023_1_Seekers

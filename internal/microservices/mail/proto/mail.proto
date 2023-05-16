@@ -187,6 +187,7 @@ service MailService {
   rpc EditFolder(EditFolderParams) returns (Folder) {}
   rpc DeleteMessage(UIDMessageIDFolderSlug) returns (Nothing) {}
   rpc SaveDraft(SaveDraftParams) returns (MessageInfo) {}
+  rpc InitHub(Nothing) returns (Nothing) {}
   rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
   rpc GetCustomFolders(UID) returns (FoldersResponse) {}
