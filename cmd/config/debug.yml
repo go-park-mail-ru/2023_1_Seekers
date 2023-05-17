@@ -76,6 +76,7 @@ routes:
 
   route_message: /message/{id:[0-9]+}
   route_attach: /attach/{id:[0-9]+}
+  route_external_attach: /external/attach/{id:[0-9]+}
   route_send_message: /message/send
   route_save_draft_message: /message/save
   route_read_message: /message/{id:[0-9]+}/read
@@ -89,6 +90,7 @@ routes:
   route_create_folder: /folder/create
   route_edit_folder: /folder/{slug}/edit
   route_get_folders_is_custom: custom
+  query_access_key: accessKey
 
   route_user: /user
   route_user_info: /user/info

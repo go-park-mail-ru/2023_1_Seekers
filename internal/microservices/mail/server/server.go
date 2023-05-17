@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/utils"
@@ -95,15 +94,6 @@ func (g *MailServerGRPC) CreateDefaultFolders(ctx context.Context, protoUid *mai
 	}
 
 	return utils.ProtoByFoldersModels(folders), nil
-}
-
-func (g *MailServerGRPC) InitHub(ctx context.Context, _ *mail_proto.Nothing) (*mail_proto.Nothing, error) {
-	fmt.Println("SERVER", ctx.Value("hub"))
-	err := g.mailUC.InitHub(ctx)
-	if err != nil {
-		return &mail_proto.Nothing{}, pkgGrpc.HandleError(ctx, err)
-	}
-	return &mail_proto.Nothing{}, nil
 }
 
 func (g *MailServerGRPC) GetMessage(ctx context.Context, protoMId *mail_proto.UIDMessageID) (*mail_proto.MessageInfo, error) {

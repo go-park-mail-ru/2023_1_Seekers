@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/proto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/utils"
@@ -41,16 +40,6 @@ func (g MailClientGRPC) GetFolderInfo(userID uint64, folderSlug string) (*models
 	}
 
 	return utils.FolderModelByProto(protoFolder), nil
-}
-
-func (g MailClientGRPC) InitHub(ctx context.Context) error {
-	fmt.Println("CLIENT", ctx.Value("hub"))
-	_, err := g.mailClient.InitHub(ctx, &mail_proto.Nothing{})
-	if err != nil {
-		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - Init hub"))
-	}
-
-	return nil
 }
 
 func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {

@@ -36,6 +36,7 @@ type MailHandlersI interface {
 	MoveToFolder(w http.ResponseWriter, r *http.Request)
 	EditDraft(w http.ResponseWriter, r *http.Request)
 	DownloadAttach(w http.ResponseWriter, r *http.Request)
+	GetAttach(w http.ResponseWriter, r *http.Request)
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
 	//File(w http.ResponseWriter, r *http.Request)
 }
@@ -49,25 +50,12 @@ type mailHandlers struct {
 func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
 	hub := ws.NewHub(c)
 	go hub.Run()
-	fmt.Println(hub)
+
 	return &mailHandlers{
 		cfg: c,
 		uc:  uc,
 		hub: hub,
 	}
-	//
-	//h := &mailHandlers{
-	//	cfg: c,
-	//	uc:  uc,
-	//	hub: hub,
-	//}
-	//ctx := context.WithValue(context.Background(), h.cfg.Api.MailHubCtx, hub)
-	//fmt.Println("API", ctx.Value("hub"))
-	//if err := h.uc.InitHub(ctx); err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//return h
 }
 
 // GetFolderMessages godoc
@@ -790,6 +778,48 @@ func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", attach.Type)
 	w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// GetAttach godoc
+// @Summary      GetAttach
+// @Description  get attach with attachID, gets access key, then validate
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success get attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /external/attach/{id} [get]
+func (h *mailHandlers) GetAttach(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	accessKey := r.URL.Query().Get(h.cfg.Routes.QueryAccessKey)
+
+	// TODO from accesskey decrypt userID
+
+	userID, _ := strconv.ParseUint(accessKey, 10, 64)
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+	//w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
 
 	w.WriteHeader(http.StatusOK)
 

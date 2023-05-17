@@ -1,9 +1,7 @@
 package usecase
 
 import (
-	"context"
 	"encoding/base64"
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage"
@@ -880,18 +878,4 @@ func (uc *mailUC) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, er
 	attach.FileData = file.Data
 
 	return attach, nil
-}
-
-func (uc *mailUC) InitHub(ctx context.Context) error {
-	fmt.Println("BEFORE", uc.hub)
-	fmt.Println(ctx.Value(uc.cfg.Api.MailHubCtx))
-	wsHub := ctx.Value(uc.cfg.Api.MailHubCtx)
-	hub, ok := wsHub.(*ws.Hub)
-	if !ok {
-		return pkgErrors.New("failed get correct hub on init")
-	}
-
-	uc.hub = hub
-	fmt.Println("AFTER", uc.hub)
-	return nil
 }
