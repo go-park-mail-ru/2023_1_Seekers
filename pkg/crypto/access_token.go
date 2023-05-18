@@ -4,9 +4,11 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -14,10 +16,10 @@ import (
 )
 
 var acTokSecret []byte
-var acTokTTL = time.Second * 20
+var acTokTTL = time.Second * 60 * 3
 var acTokSep = ":"
 
-const defaultAccessTokenSecret = "nnPCdw3M2B1TfJhoaY2mL736p2vCUc47"
+const defaultAccessTokenSecret = "1234567890abcdef"
 
 func init() {
 	envSecret := os.Getenv("ACCESS_TOKEN_SECRET")
@@ -28,57 +30,60 @@ func init() {
 	acTokSecret = []byte(envSecret)
 }
 
-func encrypt(plaintext string) string {
-	newCipher, err := aes.NewCipher(acTokSecret)
+func encrypt(plaintext string) (string, error) {
+	byteMsg := []byte(plaintext)
+	block, err := aes.NewCipher(acTokSecret)
 	if err != nil {
-		panic(err)
+		return "", pkgErrors.Wrap(err, "could not create new cipher")
 	}
 
-	gcm, err := cipher.NewGCM(newCipher)
-	if err != nil {
-		panic(err)
+	cipherText := make([]byte, aes.BlockSize+len(byteMsg))
+	iv := cipherText[:aes.BlockSize]
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		return "", pkgErrors.Wrap(err, "could not encrypt")
 	}
 
-	nonce := make([]byte, gcm.NonceSize())
-	_, err = rand.Read(nonce)
-	if err != nil {
-		panic(err)
-	}
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], byteMsg)
 
-	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
-	return string(ciphertext)
+	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
 
-func decrypt(ciphertext string) string {
-	newCipher, err := aes.NewCipher(acTokSecret)
+func decrypt(message string) (string, error) {
+	cipherText, err := base64.StdEncoding.DecodeString(message)
 	if err != nil {
-		panic(err)
+		return "", pkgErrors.Wrap(err, "could not base64 decode")
 	}
 
-	gcm, err := cipher.NewGCM(newCipher)
+	block, err := aes.NewCipher(acTokSecret)
 	if err != nil {
-		panic(err)
+		return "", pkgErrors.Wrap(err, "could not create new cipher")
 	}
 
-	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-
-	plaintext, err := gcm.Open(nil, []byte(nonce), []byte(ciphertext), nil)
-	if err != nil {
-		panic(err)
+	if len(cipherText) < aes.BlockSize {
+		return "", pkgErrors.Wrap(err, "invalid ciphertext block size")
 	}
 
-	return string(plaintext)
+	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(cipherText, cipherText)
+
+	return string(cipherText), nil
 }
 
-func EncryptAccessToken(userID uint64) string {
+func EncryptAccessToken(userID uint64) (string, error) {
 	tokenExpire := time.Now().Add(acTokTTL).Unix()
 	tokenData := fmt.Sprintf("%d%s%d", userID, acTokSep, tokenExpire)
 	return encrypt(tokenData)
 }
 
 func DecryptAccessToken(cipherToken string) (uint64, error) {
-	accessToken := decrypt(cipherToken)
+	accessToken, err := decrypt(cipherToken)
+	if err != nil {
+		return 0, pkgErrors.WithMessage(errors.ErrWrongAccessToken, "failed decrypt token: "+err.Error())
+	}
 
 	data := strings.Split(accessToken, acTokSep)
 	if len(data) < 2 {

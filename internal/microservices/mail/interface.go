@@ -10,6 +10,7 @@ type UseCaseI interface {
 	GetFolders(userID uint64) ([]models.Folder, error)
 	GetCustomFolders(userID uint64) ([]models.Folder, error)
 	GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error)
+	GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo, error)
 	GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error)
 	SearchMessages(userID uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error)
 	SearchRecipients(userID uint64) ([]models.UserInfo, error)

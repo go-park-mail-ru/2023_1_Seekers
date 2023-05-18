@@ -1,0 +1,99 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+      - prod
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.20
+      - uses: actions/checkout@v3
+      - name: linter
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: -c ./golangci.yml
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.20
+      - uses: actions/checkout@v3
+      - name: tests
+        run: make test
+
+  deploy:
+    needs: [ linter, tests ]
+    runs-on: ubuntu-latest
+    steps:
+        - name: stop backend
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make docker-stop-back
+              make docker-prune 
+
+        - name: update
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              git checkout prod
+              git pull
+
+        - name: setup env
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+              export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+              export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+              export POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+              export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+              export POSTGRES_SCHEMA=${{ secrets.POSTGRES_SCHEMA }}
+              export POSTGRES_SSL_MODE=${{ secrets.POSTGRES_SSL_MODE }}
+              export REDIS_HOST=${{ secrets.REDIS_HOST }}
+              export REDIS_PORT=${{ secrets.REDIS_PORT }}
+              export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+              export S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
+              export S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
+              export PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+              export PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+              export PGADMIN_CONFIG_SERVER_MODE=${{ secrets.PGADMIN_CONFIG_SERVER_MODE }}
+              export PGADMIN_CONFIG_SERVER_MODE=${{ secrets.PGADMIN_CONFIG_SERVER_MODE }}
+              export CSRF_SECRET=${{ secrets.CSRF_SECRET }}
+              export ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+              export GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}
+              export GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+              export GF_USERS_ALLOW_SIGN_UP=${{ secrets.GF_USERS_ALLOW_SIGN_UP }}
+              export EXTERNAL_USER_PASSWORD=${{ secrets.EXTERNAL_USER_PASSWORD }}
+              export SMTP_SECRET_PASSWORD=${{ secrets.SMTP_SECRET_PASSWORD }}
+
+        - name: build prod
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-prod

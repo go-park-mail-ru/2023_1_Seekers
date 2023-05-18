@@ -48,8 +48,11 @@ func main() {
 	}
 	middleware := _middleware.NewGRPCMiddleware(cfg, globalLogger, metrics)
 
+	size := 1024 * 1024 * 1024
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
+		grpc.MaxRecvMsgSize(size),
+		grpc.MaxSendMsgSize(size),
 	)
 
 	go func() {

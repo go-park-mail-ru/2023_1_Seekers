@@ -51,9 +51,12 @@ func main() {
 
 	authServiceClient := _authClient.NewAuthClientGRPC(authServiceCon)
 
+	size := 1024 * 1024 * 1024
+
 	mailServiceCon, err := grpc.Dial(
 		cfg.MailGRPCService.Host+":"+cfg.MailGRPCService.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(size), grpc.MaxCallSendMsgSize(size)),
 	)
 	if err != nil {
 		log.Fatal("failed connect to file microservice", err)

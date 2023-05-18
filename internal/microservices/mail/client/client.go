@@ -223,6 +223,19 @@ func (g MailClientGRPC) DeleteMessage(userID uint64, messageID uint64, folderSlu
 	return nil
 }
 
+func (g MailClientGRPC) GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	protoAttach, err := g.mailClient.GetAttach(context.TODO(), &mail_proto.AttNUser{
+		AttachID: attachID,
+		UserID:   userID,
+	})
+
+	if err != nil {
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetAttach"))
+	}
+
+	return utils.ModelAttachByProto(protoAttach), nil
+}
+
 func (g MailClientGRPC) SaveDraft(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.SaveDraft(context.TODO(), utils.ProtoSaveDraftParamsByModels(userID, &message))
 	if err != nil {

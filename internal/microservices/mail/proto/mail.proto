@@ -176,6 +176,7 @@ service MailService {
   rpc SearchRecipients(UID) returns (SearchRecipientsResponse) {}
   rpc CreateDefaultFolders(UID) returns (FoldersResponse) {}
   rpc GetMessage(UIDMessageID) returns (MessageInfo) {}
+  rpc GetAttachInfo(AttNUser) returns (AttachmentInfo) {}
   rpc ValidateRecipients(Recipients) returns (ValidateRecipientsResponse) {}
   rpc SendMessage(SendMessageParams) returns (MessageInfo) {}
   rpc SendFailedSendingMessage(FailedEmailsParams) returns (MessageInfo) {}

@@ -9,7 +9,7 @@
 <body>
 <main>
     <p><b>{{.FileName}} <a href="{{.FileDownload}}">скачать</a></b></p>
-    <audio controls style="width: 80%;">
+    <audio controls style="width: 100%;">
       <source src="{{.FilePath}}" width=>
       <p>
         Ваш браузер не поддерживает HTML5 аудио. Вы можете скачать данное аудио

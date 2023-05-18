@@ -25,6 +25,7 @@ type MailServiceClient interface {
 	SearchRecipients(ctx context.Context, in *UID, opts ...grpc.CallOption) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 	GetMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
+	GetAttachInfo(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error)
 	ValidateRecipients(ctx context.Context, in *Recipients, opts ...grpc.CallOption) (*ValidateRecipientsResponse, error)
 	SendMessage(ctx context.Context, in *SendMessageParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*MessageInfo, error)
@@ -107,6 +108,15 @@ func (c *mailServiceClient) CreateDefaultFolders(ctx context.Context, in *UID, o
 func (c *mailServiceClient) GetMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error) {
 	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) GetAttachInfo(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error) {
+	out := new(AttachmentInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetAttachInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -259,6 +269,7 @@ type MailServiceServer interface {
 	SearchRecipients(context.Context, *UID) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(context.Context, *UID) (*FoldersResponse, error)
 	GetMessage(context.Context, *UIDMessageID) (*MessageInfo, error)
+	GetAttachInfo(context.Context, *AttNUser) (*AttachmentInfo, error)
 	ValidateRecipients(context.Context, *Recipients) (*ValidateRecipientsResponse, error)
 	SendMessage(context.Context, *SendMessageParams) (*MessageInfo, error)
 	SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*MessageInfo, error)
@@ -301,6 +312,9 @@ func (UnimplementedMailServiceServer) CreateDefaultFolders(context.Context, *UID
 }
 func (UnimplementedMailServiceServer) GetMessage(context.Context, *UIDMessageID) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+}
+func (UnimplementedMailServiceServer) GetAttachInfo(context.Context, *AttNUser) (*AttachmentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttachInfo not implemented")
 }
 func (UnimplementedMailServiceServer) ValidateRecipients(context.Context, *Recipients) (*ValidateRecipientsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateRecipients not implemented")
@@ -482,6 +496,24 @@ func _MailService_GetMessage_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MailServiceServer).GetMessage(ctx, req.(*UIDMessageID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_GetAttachInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttNUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetAttachInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/GetAttachInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetAttachInfo(ctx, req.(*AttNUser))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -790,6 +822,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMessage",
 			Handler:    _MailService_GetMessage_Handler,
+		},
+		{
+			MethodName: "GetAttachInfo",
+			Handler:    _MailService_GetAttachInfo_Handler,
 		},
 		{
 			MethodName: "ValidateRecipients",

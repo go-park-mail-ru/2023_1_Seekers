@@ -753,6 +753,15 @@ func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug 
 	return uc.GetMessage(userID, messageID)
 }
 
+func (uc *mailUC) GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	attach, err := uc.mailRepo.GetAttach(attachID, userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "get attach")
+	}
+
+	return attach, nil
+}
+
 func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
 	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
 	if err != nil {

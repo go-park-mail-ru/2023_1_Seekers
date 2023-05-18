@@ -51,10 +51,13 @@ func main() {
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
 
+	size := 1024 * 1024 * 1024
 	fServiceCon, err := grpc.Dial(
 		cfg.FileGPRCService.Host+":"+cfg.FileGPRCService.Port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(size), grpc.MaxCallSendMsgSize(size)),
 	)
+
 	if err != nil {
 		log.Fatal("failed connect to file microservice", err)
 	}
@@ -72,6 +75,8 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
+		grpc.MaxRecvMsgSize(size),
+		grpc.MaxSendMsgSize(size),
 	)
 
 	go func() {

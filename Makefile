@@ -12,6 +12,14 @@ build:
 	mkdir -p -m 777 logs/app
 	docker-compose up -d --build --remove-orphans
 
+build-binaries:
+	go build cmd/api/main.go
+	go build cmd/auth/main.go
+	go build cmd/file_storage/main.go
+	go build cmd/auth/main.go
+	go build cmd/mail/main.go
+	go build cmd/user/main.go
+
 build-prod:
 	make docker-stop-back
 	sudo systemctl stop nginx.service || true

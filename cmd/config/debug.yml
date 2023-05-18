@@ -4,7 +4,7 @@ api:
   metrics_name: api
   mail_hub_ctx: hub
   mail_tpl_dir: ./internal/api/http/templates/
-  host: http://localhost
+  host: http://localhost:8001
 
 project:
   project_base_dir: 2023_1_Seekers

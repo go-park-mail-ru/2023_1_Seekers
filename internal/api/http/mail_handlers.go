@@ -862,7 +862,7 @@ func (h *mailHandlers) PreviewAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attach, err := h.uc.GetAttach(attachID, userID)
+	attach, err := h.uc.GetAttachInfo(attachID, userID)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -880,7 +880,12 @@ func (h *mailHandlers) PreviewAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessKey := crypto.EncryptAccessToken(userID)
+	accessKey, err := crypto.EncryptAccessToken(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - encrypt token"))
+		return
+	}
+
 	data := struct {
 		FileName     string
 		FilePath     string
