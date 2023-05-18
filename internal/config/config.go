@@ -12,6 +12,8 @@ type Config struct {
 		MetricsPort string `yaml:"metrics_port" env-default:"9001"`
 		MetricsName string `yaml:"metrics_name" env-default:"api"`
 		MailHubCtx  string `yaml:"mail_hub_ctx" env-default:"hub"`
+		MailTplDir  string `yaml:"mail_tpl_dir" env-default:"./internal/api/http/templates/"`
+		Host        string `yaml:"host" env-default:"https://mailbx.ru"`
 	} `yaml:"api"`
 
 	Project struct {
@@ -119,6 +121,7 @@ type Config struct {
 		RouteMessage                       string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
 		RouteAttach                        string `yaml:"route_attach" env-default:"/attach/{id:[0-9]+}"`
 		RouteExternalAttach                string `yaml:"route_external_attach" env-default:"/external/attach/{id:[0-9]+}"`
+		RoutePreviewAttach                 string `yaml:"route_preview_attach" env-default:"/attach/{id:[0-9]+}/preview"`
 		RouteSendMessage                   string `yaml:"route_send_message" env-default:"/message/send"`
 		RouteSaveDraftMessage              string `yaml:"route_save_draft_message" env-default:"/message/save"`
 		RouteReadMessage                   string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`

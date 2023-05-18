@@ -29,6 +29,8 @@ build-dev-env:
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
 	docker-compose up -d --build --remove-orphans
+#	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
+#	sudo systemctl restart nginx
 
 run-dev:
 	@make build-dev-env

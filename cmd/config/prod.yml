@@ -3,6 +3,8 @@ api:
   metrics_port: 9001
   metrics_name: api
   mail_hub_ctx: hub
+  mail_tpl_dir: ./internal/api/http/templates/
+  host: https://mailbx.ru
 
 project:
   project_base_dir: 2023_1_Seekers
@@ -77,6 +79,7 @@ routes:
   route_message: /message/{id:[0-9]+}
   route_attach: /attach/{id:[0-9]+}
   route_external_attach: /external/attach/{id:[0-9]+}
+  route_preview_attach: /attach/{id:[0-9]+}/preview
   route_send_message: /message/send
   route_save_draft_message: /message/save
   route_read_message: /message/{id:[0-9]+}/read

@@ -1,12 +1,14 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
@@ -14,8 +16,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mailru/easyjson"
 	pkgErrors "github.com/pkg/errors"
+	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -37,6 +41,7 @@ type MailHandlersI interface {
 	EditDraft(w http.ResponseWriter, r *http.Request)
 	DownloadAttach(w http.ResponseWriter, r *http.Request)
 	GetAttach(w http.ResponseWriter, r *http.Request)
+	PreviewAttach(w http.ResponseWriter, r *http.Request)
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
 	//File(w http.ResponseWriter, r *http.Request)
 }
@@ -809,9 +814,11 @@ func (h *mailHandlers) GetAttach(w http.ResponseWriter, r *http.Request) {
 
 	accessKey := r.URL.Query().Get(h.cfg.Routes.QueryAccessKey)
 
-	// TODO from accesskey decrypt userID
-
-	userID, _ := strconv.ParseUint(accessKey, 10, 64)
+	userID, err := crypto.DecryptAccessToken(accessKey)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
 
 	attach, err := h.uc.GetAttach(attachID, userID)
 	if err != nil {
@@ -819,13 +826,81 @@ func (h *mailHandlers) GetAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", attach.Type)
-	//w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
 
 	w.WriteHeader(http.StatusOK)
 
 	_, err = w.Write(attach.FileData)
 	if err != nil {
 		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// PreviewAttach godoc
+// @Summary      PreviewAttach
+// @Description  preview with attachID, returns html page
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success preview"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id}/preview [get]
+func (h *mailHandlers) PreviewAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachIDStr := vars["id"]
+	attachID, err := strconv.ParseUint(attachIDStr, 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	tplFile := common.GetTplFile(attach.FileName)
+	tpl, err := os.ReadFile(h.cfg.Api.MailTplDir + tplFile)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - read tpl file"))
+		return
+	}
+
+	t, err := template.New("MailBx").Parse(string(tpl))
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - parse tpl file"))
+		return
+	}
+
+	accessKey := crypto.EncryptAccessToken(userID)
+	data := struct {
+		FileName     string
+		FilePath     string
+		FileDownload string
+	}{
+		FileName:     attach.FileName,
+		FilePath:     fmt.Sprintf("%s/api/v1/external/attach/%s?accessKey=%s", h.cfg.Api.Host, attachIDStr, accessKey),
+		FileDownload: fmt.Sprintf("%s/api/v1/attach/%s", h.cfg.Api.Host, attachIDStr),
+	}
+
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, data); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - execute tpl file"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(buf.Bytes()); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - write body"))
 		return
 	}
 }

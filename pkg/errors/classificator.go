@@ -30,6 +30,7 @@ var (
 	ErrWrongContentType     = errors.New("unsupported content type")
 	ErrFailedAuth           = errors.New("failed auth")
 	ErrWrongCSRF            = errors.New("wrong csrf token")
+	ErrWrongAccessToken     = errors.New("wrong access token")
 	ErrFolderAlreadyExists  = errors.New("folder already exists")
 	ErrDeleteDefaultFolder  = errors.New("can't delete default folder")
 	ErrEditDefaultFolder    = errors.New("can't edit default folder")
@@ -65,6 +66,7 @@ var HttpCodes = map[string]int{
 	ErrWrongContentType.Error():     http.StatusBadRequest,
 	ErrFailedAuth.Error():           http.StatusUnauthorized,
 	ErrWrongCSRF.Error():            http.StatusBadRequest,
+	ErrWrongAccessToken.Error():     http.StatusBadRequest,
 	ErrFolderAlreadyExists.Error():  http.StatusBadRequest,
 	ErrDeleteDefaultFolder.Error():  http.StatusBadRequest,
 	ErrEditDefaultFolder.Error():    http.StatusBadRequest,
@@ -99,6 +101,7 @@ var GRPCCodes = map[string]codes.Code{
 	ErrWrongContentType.Error():     codes.InvalidArgument,
 	ErrFailedAuth.Error():           codes.Unauthenticated,
 	ErrWrongCSRF.Error():            codes.InvalidArgument,
+	ErrWrongAccessToken.Error():     codes.InvalidArgument,
 	ErrFolderAlreadyExists.Error():  codes.InvalidArgument,
 	ErrDeleteDefaultFolder.Error():  codes.InvalidArgument,
 	ErrEditDefaultFolder.Error():    codes.InvalidArgument,
@@ -132,6 +135,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrWrongContentType.Error():     logrus.WarnLevel,
 	ErrFailedAuth.Error():           logrus.WarnLevel,
 	ErrWrongCSRF.Error():            logrus.WarnLevel,
+	ErrWrongAccessToken.Error():     logrus.WarnLevel,
 	ErrFolderAlreadyExists.Error():  logrus.WarnLevel,
 	ErrDeleteDefaultFolder.Error():  logrus.WarnLevel,
 	ErrEditDefaultFolder.Error():    logrus.WarnLevel,
