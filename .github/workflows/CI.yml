@@ -11,9 +11,10 @@ jobs:
           go-version: 1.19
       - uses: actions/checkout@v2
       - name: linter
-        script: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-          make lint
+        with:
+          script: |
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+            make lint
 
   tests:
     runs-on: ubuntu-latest
