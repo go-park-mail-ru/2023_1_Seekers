@@ -11,8 +11,7 @@ jobs:
           go-version: 1.19
       - uses: actions/checkout@v2
       - name: linter
-        with:
-          script: |
+        run: |
             go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
             make lint
 
@@ -24,8 +23,7 @@ jobs:
           go-version: 1.19
       - uses: actions/checkout@v2
       - name: setup env
-        with:
-          script: |
+        run: |
             rm .env && touch .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
