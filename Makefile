@@ -20,13 +20,35 @@ build-binaries:
 	go build cmd/mail/main.go
 	go build cmd/user/main.go
 
-build-prod:
-	make docker-stop-back
+build-file_storage:
+	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans file_storage
+
+build-user:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans user
+
+build-auth:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans auth
+
+build-mail:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans mail
+
+build-api:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans api
+
+build-prod-cd:
 	sudo systemctl stop nginx.service || true
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
-	make perm-dirs
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans
+	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
+	sudo systemctl restart nginx
+
+build-prod:
+	sudo systemctl stop nginx.service || true
+	sudo systemctl stop postgresql || true
+	mkdir -p -m 777 logs/app
+	mkdir -p -m 777 logs/postgres
 	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
@@ -66,7 +88,7 @@ run-smtp-server:
 	sudo go run cmd/smtp/main.go -config=./cmd/config/debug.yml
 
 docker-prune:
-	@bash -c 'docker system prune'
+	@bash -c 'docker system prune -f'
 
 docker-stop-back:
 	docker container stop 2023_1_seekers_grafana_1 || true
@@ -80,7 +102,7 @@ docker-stop-back:
 	docker container stop 2023_1_seekers_cache_1 || true
 	docker container stop 2023_1_seekers_file_storage_1 || true
 	docker container stop 2023_1_seekers_node_exporter_1 || true
-	#@make docker-prune
+	make docker-prune
 
 docker-stop-all:
 	@bash -c "docker kill $(shell eval docker ps -q)"
