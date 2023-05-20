@@ -88,17 +88,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-        - name: stop backend
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.KEY }}
-            script: |
-              cd /home/ubuntu/backend/2023_1_Seekers
-              make docker-stop-back
-              make docker-prune 
-
         - name: update
           uses: appleboy/ssh-action@master
           with:
@@ -109,6 +98,17 @@ jobs:
               cd /home/ubuntu/backend/2023_1_Seekers
               git checkout prod
               git pull
+
+        - name: stop backend
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make docker-stop-back
+              make docker-prune 
 
         - name: setup env
           uses: appleboy/ssh-action@master
