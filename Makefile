@@ -88,7 +88,7 @@ run-smtp-server:
 	sudo go run cmd/smtp/main.go -config=./cmd/config/debug.yml
 
 docker-prune:
-	@bash -c 'docker system prune'
+	@bash -c 'docker system prune -y'
 
 docker-stop-back:
 	docker container stop 2023_1_seekers_grafana_1 || true
