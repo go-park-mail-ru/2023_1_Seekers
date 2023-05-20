@@ -126,6 +126,7 @@ clean_logs:
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
 
+
 doc:
 	swag init -g cmd/api/main.go -o docs
 
