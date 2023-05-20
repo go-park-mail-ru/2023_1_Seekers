@@ -79,7 +79,6 @@ docker-stop-back:
 	docker container stop 2023_1_seekers_cache_1 || true
 	docker container stop 2023_1_seekers_file_storage_1 || true
 	docker container stop 2023_1_seekers_node_exporter_1 || true
-	#@make docker-prune
 
 docker-stop-all:
 	@bash -c "docker kill $(shell eval docker ps -q)"
