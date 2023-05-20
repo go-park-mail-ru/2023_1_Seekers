@@ -143,6 +143,56 @@ jobs:
               echo EXTERNAL_USER_PASSWORD=${{ secrets.EXTERNAL_USER_PASSWORD }} >> .env
               echo SMTP_SECRET_PASSWORD=${{ secrets.SMTP_SECRET_PASSWORD }} >> .env
 
+        - name: build file microservice
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-file_storage
+
+        - name: build user microservice
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-user
+
+        - name: build auth microservice
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-auth 
+
+        - name: build mail microservice
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-mail         
+
+        - name: build api microservice
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              cd /home/ubuntu/backend/2023_1_Seekers
+              make build-api     
+
         - name: build prod
           timeout-minutes: 30
           uses: appleboy/ssh-action@master
@@ -152,7 +202,7 @@ jobs:
             key: ${{ secrets.KEY }}
             script: |
               cd /home/ubuntu/backend/2023_1_Seekers
-              make build-prod
+              make build-prod-cd
 
         - name: run front
           uses: appleboy/ssh-action@master

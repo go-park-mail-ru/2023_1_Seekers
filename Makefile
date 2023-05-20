@@ -20,8 +20,31 @@ build-binaries:
 	go build cmd/mail/main.go
 	go build cmd/user/main.go
 
+build-file_storage:
+	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans file_storage
+
+build-user:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans user
+
+build-auth:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans auth
+
+build-mail:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans mail
+
+build-api:
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans api
+
+build-prod-cd:
+	sudo systemctl stop nginx.service || true
+	sudo systemctl stop postgresql || true
+	mkdir -p -m 777 logs/app
+	mkdir -p -m 777 logs/postgres
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans
+	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
+	sudo systemctl restart nginx
+
 build-prod:
-	make docker-stop-back
 	sudo systemctl stop nginx.service || true
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
@@ -79,6 +102,7 @@ docker-stop-back:
 	docker container stop 2023_1_seekers_cache_1 || true
 	docker container stop 2023_1_seekers_file_storage_1 || true
 	docker container stop 2023_1_seekers_node_exporter_1 || true
+	make docker-prune
 
 docker-stop-all:
 	@bash -c "docker kill $(shell eval docker ps -q)"
