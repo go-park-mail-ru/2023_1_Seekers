@@ -45,12 +45,11 @@ func encrypt(plaintext string) (string, error) {
 
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(cipherText[aes.BlockSize:], byteMsg)
-
-	return base64.StdEncoding.EncodeToString(cipherText), nil
+	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
 func decrypt(message string) (string, error) {
-	cipherText, err := base64.StdEncoding.DecodeString(message)
+	cipherText, err := base64.URLEncoding.DecodeString(message)
 	if err != nil {
 		return "", pkgErrors.Wrap(err, "could not base64 decode")
 	}

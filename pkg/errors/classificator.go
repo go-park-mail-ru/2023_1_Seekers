@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"net/http"
+	"syscall"
 )
 
 var (
@@ -76,6 +77,7 @@ var HttpCodes = map[string]int{
 	ErrMoveFromDraftFolder.Error():  http.StatusBadRequest,
 	ErrSomeEmailsAreInvalid.Error(): http.StatusBadRequest,
 	ErrBoxNotFound.Error():          http.StatusBadRequest,
+	syscall.EPIPE.Error():           http.StatusBadRequest,
 }
 
 var GRPCCodes = map[string]codes.Code{
@@ -110,6 +112,7 @@ var GRPCCodes = map[string]codes.Code{
 	ErrMoveToDraftFolder.Error():    codes.InvalidArgument,
 	ErrMoveFromDraftFolder.Error():  codes.InvalidArgument,
 	ErrSomeEmailsAreInvalid.Error(): codes.InvalidArgument,
+	syscall.EPIPE.Error():           codes.InvalidArgument,
 }
 
 var LogLevels = map[string]logrus.Level{
@@ -127,6 +130,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrFailedGetUser.Error():        logrus.WarnLevel,
 	ErrGetFile.Error():              logrus.WarnLevel,
 	ErrNoKey.Error():                logrus.WarnLevel,
+	syscall.EPIPE.Error():           logrus.WarnLevel,
 	ErrNoBucket.Error():             logrus.ErrorLevel,
 	ErrInvalidURL.Error():           logrus.WarnLevel,
 	ErrFolderNotFound.Error():       logrus.WarnLevel,
