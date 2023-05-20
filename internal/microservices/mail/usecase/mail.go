@@ -448,6 +448,30 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 		FolderID: folder.FolderID,
 	})
 
+	attachesInfo := make([]models.AttachmentInfo, len(message.Attachments))
+	for i, a := range message.Attachments {
+		raw, err := base64.StdEncoding.DecodeString(a.FileData)
+		if err != nil {
+			return nil, pkgErrors.Wrap(err, "failed base64 decode attach")
+		}
+
+		contentType := http.DetectContentType(raw)
+		fileSize := int64(len(raw))
+		attachesInfo[i] = models.AttachmentInfo{
+			FileName:  a.FileName,
+			FileData:  raw,
+			S3FName:   rand.FileName("", filepath.Ext(a.FileName)),
+			Type:      contentType,
+			SizeStr:   common.ByteSize2Str(fileSize),
+			SizeCount: fileSize,
+		}
+	}
+
+	var sumSize int64 = 0
+	for _, v := range attachesInfo {
+		sumSize += v.SizeCount
+	}
+
 	for _, email := range message.Recipients {
 		recipient, err := uc.userUC.GetInfoByEmail(email)
 		if err != nil {
@@ -489,12 +513,24 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 		CreatedAt:        common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat),
 		Text:             message.Text,
 		ReplyToMessageID: message.ReplyToMessageID,
+		Attachments:      attachesInfo,
+		AttachmentsSize:  common.ByteSize2Str(sumSize),
 		IsDraft:          true,
 	}
 
 	err = uc.mailRepo.InsertMessage(fromUserID, &newMessage, user2folder)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : insert message")
+	}
+
+	for _, a := range newMessage.Attachments {
+		if err := uc.fileUC.Upload(&models.S3File{
+			Bucket: uc.cfg.S3.S3AttachBucket,
+			Name:   a.S3FName,
+			Data:   a.FileData,
+		}); err != nil {
+			return nil, pkgErrors.Wrap(err, "send message : put to s3")
+		}
 	}
 
 	return uc.GetMessage(fromUserID, newMessage.MessageID)
@@ -615,6 +651,7 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 			SizeCount: fileSize,
 		}
 	}
+
 	var sumSize int64 = 0
 	for _, v := range attachesInfo {
 		sumSize += v.SizeCount

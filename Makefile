@@ -26,7 +26,6 @@ build-prod:
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
-	make perm-dirs
 	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
@@ -80,7 +79,6 @@ docker-stop-back:
 	docker container stop 2023_1_seekers_cache_1 || true
 	docker container stop 2023_1_seekers_file_storage_1 || true
 	docker container stop 2023_1_seekers_node_exporter_1 || true
-	#@make docker-prune
 
 docker-stop-all:
 	@bash -c "docker kill $(shell eval docker ps -q)"
