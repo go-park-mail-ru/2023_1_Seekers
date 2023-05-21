@@ -4,6 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -223,7 +224,7 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
-
+	message.Preview = common.GetInnerText(message.Text, m.cfg.Api.MailPreviewMaxLen)
 	return message, nil
 }
 

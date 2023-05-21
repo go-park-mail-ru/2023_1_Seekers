@@ -425,6 +425,8 @@ func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels4(in *
 			out.AttachmentsSize = string(in.String())
 		case "title":
 			out.Title = string(in.String())
+		case "preview":
+			out.Preview = string(in.String())
 		case "created_at":
 			out.CreatedAt = string(in.String())
 		case "text":
@@ -510,6 +512,11 @@ func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels4(out 
 		const prefix string = ",\"title\":"
 		out.RawString(prefix)
 		out.String(string(in.Title))
+	}
+	{
+		const prefix string = ",\"preview\":"
+		out.RawString(prefix)
+		out.String(string(in.Preview))
 	}
 	{
 		const prefix string = ",\"created_at\":"

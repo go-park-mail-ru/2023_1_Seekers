@@ -8,12 +8,13 @@ import (
 
 type Config struct {
 	Api struct {
-		Port        string `yaml:"port" env-default:"8001"`
-		MetricsPort string `yaml:"metrics_port" env-default:"9001"`
-		MetricsName string `yaml:"metrics_name" env-default:"api"`
-		MailHubCtx  string `yaml:"mail_hub_ctx" env-default:"hub"`
-		MailTplDir  string `yaml:"mail_tpl_dir" env-default:"./internal/api/http/templates/"`
-		Host        string `yaml:"host" env-default:"https://mailbx.ru"`
+		Port              string `yaml:"port" env-default:"8001"`
+		MetricsPort       string `yaml:"metrics_port" env-default:"9001"`
+		MetricsName       string `yaml:"metrics_name" env-default:"api"`
+		MailHubCtx        string `yaml:"mail_hub_ctx" env-default:"hub"`
+		MailTplDir        string `yaml:"mail_tpl_dir" env-default:"./internal/api/http/templates/"`
+		Host              string `yaml:"host" env-default:"https://mailbx.ru"`
+		MailPreviewMaxLen int    `yaml:"mail_preview_max_len" env-default:"60"`
 	} `yaml:"api"`
 
 	Project struct {

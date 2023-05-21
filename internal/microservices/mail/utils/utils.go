@@ -92,6 +92,7 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Deleted:          info.Deleted,
 		Attachments:      protoAttaches,
 		AttachmentsSize:  info.AttachmentsSize,
+		Preview:          info.Preview,
 	}
 }
 
@@ -146,6 +147,7 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		Deleted:          protoMessageInfo.Deleted,
 		Attachments:      attaches,
 		AttachmentsSize:  protoMessageInfo.AttachmentsSize,
+		Preview:          protoMessageInfo.Preview,
 	}
 }
 

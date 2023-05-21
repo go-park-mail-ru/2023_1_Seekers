@@ -5,6 +5,7 @@ api:
   mail_hub_ctx: hub
   mail_tpl_dir: ./internal/api/http/templates/
   host: https://mailbx.ru
+  mail_preview_max_len: 60
 
 project:
   project_base_dir: 2023_1_Seekers

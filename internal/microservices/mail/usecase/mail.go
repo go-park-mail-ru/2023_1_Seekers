@@ -82,6 +82,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 	}
 
 	for i, message := range messages {
+		messages[i].Preview = common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen)
 		messageID := message.MessageID
 
 		fromUser, err := uc.userUC.GetInfo(message.FromUser.UserID)
@@ -129,6 +130,7 @@ func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folder, filter
 	}
 
 	for i, message := range messages {
+		message.Preview = common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen)
 		messageID := message.MessageID
 
 		fromUser, err := uc.userUC.GetInfo(message.FromUser.UserID)
@@ -366,6 +368,7 @@ func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageIn
 
 	firstMessage.Attachments = attaches
 	firstMessage.AttachmentsSize = common.ByteSize2Str(sumSize)
+	firstMessage.Preview = common.GetInnerText(firstMessage.Text, uc.cfg.Api.MailPreviewMaxLen)
 	return firstMessage, nil
 }
 
@@ -515,6 +518,7 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 		ReplyToMessageID: message.ReplyToMessageID,
 		Attachments:      attachesInfo,
 		AttachmentsSize:  common.ByteSize2Str(sumSize),
+		Preview:          common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen),
 		IsDraft:          true,
 	}
 
@@ -596,6 +600,7 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	message.Text = formMessage.Text
 	message.ReplyToMessageID = formMessage.ReplyToMessageID
 	message.CreatedAt = common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat)
+	message.Preview = common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen)
 
 	if err := uc.mailRepo.UpdateMessage(message, toInsert, toDelete); err != nil {
 		return nil, pkgErrors.Wrap(err, "edit draft : update message")
@@ -664,6 +669,7 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 		Attachments:      attachesInfo,
 		AttachmentsSize:  common.ByteSize2Str(sumSize),
 		ReplyToMessageID: message.ReplyToMessageID,
+		Preview:          common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen),
 	}
 
 	for _, recipient := range message.Recipients {

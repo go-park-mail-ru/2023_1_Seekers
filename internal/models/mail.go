@@ -23,6 +23,7 @@ type MessageInfo struct {
 	Attachments      []AttachmentInfo `json:"attachments" gorm:"-"`
 	AttachmentsSize  string           `json:"attachmentsSize" gorm:"-"`
 	Title            string           `json:"title"`
+	Preview          string           `json:"preview"`
 	CreatedAt        string           `json:"created_at"`
 	Text             string           `json:"text"`
 	ReplyToMessageID *uint64          `json:"-" gorm:"null"`
