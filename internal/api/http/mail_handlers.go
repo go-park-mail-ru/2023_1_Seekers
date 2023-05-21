@@ -47,6 +47,7 @@ type MailHandlersI interface {
 	GetAttach(w http.ResponseWriter, r *http.Request)
 	PreviewAttach(w http.ResponseWriter, r *http.Request)
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
+	DeleteDraftAttach(w http.ResponseWriter, r *http.Request)
 	//File(w http.ResponseWriter, r *http.Request)
 }
 
@@ -902,6 +903,48 @@ func (h *mailHandlers) GetAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", attach.Type)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// DeleteDraftAttach godoc
+// @Summary      DeleteDraftAttach
+// @Description  delete draft attach with attachID
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success get attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/attach/{id} [delete]
+func (h *mailHandlers) DeleteDraftAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+	w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
 
 	w.WriteHeader(http.StatusOK)
 

@@ -239,6 +239,14 @@ func ProtoSaveDraftParamsByModels(uID uint64, form *models.FormMessage) *mail_pr
 		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}
 	}
 
+	attaches := make([]*mail_proto.Attachment, len(form.Attachments))
+	for i, a := range form.Attachments {
+		attaches[i] = &mail_proto.Attachment{
+			FileName: a.FileName,
+			FileData: a.FileData,
+		}
+	}
+
 	return &mail_proto.SaveDraftParams{
 		UID: uID,
 		Message: &mail_proto.Message{
@@ -246,6 +254,7 @@ func ProtoSaveDraftParamsByModels(uID uint64, form *models.FormMessage) *mail_pr
 			Title:            form.Title,
 			Text:             form.Text,
 			ReplyToMessageID: replyMessageID,
+			Attachments:      attaches,
 		},
 	}
 }

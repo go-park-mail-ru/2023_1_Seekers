@@ -41,6 +41,7 @@ type MailServiceClient interface {
 	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 	GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 	GetAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error)
+	DeleteDraftAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*Nothing, error)
 }
 
 type mailServiceClient struct {
@@ -258,6 +259,15 @@ func (c *mailServiceClient) GetAttach(ctx context.Context, in *AttNUser, opts ..
 	return out, nil
 }
 
+func (c *mailServiceClient) DeleteDraftAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*Nothing, error) {
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/DeleteDraftAttach", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -285,6 +295,7 @@ type MailServiceServer interface {
 	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
 	GetCustomFolders(context.Context, *UID) (*FoldersResponse, error)
 	GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error)
+	DeleteDraftAttach(context.Context, *AttNUser) (*Nothing, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -360,6 +371,9 @@ func (UnimplementedMailServiceServer) GetCustomFolders(context.Context, *UID) (*
 }
 func (UnimplementedMailServiceServer) GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttach not implemented")
+}
+func (UnimplementedMailServiceServer) DeleteDraftAttach(context.Context, *AttNUser) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDraftAttach not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -788,6 +802,24 @@ func _MailService_GetAttach_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_DeleteDraftAttach_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttNUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).DeleteDraftAttach(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/DeleteDraftAttach",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).DeleteDraftAttach(ctx, req.(*AttNUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -886,6 +918,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAttach",
 			Handler:    _MailService_GetAttach_Handler,
+		},
+		{
+			MethodName: "DeleteDraftAttach",
+			Handler:    _MailService_DeleteDraftAttach_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

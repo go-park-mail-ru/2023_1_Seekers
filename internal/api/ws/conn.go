@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"net/http"
 	"time"
@@ -71,9 +70,7 @@ func (s Subscription) writePump() {
 				return
 			}
 		case <-ticker.C:
-			fmt.Println("PING")
 			if err := c.writeType(websocket.PingMessage); err != nil {
-				fmt.Println("failed to ping", err)
 				return
 			}
 		}
