@@ -1,6 +1,7 @@
 package http
 
 import (
+	"archive/zip"
 	"bytes"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
+	pkgZip "github.com/go-park-mail-ru/2023_1_Seekers/pkg/zip"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/mailru/easyjson"
@@ -21,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type MailHandlersI interface {
@@ -40,6 +43,7 @@ type MailHandlersI interface {
 	MoveToFolder(w http.ResponseWriter, r *http.Request)
 	EditDraft(w http.ResponseWriter, r *http.Request)
 	DownloadAttach(w http.ResponseWriter, r *http.Request)
+	DownloadAllAttaches(w http.ResponseWriter, r *http.Request)
 	GetAttach(w http.ResponseWriter, r *http.Request)
 	PreviewAttach(w http.ResponseWriter, r *http.Request)
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
@@ -787,6 +791,78 @@ func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// DownloadAllAttaches godoc
+// @Summary      DownloadAllAttaches
+// @Description  download all attaches as zip, get messageID
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/attaches [get]
+func (h *mailHandlers) DownloadAllAttaches(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	messageID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	msg, err := h.uc.GetMessage(userID, messageID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	var zipArch bytes.Buffer
+
+	zipWriter := zip.NewWriter(&zipArch)
+	if len(msg.Attachments) == 0 {
+		pkgHttp.HandleError(w, r, errors.ErrMessageNotFound)
+		return
+	} else {
+		for _, a := range msg.Attachments {
+			attach, err := h.uc.GetAttach(a.AttachID, userID)
+			if err != nil {
+				pkgHttp.HandleError(w, r, err)
+				return
+			}
+			if err := pkgZip.Append2Zip(attach.FileName, attach.FileData, zipWriter); err != nil {
+				pkgHttp.HandleError(w, r, err)
+				return
+			}
+		}
+	}
+	zipWriter.Close()
+
+	//fmt.Println("AFTER", zipArch.Bytes())
+
+	// Use layout string for time format.
+	const layout = "01-02-2006"
+	// Place now in the string.
+	t := time.Now()
+	archiveName := "mailbx-archive-" + t.Format(layout) + ".zip"
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", "attachment; filename="+archiveName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(zipArch.Bytes())
 	if err != nil {
 		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
 		return

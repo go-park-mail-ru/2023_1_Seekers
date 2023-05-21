@@ -152,10 +152,6 @@ func (s *Session) Data(r io.Reader) error {
 			if err != nil {
 				return errors.Wrap(err, "smtp send message : create default folders for external user")
 			}
-
-			if err != nil {
-				return errors.Wrap(err, "failed create external user")
-			}
 		}
 	}
 

@@ -24,7 +24,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 		globalLogger.Log(logLevel, err)
 	}
 
-	if pkgErr.Is(causeErr, syscall.EPIPE) {
+	if pkgErr.Is(causeErr, syscall.EPIPE) || pkgErr.Is(causeErr, http.ErrHandlerTimeout) {
 		return
 	}
 

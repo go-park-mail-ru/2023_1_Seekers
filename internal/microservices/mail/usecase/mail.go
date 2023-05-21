@@ -675,6 +675,34 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 			if err := client.SendMail(fromUser, recipient, &newMessage, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword); err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : to other mail service")
 			}
+			var recipientU *models.User
+			if recipientU, err = uc.userUC.GetByEmail(recipient); err != nil {
+				recipientU, err = uc.userUC.Create(&models.User{
+					Email:      recipient,
+					Password:   uc.cfg.UserService.ExternalUserPassword,
+					FirstName:  "",
+					LastName:   "",
+					IsExternal: true,
+				})
+				if err != nil {
+					return nil, pkgErrors.Wrap(err, "mail service - send message : create external user")
+				}
+
+				_, err = uc.CreateDefaultFolders(recipientU.UserID)
+				if err != nil {
+					return nil, pkgErrors.Wrap(err, "mail service - send message  : create default folders for external user")
+				}
+			}
+
+			folder, err := uc.GetFolderInfo(recipientU.UserID, "inbox")
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "send message - external: get folder by UId and FolderSlug")
+			}
+
+			user2folder = append(user2folder, models.User2Folder{
+				UserID:   recipientU.UserID,
+				FolderID: folder.FolderID,
+			})
 		} else {
 			recipient, err := uc.userUC.GetInfoByEmail(recipient)
 			if err != nil {

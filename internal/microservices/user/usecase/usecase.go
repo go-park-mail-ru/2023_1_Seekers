@@ -59,7 +59,13 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	}
 
 	col := image.GetRandColor()
-	label := common.GetFirstUtf(user.FirstName)
+	var label string
+	if len(user.FirstName) == 0 || len(user.LastName) == 0 {
+		label = common.GetFirstUtf(user.Email)
+	} else {
+		label = common.GetFirstUtf(user.FirstName + user.LastName)
+	}
+
 	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "Create user - generate avatar")
