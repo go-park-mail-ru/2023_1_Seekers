@@ -126,6 +126,7 @@ cors:
     - X-Csrf-Token
     - application/json
     - text/xml
+    - Content-Disposition
   allowed_origins:
     - http://127.0.0.1:8002
     - http://localhost:8002
