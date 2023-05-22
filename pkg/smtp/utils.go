@@ -52,7 +52,7 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			if disp == "attachment" {
 				fmt.Println(headers["filename"])
 				bytesBody, _ := io.ReadAll(p.Body)
-				fmt.Println(bytesBody)
+				fmt.Println(string(bytesBody))
 			}
 
 			//if p.Header.ContentDisposition() == "attachment" {
