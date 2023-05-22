@@ -45,7 +45,8 @@ func GetMessageBody(mailBody []byte) (string, error) {
 
 			t, _, _ := p.Header.ContentType()
 			fmt.Println("DISPOSITION", t)
-			fmt.Println(p.Header.ContentDisposition())
+			disp, headers, err := p.Header.ContentDisposition()
+			fmt.Println(disp, headers)
 			//if p.Header.ContentDisposition() == "attachment" {
 			//	fmt.Println("attachment")
 			//	fmt.Println(p.Header)
