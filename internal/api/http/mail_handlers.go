@@ -3,6 +3,7 @@ package http
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
@@ -48,6 +49,7 @@ type MailHandlersI interface {
 	PreviewAttach(w http.ResponseWriter, r *http.Request)
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
 	DeleteDraftAttach(w http.ResponseWriter, r *http.Request)
+	GetAttachB64(w http.ResponseWriter, r *http.Request)
 	//File(w http.ResponseWriter, r *http.Request)
 }
 
@@ -796,6 +798,44 @@ func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
 		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
 		return
 	}
+}
+
+// GetAttachB64 godoc
+// @Summary      GetAttachB64
+// @Description  get attach in base64
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id} [get]
+func (h *mailHandlers) GetAttachB64(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	attachB64 := models.Attachment{FileName: attach.FileName, FileData: base64.StdEncoding.EncodeToString(attach.FileData)}
+	w.Header().Set("Content-Type", common.ContentTypeJSON)
+	w.WriteHeader(http.StatusOK)
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, attachB64)
 }
 
 // DownloadAllAttaches godoc

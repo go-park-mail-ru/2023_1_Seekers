@@ -43,6 +43,7 @@ func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, 
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteSaveDraftMessage, m.CheckAuth(m.CheckCSRF(mailH.SaveDraft))).Methods(http.MethodPost)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMessage, m.CheckAuth(m.CheckCSRF(mailH.EditDraft))).Methods(http.MethodPut)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteAttach, m.CheckAuth(m.CheckCSRF(mailH.DownloadAttach))).Methods(http.MethodGet)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteAttachB64, m.CheckAuth(m.CheckCSRF(mailH.GetAttachB64))).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteMessageAttaches, m.CheckAuth(m.CheckCSRF(mailH.DownloadAllAttaches))).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RoutePreviewAttach, m.CheckAuth(m.CheckCSRF(mailH.PreviewAttach))).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteExternalAttach, mailH.GetAttach).Methods(http.MethodGet)

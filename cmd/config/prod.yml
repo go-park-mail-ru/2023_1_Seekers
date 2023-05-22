@@ -79,6 +79,7 @@ routes:
 
   route_message: /message/{id:[0-9]+}
   route_attach: /attach/{id:[0-9]+}
+  route_attach_b64: /attach/{id:[0-9]+}/b64
   route_message_attaches: /message/{id:[0-9]+}/attaches
   route_external_attach: /external/attach/{id:[0-9]+}
   route_preview_attach: /attach/{id:[0-9]+}/preview
