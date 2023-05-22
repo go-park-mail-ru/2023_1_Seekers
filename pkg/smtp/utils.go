@@ -85,7 +85,12 @@ func GetMessageBody(mailBody []byte) (string, error) {
 		messageBody = htmlBody
 	}
 
+	fmt.Println("BEFORE", messageBody)
+
 	messageBody = strings.ReplaceAll(messageBody, "<HTML><BODY>", "")
 	messageBody = strings.ReplaceAll(messageBody, "</BODY></HTML>", "")
+	fmt.Println("AFTER", messageBody)
+	a, _ := pkgJson.Escape(messageBody)
+	fmt.Println("GOT", a)
 	return pkgJson.Escape(messageBody)
 }
