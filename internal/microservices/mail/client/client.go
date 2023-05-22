@@ -245,7 +245,7 @@ func (g MailClientGRPC) SaveDraft(userID uint64, message models.FormMessage) (*m
 	return utils.MessageInfoByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) EditDraft(userID, messageID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (g MailClientGRPC) EditDraft(userID, messageID uint64, message models.FormEditMessage) (*models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.EditDraft(context.TODO(), utils.ProtoEditDraftParamsByModels(userID, messageID, &message))
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - EditDraft"))

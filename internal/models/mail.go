@@ -67,11 +67,30 @@ type FormMessage struct {
 	Attachments      []Attachment `json:"attachments"`
 }
 
+type FormEditMessage struct {
+	FromUser          string       `json:"from_user" validate:"required"`
+	Recipients        []string     `json:"recipients" validate:"required"`
+	Title             string       `json:"title"`
+	Text              string       `json:"text"`
+	ReplyToMessageID  *uint64      `json:"reply_to"`
+	NewAttachments    []Attachment `json:"newAttaches"`
+	DeleteAttachments []uint64     `json:"deleteAttachments"`
+}
+
 type FormSearchMessages struct {
 	FromUser string `json:"fromUser"`
 	ToUser   string `json:"toUser"`
 	Folder   string `json:"folder"`
 	Filter   string `json:"filter"`
+}
+
+func (form *FormEditMessage) Sanitize() {
+	form.Title = html.EscapeString(form.Title)
+	sanitizer := bluemonday.UGCPolicy()
+	form.Text = sanitizer.Sanitize(form.Text)
+	for i, s := range form.Recipients {
+		form.Recipients[i] = html.EscapeString(s)
+	}
 }
 
 func (form *FormMessage) Sanitize() {

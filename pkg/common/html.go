@@ -14,14 +14,14 @@ func GetInnerText(htmlText string, maxLen int) string {
 		tt := tkn.Next()
 		if len(data) > maxLen {
 			data = strings.TrimLeft(data, " ")
-			return data[:maxLen]
+			return string([]rune(data)[:maxLen])
 		}
 
 		switch {
 		case tt == html.ErrorToken:
 			data = strings.TrimLeft(data, " ")
 			if len(data) > maxLen {
-				return data[:maxLen]
+				return string([]rune(data)[:maxLen])
 			} else {
 				return data
 			}

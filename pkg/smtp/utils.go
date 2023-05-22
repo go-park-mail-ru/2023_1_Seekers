@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/emersion/go-message"
+	pkgJson "github.com/go-park-mail-ru/2023_1_Seekers/pkg/json"
 	"github.com/pkg/errors"
 	"io"
 	"strings"
@@ -43,6 +44,12 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			}
 
 			t, _, _ := p.Header.ContentType()
+			if t == "attachment" {
+				fmt.Println("attachment")
+				fmt.Println(p.Header)
+				fmt.Println(p.Body)
+			}
+
 			if t == "text/html" {
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
@@ -72,9 +79,9 @@ func GetMessageBody(mailBody []byte) (string, error) {
 		}
 	}
 
-	if len(messageBody) == 0 && len(htmlBody) > 0 {
-		messageBody = htmlBody
+	if len(htmlBody) > 0 {
+		htmlBody = messageBody
 	}
 
-	return messageBody, nil
+	return pkgJson.Escape(messageBody)
 }

@@ -213,7 +213,7 @@ func (g *MailServerGRPC) SaveDraft(ctx context.Context, protoParams *mail_proto.
 }
 
 func (g *MailServerGRPC) EditDraft(ctx context.Context, protoParams *mail_proto.EditDraftParams) (*mail_proto.MessageInfo, error) {
-	info, err := g.mailUC.EditDraft(protoParams.UID, protoParams.MessageID, utils.MessageModelByProto(protoParams.Message))
+	info, err := g.mailUC.EditDraft(protoParams.UID, protoParams.MessageID, utils.EditMessageModelByProto(protoParams.Message))
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}

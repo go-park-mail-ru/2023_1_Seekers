@@ -724,7 +724,7 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := models.FormMessage{}
+	form := models.FormEditMessage{}
 	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return

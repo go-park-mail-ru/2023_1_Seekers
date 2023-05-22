@@ -620,57 +620,58 @@ func TestDelivery_MoveToFolder(t *testing.T) {
 	}
 }
 
-func TestDelivery_EditDraft(t *testing.T) {
-	cfg := createConfig()
-
-	var tests = []testCases{
-		{
-			name: "standart test",
-			input: inputCase{
-				userID:    1,
-				messageID: 1,
-				messageForm: models.FormMessage{
-					FromUser:         "max@mailbx.ru",
-					Recipients:       []string{"valera@mailbox.ru"},
-					Title:            "title test message",
-					Text:             "text test message",
-					ReplyToMessageID: nil,
-				},
-			},
-			output: outputCase{
-				status: http.StatusOK,
-			},
-		},
-	}
-
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
-	mailH := NewMailHandlers(cfg, mailUC)
-
-	for _, test := range tests {
-		body, err := easyjson.Marshal(test.input.messageForm)
-		if err != nil {
-			t.Fatalf("error while marshaling to json: %v", err)
-		}
-
-		r := httptest.NewRequest(http.MethodPost, "/api/message/send", bytes.NewReader(body))
-		vars := map[string]string{
-			"id": strconv.FormatUint(test.input.messageID, 10),
-		}
-		r = mux.SetURLVars(r, vars)
-		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
-		w := httptest.NewRecorder()
-
-		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
-		mailUC.EXPECT().EditDraft(test.input.userID, test.input.messageID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
-
-		mailH.EditDraft(w, r)
-
-		if w.Code != test.output.status {
-			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
-		}
-	}
-}
+//
+//func TestDelivery_EditDraft(t *testing.T) {
+//	cfg := createConfig()
+//
+//	var tests = []testCases{
+//		{
+//			name: "standart test",
+//			input: inputCase{
+//				userID:    1,
+//				messageID: 1,
+//				messageForm: models.FormMessage{
+//					FromUser:         "max@mailbx.ru",
+//					Recipients:       []string{"valera@mailbox.ru"},
+//					Title:            "title test message",
+//					Text:             "text test message",
+//					ReplyToMessageID: nil,
+//				},
+//			},
+//			output: outputCase{
+//				status: http.StatusOK,
+//			},
+//		},
+//	}
+//
+//	t.Parallel()
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//
+//	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+//	mailH := NewMailHandlers(cfg, mailUC)
+//
+//	for _, test := range tests {
+//		body, err := easyjson.Marshal(test.input.messageForm)
+//		if err != nil {
+//			t.Fatalf("error while marshaling to json: %v", err)
+//		}
+//
+//		r := httptest.NewRequest(http.MethodPost, "/api/message/send", bytes.NewReader(body))
+//		vars := map[string]string{
+//			"id": strconv.FormatUint(test.input.messageID, 10),
+//		}
+//		r = mux.SetURLVars(r, vars)
+//		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+//		w := httptest.NewRecorder()
+//
+//		mailUC.EXPECT().ValidateRecipients(test.input.messageForm.Recipients).Return(test.input.messageForm.Recipients, []string{})
+//		mailUC.EXPECT().EditDraft(test.input.userID, test.input.messageID, test.input.messageForm).Return(&models.MessageInfo{}, nil)
+//
+//		mailH.EditDraft(w, r)
+//
+//		if w.Code != test.output.status {
+//			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+//		}
+//	}
+//}

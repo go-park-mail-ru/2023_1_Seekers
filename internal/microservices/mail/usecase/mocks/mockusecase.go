@@ -93,7 +93,7 @@ func (mr *MockUseCaseIMockRecorder) DeleteMessage(userID, messageID, folderSlug 
 }
 
 // EditDraft mocks base method.
-func (m *MockUseCaseI) EditDraft(userID, messageID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) EditDraft(userID, messageID uint64, message models.FormEditMessage) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EditDraft", userID, messageID, message)
 	ret0, _ := ret[0].(*models.MessageInfo)

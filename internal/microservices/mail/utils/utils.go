@@ -160,6 +160,31 @@ func MessagesInfoModelByProto(protoResponse *mail_proto.MessagesInfoResponse) []
 	return msgInfo
 }
 
+func EditMessageModelByProto(protoMsg *mail_proto.Message) models.FormEditMessage {
+	var replyMessageID *uint64 = nil
+	if protoMsg.ReplyToMessageID != nil {
+		replyMessageID = &protoMsg.ReplyToMessageID.UID
+	}
+
+	attaches := make([]models.Attachment, len(protoMsg.Attachments))
+	for i, a := range protoMsg.Attachments {
+		attaches[i] = models.Attachment{
+			FileName: a.FileName,
+			FileData: a.FileData,
+		}
+	}
+
+	return models.FormEditMessage{
+		FromUser:         protoMsg.FromUser,
+		Recipients:       protoMsg.Recipients,
+		Title:            protoMsg.Title,
+		Text:             protoMsg.Text,
+		ReplyToMessageID: replyMessageID,
+		NewAttachments:   attaches,
+		//TODO DeleteAttachments:
+	}
+}
+
 func MessageModelByProto(protoMsg *mail_proto.Message) models.FormMessage {
 	var replyMessageID *uint64 = nil
 	if protoMsg.ReplyToMessageID != nil {
@@ -261,7 +286,8 @@ func ProtoSaveDraftParamsByModels(uID uint64, form *models.FormMessage) *mail_pr
 	}
 }
 
-func ProtoEditDraftParamsByModels(uID, messageId uint64, form *models.FormMessage) *mail_proto.EditDraftParams {
+func ProtoEditDraftParamsByModels(uID, messageId uint64, form *models.FormEditMessage) *mail_proto.EditDraftParams {
+	//TODO
 	var replyMessageID *mail_proto.UID = nil
 	if form.ReplyToMessageID != nil {
 		replyMessageID = &mail_proto.UID{UID: *form.ReplyToMessageID}

@@ -558,7 +558,8 @@ func (uc *mailUC) mapRecipients(newRecipients []string, oldMessage *models.Messa
 	return recipients
 }
 
-func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormMessage) (*models.MessageInfo, error) {
+func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormEditMessage) (*models.MessageInfo, error) {
+	//TODO
 	message, err := uc.GetMessage(fromUserID, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message")
@@ -574,12 +575,12 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	for email, value := range recipients {
 		recipient, err := uc.userUC.GetInfoByEmail(email)
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message : get user info by email")
+			return nil, pkgErrors.Wrap(err, "edit draft : get user info by email")
 		}
 
 		folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+			return nil, pkgErrors.Wrap(err, "edit draft: get folder by UId and FolderSlug")
 		}
 
 		switch value {

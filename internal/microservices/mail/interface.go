@@ -23,7 +23,7 @@ type UseCaseI interface {
 	ValidateRecipients(recipients []string) ([]string, []string)
 	SendMessage(userId uint64, message models.FormMessage) (*models.MessageInfo, error)
 	SaveDraft(userID uint64, message models.FormMessage) (*models.MessageInfo, error)
-	EditDraft(userID uint64, messageID uint64, message models.FormMessage) (*models.MessageInfo, error)
+	EditDraft(userID uint64, messageID uint64, message models.FormEditMessage) (*models.MessageInfo, error)
 	SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error)
 	SendWelcomeMessage(recipientEmail string) error
 	MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)

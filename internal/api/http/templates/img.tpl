@@ -8,7 +8,7 @@
 </head>
 <body>
 <main>
-    <p><b>{{.FileName}} <a href{{.FileDownload}}>скачать</a></b></p>
+    <p><b>{{.FileName}} <a href="{{.FileDownload}}">скачать</a></b></p>
     <img src="{{.FilePath}}" alt="Вложение MailBx">
 </main>
 </body>

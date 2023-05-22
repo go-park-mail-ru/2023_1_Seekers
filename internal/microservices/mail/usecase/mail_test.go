@@ -707,7 +707,7 @@ func TestUseCase_EditDraft(t *testing.T) {
 	var mockFolderResponse [2]models.Folder
 	generateFakeData(&mockFolderResponse)
 
-	formMessage := models.FormMessage{
+	formMessage := models.FormEditMessage{
 		Recipients:       []string{mockUserResponse[2].Email},
 		Title:            "test",
 		Text:             "test text",
