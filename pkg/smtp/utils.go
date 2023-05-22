@@ -28,6 +28,9 @@ func ParseLogin(emailAddr string) (string, error) {
 	return login, nil
 }
 
+type Attach struct {
+}
+
 func GetMessageBody(mailBody []byte) (string, error) {
 	m, err := message.Read(bytes.NewReader(mailBody))
 	if err != nil {
@@ -44,10 +47,14 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			}
 
 			t, _, _ := p.Header.ContentType()
-			fmt.Println("DISPOSITION", t)
+
 			disp, headers, err := p.Header.ContentDisposition()
-			fmt.Println(disp)
-			fmt.Println(headers)
+			if disp == "attachment" {
+				fmt.Println(headers["filename"])
+				bytesBody, _ := io.ReadAll(p.Body)
+				fmt.Println(bytesBody)
+			}
+
 			//if p.Header.ContentDisposition() == "attachment" {
 			//	fmt.Println("attachment")
 			//	fmt.Println(p.Header)
