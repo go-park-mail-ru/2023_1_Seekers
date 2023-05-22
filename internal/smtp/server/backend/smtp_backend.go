@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
@@ -186,6 +187,7 @@ func (s *Session) Data(r io.Reader) error {
 
 		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
 		if err != nil {
+			fmt.Println(message, err)
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}
 
