@@ -49,7 +49,8 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 			t, _, _ := p.Header.ContentType()
 
 			disp, headers, err := p.Header.ContentDisposition()
-			if disp == "attachment" {
+
+			if err != nil && disp == "attachment" {
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
 					return "", nil, errors.Wrap(err, "failed read attach content")
@@ -102,13 +103,8 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 		messageBody = htmlBody
 	}
 
-	fmt.Println("BEFORE", messageBody)
-
 	messageBody = strings.ReplaceAll(messageBody, "<HTML><BODY>", "")
 	messageBody = strings.ReplaceAll(messageBody, "</BODY></HTML>", "")
-	fmt.Println("AFTER", messageBody)
-	a, _ := pkgJson.Escape(messageBody)
-	fmt.Println("GOT", a)
 	body, err := pkgJson.Escape(messageBody)
 	if err != nil {
 		return "", nil, errors.Wrap(err, "failed escape body")
