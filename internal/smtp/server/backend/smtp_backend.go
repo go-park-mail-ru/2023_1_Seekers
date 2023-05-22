@@ -181,6 +181,7 @@ func (s *Session) Data(r io.Reader) error {
 			Title:            msgData.Subject,
 			Text:             msgData.Body,
 			ReplyToMessageID: nil,
+			Attachments:      nil,
 		}
 
 		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
