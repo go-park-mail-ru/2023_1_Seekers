@@ -748,7 +748,7 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 		}
 	}
 
-	return uc.GetMessage(fromUser.UserID, newMessage.MessageID)
+	return &newMessage, nil
 }
 
 func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {

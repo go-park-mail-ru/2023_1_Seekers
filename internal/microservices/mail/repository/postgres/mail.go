@@ -224,6 +224,7 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
+
 	message.Preview = common.GetInnerText(message.Text, m.cfg.Api.MailPreviewMaxLen)
 	return message, nil
 }
