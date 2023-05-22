@@ -53,7 +53,7 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 			fmt.Println(disp)
 			fmt.Println(headers)
 
-			if err != nil && disp == "attachment" {
+			if err == nil && disp == "attachment" {
 				fmt.Println("GOT ATTACH")
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
