@@ -51,6 +51,7 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 			disp, headers, err := p.Header.ContentDisposition()
 
 			if err != nil && disp == "attachment" {
+				fmt.Println("GOT ATTACH")
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
 					return "", nil, errors.Wrap(err, "failed read attach content")
@@ -61,7 +62,7 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 					FileName: filename,
 					FileData: data,
 				})
-				continue
+				fmt.Println("GOT ATTACH", attaches)
 			}
 
 			//if p.Header.ContentDisposition() == "attachment" {
