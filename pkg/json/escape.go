@@ -1,12 +1,15 @@
 package json
 
-import "encoding/json"
+import (
+	"strings"
+)
 
 func Escape(i string) (string, error) {
-	b, err := json.Marshal(i)
-	if err != nil {
-		return "", err
-	}
-	s := string(b)
-	return s[1 : len(s)-1], nil
+	return strings.ReplaceAll(i, "\"", "\\\""), nil
+	//b, err := json.Marshal(i)
+	//if err != nil {
+	//	return "", err
+	//}
+	//s := string(b)
+	//return s[1 : len(s)-1], nil
 }
