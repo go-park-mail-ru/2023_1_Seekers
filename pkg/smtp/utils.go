@@ -53,6 +53,7 @@ func GetMessageBody(mailBody []byte) (string, error) {
 
 			if t == "text/html" {
 				bytesBody, err := io.ReadAll(p.Body)
+				fmt.Println("html ...", string(bytesBody))
 				if err != nil {
 					return "", errors.Wrap(err, "failed read text/html content")
 				}
@@ -83,6 +84,7 @@ func GetMessageBody(mailBody []byte) (string, error) {
 	if len(htmlBody) > 0 {
 		messageBody = htmlBody
 	}
-
+	fmt.Println("MAIL", messageBody)
+	fmt.Println("HTML", htmlBody)
 	return pkgJson.Escape(messageBody)
 }
