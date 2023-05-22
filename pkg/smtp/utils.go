@@ -31,6 +31,7 @@ func ParseLogin(emailAddr string) (string, error) {
 }
 
 func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
+	fmt.Println(string(mailBody))
 	m, err := message.Read(bytes.NewReader(mailBody))
 	if err != nil {
 		return "", nil, errors.Wrap(err, "failed to read mail body")
