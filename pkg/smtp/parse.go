@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/pkg/errors"
 	"io"
 	"mime"
@@ -14,6 +15,7 @@ type Message struct {
 	FromName string
 	Subject  string
 	Body     string
+	Attaches []models.Attachment
 }
 
 func ParseMail(bytesMail []byte) (*Message, error) {
@@ -33,7 +35,7 @@ func ParseMail(bytesMail []byte) (*Message, error) {
 		resultMessage.Subject = decodedSubject
 	}
 
-	messageBody, err := GetMessageBody(bytesMail)
+	messageBody, attaches, err := GetMessageBody(bytesMail)
 	if err != nil {
 		bytesBody, err := io.ReadAll(entity.Body)
 		if err != nil {
@@ -44,6 +46,7 @@ func ParseMail(bytesMail []byte) (*Message, error) {
 	}
 
 	resultMessage.Body = messageBody
+	resultMessage.Attaches = attaches
 
 	fromString := entity.Header.Get("From")
 	addr, err := mail.ParseAddress(fromString)

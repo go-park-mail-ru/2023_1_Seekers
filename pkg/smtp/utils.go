@@ -2,8 +2,10 @@ package smtp
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/emersion/go-message"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgJson "github.com/go-park-mail-ru/2023_1_Seekers/pkg/json"
 	"github.com/pkg/errors"
 	"io"
@@ -28,16 +30,14 @@ func ParseLogin(emailAddr string) (string, error) {
 	return login, nil
 }
 
-type Attach struct {
-}
-
-func GetMessageBody(mailBody []byte) (string, error) {
+func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 	m, err := message.Read(bytes.NewReader(mailBody))
 	if err != nil {
-		return "", errors.Wrap(err, "failed to read mail body")
+		return "", nil, errors.Wrap(err, "failed to read mail body")
 	}
 	var messageBody string
 	var htmlBody string
+	var attaches []models.Attachment
 	if mr := m.MultipartReader(); mr != nil {
 		// This is a multipart message
 		for {
@@ -50,9 +50,17 @@ func GetMessageBody(mailBody []byte) (string, error) {
 
 			disp, headers, err := p.Header.ContentDisposition()
 			if disp == "attachment" {
-				fmt.Println(headers["filename"])
-				bytesBody, _ := io.ReadAll(p.Body)
-				fmt.Println(string(bytesBody))
+				bytesBody, err := io.ReadAll(p.Body)
+				if err != nil {
+					return "", nil, errors.Wrap(err, "failed read attach content")
+				}
+				data := base64.StdEncoding.EncodeToString(bytesBody)
+				filename := headers["filename"]
+				attaches = append(attaches, models.Attachment{
+					FileName: filename,
+					FileData: data,
+				})
+				continue
 			}
 
 			//if p.Header.ContentDisposition() == "attachment" {
@@ -64,13 +72,13 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			if t == "text/html" {
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
-					return "", errors.Wrap(err, "failed read text/html content")
+					return "", nil, errors.Wrap(err, "failed read text/html content")
 				}
 				htmlBody = string(bytesBody)
 			} else if t == "text/plain" {
 				bytesBody, err := io.ReadAll(p.Body)
 				if err != nil {
-					return "", errors.Wrap(err, "failed read text/plain content")
+					return "", nil, errors.Wrap(err, "failed read text/plain content")
 				}
 				messageBody = string(bytesBody)
 			}
@@ -78,12 +86,12 @@ func GetMessageBody(mailBody []byte) (string, error) {
 	} else {
 		t, _, err := m.Header.ContentType()
 		if err != nil {
-			return "", errors.Wrap(err, "failed get content type of non multipart message")
+			return "", nil, errors.Wrap(err, "failed get content type of non multipart message")
 		}
 		if t == "text/plain" || t == "text/html" {
 			bytesBody, err := io.ReadAll(m.Body)
 			if err != nil {
-				return "", errors.Wrap(err, "failed read non multipart message body")
+				return "", nil, errors.Wrap(err, "failed read non multipart message body")
 			}
 
 			messageBody = string(bytesBody)
@@ -101,5 +109,10 @@ func GetMessageBody(mailBody []byte) (string, error) {
 	fmt.Println("AFTER", messageBody)
 	a, _ := pkgJson.Escape(messageBody)
 	fmt.Println("GOT", a)
-	return pkgJson.Escape(messageBody)
+	body, err := pkgJson.Escape(messageBody)
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed escape body")
+	}
+
+	return body, attaches, nil
 }
