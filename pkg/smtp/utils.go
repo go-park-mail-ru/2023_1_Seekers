@@ -48,6 +48,8 @@ func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
 			}
 
 			t, _, _ := p.Header.ContentType()
+			fmt.Println(t)
+			fmt.Println(p.Header)
 
 			disp, headers, err := p.Header.ContentDisposition()
 
