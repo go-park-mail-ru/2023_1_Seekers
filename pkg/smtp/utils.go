@@ -44,16 +44,16 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			}
 
 			t, _, _ := p.Header.ContentType()
-			fmt.Println("TYPE", t)
-			if t == "attachment" {
-				fmt.Println("attachment")
-				fmt.Println(p.Header)
-				fmt.Println(p.Body)
-			}
+			fmt.Println("DISPOSITION", t)
+			fmt.Println(p.Header.ContentDisposition())
+			//if p.Header.ContentDisposition() == "attachment" {
+			//	fmt.Println("attachment")
+			//	fmt.Println(p.Header)
+			//	fmt.Println(p.Body)
+			//}
 
 			if t == "text/html" {
 				bytesBody, err := io.ReadAll(p.Body)
-				fmt.Println("html ...", string(bytesBody))
 				if err != nil {
 					return "", errors.Wrap(err, "failed read text/html content")
 				}
@@ -84,7 +84,8 @@ func GetMessageBody(mailBody []byte) (string, error) {
 	if len(htmlBody) > 0 {
 		messageBody = htmlBody
 	}
-	fmt.Println("MAIL", messageBody)
-	fmt.Println("HTML", htmlBody)
+
+	messageBody = strings.ReplaceAll(messageBody, "<HTML><BODY>", "")
+	messageBody = strings.ReplaceAll(messageBody, "</BODY></HTML>", "")
 	return pkgJson.Escape(messageBody)
 }
