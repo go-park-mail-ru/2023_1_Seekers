@@ -44,6 +44,7 @@ func GetMessageBody(mailBody []byte) (string, error) {
 			}
 
 			t, _, _ := p.Header.ContentType()
+			fmt.Println("TYPE", t)
 			if t == "attachment" {
 				fmt.Println("attachment")
 				fmt.Println(p.Header)
@@ -80,7 +81,7 @@ func GetMessageBody(mailBody []byte) (string, error) {
 	}
 
 	if len(htmlBody) > 0 {
-		htmlBody = messageBody
+		messageBody = htmlBody
 	}
 
 	return pkgJson.Escape(messageBody)
