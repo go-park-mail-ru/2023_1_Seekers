@@ -12,7 +12,7 @@ func GetInnerText(htmlText string, maxLen int) string {
 
 	for {
 		tt := tkn.Next()
-		if len(data) > maxLen {
+		if len([]rune(data)) > maxLen {
 			data = strings.TrimLeft(data, " ")
 			return string([]rune(data)[:maxLen])
 		}
@@ -20,7 +20,7 @@ func GetInnerText(htmlText string, maxLen int) string {
 		switch {
 		case tt == html.ErrorToken:
 			data = strings.TrimLeft(data, " ")
-			if len(data) > maxLen {
+			if len([]rune(data)) > maxLen {
 				return string([]rune(data)[:maxLen])
 			} else {
 				return data
