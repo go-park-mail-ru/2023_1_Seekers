@@ -612,8 +612,13 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 
 func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	usr, err := uc.userUC.GetByEmail(message.FromUser)
-	if usr.UserID != userID || err != nil {
+	if err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - invalid sender field")
+	}
+	if usr != nil {
+		if usr.UserID != userID {
+			return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - sender not compare")
+		}
 	}
 
 	if len(message.Recipients) == 0 {
