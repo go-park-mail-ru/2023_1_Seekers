@@ -483,7 +483,8 @@ func TestRepository_SelectCustomFoldersByUser(t *testing.T) {
 		rows.AddRow(folder.FolderID, folder.UserID, folder.LocalName, folder.Name,
 			folder.MessagesUnseen, folder.MessagesCount)
 	}
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "folders" WHERE user_id = $1 AND local_name NOT IN ($2,$3,$4,$5,$6)`)).WithArgs(userID, "inbox", "outbox", "drafts", "trash", "spam").WillReturnRows(rows)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "folders" WHERE user_id = $1 AND local_name NOT IN ($2,$3,$4,$5,$6)`)).
+		WithArgs(userID, "inbox", "outbox", "drafts", "trash", "spam").WillReturnRows(rows)
 
 	mailRepo := New(cfg, gormDB)
 	response, err := mailRepo.SelectCustomFoldersByUser(userID, defaultLocalNames)
@@ -627,5 +628,219 @@ func TestRepository_UpdateMessageFolder(t *testing.T) {
 
 	if causeErr != nil {
 		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	}
+}
+
+func TestRepository_CheckExistingBox(t *testing.T) {
+	cfg := createConfig()
+	var fakeBox Box
+	generateFakeData(&fakeBox)
+
+	userID := uint64(1)
+	messageID := uint64(1)
+	folderID := uint64(1)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "message_id", "folder_id", "seen", "favorite", "deleted", "is_draft"})
+	rows.AddRow(fakeBox.UserID, fakeBox.MessageID, fakeBox.FolderID, fakeBox.Seen, fakeBox.Favorite, fakeBox.Deleted, fakeBox.IsDraft)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "boxes" WHERE user_id = $1 AND message_id = $2 AND folder_id = $3`)).
+		WithArgs(userID, messageID, folderID).WillReturnRows(rows)
+
+	mailRepo := New(cfg, gormDB)
+	reponse, err := mailRepo.CheckExistingBox(userID, messageID, folderID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, true, reponse)
+	}
+}
+
+func TestRepository_SearchMessages(t *testing.T) {
+	cfg := createConfig()
+	fakeMsgIDs := []uint64{1}
+	var fakeMessages []models.MessageInfo
+	generateFakeData(&fakeMessages)
+	fakeMessages = fakeMessages[:1]
+	fakeMessages[0].MessageID = fakeMsgIDs[0]
+	fakeMessages[0].IsDraft = false
+	fakeMessages[0].Recipients = nil
+	fakeMessages[0].FromUser.Email = ""
+	fakeMessages[0].FromUser.FirstName = ""
+	fakeMessages[0].FromUser.LastName = ""
+	fakeMessages[0].ReplyTo = nil
+	fakeMessages[0].Attachments = nil
+	fakeMessages[0].AttachmentsSize = ""
+
+	userID := uint64(1)
+	fromUser := "user1"
+	toUser := "user2"
+	folderSlug := "Входящие"
+	filter := "test"
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"message_id"})
+	rows.AddRow(fakeMsgIDs[0])
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM get_messages($1, $2, $3, $4, $5);`)).
+		WithArgs(userID, fromUser, toUser, folderSlug, filter).WillReturnRows(rows)
+
+	rows = sqlmock.NewRows([]string{"message_id", "from_user_id", "title", "created_at", "text",
+		"reply_to_message_id", "seen", "favorite", "deleted"})
+	rows.AddRow(fakeMessages[0].MessageID, fakeMessages[0].FromUser.UserID, fakeMessages[0].Title, fakeMessages[0].CreatedAt,
+		fakeMessages[0].Text, fakeMessages[0].ReplyToMessageID, fakeMessages[0].Seen, fakeMessages[0].Favorite, fakeMessages[0].Deleted)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "boxes" JOIN mail.messages using(message_id) WHERE user_id = $1
+AND message_id = $2`)).WithArgs(userID, fakeMessages[0].MessageID).WillReturnRows(rows)
+
+	mailRepo := New(cfg, gormDB)
+	response, err := mailRepo.SearchMessages(userID, fromUser, toUser, folderSlug, filter)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, fakeMessages, response)
+	}
+}
+
+func TestRepository_SearchRecipients(t *testing.T) {
+	cfg := createConfig()
+	userID := uint64(1)
+	var fakeUsers []models.UserInfo
+	generateFakeData(&fakeUsers)
+	fakeUsers = fakeUsers[:1]
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"user_id", "first_name", "last_name", "email"})
+	rows.AddRow(fakeUsers[0].UserID, fakeUsers[0].FirstName, fakeUsers[0].LastName, fakeUsers[0].Email)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM get_recipes( $1 );`)).
+		WithArgs(userID).WillReturnRows(rows)
+
+	mailRepo := New(cfg, gormDB)
+	response, err := mailRepo.SearchRecipients(userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, fakeUsers, response)
+	}
+}
+
+func TestRepository_GetAttach(t *testing.T) {
+	cfg := createConfig()
+
+	attachID := uint64(1)
+	userID := uint64(1)
+	type Result struct {
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
+	}
+	var res Result
+	generateFakeData(&res)
+	expected := &models.AttachmentInfo{
+		AttachID:  attachID,
+		FileName:  res.Filename,
+		S3FName:   res.S3FName,
+		Type:      res.Type,
+		SizeStr:   res.SizeStr,
+		SizeCount: res.SizeCount,
+	}
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"type", "filename", "s3_fname", "size_str", "size_count"})
+	rows.AddRow(res.Type, res.Filename, res.S3FName, res.SizeStr, res.SizeCount)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT type, filename, s3_fname, size_str, size_count from mail.attaches
+JOIN mail.boxes b on attaches.message_id = b.message_id
+WHERE attach_id = $1 AND user_id = $2;`)).
+		WithArgs(attachID, userID).WillReturnRows(rows)
+
+	mailRepo := New(cfg, gormDB)
+	response, err := mailRepo.GetAttach(attachID, userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, expected, response)
+	}
+}
+
+func TestRepository_GetMessageAttachments(t *testing.T) {
+	cfg := createConfig()
+
+	messageID := uint64(1)
+	type Result struct {
+		AttachID  uint64
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
+	}
+	var res []Result
+	generateFakeData(&res)
+	res = res[:1]
+	expected := []models.AttachmentInfo{
+		{
+			AttachID:  res[0].AttachID,
+			FileName:  res[0].Filename,
+			S3FName:   res[0].S3FName,
+			Type:      res[0].Type,
+			SizeStr:   res[0].SizeStr,
+			SizeCount: res[0].SizeCount,
+		},
+	}
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"attach_id", "type", "filename", "s3_fname", "size_str", "size_count"})
+	rows.AddRow(res[0].AttachID, res[0].Type, res[0].Filename, res[0].S3FName, res[0].SizeStr, res[0].SizeCount)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT attach_id, type, filename, s3_fname, size_str, size_count from mail.attaches 
+JOIN mail.messages m on attaches.message_id = m.message_id 
+WHERE m.message_id = $1;`)).
+		WithArgs(messageID).WillReturnRows(rows)
+
+	mailRepo := New(cfg, gormDB)
+	response, err := mailRepo.GetMessageAttachments(messageID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, expected, response)
 	}
 }

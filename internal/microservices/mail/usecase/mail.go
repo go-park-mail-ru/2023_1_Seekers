@@ -605,8 +605,8 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 }
 
 func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
-	usr, err := uc.userUC.GetByEmail(message.FromUser)
-	if usr.UserID != userID || err != nil {
+	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
+	if fromUser.UserID != userID || err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - invalid sender field")
 	}
 
@@ -615,11 +615,6 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 	}
 
 	var user2folder []models.User2Folder
-
-	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "send message")
-	}
 
 	if !fromUser.IsExternal {
 		folder, err := uc.GetFolderInfo(fromUser.UserID, "outbox")
@@ -855,15 +850,6 @@ func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlu
 	}
 
 	return uc.GetMessage(userID, messageID)
-}
-
-func (uc *mailUC) getFolderByMessage(userID uint64, messageID uint64) (*models.Folder, error) {
-	folder, err := uc.mailRepo.SelectFolderByUserNMessage(userID, messageID)
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "select folder by message")
-	}
-
-	return folder, nil
 }
 
 func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolderSlug string, toFolderSlug string) error {

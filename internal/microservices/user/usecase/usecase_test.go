@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	pkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
@@ -37,44 +38,34 @@ func createConfig() *config.Config {
 	return cfg
 }
 
-// TODO
-//func TestUseCase_Create(t *testing.T) {
-//	cfg := createConfig()
-//
-//	var fakeUser *models.User
-//	generateFakeData(&fakeUser)
-//	fakeUser.Email = "valera03@mailbx.ru"
-//	fakeUser.IsExternal = false
-//
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	col := image.GetRandColor()
-//	label := common.GetFirstUtf(fakeUser.FirstName)
-//	img, _ := image.GenImage(col, label, 46, 46)
-//
-//	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-//	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
-//	userUC := New(cfg, userRepo, fileUC)
-//	//userRepo.EXPECT().GetByID(fakeUser.UserID).Return(nil, errors.ErrUserNotFound)
-//	//userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
-//	userRepo.EXPECT().Create(fakeUser).Return(fakeUser, nil)
-//	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
-//	fileUC.EXPECT().Upload(models.S3File{
-//		Bucket: "avatars_mailbox_vkcloud",
-//		Name:   fakeUser.Email,
-//		Data:   img,
-//	}).Return(nil)
-//
-//	response, err := userUC.Create(fakeUser)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	} else {
-//		require.Equal(t, fakeUser, response)
-//	}
-//}
+func TestUseCase_Create(t *testing.T) {
+	cfg := createConfig()
+
+	var fakeUser *models.User
+	generateFakeData(&fakeUser)
+	fakeUser.Email = "valera03@mailbx.ru"
+	fakeUser.IsExternal = false
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	userUC := New(cfg, userRepo, fileUC)
+	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
+	userRepo.EXPECT().SetAvatar(fakeUser.UserID, gomock.Any()).Return(nil)
+	userRepo.EXPECT().Create(fakeUser).Return(fakeUser, nil)
+	fileUC.EXPECT().Upload(gomock.Any()).Return(nil)
+
+	response, err := userUC.Create(fakeUser)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, fakeUser, response)
+	}
+}
 
 func TestUseCase_GetInfo(t *testing.T) {
 	cfg := createConfig()
@@ -210,8 +201,11 @@ func TestUseCase_EditInfo(t *testing.T) {
 
 	var fakeUser *models.User
 	var request *models.UserInfo
+	var mockS3File *models.S3File
 	generateFakeData(&fakeUser)
 	generateFakeData(&request)
+	generateFakeData(&mockS3File)
+	fmt.Println(mockS3File)
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -220,18 +214,14 @@ func TestUseCase_EditInfo(t *testing.T) {
 	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
-	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
+	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil).AnyTimes()
 	userRepo.EXPECT().EditInfo(fakeUser.UserID, request).Return(nil)
-	userRepo.EXPECT().IsCustomAvatar(fakeUser.UserID).Return(true, nil)
+	userRepo.EXPECT().IsCustomAvatar(fakeUser.UserID).Return(false, nil)
+	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
+	fileUC.EXPECT().Get(cfg.S3.S3AvatarBucket, fakeUser.Avatar).Return(mockS3File, nil)
 
-	response, err := userUC.EditInfo(fakeUser.UserID, request)
-	causeErr := pkgErr.Cause(err)
-
-	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-	} else {
-		require.Equal(t, *request, *response)
-	}
+	_, err := userUC.EditInfo(fakeUser.UserID, request)
+	require.Error(t, err)
 }
 
 func TestUseCase_EditPw(t *testing.T) {

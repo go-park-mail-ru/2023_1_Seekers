@@ -9,8 +9,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/mailru/easyjson"
+	"github.com/stretchr/testify/require"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"testing"
 )
 
@@ -144,49 +147,43 @@ func TestDelivery_EditInfo(t *testing.T) {
 }
 
 func TestDelivery_EditAvatar(t *testing.T) {
-	//t.Parallel()
-	//ctrl := gomock.NewController(t)
-	//defer ctrl.Finish()
-	//
-	//userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	//
-	//img := []byte("sdsdjbasd;jrandombytes")
-	//body := &bytes.Buffer{}
-	//writer := multipart.NewWriter(body)
-	//metadataHeader := textproto.MIMEHeader{}
-	//metadataHeader.Add("Content-Disposition", `form-data; name="avatar"; filename="test.png"`)
-	//metadataHeader.Add("Content-Type", "image/png")
-	//part, err := writer.CreatePart(metadataHeader)
-	//require.Nil(t, err)
-	//_, err = part.Write(img)
-	//err = writer.Close()
-	//require.Nil(t, err)
-	//
-	//r := httptest.NewRequest(http.MethodPut, config.RouteUserAvatar, body)
-	//
-	//input := models.Image{
-	//	Name: "test.png",
-	//	Data: img,
-	//}
-	//
-	//r.Header.Set("Content-Type", writer.FormDataContentType())
-	//
-	//user := models.User{
-	//	UserID: 1,
-	//}
-	//
-	//r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, user.UserID))
-	//
-	//userUC.EXPECT().EditAvatar(user.UserID, &input, true).Return(nil)
-	//
-	//w := httptest.NewRecorder()
-	//
-	//router := mux.NewRouter()
-	//handler := New(userUC)
-	//router.HandleFunc(config.RouteUserAvatar, handler.EditAvatar).Methods(http.MethodPut)
-	//handler.EditAvatar(w, r)
-	//
-	//require.Equal(t, http.StatusOK, w.Code)
+	cfg := createConfig()
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+
+	img := []byte("sdsdjbasd;jrandombytes")
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	metadataHeader := textproto.MIMEHeader{}
+	metadataHeader.Add("Content-Disposition", `form-data; name="avatar"; filename="test.png"`)
+	metadataHeader.Add("Content-Type", "image/png")
+	part, err := writer.CreatePart(metadataHeader)
+	require.Nil(t, err)
+	_, err = part.Write(img)
+	err = writer.Close()
+	require.Nil(t, err)
+
+	r := httptest.NewRequest(http.MethodPut, cfg.Routes.RouteUserAvatar, body)
+	r.Header.Set("Content-Type", writer.FormDataContentType())
+
+	user := models.User{
+		UserID: 1,
+	}
+
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, user.UserID))
+
+	w := httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	handler := NewUserHandlers(cfg, userUC)
+	router.HandleFunc(cfg.Routes.RouteUserAvatar, handler.EditAvatar).Methods(http.MethodPut)
+	handler.EditAvatar(w, r)
+
+	require.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDelivery_GetAvatar(t *testing.T) {

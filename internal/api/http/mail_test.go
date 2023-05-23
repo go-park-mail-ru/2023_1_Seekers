@@ -21,6 +21,7 @@ type inputCase struct {
 	fromFolder  string
 	toFolder    string
 	messageID   uint64
+	attachID    uint64
 	messageForm models.FormMessage
 	folderForm  models.FormFolder
 }
@@ -80,6 +81,83 @@ func TestDelivery_GetFolderMessages(t *testing.T) {
 		mailUC.EXPECT().GetFolderMessages(test.input.userID, test.input.folderSlug).Return([]models.MessageInfo{}, nil)
 
 		mailH.GetFolderMessages(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_SearchMessages(t *testing.T) {
+	cfg := createConfig()
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID:     1,
+				fromFolder: "inbox",
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest(http.MethodGet, "/api/v2/messages/search", bytes.NewReader([]byte{}))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		q := r.URL.Query()
+		q.Set("filter", "123")
+		q.Set("folder", test.input.fromFolder)
+		r.URL.RawQuery = q.Encode()
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().SearchMessages(test.input.userID, "", "", test.input.fromFolder, "123").Return([]models.MessageInfo{}, nil)
+
+		mailH.SearchMessages(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_SearchRecipients(t *testing.T) {
+	cfg := createConfig()
+	var tests = []testCases{
+		{
+			name: "standard test",
+			input: inputCase{
+				userID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest(http.MethodGet, "/api/v2/recipients/search", bytes.NewReader([]byte{}))
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().SearchRecipients(test.input.userID).Return([]models.UserInfo{}, nil)
+
+		mailH.SearchRecipients(w, r)
 
 		if w.Code != test.output.status {
 			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
@@ -672,5 +750,177 @@ func TestDelivery_EditDraft(t *testing.T) {
 		if w.Code != test.output.status {
 			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
 		}
+	}
+}
+
+func TestDelivery_DownloadAttah(t *testing.T) {
+	cfg := createConfig()
+
+	var tests = []testCases{
+		{
+			name: "standart test",
+			input: inputCase{
+				userID:   1,
+				attachID: 1,
+			},
+			output: outputCase{
+				status: http.StatusOK,
+			},
+		},
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	for _, test := range tests {
+		r := httptest.NewRequest(http.MethodGet, "/api/v1/attach/", bytes.NewReader([]byte{}))
+		vars := map[string]string{
+			"id": strconv.FormatUint(test.input.attachID, 10),
+		}
+		r = mux.SetURLVars(r, vars)
+		r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, test.input.userID))
+		w := httptest.NewRecorder()
+
+		mailUC.EXPECT().GetAttach(test.input.attachID, test.input.userID).Return(&models.AttachmentInfo{}, nil)
+
+		mailH.DownloadAttach(w, r)
+
+		if w.Code != test.output.status {
+			t.Errorf("[TEST] %s: Expected err %d, got %d ", test.name, test.output.status, w.Code)
+		}
+	}
+}
+
+func TestDelivery_DownloadAllAttaches(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	messageID := uint64(1)
+	var msg *models.MessageInfo
+	var attaches []models.AttachmentInfo
+	generateFakeData(&msg)
+	generateFakeData(&attaches)
+	msg.Attachments = attaches[:1]
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/attach/", bytes.NewReader([]byte{}))
+	vars := map[string]string{
+		"id": strconv.FormatUint(messageID, 10),
+	}
+	r = mux.SetURLVars(r, vars)
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
+	w := httptest.NewRecorder()
+
+	mailUC.EXPECT().GetMessage(userID, messageID).Return(msg, nil)
+	mailUC.EXPECT().GetAttach(msg.Attachments[0].AttachID, userID).Return(&msg.Attachments[0], nil)
+
+	mailH.DownloadAllAttaches(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", http.StatusOK, w.Code)
+	}
+}
+
+func TestDelivery_GetAttach(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	var attach *models.AttachmentInfo
+	generateFakeData(&attach)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/attach/", bytes.NewReader([]byte{}))
+	vars := map[string]string{
+		"id": strconv.FormatUint(attach.AttachID, 10),
+	}
+	r = mux.SetURLVars(r, vars)
+	q := r.URL.Query()
+	q.Set(cfg.Routes.QueryAccessKey, "Xi6uVrevawNwAmAcc0dp4xjzszoZfbo3wLy-MA==")
+	r.URL.RawQuery = q.Encode()
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
+	w := httptest.NewRecorder()
+
+	mailH.GetAttach(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestDelivery_DeleteDraftAttach(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	var attach *models.AttachmentInfo
+	generateFakeData(&attach)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	r := httptest.NewRequest(http.MethodDelete, "/api/v1/attach/", bytes.NewReader([]byte{}))
+	vars := map[string]string{
+		"id": strconv.FormatUint(attach.AttachID, 10),
+	}
+	r = mux.SetURLVars(r, vars)
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
+	w := httptest.NewRecorder()
+
+	mailUC.EXPECT().GetAttach(attach.AttachID, userID).Return(attach, nil)
+
+	mailH.DeleteDraftAttach(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", http.StatusOK, w.Code)
+	}
+}
+
+func TestDelivery_PreviewAttach(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	var attach *models.AttachmentInfo
+	generateFakeData(&attach)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailUC := mockMailUC.NewMockUseCaseI(ctrl)
+	mailH := NewMailHandlers(cfg, mailUC)
+
+	r := httptest.NewRequest(http.MethodDelete, "/api/v1/attach/", bytes.NewReader([]byte{}))
+	vars := map[string]string{
+		"id": strconv.FormatUint(attach.AttachID, 10),
+	}
+	r = mux.SetURLVars(r, vars)
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
+	w := httptest.NewRecorder()
+
+	mailUC.EXPECT().GetAttachInfo(attach.AttachID, userID).Return(attach, nil)
+
+	mailH.PreviewAttach(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("[TEST] simple: Expected err %d, got %d ", http.StatusInternalServerError, w.Code)
 	}
 }
