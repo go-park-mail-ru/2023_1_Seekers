@@ -52,16 +52,17 @@ func GetMessageData(mailBody []byte) (*Message, error) {
 	res.FromName = email.From[0].Name
 
 	htmlBody := email.HTMLBody
-	_, err = base64.StdEncoding.DecodeString(htmlBody)
-	if err != nil {
-		htmlBody = base64.StdEncoding.EncodeToString([]byte(htmlBody))
+
+	decodedHtml, err := base64.StdEncoding.DecodeString(htmlBody)
+	if err == nil {
+		htmlBody = string(decodedHtml)
 	}
 	res.HTMLBody = htmlBody
 
 	plainBody := email.TextBody
-	_, err = base64.StdEncoding.DecodeString(plainBody)
+	decodedPlain, err := base64.StdEncoding.DecodeString(plainBody)
 	if err != nil {
-		plainBody = base64.StdEncoding.EncodeToString([]byte(plainBody))
+		plainBody = string(decodedPlain)
 	}
 	res.PlainBody = plainBody
 
