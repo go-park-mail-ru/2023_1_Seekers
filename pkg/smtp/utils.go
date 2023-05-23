@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/DusanKasan/parsemail"
 	"github.com/emersion/go-message"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgJson "github.com/go-park-mail-ru/2023_1_Seekers/pkg/json"
@@ -31,7 +32,19 @@ func ParseLogin(emailAddr string) (string, error) {
 }
 
 func GetMessageBody(mailBody []byte) (string, []models.Attachment, error) {
-	fmt.Println(string(mailBody))
+	r := bytes.NewReader(mailBody)
+	fmt.Println("parsing mail...")
+	email, err := parsemail.Parse(r)
+	fmt.Println(email.Subject)
+	fmt.Println(email.From)
+	fmt.Println(email.To)
+	fmt.Println(email.HTMLBody)
+	fmt.Println(email.ReplyTo)
+	for _, a := range email.Attachments {
+		fmt.Println(a.Filename)
+		fmt.Println(a.ContentType)
+		//and read a.Data
+	}
 	m, err := message.Read(bytes.NewReader(mailBody))
 	if err != nil {
 		return "", nil, errors.Wrap(err, "failed to read mail body")

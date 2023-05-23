@@ -1,5 +1,7 @@
 github.com/BurntSushi/toml v1.1.0 h1:ksErzDEI1khOiGPgpwuI7x2ebx/uXQNw7xJpn9Eq1+I=
 github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/DusanKasan/parsemail v1.2.0 h1:CrzTL1nuPLxB41aO4zE/Tzc9GVD8jjifUftlbTKQQl4=
+github.com/DusanKasan/parsemail v1.2.0/go.mod h1:B9lfMbpVe4DMqPImAOCGti7KEwasnRTrKKn66iQefVs=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/aws/aws-sdk-go v1.44.224 h1:09CiaaF35nRmxrzWZ2uRq5v6Ghg/d2RiPjZnSgtt+RQ=

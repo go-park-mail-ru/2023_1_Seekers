@@ -38,6 +38,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/DusanKasan/parsemail v1.2.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
