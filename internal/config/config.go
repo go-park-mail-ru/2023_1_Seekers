@@ -65,7 +65,7 @@ type Config struct {
 		Domain             string        `yaml:"domain" env-default:"mailbx"`
 		ReadTimeout        time.Duration `yaml:"read_timeout" env-default:"10s"`
 		WriteTimeout       time.Duration `yaml:"write_timeout_timeout" env-default:"10s"`
-		MaxMessageBytes    int           `yaml:"max_message_bytes" env-default:"1048576"` //1024 * 1024
+		MaxMessageBytes    int           `yaml:"max_message_bytes" env-default:"104857600"`
 		MaxRecipients      int           `yaml:"max_recipients" env-default:"50"`
 		AllowInsecureAuth  bool          `yaml:"allow_insecure_auth" env-default:"false"`
 		CertFile           string        `yaml:"cert_file"`

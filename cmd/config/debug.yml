@@ -48,7 +48,7 @@ smtp_server:
   domain: mailbx
   read_timeout: 10s
   write_timeout_timeout: 10s
-  max_message_bytes: 1048576
+  max_message_bytes: 104857600
   max_recipients: 50
   allow_insecure_auth: false
   cert_file: /etc/letsencrypt/live/mailbx.ru/fullchain.pem
