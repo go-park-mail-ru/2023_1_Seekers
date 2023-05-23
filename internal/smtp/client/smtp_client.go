@@ -68,8 +68,8 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 	if err != nil {
 		return errors.Wrap(err, "failed create part of message")
 	}
-	//пока без html поэтому обрамим сообщение в заголовок
-	io.WriteString(partWriter, "<h1>"+message.Text+"</h1>")
+
+	io.WriteString(partWriter, message.Text+"<div>--\n<br>Отправлено из сервиса <a href=\"https://mailbx.ru\" target=\"_blank\" rel=\" noopener noreferrer\" style=\"border-color: rgb(35, 35, 35) !important;\">MailBX.ru<div></div></a></br>\n</div>")
 
 	partWriter.Close()
 	textWriter.Close()
@@ -92,7 +92,7 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 
 	mailWriter.Close()
 
-	err = smtp.SendMail(smtpDomain+":25", auth, from.Email, Address2Slice(addrTo), strings.NewReader(b.String()))
+	err = smtp.SendMail(smtpDomain+"localhost:25", auth, from.Email, Address2Slice(addrTo), strings.NewReader(b.String()))
 	if err != nil {
 		errors.Wrap(err, "failed to send mail")
 	}

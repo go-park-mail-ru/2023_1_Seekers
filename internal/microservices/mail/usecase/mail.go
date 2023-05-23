@@ -747,11 +747,11 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 			return nil, pkgErrors.Wrap(err, "send message : put to s3")
 		}
 	}
-	m, err := uc.GetMessage(userID, newMessage.MessageID)
-	if err != nil {
+	if fromUser.IsExternal {
 		return &newMessage, nil
+	} else {
+		return uc.GetMessage(userID, newMessage.MessageID)
 	}
-	return m, nil
 }
 
 func (uc *mailUC) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {

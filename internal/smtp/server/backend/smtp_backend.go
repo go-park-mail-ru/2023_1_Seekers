@@ -188,8 +188,6 @@ func (s *Session) Data(r io.Reader) error {
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}
-
-		// TODO hub ws notify
 	}
 	return nil
 }
