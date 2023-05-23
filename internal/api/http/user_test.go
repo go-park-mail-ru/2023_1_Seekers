@@ -163,7 +163,7 @@ func TestDelivery_EditAvatar(t *testing.T) {
 	metadataHeader.Add("Content-Type", "image/png")
 	part, err := writer.CreatePart(metadataHeader)
 	require.Nil(t, err)
-	_, err = part.Write(img)
+	part.Write(img)
 	err = writer.Close()
 	require.Nil(t, err)
 

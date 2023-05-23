@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	pkg "github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
@@ -205,7 +204,6 @@ func TestUseCase_EditInfo(t *testing.T) {
 	generateFakeData(&fakeUser)
 	generateFakeData(&request)
 	generateFakeData(&mockS3File)
-	fmt.Println(mockS3File)
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
