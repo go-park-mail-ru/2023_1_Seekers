@@ -3,20 +3,11 @@ package smtp
 import (
 	"bytes"
 	"github.com/emersion/go-message"
-	"github.com/emersion/go-message/mail"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/pkg/errors"
-	"io"
 	"mime"
+	"net/mail"
 	"strings"
 )
-
-type Message struct {
-	FromName string
-	Subject  string
-	Body     string
-	Attaches []models.Attachment
-}
 
 func ParseMail(bytesMail []byte) (*Message, error) {
 	var resultMessage Message
@@ -35,25 +26,30 @@ func ParseMail(bytesMail []byte) (*Message, error) {
 		resultMessage.Subject = decodedSubject
 	}
 
-	messageBody, attaches, err := GetMessageBody(bytesMail)
-	if err != nil {
-		bytesBody, err := io.ReadAll(entity.Body)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed read body")
-		}
-
-		messageBody = string(bytesBody)
-	}
-
-	resultMessage.Body = messageBody
-	resultMessage.Attaches = attaches
-
 	fromString := entity.Header.Get("From")
 	addr, err := mail.ParseAddress(fromString)
 
 	if err == nil {
 		resultMessage.FromName = addr.Name
 	}
+	resultMessage.FromEmail = addr.Address
+
+	msgData, err := GetMessageData(bytesMail)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed read body")
+	}
+
+	if msgData.Subject != resultMessage.Subject {
+		resultMessage.Subject = msgData.Subject
+	}
+
+	if msgData.HTMLBody == "" {
+		resultMessage.HTMLBody = msgData.PlainBody
+	} else {
+		resultMessage.HTMLBody = msgData.HTMLBody
+	}
+
+	resultMessage.Attaches = msgData.Attaches
 
 	return &resultMessage, nil
 }

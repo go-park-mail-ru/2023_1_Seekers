@@ -179,7 +179,7 @@ func (s *Session) Data(r io.Reader) error {
 			FromUser:         fromUser.Email,
 			Recipients:       batchRecipients,
 			Title:            msgData.Subject,
-			Text:             msgData.Body,
+			Text:             msgData.HTMLBody,
 			ReplyToMessageID: nil,
 			Attachments:      msgData.Attaches,
 		}
