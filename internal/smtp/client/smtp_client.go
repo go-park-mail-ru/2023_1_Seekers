@@ -69,7 +69,7 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 		return errors.Wrap(err, "failed create part of message")
 	}
 
-	io.WriteString(partWriter, message.Text+"<div>--\n<br>Отправлено из сервиса <a href=\"https://mailbx.ru\" target=\"_blank\" rel=\" noopener noreferrer\" style=\"border-color: rgb(35, 35, 35) !important;\">MailBX.ru<div></div></a></br>\n</div>")
+	io.WriteString(partWriter, message.Text)
 
 	partWriter.Close()
 	textWriter.Close()
