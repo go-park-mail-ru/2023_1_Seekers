@@ -2,7 +2,6 @@ package backend
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
@@ -47,14 +46,12 @@ func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 }
 
 func (s *Session) AuthPlain(username, password string) error {
-	fmt.Println("auth")
 	if password != s.cfg.SmtpServer.SecretPassword {
 		_, _, err := s.authClient.SignIn(&models.FormLogin{
 			Login:    username,
 			Password: password,
 		})
 		if err != nil {
-			fmt.Println("failed  auth")
 			return errors.Wrap(err, "failed smtp auth")
 		}
 	}
@@ -78,7 +75,6 @@ func (s *Session) Rcpt(to string) error {
 }
 
 func (s *Session) Data(r io.Reader) error {
-	fmt.Println("1 Data")
 	bytesMail, err := io.ReadAll(r)
 	if err != nil {
 		return errors.Wrap(err, "failed read message")
@@ -158,9 +154,6 @@ func (s *Session) Data(r io.Reader) error {
 			}
 		}
 	}
-
-	fmt.Println("DATA")
-	fmt.Println(msgData)
 
 	var batchRecipients []string
 

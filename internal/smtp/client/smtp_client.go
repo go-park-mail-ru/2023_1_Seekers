@@ -92,7 +92,7 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 
 	mailWriter.Close()
 
-	err = smtp.SendMail(smtpDomain+"localhost:25", auth, from.Email, Address2Slice(addrTo), strings.NewReader(b.String()))
+	err = smtp.SendMail(smtpDomain+":25", auth, from.Email, Address2Slice(addrTo), strings.NewReader(b.String()))
 	if err != nil {
 		errors.Wrap(err, "failed to send mail")
 	}
