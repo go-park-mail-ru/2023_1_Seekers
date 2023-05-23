@@ -12,6 +12,7 @@ import (
 	"github.com/golang/mock/gomock"
 	pkgErr "github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 )
 
@@ -42,6 +43,7 @@ type testCases struct {
 func createConfig() *config.Config {
 	cfg := new(config.Config)
 	cfg.Logger.LogsTimeFormat = "2006-01-02_15:04:05_MST"
+	cfg.S3.S3AttachBucket = "test"
 
 	return cfg
 }
@@ -535,7 +537,6 @@ func TestUseCase_DeleteMessage(t *testing.T) {
 			MessagesCount:  0,
 		}, nil)
 
-		// TODO
 		err := mailUCase.DeleteMessage(userID, messageID, test.input.folderSlug)
 		causeErr := pkgErr.Cause(err)
 
@@ -573,100 +574,97 @@ func TestUseCase_ValidateRecipients(t *testing.T) {
 	require.Equal(t, outputInvalid, responseInvalid)
 }
 
-//TODO в функции создается сообщение и потом передается по указателю, надо учесть в тесте так как в вызове мока это никак не учесть
+func TestUseCase_SaveDraft(t *testing.T) {
+	cfg := createConfig()
+	userID := uint64(1)
 
-//func TestUseCase_SaveDraft(t *testing.T) {
-//	cfg := createConfig()
-//	userID := uint64(1)
-//
-//	var formMessage models.FormMessage
-//	generateFakeData(&formMessage)
-//	formMessage.Recipients = []string{"max@mailbx.ru"}
-//	formMessage.Attachments = nil
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    userID,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     "valera03@mailbx.ru",
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "max",
-//			LastName:  "vlasov",
-//			Email:     "max03@mailbx.ru",
-//		},
-//	}
-//	mockFolderResponse := []models.Folder{
-//		{
-//			FolderID:  1,
-//			UserID:    userID,
-//			LocalName: "outbox",
-//			Name:      "Исходящие",
-//		},
-//		{
-//			FolderID:  2,
-//			UserID:    mockUserResponse[1].UserID,
-//			LocalName: "inbox",
-//			Name:      "Входящие",
-//		},
-//	}
-//	user2folder := []models.User2Folder{
-//		{
-//			UserID:   userID,
-//			FolderID: mockFolderResponse[0].FolderID,
-//		},
-//		{
-//			UserID:   mockUserResponse[1].UserID,
-//			FolderID: mockFolderResponse[1].FolderID,
-//		},
-//	}
-//	newMessage := models.MessageInfo{
-//		Title:            formMessage.Title,
-//		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
-//		Text:             formMessage.Text,
-//		ReplyToMessageID: formMessage.ReplyToMessageID,
-//		IsDraft:          true,
-//		Attachments:      nil,
-//		AttachmentsSize:  "0 Б",
-//	}
-//
-//	messageSelected := newMessage
-//	messageSelected.FromUser = mockUserResponse[0]
-//	messageSelected.ReplyToMessageID = nil
-//	messageSelected.Attachments = nil
-//	messageSelected.AttachmentsSize = "0 Б"
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC, fileUC)
-//
-//	print(&newMessage)
-//
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, "drafts").Return(&mockFolderResponse[0], nil)
-//	userUC.EXPECT().GetInfoByEmail(formMessage.Recipients[0]).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "inbox").Return(&mockFolderResponse[1], nil)
-//	mailRepo.EXPECT().InsertMessage(userID, &messageSelected, user2folder).Return(nil)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageSelected.MessageID).Return(&messageSelected, nil)
-//	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return(nil, nil)
-//	userUC.EXPECT().GetInfo(userID).Return(&mockUserResponse[0], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, userID).Return([]uint64{mockUserResponse[1].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[0], nil)
-//
-//	response, err := mailH.SaveDraft(userID, formMessage)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	} else {
-//		require.Equal(t, messageSelected, *response)
-//	}
-//}
+	var formMessage models.FormMessage
+	generateFakeData(&formMessage)
+	formMessage.Recipients = []string{"max@mailbx.ru"}
+	formMessage.ReplyToMessageID = nil
+	formMessage.Attachments = nil
+	mockUserResponse := []models.UserInfo{
+		{
+			UserID:    userID,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     "valera03@mailbx.ru",
+		},
+		{
+			UserID:    2,
+			FirstName: "max",
+			LastName:  "vlasov",
+			Email:     "max03@mailbx.ru",
+		},
+	}
+	mockFolderResponse := []models.Folder{
+		{
+			FolderID:  1,
+			UserID:    userID,
+			LocalName: "outbox",
+			Name:      "Исходящие",
+		},
+		{
+			FolderID:  2,
+			UserID:    mockUserResponse[1].UserID,
+			LocalName: "inbox",
+			Name:      "Входящие",
+		},
+	}
+	user2folder := []models.User2Folder{
+		{
+			UserID:   userID,
+			FolderID: mockFolderResponse[0].FolderID,
+		},
+		{
+			UserID:   mockUserResponse[1].UserID,
+			FolderID: mockFolderResponse[1].FolderID,
+		},
+	}
+	newMessage := models.MessageInfo{
+		Title:            formMessage.Title,
+		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
+		Text:             formMessage.Text,
+		ReplyToMessageID: formMessage.ReplyToMessageID,
+		IsDraft:          true,
+		Attachments:      nil,
+		AttachmentsSize:  "0 Б",
+	}
+
+	messageSelected := newMessage
+	//messageSelected.FromUser = mockUserResponse[0]
+	messageSelected.ReplyToMessageID = nil
+	messageSelected.Attachments = []models.AttachmentInfo{}
+	messageSelected.AttachmentsSize = "0 Б"
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, "drafts").Return(&mockFolderResponse[0], nil)
+	userUC.EXPECT().GetInfoByEmail(formMessage.Recipients[0]).Return(&mockUserResponse[1], nil)
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "inbox").Return(&mockFolderResponse[1], nil)
+	mailRepo.EXPECT().InsertMessage(userID, &messageSelected, user2folder).Return(nil)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageSelected.MessageID).Return(&messageSelected, nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return(nil, nil)
+	userUC.EXPECT().GetInfo(uint64(0)).Return(&mockUserResponse[0], nil).Times(1)
+	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, userID).Return([]uint64{mockUserResponse[1].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[0], nil)
+
+	response, err := mailH.SaveDraft(userID, formMessage)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, messageSelected, *response)
+	}
+}
 
 func TestUseCase_EditDraft(t *testing.T) {
 	cfg := createConfig()
@@ -768,411 +766,493 @@ func TestUseCase_EditDraft(t *testing.T) {
 	}
 }
 
-// TODO Send and seen tests!
-//func TestUseCase_SendMessage(t *testing.T) {
-//	cfg := createConfig()
-//	userID := uint64(1)
-//
-//	var formMessage models.FormMessage
-//	generateFakeData(&formMessage)
-//	formMessage.Recipients = []string{"max@mailbx.ru"}
-//
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    userID,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     "valera03@mailbx.ru",
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "max",
-//			LastName:  "vlasov",
-//			Email:     "max03@mailbx.ru",
-//		},
-//	}
-//	mockFolderResponse := []models.Folder{
-//		{
-//			FolderID:  1,
-//			UserID:    userID,
-//			LocalName: "outbox",
-//			Name:      "Исходящие",
-//		},
-//		{
-//			FolderID:  2,
-//			UserID:    mockUserResponse[1].UserID,
-//			LocalName: "inbox",
-//			Name:      "Входящие",
-//		},
-//	}
-//
-//	user2folder := []models.User2Folder{
-//		{
-//			UserID:   userID,
-//			FolderID: mockFolderResponse[0].FolderID,
-//		},
-//		{
-//			UserID:   mockUserResponse[1].UserID,
-//			FolderID: mockFolderResponse[1].FolderID,
-//		},
-//	}
-//	newMessage := models.MessageInfo{
-//		Title:            formMessage.Title,
-//		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
-//		Text:             formMessage.Text,
-//		ReplyToMessageID: formMessage.ReplyToMessageID,
-//	}
-//	messageSelected := newMessage
-//	messageSelected.FromUser = mockUserResponse[0]
-//	messageSelected.ReplyToMessageID = nil
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, "outbox").Return(&mockFolderResponse[0], nil)
-//	userUC.EXPECT().GetInfoByEmail(formMessage.Recipients[0]).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "inbox").Return(&mockFolderResponse[1], nil)
-//	mailRepo.EXPECT().InsertMessage(userID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageSelected.MessageID).Return(&messageSelected, nil)
-//	userUC.EXPECT().GetInfo(userID).Return(&mockUserResponse[0], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, userID).Return([]uint64{mockUserResponse[1].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[0], nil)
-//
-//	response, err := mailH.SendMessage(userID, formMessage)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	} else {
-//		require.Equal(t, messageSelected, *response)
-//	}
-//}
-//
-//func TestUseCase_SendFailedSendingMessage(t *testing.T) {
-//	cfg := createConfig()
-//
-//	supportEmail := "support@mailbx.ru"
-//	userEmail := "valera03@mailbx.ru"
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    1,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     userEmail,
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "Suppot",
-//			LastName:  "Supportov",
-//			Email:     supportEmail,
-//		},
-//	}
-//	invalidEmails := []string{"123123123@mailbx.ru"}
-//	formMessage := models.FormMessage{
-//		Recipients: []string{userEmail},
-//		Title:      "Ваше сообщение не доставлено",
-//		Text: "Это письмо создано автоматически сервером mailbx.ru, отвечать на него не нужно.\n\n" +
-//			"К сожалению, Ваше письмо не может быть доставлено одному или нескольким получателям:\n" +
-//			strings.Join(invalidEmails, "\n") + "\n\nРекомендуем Вам проверить корректность указания адресов получателей.",
-//		ReplyToMessageID: nil,
-//	}
-//	mockFolderResponse := []models.Folder{
-//		{
-//			FolderID:  1,
-//			UserID:    mockUserResponse[0].UserID,
-//			LocalName: "inbox",
-//			Name:      "Входящие",
-//		},
-//		{
-//			FolderID:  2,
-//			UserID:    mockUserResponse[1].UserID,
-//			LocalName: "outbox",
-//			Name:      "Исходящие",
-//		},
-//	}
-//	user2folder := []models.User2Folder{
-//		{
-//			UserID:   mockUserResponse[1].UserID,
-//			FolderID: mockFolderResponse[1].FolderID,
-//		},
-//		{
-//			UserID:   mockUserResponse[0].UserID,
-//			FolderID: mockFolderResponse[0].FolderID,
-//		},
-//	}
-//	newMessage := models.MessageInfo{
-//		Title:            formMessage.Title,
-//		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
-//		Text:             formMessage.Text,
-//		ReplyToMessageID: formMessage.ReplyToMessageID,
-//	}
-//	messageSelected := newMessage
-//	messageSelected.FromUser = mockUserResponse[1]
-//	messageSelected.ReplyToMessageID = nil
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	userUC.EXPECT().GetInfoByEmail(userEmail).Return(&mockUserResponse[0], nil)
-//	userUC.EXPECT().GetInfoByEmail(supportEmail).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "outbox").Return(&mockFolderResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[0].UserID, "inbox").Return(&mockFolderResponse[0], nil)
-//	mailRepo.EXPECT().InsertMessage(mockUserResponse[1].UserID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[1].UserID, messageSelected.MessageID).Return(&messageSelected, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, mockUserResponse[1].UserID).Return([]uint64{mockUserResponse[0].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
-//
-//	err := mailH.SendFailedSendingMessage(userEmail, invalidEmails)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	}
-//}
-//
-//func TestUseCase_SendWelcomeMessage(t *testing.T) {
-//	cfg := createConfig()
-//
-//	supportEmail := "support@mailbx.ru"
-//	userEmail := "valera03@mailbx.ru"
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    1,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     userEmail,
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "Suppot",
-//			LastName:  "Supportov",
-//			Email:     supportEmail,
-//		},
-//	}
-//	formMessage := models.FormMessage{
-//		Recipients: []string{userEmail},
-//		Title:      "Добро пожаловать в почту Mailbx",
-//		Text: "Это письмо создано автоматически сервером Mailbx.ru, отвечать на него не нужно.\n" +
-//			"Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использованием!",
-//		ReplyToMessageID: nil,
-//	}
-//	mockFolderResponse := []models.Folder{
-//		{
-//			FolderID:  1,
-//			UserID:    mockUserResponse[0].UserID,
-//			LocalName: "inbox",
-//			Name:      "Входящие",
-//		},
-//		{
-//			FolderID:  2,
-//			UserID:    mockUserResponse[1].UserID,
-//			LocalName: "outbox",
-//			Name:      "Исходящие",
-//		},
-//	}
-//	user2folder := []models.User2Folder{
-//		{
-//			UserID:   mockUserResponse[1].UserID,
-//			FolderID: mockFolderResponse[1].FolderID,
-//		},
-//		{
-//			UserID:   mockUserResponse[0].UserID,
-//			FolderID: mockFolderResponse[0].FolderID,
-//		},
-//	}
-//	newMessage := models.MessageInfo{
-//		Title:            formMessage.Title,
-//		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
-//		Text:             formMessage.Text,
-//		ReplyToMessageID: formMessage.ReplyToMessageID,
-//	}
-//	messageSelected := newMessage
-//	messageSelected.FromUser = mockUserResponse[1]
-//	messageSelected.ReplyToMessageID = nil
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	userUC.EXPECT().GetInfoByEmail(userEmail).Return(&mockUserResponse[0], nil)
-//	userUC.EXPECT().GetInfoByEmail(supportEmail).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "outbox").Return(&mockFolderResponse[1], nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[0].UserID, "inbox").Return(&mockFolderResponse[0], nil)
-//	mailRepo.EXPECT().InsertMessage(mockUserResponse[1].UserID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[1].UserID, messageSelected.MessageID).Return(&messageSelected, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, mockUserResponse[1].UserID).Return([]uint64{mockUserResponse[0].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
-//
-//	err := mailH.SendWelcomeMessage(userEmail)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	}
-//}
-//
-//func TestUseCase_MarkMessageAsSeen(t *testing.T) {
-//	cfg := createConfig()
-//
-//	userID := uint64(1)
-//	messageID := uint64(1)
-//	folderID := uint64(1)
-//	state := "seen"
-//	stateValue := true
-//
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    userID,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     "valera03@mailbx.ru",
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "max",
-//			LastName:  "vlasov",
-//			Email:     "max03@mailbx.ru",
-//		},
-//	}
-//	mockMessageResponse := &models.MessageInfo{
-//		FromUser:   mockUserResponse[0],
-//		MessageID:  messageID,
-//		Recipients: nil,
-//		Title:      "test",
-//		CreatedAt:  "2023-01-29",
-//		Text:       "test text",
-//		Seen:       stateValue,
-//	}
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
-//
-//	// TODO
-//	response, err := mailH.MarkMessageAsSeen(userID, messageID, "TODO FOLDER SLUG")
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	} else {
-//		require.Equal(t, mockMessageResponse, response)
-//	}
-//}
-//
-//func TestUseCase_MarkMessageAsUnseen(t *testing.T) {
-//	cfg := createConfig()
-//
-//	userID := uint64(1)
-//	messageID := uint64(1)
-//	folderID := uint64(1)
-//	state := "seen"
-//	stateValue := false
-//
-//	mockUserResponse := []models.UserInfo{
-//		{
-//			UserID:    userID,
-//			FirstName: "valera",
-//			LastName:  "vinokurshin",
-//			Email:     "valera03@mailbx.ru",
-//		},
-//		{
-//			UserID:    2,
-//			FirstName: "max",
-//			LastName:  "vlasov",
-//			Email:     "max03@mailbx.ru",
-//		},
-//	}
-//	mockMessageResponse := &models.MessageInfo{
-//		FromUser:   mockUserResponse[0],
-//		MessageID:  messageID,
-//		Recipients: nil,
-//		Title:      "test",
-//		CreatedAt:  "2023-01-29",
-//		Text:       "test text",
-//		Seen:       stateValue,
-//	}
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
-//	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
-//	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
-//
-//	// TODO
-//	response, err := mailH.MarkMessageAsUnseen(userID, messageID, "TODO FOLDER SLUG")
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	} else {
-//		require.Equal(t, mockMessageResponse, response)
-//	}
-//}
-//
-//func TestUseCase_MoveMessageToFolder(t *testing.T) {
-//	cfg := createConfig()
-//	userID := uint64(1)
-//	var fakeMessage *models.MessageInfo
-//	var fakeFromFolder, fakeToFolder *models.Folder
-//	generateFakeData(&fakeMessage)
-//	generateFakeData(&fakeFromFolder)
-//	generateFakeData(&fakeToFolder)
-//
-//	t.Parallel()
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//
-//	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
-//	userUC := mockUserUC.NewMockUseCaseI(ctrl)
-//	mailH := New(cfg, mailRepo, userUC)
-//
-//	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, fakeMessage.MessageID).Return(fakeMessage, nil)
-//	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeToFolder.LocalName).Return(fakeToFolder, nil)
-//	mailRepo.EXPECT().SelectFolderByUserNMessage(userID, fakeMessage.MessageID).Return(fakeFromFolder, nil)
-//	mailRepo.EXPECT().UpdateMessageFolder(userID, fakeMessage.MessageID, fakeFromFolder.FolderID, fakeToFolder.FolderID).Return(nil)
-//
-//	// TODO
-//	err := mailH.MoveMessageToFolder(userID, fakeMessage.MessageID, "TODO FROM FOLDER", "TODO TO FOLDER")
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != nil {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-//	}
-//}
+func TestUseCase_SendMessage(t *testing.T) {
+	cfg := createConfig()
+	userID := uint64(1)
+
+	var formMessage models.FormMessage
+	generateFakeData(&formMessage)
+	formMessage.Recipients = []string{"max@mailbx.ru"}
+	formMessage.FromUser = "valera03@mailbx.ru"
+	formMessage.Attachments = nil
+	formMessage.ReplyToMessageID = nil
+
+	mockUserResponse := []models.UserInfo{
+		{
+			UserID:    userID,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     "valera03@mailbx.ru",
+		},
+		{
+			UserID:    2,
+			FirstName: "max",
+			LastName:  "vlasov",
+			Email:     "max03@mailbx.ru",
+		},
+	}
+	mockUsers := []models.User{
+		{
+			UserID:    userID,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     "valera03@mailbx.ru",
+		},
+		{
+			UserID:    2,
+			FirstName: "max",
+			LastName:  "vlasov",
+			Email:     "max03@mailbx.ru",
+		},
+	}
+	mockFolderResponse := []models.Folder{
+		{
+			FolderID:  1,
+			UserID:    userID,
+			LocalName: "outbox",
+			Name:      "Исходящие",
+		},
+		{
+			FolderID:  2,
+			UserID:    mockUserResponse[1].UserID,
+			LocalName: "inbox",
+			Name:      "Входящие",
+		},
+	}
+
+	user2folder := []models.User2Folder{
+		{
+			UserID:   userID,
+			FolderID: mockFolderResponse[0].FolderID,
+		},
+		{
+			UserID:   mockUserResponse[1].UserID,
+			FolderID: mockFolderResponse[1].FolderID,
+		},
+	}
+	newMessage := models.MessageInfo{
+		Title:            formMessage.Title,
+		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
+		Text:             formMessage.Text,
+		ReplyToMessageID: formMessage.ReplyToMessageID,
+		AttachmentsSize:  "0 Б",
+		Attachments:      []models.AttachmentInfo{},
+		Preview:          "",
+	}
+	messageSelected := newMessage
+	messageSelected.MessageID = uint64(1)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	userUC.EXPECT().GetByEmail(formMessage.FromUser).Return(&mockUsers[0], nil).AnyTimes()
+	userUC.EXPECT().GetByEmail(formMessage.Recipients[0]).Return(&mockUsers[1], nil).AnyTimes()
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, "outbox").Return(&mockFolderResponse[0], nil)
+	userUC.EXPECT().GetInfoByEmail(formMessage.Recipients[0]).Return(&mockUserResponse[1], nil).AnyTimes()
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserResponse[1].UserID, "inbox").Return(&mockFolderResponse[1], nil)
+	mailRepo.EXPECT().InsertMessage(userID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, messageSelected.MessageID).Return(&messageSelected, nil)
+	userUC.EXPECT().GetInfo(uint64(0)).Return(&mockUserResponse[0], nil).Times(1)
+	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, userID).Return([]uint64{mockUserResponse[1].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[0], nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return([]models.AttachmentInfo{}, nil)
+
+	response, err := mailH.SendMessage(userID, formMessage)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	} else {
+		require.Equal(t, messageSelected, *response)
+	}
+}
+
+func TestUseCase_SendFailedSendingMessage(t *testing.T) {
+	cfg := createConfig()
+
+	supportEmail := "support@mailbx.ru"
+	userEmail := "valera03@mailbx.ru"
+	mockUserInfoResponse := []models.UserInfo{
+		{
+			UserID:    1,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     userEmail,
+		},
+		{
+			UserID:    2,
+			FirstName: "Suppot",
+			LastName:  "Supportov",
+			Email:     supportEmail,
+		},
+	}
+	mockUserResponse := []models.User{
+		{
+			UserID:    mockUserInfoResponse[0].UserID,
+			FirstName: mockUserInfoResponse[0].FirstName,
+			LastName:  mockUserInfoResponse[0].LastName,
+			Email:     mockUserInfoResponse[0].Email,
+		},
+		{
+			UserID:    mockUserInfoResponse[1].UserID,
+			FirstName: mockUserInfoResponse[1].FirstName,
+			LastName:  mockUserInfoResponse[1].LastName,
+			Email:     mockUserInfoResponse[1].Email,
+		},
+	}
+	invalidEmails := []string{"123123123@mailbx.ru"}
+	formMessage := models.FormMessage{
+		Recipients: []string{userEmail},
+		Title:      "Ваше сообщение не доставлено",
+		Text: "Это письмо создано автоматически сервером mailbx.ru, отвечать на него не нужно.\n\n" +
+			"К сожалению, Ваше письмо не может быть доставлено одному или нескольким получателям:\n" +
+			strings.Join(invalidEmails, "\n") + "\n\nРекомендуем Вам проверить корректность указания адресов получателей.",
+		ReplyToMessageID: nil,
+		Attachments:      nil,
+	}
+	mockFolderResponse := []models.Folder{
+		{
+			FolderID:  1,
+			UserID:    mockUserInfoResponse[0].UserID,
+			LocalName: "inbox",
+			Name:      "Входящие",
+		},
+		{
+			FolderID:  2,
+			UserID:    mockUserInfoResponse[1].UserID,
+			LocalName: "outbox",
+			Name:      "Исходящие",
+		},
+	}
+	user2folder := []models.User2Folder{
+		{
+			UserID:   mockUserInfoResponse[1].UserID,
+			FolderID: mockFolderResponse[1].FolderID,
+		},
+		{
+			UserID:   mockUserInfoResponse[0].UserID,
+			FolderID: mockFolderResponse[0].FolderID,
+		},
+	}
+	newMessage := models.MessageInfo{
+		Title:            formMessage.Title,
+		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
+		Text:             formMessage.Text,
+		ReplyToMessageID: formMessage.ReplyToMessageID,
+		AttachmentsSize:  "0 Б",
+		Attachments:      []models.AttachmentInfo{},
+	}
+	messageSelected := newMessage
+	messageSelected.FromUser = mockUserInfoResponse[1]
+	messageSelected.ReplyToMessageID = nil
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	userUC.EXPECT().GetInfoByEmail(supportEmail).Return(&mockUserInfoResponse[1], nil)
+	userUC.EXPECT().GetByEmail(supportEmail).Return(&mockUserResponse[1], nil).AnyTimes()
+	userUC.EXPECT().GetByEmail(userEmail).Return(&mockUserResponse[0], nil).AnyTimes()
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserInfoResponse[1].UserID, "outbox").Return(&mockFolderResponse[1], nil)
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserInfoResponse[0].UserID, "inbox").Return(&mockFolderResponse[0], nil)
+	mailRepo.EXPECT().InsertMessage(mockUserInfoResponse[1].UserID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserInfoResponse[1].UserID, messageSelected.MessageID).Return(&messageSelected, nil)
+	userUC.EXPECT().GetInfo(mockUserInfoResponse[1].UserID).Return(&mockUserInfoResponse[1], nil)
+	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, mockUserInfoResponse[1].UserID).Return([]uint64{mockUserInfoResponse[0].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserInfoResponse[0].UserID).Return(&mockUserInfoResponse[0], nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return([]models.AttachmentInfo{}, nil)
+
+	_, err := mailH.SendFailedSendingMessage(userEmail, invalidEmails)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	}
+}
+
+func TestUseCase_SendWelcomeMessage(t *testing.T) {
+	cfg := createConfig()
+
+	supportEmail := "support@mailbx.ru"
+	userEmail := "valera03@mailbx.ru"
+	mockUserInfoResponse := []models.UserInfo{
+		{
+			UserID:    1,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     userEmail,
+		},
+		{
+			UserID:    2,
+			FirstName: "Suppot",
+			LastName:  "Supportov",
+			Email:     supportEmail,
+		},
+	}
+	mockUserResponse := []models.User{
+		{
+			UserID:    mockUserInfoResponse[0].UserID,
+			FirstName: mockUserInfoResponse[0].FirstName,
+			LastName:  mockUserInfoResponse[0].LastName,
+			Email:     mockUserInfoResponse[0].Email,
+		},
+		{
+			UserID:    mockUserInfoResponse[1].UserID,
+			FirstName: mockUserInfoResponse[1].FirstName,
+			LastName:  mockUserInfoResponse[1].LastName,
+			Email:     mockUserInfoResponse[1].Email,
+		},
+	}
+	formMessage := models.FormMessage{
+		Recipients: []string{userEmail},
+		Title:      "Добро пожаловать в почту Mailbx",
+		Text: "Это письмо создано автоматически сервером Mailbx.ru, отвечать на него не нужно.\n" +
+			"Поздравляем Вас с присоединением к нашей почте. Уверены, что вы останетесь довольны ее использованием!",
+		ReplyToMessageID: nil,
+		Attachments:      nil,
+	}
+	mockFolderResponse := []models.Folder{
+		{
+			FolderID:  1,
+			UserID:    mockUserInfoResponse[0].UserID,
+			LocalName: "inbox",
+			Name:      "Входящие",
+		},
+		{
+			FolderID:  2,
+			UserID:    mockUserInfoResponse[1].UserID,
+			LocalName: "outbox",
+			Name:      "Исходящие",
+		},
+	}
+	user2folder := []models.User2Folder{
+		{
+			UserID:   mockUserInfoResponse[1].UserID,
+			FolderID: mockFolderResponse[1].FolderID,
+		},
+		{
+			UserID:   mockUserInfoResponse[0].UserID,
+			FolderID: mockFolderResponse[0].FolderID,
+		},
+	}
+	newMessage := models.MessageInfo{
+		Title:            formMessage.Title,
+		CreatedAt:        pkg.GetCurrentTime(cfg.Logger.LogsTimeFormat),
+		Text:             formMessage.Text,
+		ReplyToMessageID: formMessage.ReplyToMessageID,
+		AttachmentsSize:  "0 Б",
+		Attachments:      []models.AttachmentInfo{},
+	}
+	messageSelected := newMessage
+	messageSelected.FromUser = mockUserInfoResponse[1]
+	messageSelected.ReplyToMessageID = nil
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	userUC.EXPECT().GetInfoByEmail(supportEmail).Return(&mockUserInfoResponse[1], nil)
+	userUC.EXPECT().GetByEmail(userEmail).Return(&mockUserResponse[0], nil).AnyTimes()
+	userUC.EXPECT().GetByEmail(supportEmail).Return(&mockUserResponse[1], nil).AnyTimes()
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserInfoResponse[1].UserID, "outbox").Return(&mockFolderResponse[1], nil)
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(mockUserInfoResponse[0].UserID, "inbox").Return(&mockFolderResponse[0], nil)
+	mailRepo.EXPECT().InsertMessage(mockUserInfoResponse[1].UserID, &newMessage, user2folder).Return(nil).SetArg(1, messageSelected)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserInfoResponse[1].UserID, messageSelected.MessageID).Return(&messageSelected, nil)
+	userUC.EXPECT().GetInfo(mockUserInfoResponse[1].UserID).Return(&mockUserInfoResponse[1], nil)
+	mailRepo.EXPECT().SelectRecipientsByMessage(messageSelected.MessageID, mockUserInfoResponse[1].UserID).Return([]uint64{mockUserInfoResponse[0].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserInfoResponse[0].UserID).Return(&mockUserInfoResponse[0], nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageSelected.MessageID).Return([]models.AttachmentInfo{}, nil)
+
+	err := mailH.SendWelcomeMessage(userEmail)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+	}
+}
+
+func TestUseCase_MarkMessageAsSeen(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	messageID := uint64(1)
+	folderID := uint64(1)
+	state := "seen"
+	stateValue := true
+
+	mockUserResponse := []models.UserInfo{
+		{
+			UserID:    userID,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     "valera03@mailbx.ru",
+		},
+		{
+			UserID:    2,
+			FirstName: "max",
+			LastName:  "vlasov",
+			Email:     "max03@mailbx.ru",
+		},
+	}
+	mockMessageResponse := &models.MessageInfo{
+		FromUser:   mockUserResponse[0],
+		MessageID:  messageID,
+		Recipients: nil,
+		Title:      "test",
+		CreatedAt:  "2023-01-29",
+		Text:       "test text",
+		Seen:       stateValue,
+	}
+	mockFolderResponse := &models.Folder{
+		FolderID:  folderID,
+		UserID:    mockUserResponse[0].UserID,
+		LocalName: "inbox",
+		Name:      "Входящие",
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, mockFolderResponse.LocalName).Return(mockFolderResponse, nil)
+	mailRepo.EXPECT().CheckExistingBox(userID, messageID, folderID).Return(true, nil)
+	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil).AnyTimes()
+	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
+	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageID).Return([]models.AttachmentInfo{}, nil).AnyTimes()
+
+	response, err := mailH.MarkMessageAsSeen(userID, messageID, mockFolderResponse.LocalName)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockMessageResponse, response)
+	}
+}
+
+func TestUseCase_MarkMessageAsUnseen(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	messageID := uint64(1)
+	folderID := uint64(1)
+	state := "seen"
+	stateValue := false
+
+	mockUserResponse := []models.UserInfo{
+		{
+			UserID:    userID,
+			FirstName: "valera",
+			LastName:  "vinokurshin",
+			Email:     "valera03@mailbx.ru",
+		},
+		{
+			UserID:    2,
+			FirstName: "max",
+			LastName:  "vlasov",
+			Email:     "max03@mailbx.ru",
+		},
+	}
+	mockMessageResponse := &models.MessageInfo{
+		FromUser:   mockUserResponse[0],
+		MessageID:  messageID,
+		Recipients: nil,
+		Title:      "test",
+		CreatedAt:  "2023-01-29",
+		Text:       "test text",
+		Seen:       stateValue,
+	}
+	mockFolderResponse := &models.Folder{
+		FolderID:  folderID,
+		UserID:    mockUserResponse[0].UserID,
+		LocalName: "inbox",
+		Name:      "Входящие",
+	}
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, mockFolderResponse.LocalName).Return(mockFolderResponse, nil)
+	mailRepo.EXPECT().CheckExistingBox(userID, messageID, folderID).Return(true, nil)
+	mailRepo.EXPECT().UpdateMessageState(userID, messageID, folderID, state, stateValue).Return(nil)
+	mailRepo.EXPECT().SelectMessageByUserNMessage(mockUserResponse[0].UserID, mockMessageResponse.MessageID).Return(mockMessageResponse, nil).AnyTimes()
+	userUC.EXPECT().GetInfo(mockUserResponse[0].UserID).Return(&mockUserResponse[0], nil)
+	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessageResponse.MessageID, mockUserResponse[0].UserID).Return([]uint64{mockUserResponse[1].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockUserResponse[1].UserID).Return(&mockUserResponse[1], nil)
+	mailRepo.EXPECT().GetMessageAttachments(messageID).Return([]models.AttachmentInfo{}, nil).AnyTimes()
+
+	response, err := mailH.MarkMessageAsUnseen(userID, messageID, mockFolderResponse.LocalName)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockMessageResponse, response)
+	}
+}
+
+func TestUseCase_MoveMessageToFolder(t *testing.T) {
+	cfg := createConfig()
+	userID := uint64(1)
+	var fakeMessage *models.MessageInfo
+	var fakeFromFolder, fakeToFolder *models.Folder
+	generateFakeData(&fakeMessage)
+	generateFakeData(&fakeFromFolder)
+	generateFakeData(&fakeToFolder)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SelectMessageByUserNMessage(userID, fakeMessage.MessageID).Return(fakeMessage, nil)
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeToFolder.LocalName).Return(fakeToFolder, nil)
+	mailRepo.EXPECT().SelectFolderByUserNFolderSlug(userID, fakeFromFolder.LocalName).Return(fakeFromFolder, nil)
+	mailRepo.EXPECT().CheckExistingBox(userID, fakeMessage.MessageID, fakeFromFolder.FolderID).Return(true, nil)
+	mailRepo.EXPECT().CheckExistingBox(userID, fakeMessage.MessageID, fakeToFolder.FolderID).Return(false, nil)
+	mailRepo.EXPECT().UpdateMessageFolder(userID, fakeMessage.MessageID, fakeFromFolder.FolderID, fakeToFolder.FolderID).Return(nil)
+
+	err := mailH.MoveMessageToFolder(userID, fakeMessage.MessageID, fakeFromFolder.LocalName, fakeToFolder.LocalName)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	}
+}
 
 func TestUseCase_GetCustomFolders(t *testing.T) {
 	cfg := createConfig()
@@ -1196,5 +1276,135 @@ func TestUseCase_GetCustomFolders(t *testing.T) {
 		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
 	} else {
 		require.Equal(t, []models.Folder{}, response)
+	}
+}
+
+func TestUseCase_SearchMessages(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	var mockMessagesResponse []models.MessageInfo
+	generateFakeData(&mockMessagesResponse)
+	mockMessagesResponse = mockMessagesResponse[:1]
+	var mockFromUserResponse *models.UserInfo
+	var mockRecipientResponse []models.UserInfo
+	generateFakeData(&mockFromUserResponse)
+	generateFakeData(&mockRecipientResponse)
+	mockRecipientResponse = mockRecipientResponse[:1]
+	mockMessagesResponse[0].FromUser = *mockFromUserResponse
+	mockMessagesResponse[0].Recipients = mockRecipientResponse
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SearchMessages(userID, mockFromUserResponse.Email, mockRecipientResponse[0].Email, "folder", "filter").
+		Return(mockMessagesResponse, nil)
+	userUC.EXPECT().GetInfo(mockFromUserResponse.UserID).Return(mockFromUserResponse, nil)
+	mailRepo.EXPECT().SelectRecipientsByMessage(mockMessagesResponse[0].MessageID, mockFromUserResponse.UserID).Return([]uint64{mockRecipientResponse[0].UserID}, nil)
+	userUC.EXPECT().GetInfo(mockRecipientResponse[0].UserID).Return(&mockRecipientResponse[0], nil)
+
+	response, err := mailH.SearchMessages(userID, mockFromUserResponse.Email, mockRecipientResponse[0].Email, "folder", "filter")
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockMessagesResponse, response)
+	}
+}
+
+func TestUseCase_SearchRecipients(t *testing.T) {
+	cfg := createConfig()
+
+	userID := uint64(1)
+	var mockRecipientsResponse []models.UserInfo
+	generateFakeData(&mockRecipientsResponse)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().SearchRecipients(userID).Return(mockRecipientsResponse, nil)
+
+	response, err := mailH.SearchRecipients(userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockRecipientsResponse, response)
+	}
+}
+
+func TestUseCase_GetAttachInfo(t *testing.T) {
+	cfg := createConfig()
+
+	attachID := uint64(1)
+	userID := uint64(1)
+	var mockAttachResponse *models.AttachmentInfo
+	generateFakeData(&mockAttachResponse)
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().GetAttach(attachID, userID).Return(mockAttachResponse, nil)
+
+	response, err := mailH.GetAttachInfo(attachID, userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockAttachResponse, response)
+	}
+}
+
+func TestUseCase_GetAttach(t *testing.T) {
+	cfg := createConfig()
+
+	attachID := uint64(1)
+	userID := uint64(1)
+	var mockAttachResponse *models.AttachmentInfo
+	var fileS3Response *models.S3File
+	generateFakeData(&mockAttachResponse)
+	generateFakeData(&fileS3Response)
+	mockAttachResponse.FileData = fileS3Response.Data
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mailRepo := mockMailRepo.NewMockMailRepoI(ctrl)
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
+	mailH := New(cfg, mailRepo, userUC, fileUC)
+
+	mailRepo.EXPECT().GetAttach(attachID, userID).Return(mockAttachResponse, nil)
+	fileUC.EXPECT().Get(cfg.S3.S3AttachBucket, mockAttachResponse.S3FName).Return(fileS3Response, nil)
+
+	response, err := mailH.GetAttach(attachID, userID)
+	causeErr := pkgErr.Cause(err)
+
+	if causeErr != nil {
+		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
+	} else {
+		require.Equal(t, mockAttachResponse, response)
 	}
 }

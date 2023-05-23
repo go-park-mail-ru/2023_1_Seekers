@@ -28,6 +28,9 @@ func createConfig() *config.Config {
 	cfg.Routes.RouteUserInfoQueryEmail = "email"
 	cfg.Routes.RouteQueryFromFolderSlug = "fromFolder"
 	cfg.Routes.RouteMoveToFolderQueryToFolderSlug = "toFolder"
+	cfg.Routes.RouteUserAvatar = "/user/avatar"
+	cfg.Routes.QueryAccessKey = "accessKey"
+	cfg.UserService.UserFormNewAvatar = "newAvatar"
 
 	return cfg
 }
