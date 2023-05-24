@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"net/http"
+	"syscall"
 )
 
 var (
@@ -30,6 +31,7 @@ var (
 	ErrWrongContentType     = errors.New("unsupported content type")
 	ErrFailedAuth           = errors.New("failed auth")
 	ErrWrongCSRF            = errors.New("wrong csrf token")
+	ErrWrongAccessToken     = errors.New("wrong access token")
 	ErrFolderAlreadyExists  = errors.New("folder already exists")
 	ErrDeleteDefaultFolder  = errors.New("can't delete default folder")
 	ErrEditDefaultFolder    = errors.New("can't edit default folder")
@@ -39,6 +41,7 @@ var (
 	ErrMoveFromDraftFolder  = errors.New("can't move message from draft folder")
 	ErrSomeEmailsAreInvalid = errors.New("some emails are invalid")
 	ErrCantEditSentMessage  = errors.New("can't edit sent message")
+	ErrBoxNotFound          = errors.New("box not found")
 )
 
 var HttpCodes = map[string]int{
@@ -64,6 +67,7 @@ var HttpCodes = map[string]int{
 	ErrWrongContentType.Error():     http.StatusBadRequest,
 	ErrFailedAuth.Error():           http.StatusUnauthorized,
 	ErrWrongCSRF.Error():            http.StatusBadRequest,
+	ErrWrongAccessToken.Error():     http.StatusBadRequest,
 	ErrFolderAlreadyExists.Error():  http.StatusBadRequest,
 	ErrDeleteDefaultFolder.Error():  http.StatusBadRequest,
 	ErrEditDefaultFolder.Error():    http.StatusBadRequest,
@@ -72,6 +76,8 @@ var HttpCodes = map[string]int{
 	ErrMoveToDraftFolder.Error():    http.StatusBadRequest,
 	ErrMoveFromDraftFolder.Error():  http.StatusBadRequest,
 	ErrSomeEmailsAreInvalid.Error(): http.StatusBadRequest,
+	ErrBoxNotFound.Error():          http.StatusBadRequest,
+	syscall.EPIPE.Error():           http.StatusBadRequest,
 }
 
 var GRPCCodes = map[string]codes.Code{
@@ -97,6 +103,7 @@ var GRPCCodes = map[string]codes.Code{
 	ErrWrongContentType.Error():     codes.InvalidArgument,
 	ErrFailedAuth.Error():           codes.Unauthenticated,
 	ErrWrongCSRF.Error():            codes.InvalidArgument,
+	ErrWrongAccessToken.Error():     codes.InvalidArgument,
 	ErrFolderAlreadyExists.Error():  codes.InvalidArgument,
 	ErrDeleteDefaultFolder.Error():  codes.InvalidArgument,
 	ErrEditDefaultFolder.Error():    codes.InvalidArgument,
@@ -105,6 +112,7 @@ var GRPCCodes = map[string]codes.Code{
 	ErrMoveToDraftFolder.Error():    codes.InvalidArgument,
 	ErrMoveFromDraftFolder.Error():  codes.InvalidArgument,
 	ErrSomeEmailsAreInvalid.Error(): codes.InvalidArgument,
+	syscall.EPIPE.Error():           codes.InvalidArgument,
 }
 
 var LogLevels = map[string]logrus.Level{
@@ -122,6 +130,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrFailedGetUser.Error():        logrus.WarnLevel,
 	ErrGetFile.Error():              logrus.WarnLevel,
 	ErrNoKey.Error():                logrus.WarnLevel,
+	syscall.EPIPE.Error():           logrus.WarnLevel,
 	ErrNoBucket.Error():             logrus.ErrorLevel,
 	ErrInvalidURL.Error():           logrus.WarnLevel,
 	ErrFolderNotFound.Error():       logrus.WarnLevel,
@@ -130,6 +139,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrWrongContentType.Error():     logrus.WarnLevel,
 	ErrFailedAuth.Error():           logrus.WarnLevel,
 	ErrWrongCSRF.Error():            logrus.WarnLevel,
+	ErrWrongAccessToken.Error():     logrus.WarnLevel,
 	ErrFolderAlreadyExists.Error():  logrus.WarnLevel,
 	ErrDeleteDefaultFolder.Error():  logrus.WarnLevel,
 	ErrEditDefaultFolder.Error():    logrus.WarnLevel,
@@ -138,6 +148,7 @@ var LogLevels = map[string]logrus.Level{
 	ErrMoveToDraftFolder.Error():    logrus.WarnLevel,
 	ErrMoveFromDraftFolder.Error():  logrus.WarnLevel,
 	ErrSomeEmailsAreInvalid.Error(): logrus.WarnLevel,
+	ErrBoxNotFound.Error():          logrus.WarnLevel,
 }
 
 func HttpCode(err error) int {

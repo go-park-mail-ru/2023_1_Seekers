@@ -6,13 +6,18 @@ require (
 	github.com/aws/aws-sdk-go v1.44.224
 	github.com/emersion/go-message v0.16.0
 	github.com/emersion/go-msgauth v0.6.6
+	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21
+	github.com/emersion/go-smtp v0.16.0
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-redis/redismock/v9 v9.0.3
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/ilyakaznacheev/cleanenv v1.4.2
+	github.com/joho/godotenv v1.4.0
+	github.com/mailru/easyjson v0.7.7
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.0
@@ -33,6 +38,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/DusanKasan/parsemail v1.2.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -54,16 +60,15 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/swaggo/files v1.0.0 // indirect
+	github.com/urfave/negroni v1.0.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

@@ -40,7 +40,7 @@ func SendMailRaw(addr string, port string, heloDomain string, smtpAuth smtp.Auth
 
 		// start tls
 		isExistTLS, _ := client.Extension("STARTTLS")
-		if isExistTLS == true {
+		if isExistTLS {
 			config := &tls.Config{
 				ServerName:         addr,
 				InsecureSkipVerify: true,
@@ -60,7 +60,6 @@ func SendMailRaw(addr string, port string, heloDomain string, smtpAuth smtp.Auth
 				return err
 			}
 		}
-
 	}
 
 	// 4. Send

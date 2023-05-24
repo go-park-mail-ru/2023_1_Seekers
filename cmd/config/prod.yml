@@ -2,6 +2,10 @@ api:
   port: 8001
   metrics_port: 9001
   metrics_name: api
+  mail_hub_ctx: hub
+  mail_tpl_dir: ./internal/api/http/templates/
+  host: https://mailbx.ru
+  mail_preview_max_len: 60
 
 project:
   project_base_dir: 2023_1_Seekers
@@ -44,7 +48,7 @@ smtp_server:
   domain: mailbx
   read_timeout: 10s
   write_timeout_timeout: 10s
-  max_message_bytes: 1048576
+  max_message_bytes: 104857600
   max_recipients: 50
   allow_insecure_auth: false
   cert_file: /etc/letsencrypt/live/mailbx.ru/fullchain.pem
@@ -55,6 +59,7 @@ s3:
   s3_region: eu-west-2
   s3_endpoint: https://hb.bizmrg.com
   s3_avatar_bucket: avatars_mailbox_vkcloud
+  s3_attach_bucket: attachs_mailbox_vkcloud
 
 sessions:
   cookie_name: MailBxSession
@@ -73,6 +78,11 @@ routes:
   route_csrf: /csrf
 
   route_message: /message/{id:[0-9]+}
+  route_attach: /attach/{id:[0-9]+}
+  route_attach_b64: /attach/{id:[0-9]+}/b64
+  route_message_attaches: /message/{id:[0-9]+}/attaches
+  route_external_attach: /external/attach/{id:[0-9]+}
+  route_preview_attach: /attach/{id:[0-9]+}/preview
   route_send_message: /message/send
   route_save_draft_message: /message/save
   route_read_message: /message/{id:[0-9]+}/read
@@ -81,9 +91,12 @@ routes:
   route_move_to_folder_query_folder_slug: folderSlug
   route_get_folders: /folders
   route_folder: /folder/{slug}
+  route_search: /messages/search
+  route_recipients: /recipients/search
   route_create_folder: /folder/create
   route_edit_folder: /folder/{slug}/edit
   route_get_folders_is_custom: custom
+  query_access_key: accessKey
 
   route_user: /user
   route_user_info: /user/info
@@ -114,6 +127,7 @@ cors:
     - X-Csrf-Token
     - application/json
     - text/xml
+    - Content-Disposition
   allowed_origins:
     - http://127.0.0.1:8002
     - http://localhost:8002

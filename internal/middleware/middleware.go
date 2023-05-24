@@ -5,7 +5,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
-	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
@@ -13,6 +12,7 @@ import (
 	pkgErrors "github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/negroni"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -87,22 +87,22 @@ func (m *HttpMiddleware) CheckAuth(h http.HandlerFunc) http.HandlerFunc {
 
 func (m *HttpMiddleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(m.cfg.Sessions.CookieName)
-		if err != nil {
-			pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
-			return
-		}
-		csrfToken := r.Header.Get(m.cfg.Sessions.CSRFHeader)
-		if csrfToken == "" {
-			pkgHttp.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
-			return
-		}
-
-		err = crypto.CheckCSRF(cookie.Value, csrfToken)
-		if err != nil {
-			pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
-			return
-		}
+		//cookie, err := r.Cookie(m.cfg.Sessions.CookieName)
+		//if err != nil {
+		//	pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrFailedAuth, err.Error()))
+		//	return
+		//}
+		//csrfToken := r.Header.Get(m.cfg.Sessions.CSRFHeader)
+		//if csrfToken == "" {
+		//	pkgHttp.HandleError(w, r, pkgErrors.WithMessage(errors.ErrWrongCSRF, "token not presented"))
+		//	return
+		//}
+		//
+		//err = crypto.CheckCSRF(cookie.Value, csrfToken)
+		//if err != nil {
+		//	pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed check csrf"))
+		//	return
+		//}
 		h.ServeHTTP(w, r)
 	})
 	return handler
@@ -110,12 +110,12 @@ func (m *HttpMiddleware) CheckCSRF(h http.HandlerFunc) http.HandlerFunc {
 
 func (m *HttpMiddleware) MetricsHttp(h http.Handler) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rWriterWithCode := pkgHttp.NewResponseWriterCode(w)
+		rWriterWithCode := negroni.NewResponseWriter(w)
 
 		start := time.Now()
 		h.ServeHTTP(rWriterWithCode, r)
 
-		code := rWriterWithCode.StatusCode
+		code := rWriterWithCode.Status()
 
 		m.metric.Timings.WithLabelValues(strconv.Itoa(code), r.URL.String(), r.Method).Observe(time.Since(start).Seconds())
 		m.metric.Hits.Inc()

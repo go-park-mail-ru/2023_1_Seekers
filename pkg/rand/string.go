@@ -2,7 +2,9 @@ package rand
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"math/big"
+	"path/filepath"
 )
 
 func String(length int) (string, error) {
@@ -16,4 +18,10 @@ func String(length int) (string, error) {
 		randBytes[i] = charSet[res.Int64()]
 	}
 	return string(randBytes), nil
+}
+
+func FileName(prefix, suffix string) string {
+	randBytes := make([]byte, 20)
+	rand.Read(randBytes)
+	return filepath.Join(prefix + hex.EncodeToString(randBytes) + suffix)
 }

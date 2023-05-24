@@ -4,6 +4,8 @@ import (
 	"html"
 )
 
+//go:generate easyjson -all
+
 type AuthResponse struct {
 	Email     string `json:"email" validate:"required"`
 	FirstName string `json:"firstName" validate:"required"`

@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgErrors "github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -90,6 +90,17 @@ func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, err
 	return folders, nil
 }
 
+func (m mailRepository) SearchRecipients(userId uint64) ([]models.UserInfo, error) {
+	var result []models.UserInfo
+	tx := m.db.Raw("SELECT * FROM get_recipes( $1 );", userId).Scan(&result)
+
+	if err := tx.Error; err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return result, nil
+}
+
 func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error) {
 	var folder models.Folder
 
@@ -100,6 +111,21 @@ func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint
 	}
 
 	return &folder, nil
+}
+
+func (m mailRepository) CheckExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error) {
+	var box Box
+
+	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).First(&box)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+
+		return false, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return true, nil
 }
 
 func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
@@ -114,6 +140,26 @@ func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folde
 	return messages, nil
 }
 
+func (m mailRepository) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+	var messages []models.MessageInfo
+	var messagesIds []uint64
+
+	tx := m.db.Raw("SELECT * FROM get_messages($1, $2, $3, $4, $5);", userId, fromUser, toUser, folder, filter).Scan(&messagesIds)
+	if err := tx.Error; err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	for _, mid := range messagesIds {
+		mInfo, err := m.SelectMessageByUserNMessage(userId, mid)
+		if err != nil {
+			return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+		}
+		messages = append(messages, *mInfo)
+	}
+
+	return messages, nil
+}
+
 func (m mailRepository) DeleteFolder(folderID uint64) error {
 	tx := m.db.Where("folder_id = ?", folderID).Delete(&models.Folder{})
 	if err := tx.Error; err != nil {
@@ -123,8 +169,8 @@ func (m mailRepository) DeleteFolder(folderID uint64) error {
 	return nil
 }
 
-func (m mailRepository) DeleteMessageForUser(userID uint64, messageID uint64) error {
-	tx := m.db.Where("user_id = ? AND message_id = ?", userID, messageID).Delete(&Box{})
+func (m mailRepository) DeleteBox(userID uint64, messageID uint64, folderID uint64) error {
+	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Delete(&Box{})
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -143,7 +189,6 @@ func (m mailRepository) DeleteMessageFromMessages(messageID uint64) error {
 func (m mailRepository) UpdateFolder(folder models.Folder) error {
 	tx := m.db.Updates(folder)
 	if err := tx.Error; err != nil {
-		fmt.Println(err)
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -180,6 +225,7 @@ func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uin
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
+	message.Preview = common.GetInnerText(message.Text, m.cfg.Api.MailPreviewMaxLen)
 	return message, nil
 }
 
@@ -191,13 +237,21 @@ func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *mode
 		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
+	for _, v := range message.Attachments {
+		var attachID uint64
+		tx = tx.Raw("INSERT INTO mail.attaches(message_id, type, filename, s3_fname, size_str, size_count) VALUES ($1, $2, $3, $4, $5, $6) RETURNING attach_id;", convMsg.MessageID, v.Type, v.FileName, v.S3FName, v.SizeStr, v.SizeCount).Scan(&attachID)
+		if err := tx.Error; err != nil {
+			return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+		}
+		v.AttachID = attachID
+	}
+
 	return convMsg.MessageID, nil
 }
 
 func (m mailRepository) updateMessageInMessages(message *models.MessageInfo, tx *gorm.DB) error {
 	tx = tx.Model(Message{}).Omit("message_id", "from_user_id", "size").Where("message_id = ?", message.MessageID).Updates(&message)
 	if err := tx.Error; err != nil {
-		fmt.Println(err)
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 	if message.ReplyToMessageID == nil {
@@ -318,8 +372,8 @@ func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) {
 	return folder.FolderID, nil
 }
 
-func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stateName string, stateValue bool) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update(stateName, stateValue)
+func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error {
+	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Update(stateName, stateValue)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -327,11 +381,70 @@ func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, stat
 	return nil
 }
 
-func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, folderID uint64) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ?", userID, messageID).Update("folder_id", folderID)
+func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error {
+	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, oldFolderID).Update("folder_id", newFolderID)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	return nil
+}
+
+func (m mailRepository) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	type Result struct {
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
+	}
+	var res Result
+
+	tx := m.db.Raw("SELECT type, filename, s3_fname, size_str, size_count from mail.attaches "+
+		"JOIN mail.boxes b on attaches.message_id = b.message_id "+
+		"WHERE attach_id = $1 AND user_id = $2;", attachID, userID).Scan(&res)
+	if err := tx.Error; err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return &models.AttachmentInfo{
+		AttachID:  attachID,
+		FileName:  res.Filename,
+		S3FName:   res.S3FName,
+		Type:      res.Type,
+		SizeStr:   res.SizeStr,
+		SizeCount: res.SizeCount,
+	}, nil
+}
+
+func (m mailRepository) GetMessageAttachments(messageID uint64) ([]models.AttachmentInfo, error) {
+	type Result struct {
+		AttachID  uint64
+		Type      string
+		Filename  string
+		S3FName   string `gorm:"column:s3_fname"`
+		SizeStr   string
+		SizeCount int64
+	}
+	var res []Result
+
+	tx := m.db.Raw("SELECT attach_id, type, filename, s3_fname, size_str, size_count from mail.attaches "+
+		"JOIN mail.messages m on attaches.message_id = m.message_id "+
+		"WHERE m.message_id = $1;", messageID).Scan(&res)
+	if err := tx.Error; err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	response := make([]models.AttachmentInfo, len(res))
+	for i, v := range res {
+		response[i] = models.AttachmentInfo{
+			AttachID:  v.AttachID,
+			FileName:  v.Filename,
+			S3FName:   v.S3FName,
+			Type:      v.Type,
+			SizeStr:   v.SizeStr,
+			SizeCount: v.SizeCount,
+		}
+	}
+	return response, nil
 }

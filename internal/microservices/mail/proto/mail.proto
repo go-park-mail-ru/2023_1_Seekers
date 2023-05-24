@@ -17,15 +17,28 @@ message UIDMessageID {
   uint64 MessageID = 2;
 }
 
+message UIDMessageIDFolderSlug {
+  uint64 UID = 1;
+  uint64 MessageID = 2;
+  string FolderSlug = 3;
+}
+
 message Recipients {
   repeated string Recipients = 1;
 }
 
+message Attachment {
+  string FileName = 1;
+  string FileData = 2;
+}
+
 message Message {
-  repeated string  Recipients = 1;
-  string Title = 2;
-  string Text = 3;
-  UID ReplyToMessageID = 4;
+  string FromUser = 1;
+  repeated string  Recipients = 2;
+  string Title = 3;
+  string Text = 4;
+  UID ReplyToMessageID = 5;
+  repeated Attachment Attachments = 6;
 }
 
 message SendMessageParams {
@@ -83,7 +96,8 @@ message SaveDraftParams {
 message MoveToFolderParams{
   uint64 UID = 1;
   uint64 MessageID = 2;
-  string FolderSlug = 3;
+  string FromFolderSlug = 3;
+  string ToFolderSlug = 4;
 }
 
 message EditDraftParams {
@@ -98,6 +112,20 @@ message UserInfo {
   string LastName = 3;
 }
 
+message SearchRecipientsResponse {
+  repeated UserInfo UsersInfo = 1;
+}
+
+message AttachmentInfo {
+  uint64 AttachID = 1;
+  string   FileName = 2;
+  bytes FileData = 3;
+  string S3FName = 4;
+  string Type = 5;
+  string SizeStr = 6;
+  int64  SizeCount = 7;
+}
+
 message MessageInfo {
   uint64 MessageID = 1;
   UserInfo FromUser = 2;
@@ -110,6 +138,9 @@ message MessageInfo {
   bool Seen = 9;
   bool Favorite = 10;
   bool Deleted = 11;
+  repeated AttachmentInfo Attachments = 12;
+  string  AttachmentsSize = 13;
+  string Preview = 14;
 }
 
 message ValidateRecipientsResponse {
@@ -121,6 +152,19 @@ message MessagesInfoResponse {
   repeated MessageInfo MessagesInfo = 1;
 }
 
+message SearchMailParams{
+  uint64 UID = 1;
+  string FromUser = 2;
+  string ToUser = 3;
+  string Folder = 4;
+  string Filter = 5;
+}
+
+message AttNUser {
+  uint64 AttachID = 1;
+  uint64 UserID = 2;
+}
+
 message Nothing {
   bool dummy = 1;
 }
@@ -129,20 +173,24 @@ service MailService {
   rpc GetFolders(UID) returns (FoldersResponse) {}
   rpc GetFolderInfo(UserFolder) returns (Folder){}
   rpc GetFolderMessages(UserFolder) returns (MessagesInfoResponse) {}
+  rpc SearchMessages(SearchMailParams) returns (MessagesInfoResponse) {}
+  rpc SearchRecipients(UID) returns (SearchRecipientsResponse) {}
   rpc CreateDefaultFolders(UID) returns (FoldersResponse) {}
   rpc GetMessage(UIDMessageID) returns (MessageInfo) {}
+  rpc GetAttachInfo(AttNUser) returns (AttachmentInfo) {}
   rpc ValidateRecipients(Recipients) returns (ValidateRecipientsResponse) {}
   rpc SendMessage(SendMessageParams) returns (MessageInfo) {}
-  rpc SendFailedSendingMessage(FailedEmailsParams) returns (Nothing) {}
+  rpc SendFailedSendingMessage(FailedEmailsParams) returns (MessageInfo) {}
   rpc SendWelcomeMessage(RecipientEmail) returns (Nothing) {}
-  rpc MarkMessageAsSeen(UIDMessageID) returns (MessageInfo) {}
-  rpc MarkMessageAsUnseen(UIDMessageID) returns (MessageInfo) {}
+  rpc MarkMessageAsSeen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
+  rpc MarkMessageAsUnseen(UIDMessageIDFolderSlug) returns (MessageInfo) {}
   rpc CreateFolder(CreateFolderParams) returns (Folder) {}
   rpc DeleteFolder(DeleteFolderParams) returns (Nothing) {}
   rpc EditFolder(EditFolderParams) returns (Folder) {}
-  rpc DeleteMessage(UIDMessageID) returns (Nothing) {}
+  rpc DeleteMessage(UIDMessageIDFolderSlug) returns (Nothing) {}
   rpc SaveDraft(SaveDraftParams) returns (MessageInfo) {}
   rpc EditDraft(EditDraftParams) returns (MessageInfo) {}
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
   rpc GetCustomFolders(UID) returns (FoldersResponse) {}
+  rpc GetAttach(AttNUser) returns (AttachmentInfo) {}
 }

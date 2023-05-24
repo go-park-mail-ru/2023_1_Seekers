@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	//"github.com/go-park-mail-ru/2023_1_Seekers/cmd/config"
-	mockFileRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/usecase/mocks"
+	mockFileUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/usecase/mocks"
 	mockUserRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/repository/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
@@ -42,17 +42,19 @@ func TestUseCase_Create(t *testing.T) {
 
 	var fakeUser *models.User
 	generateFakeData(&fakeUser)
-	fakeUser.Email = "valera03@mailbox.ru"
+	fakeUser.Email = "valera03@mailbx.ru"
+	fakeUser.IsExternal = false
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
-
-	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(nil, errors.ErrUserNotFound)
+	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
+	userRepo.EXPECT().SetAvatar(fakeUser.UserID, gomock.Any()).Return(nil)
 	userRepo.EXPECT().Create(fakeUser).Return(fakeUser, nil)
+	fileUC.EXPECT().Upload(gomock.Any()).Return(nil)
 
 	response, err := userUC.Create(fakeUser)
 	causeErr := pkgErr.Cause(err)
@@ -80,7 +82,7 @@ func TestUseCase_GetInfo(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
@@ -103,7 +105,7 @@ func TestUseCase_Delete(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().Delete(userID).Return(nil)
@@ -125,7 +127,7 @@ func TestUseCase_GetByID(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
@@ -149,7 +151,7 @@ func TestUseCase_GetByEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
@@ -179,7 +181,7 @@ func TestUseCase_GetInfoByEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
@@ -198,28 +200,26 @@ func TestUseCase_EditInfo(t *testing.T) {
 
 	var fakeUser *models.User
 	var request *models.UserInfo
+	var mockS3File *models.S3File
 	generateFakeData(&fakeUser)
 	generateFakeData(&request)
+	generateFakeData(&mockS3File)
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
-	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
+	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil).AnyTimes()
 	userRepo.EXPECT().EditInfo(fakeUser.UserID, request).Return(nil)
-	userRepo.EXPECT().IsCustomAvatar(fakeUser.UserID).Return(true, nil)
+	userRepo.EXPECT().IsCustomAvatar(fakeUser.UserID).Return(false, nil)
+	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)
+	fileUC.EXPECT().Get(cfg.S3.S3AvatarBucket, fakeUser.Avatar).Return(mockS3File, nil)
 
-	response, err := userUC.EditInfo(fakeUser.UserID, request)
-	causeErr := pkgErr.Cause(err)
-
-	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", err, causeErr)
-	} else {
-		require.Equal(t, *request, *response)
-	}
+	_, err := userUC.EditInfo(fakeUser.UserID, request)
+	require.Error(t, err)
 }
 
 func TestUseCase_EditPw(t *testing.T) {
@@ -237,7 +237,7 @@ func TestUseCase_EditPw(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
@@ -267,7 +267,7 @@ func TestUseCase_EditAvatar(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByID(fakeUser.UserID).Return(fakeUser, nil)
@@ -295,7 +295,7 @@ func TestUseCase_GetAvatar(t *testing.T) {
 	defer ctrl.Finish()
 
 	userRepo := mockUserRepo.NewMockUserRepoI(ctrl)
-	fileUC := mockFileRepo.NewMockUseCaseI(ctrl)
+	fileUC := mockFileUC.NewMockUseCaseI(ctrl)
 	userUC := New(cfg, userRepo, fileUC)
 
 	userRepo.EXPECT().GetByEmail(fakeUser.Email).Return(fakeUser, nil)

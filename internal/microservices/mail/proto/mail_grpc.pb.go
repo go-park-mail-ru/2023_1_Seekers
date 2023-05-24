@@ -21,22 +21,26 @@ type MailServiceClient interface {
 	GetFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 	GetFolderInfo(ctx context.Context, in *UserFolder, opts ...grpc.CallOption) (*Folder, error)
 	GetFolderMessages(ctx context.Context, in *UserFolder, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
+	SearchMessages(ctx context.Context, in *SearchMailParams, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
+	SearchRecipients(ctx context.Context, in *UID, opts ...grpc.CallOption) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 	GetMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
+	GetAttachInfo(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error)
 	ValidateRecipients(ctx context.Context, in *Recipients, opts ...grpc.CallOption) (*ValidateRecipientsResponse, error)
 	SendMessage(ctx context.Context, in *SendMessageParams, opts ...grpc.CallOption) (*MessageInfo, error)
-	SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*Nothing, error)
+	SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	SendWelcomeMessage(ctx context.Context, in *RecipientEmail, opts ...grpc.CallOption) (*Nothing, error)
-	MarkMessageAsSeen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
-	MarkMessageAsUnseen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error)
+	MarkMessageAsSeen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error)
+	MarkMessageAsUnseen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error)
 	CreateFolder(ctx context.Context, in *CreateFolderParams, opts ...grpc.CallOption) (*Folder, error)
 	DeleteFolder(ctx context.Context, in *DeleteFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 	EditFolder(ctx context.Context, in *EditFolderParams, opts ...grpc.CallOption) (*Folder, error)
-	DeleteMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*Nothing, error)
+	DeleteMessage(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*Nothing, error)
 	SaveDraft(ctx context.Context, in *SaveDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	EditDraft(ctx context.Context, in *EditDraftParams, opts ...grpc.CallOption) (*MessageInfo, error)
 	MoveMessageToFolder(ctx context.Context, in *MoveToFolderParams, opts ...grpc.CallOption) (*Nothing, error)
 	GetCustomFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
+	GetAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error)
 }
 
 type mailServiceClient struct {
@@ -74,6 +78,24 @@ func (c *mailServiceClient) GetFolderMessages(ctx context.Context, in *UserFolde
 	return out, nil
 }
 
+func (c *mailServiceClient) SearchMessages(ctx context.Context, in *SearchMailParams, opts ...grpc.CallOption) (*MessagesInfoResponse, error) {
+	out := new(MessagesInfoResponse)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/SearchMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) SearchRecipients(ctx context.Context, in *UID, opts ...grpc.CallOption) (*SearchRecipientsResponse, error) {
+	out := new(SearchRecipientsResponse)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/SearchRecipients", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mailServiceClient) CreateDefaultFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error) {
 	out := new(FoldersResponse)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/CreateDefaultFolders", in, out, opts...)
@@ -86,6 +108,15 @@ func (c *mailServiceClient) CreateDefaultFolders(ctx context.Context, in *UID, o
 func (c *mailServiceClient) GetMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error) {
 	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) GetAttachInfo(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error) {
+	out := new(AttachmentInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetAttachInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +141,8 @@ func (c *mailServiceClient) SendMessage(ctx context.Context, in *SendMessagePara
 	return out, nil
 }
 
-func (c *mailServiceClient) SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*Nothing, error) {
-	out := new(Nothing)
+func (c *mailServiceClient) SendFailedSendingMessage(ctx context.Context, in *FailedEmailsParams, opts ...grpc.CallOption) (*MessageInfo, error) {
+	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/SendFailedSendingMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -128,7 +159,7 @@ func (c *mailServiceClient) SendWelcomeMessage(ctx context.Context, in *Recipien
 	return out, nil
 }
 
-func (c *mailServiceClient) MarkMessageAsSeen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error) {
+func (c *mailServiceClient) MarkMessageAsSeen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error) {
 	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/MarkMessageAsSeen", in, out, opts...)
 	if err != nil {
@@ -137,7 +168,7 @@ func (c *mailServiceClient) MarkMessageAsSeen(ctx context.Context, in *UIDMessag
 	return out, nil
 }
 
-func (c *mailServiceClient) MarkMessageAsUnseen(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*MessageInfo, error) {
+func (c *mailServiceClient) MarkMessageAsUnseen(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*MessageInfo, error) {
 	out := new(MessageInfo)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/MarkMessageAsUnseen", in, out, opts...)
 	if err != nil {
@@ -173,7 +204,7 @@ func (c *mailServiceClient) EditFolder(ctx context.Context, in *EditFolderParams
 	return out, nil
 }
 
-func (c *mailServiceClient) DeleteMessage(ctx context.Context, in *UIDMessageID, opts ...grpc.CallOption) (*Nothing, error) {
+func (c *mailServiceClient) DeleteMessage(ctx context.Context, in *UIDMessageIDFolderSlug, opts ...grpc.CallOption) (*Nothing, error) {
 	out := new(Nothing)
 	err := c.cc.Invoke(ctx, "/mail_proto.MailService/DeleteMessage", in, out, opts...)
 	if err != nil {
@@ -218,6 +249,15 @@ func (c *mailServiceClient) GetCustomFolders(ctx context.Context, in *UID, opts 
 	return out, nil
 }
 
+func (c *mailServiceClient) GetAttach(ctx context.Context, in *AttNUser, opts ...grpc.CallOption) (*AttachmentInfo, error) {
+	out := new(AttachmentInfo)
+	err := c.cc.Invoke(ctx, "/mail_proto.MailService/GetAttach", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -225,22 +265,26 @@ type MailServiceServer interface {
 	GetFolders(context.Context, *UID) (*FoldersResponse, error)
 	GetFolderInfo(context.Context, *UserFolder) (*Folder, error)
 	GetFolderMessages(context.Context, *UserFolder) (*MessagesInfoResponse, error)
+	SearchMessages(context.Context, *SearchMailParams) (*MessagesInfoResponse, error)
+	SearchRecipients(context.Context, *UID) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(context.Context, *UID) (*FoldersResponse, error)
 	GetMessage(context.Context, *UIDMessageID) (*MessageInfo, error)
+	GetAttachInfo(context.Context, *AttNUser) (*AttachmentInfo, error)
 	ValidateRecipients(context.Context, *Recipients) (*ValidateRecipientsResponse, error)
 	SendMessage(context.Context, *SendMessageParams) (*MessageInfo, error)
-	SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*Nothing, error)
+	SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*MessageInfo, error)
 	SendWelcomeMessage(context.Context, *RecipientEmail) (*Nothing, error)
-	MarkMessageAsSeen(context.Context, *UIDMessageID) (*MessageInfo, error)
-	MarkMessageAsUnseen(context.Context, *UIDMessageID) (*MessageInfo, error)
+	MarkMessageAsSeen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error)
+	MarkMessageAsUnseen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error)
 	CreateFolder(context.Context, *CreateFolderParams) (*Folder, error)
 	DeleteFolder(context.Context, *DeleteFolderParams) (*Nothing, error)
 	EditFolder(context.Context, *EditFolderParams) (*Folder, error)
-	DeleteMessage(context.Context, *UIDMessageID) (*Nothing, error)
+	DeleteMessage(context.Context, *UIDMessageIDFolderSlug) (*Nothing, error)
 	SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error)
 	EditDraft(context.Context, *EditDraftParams) (*MessageInfo, error)
 	MoveMessageToFolder(context.Context, *MoveToFolderParams) (*Nothing, error)
 	GetCustomFolders(context.Context, *UID) (*FoldersResponse, error)
+	GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -257,11 +301,20 @@ func (UnimplementedMailServiceServer) GetFolderInfo(context.Context, *UserFolder
 func (UnimplementedMailServiceServer) GetFolderMessages(context.Context, *UserFolder) (*MessagesInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolderMessages not implemented")
 }
+func (UnimplementedMailServiceServer) SearchMessages(context.Context, *SearchMailParams) (*MessagesInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchMessages not implemented")
+}
+func (UnimplementedMailServiceServer) SearchRecipients(context.Context, *UID) (*SearchRecipientsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchRecipients not implemented")
+}
 func (UnimplementedMailServiceServer) CreateDefaultFolders(context.Context, *UID) (*FoldersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDefaultFolders not implemented")
 }
 func (UnimplementedMailServiceServer) GetMessage(context.Context, *UIDMessageID) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+}
+func (UnimplementedMailServiceServer) GetAttachInfo(context.Context, *AttNUser) (*AttachmentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttachInfo not implemented")
 }
 func (UnimplementedMailServiceServer) ValidateRecipients(context.Context, *Recipients) (*ValidateRecipientsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateRecipients not implemented")
@@ -269,16 +322,16 @@ func (UnimplementedMailServiceServer) ValidateRecipients(context.Context, *Recip
 func (UnimplementedMailServiceServer) SendMessage(context.Context, *SendMessageParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedMailServiceServer) SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*Nothing, error) {
+func (UnimplementedMailServiceServer) SendFailedSendingMessage(context.Context, *FailedEmailsParams) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFailedSendingMessage not implemented")
 }
 func (UnimplementedMailServiceServer) SendWelcomeMessage(context.Context, *RecipientEmail) (*Nothing, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendWelcomeMessage not implemented")
 }
-func (UnimplementedMailServiceServer) MarkMessageAsSeen(context.Context, *UIDMessageID) (*MessageInfo, error) {
+func (UnimplementedMailServiceServer) MarkMessageAsSeen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MarkMessageAsSeen not implemented")
 }
-func (UnimplementedMailServiceServer) MarkMessageAsUnseen(context.Context, *UIDMessageID) (*MessageInfo, error) {
+func (UnimplementedMailServiceServer) MarkMessageAsUnseen(context.Context, *UIDMessageIDFolderSlug) (*MessageInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MarkMessageAsUnseen not implemented")
 }
 func (UnimplementedMailServiceServer) CreateFolder(context.Context, *CreateFolderParams) (*Folder, error) {
@@ -290,7 +343,7 @@ func (UnimplementedMailServiceServer) DeleteFolder(context.Context, *DeleteFolde
 func (UnimplementedMailServiceServer) EditFolder(context.Context, *EditFolderParams) (*Folder, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditFolder not implemented")
 }
-func (UnimplementedMailServiceServer) DeleteMessage(context.Context, *UIDMessageID) (*Nothing, error) {
+func (UnimplementedMailServiceServer) DeleteMessage(context.Context, *UIDMessageIDFolderSlug) (*Nothing, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessage not implemented")
 }
 func (UnimplementedMailServiceServer) SaveDraft(context.Context, *SaveDraftParams) (*MessageInfo, error) {
@@ -304,6 +357,9 @@ func (UnimplementedMailServiceServer) MoveMessageToFolder(context.Context, *Move
 }
 func (UnimplementedMailServiceServer) GetCustomFolders(context.Context, *UID) (*FoldersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCustomFolders not implemented")
+}
+func (UnimplementedMailServiceServer) GetAttach(context.Context, *AttNUser) (*AttachmentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttach not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -372,6 +428,42 @@ func _MailService_GetFolderMessages_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_SearchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchMailParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).SearchMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/SearchMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).SearchMessages(ctx, req.(*SearchMailParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_SearchRecipients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).SearchRecipients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/SearchRecipients",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).SearchRecipients(ctx, req.(*UID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MailService_CreateDefaultFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UID)
 	if err := dec(in); err != nil {
@@ -404,6 +496,24 @@ func _MailService_GetMessage_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MailServiceServer).GetMessage(ctx, req.(*UIDMessageID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_GetAttachInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttNUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetAttachInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/GetAttachInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetAttachInfo(ctx, req.(*AttNUser))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -481,7 +591,7 @@ func _MailService_SendWelcomeMessage_Handler(srv interface{}, ctx context.Contex
 }
 
 func _MailService_MarkMessageAsSeen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UIDMessageID)
+	in := new(UIDMessageIDFolderSlug)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -493,13 +603,13 @@ func _MailService_MarkMessageAsSeen_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/mail_proto.MailService/MarkMessageAsSeen",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MailServiceServer).MarkMessageAsSeen(ctx, req.(*UIDMessageID))
+		return srv.(MailServiceServer).MarkMessageAsSeen(ctx, req.(*UIDMessageIDFolderSlug))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _MailService_MarkMessageAsUnseen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UIDMessageID)
+	in := new(UIDMessageIDFolderSlug)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -511,7 +621,7 @@ func _MailService_MarkMessageAsUnseen_Handler(srv interface{}, ctx context.Conte
 		FullMethod: "/mail_proto.MailService/MarkMessageAsUnseen",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MailServiceServer).MarkMessageAsUnseen(ctx, req.(*UIDMessageID))
+		return srv.(MailServiceServer).MarkMessageAsUnseen(ctx, req.(*UIDMessageIDFolderSlug))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -571,7 +681,7 @@ func _MailService_EditFolder_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _MailService_DeleteMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UIDMessageID)
+	in := new(UIDMessageIDFolderSlug)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -583,7 +693,7 @@ func _MailService_DeleteMessage_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/mail_proto.MailService/DeleteMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MailServiceServer).DeleteMessage(ctx, req.(*UIDMessageID))
+		return srv.(MailServiceServer).DeleteMessage(ctx, req.(*UIDMessageIDFolderSlug))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -660,6 +770,24 @@ func _MailService_GetCustomFolders_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_GetAttach_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttNUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetAttach(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mail_proto.MailService/GetAttach",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetAttach(ctx, req.(*AttNUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -680,12 +808,24 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MailService_GetFolderMessages_Handler,
 		},
 		{
+			MethodName: "SearchMessages",
+			Handler:    _MailService_SearchMessages_Handler,
+		},
+		{
+			MethodName: "SearchRecipients",
+			Handler:    _MailService_SearchRecipients_Handler,
+		},
+		{
 			MethodName: "CreateDefaultFolders",
 			Handler:    _MailService_CreateDefaultFolders_Handler,
 		},
 		{
 			MethodName: "GetMessage",
 			Handler:    _MailService_GetMessage_Handler,
+		},
+		{
+			MethodName: "GetAttachInfo",
+			Handler:    _MailService_GetAttachInfo_Handler,
 		},
 		{
 			MethodName: "ValidateRecipients",
@@ -742,6 +882,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCustomFolders",
 			Handler:    _MailService_GetCustomFolders_Handler,
+		},
+		{
+			MethodName: "GetAttach",
+			Handler:    _MailService_GetAttach_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

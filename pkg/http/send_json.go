@@ -1,14 +1,14 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	pkgJson "github.com/go-park-mail-ru/2023_1_Seekers/pkg/json"
 	"net/http"
 )
 
 func SendJSON(w http.ResponseWriter, r *http.Request, status int, dataStruct any) {
-	dataJSON, err := json.Marshal(dataStruct)
+	dataJSON, err := pkgJson.MarshalEasyJSON(dataStruct)
 	if err != nil {
 		HandleError(w, r, fmt.Errorf("failed to marshal : %w", err))
 		return

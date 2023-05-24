@@ -1,23 +1,36 @@
 package http
 
 import (
-	"encoding/json"
+	"archive/zip"
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/crypto"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
 	pkgHttp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/http"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
+	pkgZip "github.com/go-park-mail-ru/2023_1_Seekers/pkg/zip"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	pkgErrors "github.com/pkg/errors"
+	"html/template"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 )
 
 type MailHandlersI interface {
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
+	SearchMessages(w http.ResponseWriter, r *http.Request)
+	SearchRecipients(w http.ResponseWriter, r *http.Request)
 	GetFolders(w http.ResponseWriter, r *http.Request)
 	GetMessage(w http.ResponseWriter, r *http.Request)
 	DeleteMessage(w http.ResponseWriter, r *http.Request)
@@ -30,17 +43,30 @@ type MailHandlersI interface {
 	EditFolder(w http.ResponseWriter, r *http.Request)
 	MoveToFolder(w http.ResponseWriter, r *http.Request)
 	EditDraft(w http.ResponseWriter, r *http.Request)
+	DownloadAttach(w http.ResponseWriter, r *http.Request)
+	DownloadAllAttaches(w http.ResponseWriter, r *http.Request)
+	GetAttach(w http.ResponseWriter, r *http.Request)
+	PreviewAttach(w http.ResponseWriter, r *http.Request)
+	WSMessageHandler(w http.ResponseWriter, r *http.Request)
+	DeleteDraftAttach(w http.ResponseWriter, r *http.Request)
+	GetAttachB64(w http.ResponseWriter, r *http.Request)
+	//File(w http.ResponseWriter, r *http.Request)
 }
 
 type mailHandlers struct {
 	cfg *config.Config
 	uc  mail.UseCaseI
+	hub *ws.Hub
 }
 
 func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
+	hub := ws.NewHub(c)
+	go hub.Run()
+
 	return &mailHandlers{
 		cfg: c,
 		uc:  uc,
+		hub: hub,
 	}
 }
 
@@ -89,6 +115,65 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 	})
 }
 
+// SearchMessages godoc
+// @Summary      SearchMessages
+// @Description  list of filtered messages
+// @Tags     	 folders
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} MessagesResponse "success get filtered messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /messages/search [get]
+func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	filter := r.URL.Query().Get("filter")
+	folder := r.URL.Query().Get("folder")
+
+	messages, err := h.uc.SearchMessages(userID, "", "", folder, filter)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessagesResponse{
+		Messages: messages,
+	})
+}
+
+// SearchRecipients godoc
+// @Summary      SearchRecipients
+// @Description  list recipients for user
+// @Tags     	 recipients
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []UserInfo "success get recipients"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /recipients/search [get]
+func (h *mailHandlers) SearchRecipients(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	usersInfo, err := h.uc.SearchRecipients(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.Recipients{
+		Users: usersInfo,
+	})
+}
+
 // GetFolders godoc
 // @Summary      GetFolders
 // @Description  List of user folders
@@ -108,7 +193,8 @@ func (h *mailHandlers) GetFolders(w http.ResponseWriter, r *http.Request) {
 
 	var folders []models.Folder
 
-	isCustom, err := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
+	var err error
+	isCustom, _ := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteGetFoldersIsCustom))
 	if isCustom {
 		folders, err = h.uc.GetCustomFolders(userID)
 		if len(folders) == 0 || folders == nil {
@@ -194,7 +280,9 @@ func (h *mailHandlers) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.uc.DeleteMessage(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	err = h.uc.DeleteMessage(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -224,8 +312,14 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -248,17 +342,20 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(invalidEmails) != 0 {
-		err = h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
-
+		failedMessage, err := h.uc.SendFailedSendingMessage(message.FromUser.Email, invalidEmails)
 		if err != nil {
 			pkgHttp.HandleError(w, r, err)
 			return
 		}
+
+		h.hub.SendNotifications(failedMessage)
 	}
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{
 		Message: *message,
 	})
+
+	h.hub.SendNotifications(message)
 }
 
 // SaveDraft godoc
@@ -282,8 +379,14 @@ func (h *mailHandlers) SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -296,13 +399,13 @@ func (h *mailHandlers) SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	form.Sanitize()
 
-	validEmails, invalidEmails := h.uc.ValidateRecipients(form.Recipients)
-	if len(invalidEmails) != 0 {
-		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
-		return
+	for _, email := range form.Recipients {
+		if err := validation.ValidateEmail(email); err != nil {
+			pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
+			return
+		}
 	}
 
-	form.Recipients = validEmails
 	message, err := h.uc.SaveDraft(userID, form)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
@@ -341,7 +444,9 @@ func (h *mailHandlers) ReadMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := h.uc.MarkMessageAsSeen(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	message, err := h.uc.MarkMessageAsSeen(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -379,7 +484,9 @@ func (h *mailHandlers) UnreadMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := h.uc.MarkMessageAsUnseen(userID, messageID)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+
+	message, err := h.uc.MarkMessageAsUnseen(userID, messageID, fromFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -411,8 +518,14 @@ func (h *mailHandlers) CreateFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormFolder{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -460,7 +573,6 @@ func (h *mailHandlers) DeleteFolder(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	folderSlug, ok := vars["slug"]
-	fmt.Println(folderSlug)
 	if !ok {
 		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
 		return
@@ -506,8 +618,14 @@ func (h *mailHandlers) EditFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
 	form := models.FormFolder{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -562,9 +680,10 @@ func (h *mailHandlers) MoveToFolder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	folderSlug := r.URL.Query().Get(h.cfg.Routes.RouteMoveToFolderQueryFolderSlug)
+	fromFolder := r.URL.Query().Get(h.cfg.Routes.RouteQueryFromFolderSlug)
+	toFolder := r.URL.Query().Get(h.cfg.Routes.RouteMoveToFolderQueryToFolderSlug)
 
-	err = h.uc.MoveMessageToFolder(userID, messageID, folderSlug)
+	err = h.uc.MoveMessageToFolder(userID, messageID, fromFolder, toFolder)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -601,8 +720,14 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := models.FormMessage{}
-	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed read request body"))
+		return
+	}
+
+	form := models.FormEditMessage{}
+	if err := easyjson.Unmarshal(body, &form); err != nil {
 		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrInvalidForm, err.Error()))
 		return
 	}
@@ -632,3 +757,325 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 		Message: *message,
 	})
 }
+
+// DownloadAttach godoc
+// @Summary      DownloadAttach
+// @Description  download attach, get attachID, check relation for attach and user
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id} [get]
+func (h *mailHandlers) DownloadAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+	w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// GetAttachB64 godoc
+// @Summary      GetAttachB64
+// @Description  get attach in base64
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id} [get]
+func (h *mailHandlers) GetAttachB64(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	attachB64 := models.Attachment{FileName: attach.FileName, FileData: base64.StdEncoding.EncodeToString(attach.FileData)}
+	w.Header().Set("Content-Type", common.ContentTypeJSON)
+	w.WriteHeader(http.StatusOK)
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, attachB64)
+}
+
+// DownloadAllAttaches godoc
+// @Summary      DownloadAllAttaches
+// @Description  download all attaches as zip, get messageID
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success download attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/{id}/attaches [get]
+func (h *mailHandlers) DownloadAllAttaches(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	messageID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	msg, err := h.uc.GetMessage(userID, messageID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	var zipArch bytes.Buffer
+
+	zipWriter := zip.NewWriter(&zipArch)
+	if len(msg.Attachments) == 0 {
+		pkgHttp.HandleError(w, r, errors.ErrMessageNotFound)
+		return
+	} else {
+		for _, a := range msg.Attachments {
+			attach, err := h.uc.GetAttach(a.AttachID, userID)
+			if err != nil {
+				pkgHttp.HandleError(w, r, err)
+				return
+			}
+			if err := pkgZip.Append2Zip(attach.FileName, attach.FileData, zipWriter); err != nil {
+				pkgHttp.HandleError(w, r, err)
+				return
+			}
+		}
+	}
+	zipWriter.Close()
+
+	//fmt.Println("AFTER", zipArch.Bytes())
+
+	// Use layout string for time format.
+	const layout = "01-02-2006"
+	// Place now in the string.
+	t := time.Now()
+	archiveName := "mailbx-archive-" + t.Format(layout) + ".zip"
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", "attachment; filename="+archiveName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(zipArch.Bytes())
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// GetAttach godoc
+// @Summary      GetAttach
+// @Description  get attach with attachID, gets access key, then validate
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success get attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /external/attach/{id} [get]
+func (h *mailHandlers) GetAttach(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	accessKey := r.URL.Query().Get(h.cfg.Routes.QueryAccessKey)
+
+	userID, err := crypto.DecryptAccessToken(accessKey)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// DeleteDraftAttach godoc
+// @Summary      DeleteDraftAttach
+// @Description  delete draft attach with attachID
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success get attach"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /message/attach/{id} [delete]
+func (h *mailHandlers) DeleteDraftAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachID, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttach(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", attach.Type)
+	w.Header().Set("Content-Disposition", "attachment; filename="+attach.FileName)
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(attach.FileData)
+	if err != nil {
+		pkgHttp.HandleError(w, r, fmt.Errorf("failed to send : %w", err))
+		return
+	}
+}
+
+// PreviewAttach godoc
+// @Summary      PreviewAttach
+// @Description  preview with attachID, returns html page
+// @Tags     	 messages
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessageResponse "success preview"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "attach not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /attach/{id}/preview [get]
+func (h *mailHandlers) PreviewAttach(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	vars := mux.Vars(r)
+	attachIDStr := vars["id"]
+	attachID, err := strconv.ParseUint(attachIDStr, 10, 64)
+	if err != nil {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	attach, err := h.uc.GetAttachInfo(attachID, userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+	tplFile := common.GetTplFile(attach.FileName)
+	tpl, err := os.ReadFile(h.cfg.Api.MailTplDir + tplFile)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - read tpl file"))
+		return
+	}
+
+	t, err := template.New("MailBx").Parse(string(tpl))
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - parse tpl file"))
+		return
+	}
+
+	accessKey, err := crypto.EncryptAccessToken(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - encrypt token"))
+		return
+	}
+
+	data := struct {
+		FileName     string
+		FilePath     string
+		FileDownload string
+	}{
+		FileName:     attach.FileName,
+		FilePath:     fmt.Sprintf("%s/api/v1/external/attach/%s?accessKey=%s", h.cfg.Api.Host, attachIDStr, accessKey),
+		FileDownload: fmt.Sprintf("%s/api/v1/attach/%s", h.cfg.Api.Host, attachIDStr),
+	}
+
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, data); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - execute tpl file"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(buf.Bytes()); err != nil {
+		pkgHttp.HandleError(w, r, pkgErrors.Wrap(err, "failed to preview - write body"))
+		return
+	}
+}
+
+func (h *mailHandlers) WSMessageHandler(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get(h.cfg.Routes.RouteWsQueryEmail)
+	ws.ServeWs(w, r, email, h.hub)
+
+	w.Header().Set("Upgrade", "websocket")
+}
+
+//func (h *mailHandlers) File(w http.ResponseWriter, r *http.Request) {
+//	http.ServeFile(w, r, "cmd/index.html")
+//}

@@ -7,6 +7,7 @@ import (
 	pkgErr "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"syscall"
 )
 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
@@ -21,6 +22,10 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 		log.Error(err)
 	} else {
 		globalLogger.Log(logLevel, err)
+	}
+
+	if pkgErr.Is(causeErr, syscall.EPIPE) || pkgErr.Is(causeErr, http.ErrHandlerTimeout) {
+		return
 	}
 
 	SendJSON(w, r, code, customErr)

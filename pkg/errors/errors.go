@@ -1,5 +1,7 @@
 package errors
 
+//go:generate easyjson -all
+
 type JSONError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`

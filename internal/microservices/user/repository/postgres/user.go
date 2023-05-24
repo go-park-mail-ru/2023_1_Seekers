@@ -22,9 +22,22 @@ func New(c *config.Config, db *gorm.DB) repository.UserRepoI {
 }
 
 func (uDB *userDB) Create(user *models.User) (*models.User, error) {
-	_, err := uDB.GetByEmail(user.Email)
+	exUser, err := uDB.GetByEmail(user.Email)
 	if err == nil {
-		return nil, errors.ErrUserExists
+		if exUser.IsExternal {
+			if err = uDB.EditPw(exUser.UserID, user.Password); err != nil {
+				return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+			}
+
+			tx := uDB.db.Where("user_id = ?", exUser.UserID).Set("is_external", false)
+			if err = tx.Error; err != nil {
+				return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+			}
+			user.UserID = exUser.UserID
+			return user, nil
+		} else {
+			return nil, errors.ErrUserExists
+		}
 	}
 
 	dbUser := User{}

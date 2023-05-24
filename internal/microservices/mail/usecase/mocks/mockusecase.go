@@ -79,21 +79,21 @@ func (mr *MockUseCaseIMockRecorder) DeleteFolder(userID, folderSlug interface{})
 }
 
 // DeleteMessage mocks base method.
-func (m *MockUseCaseI) DeleteMessage(userID, messageID uint64) error {
+func (m *MockUseCaseI) DeleteMessage(userID, messageID uint64, folderSlug string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteMessage", userID, messageID)
+	ret := m.ctrl.Call(m, "DeleteMessage", userID, messageID, folderSlug)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteMessage indicates an expected call of DeleteMessage.
-func (mr *MockUseCaseIMockRecorder) DeleteMessage(userID, messageID interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) DeleteMessage(userID, messageID, folderSlug interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessage", reflect.TypeOf((*MockUseCaseI)(nil).DeleteMessage), userID, messageID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessage", reflect.TypeOf((*MockUseCaseI)(nil).DeleteMessage), userID, messageID, folderSlug)
 }
 
 // EditDraft mocks base method.
-func (m *MockUseCaseI) EditDraft(userID, messageID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) EditDraft(userID, messageID uint64, message models.FormEditMessage) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EditDraft", userID, messageID, message)
 	ret0, _ := ret[0].(*models.MessageInfo)
@@ -120,6 +120,36 @@ func (m *MockUseCaseI) EditFolder(userID uint64, folderSlug string, form models.
 func (mr *MockUseCaseIMockRecorder) EditFolder(userID, folderSlug, form interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditFolder", reflect.TypeOf((*MockUseCaseI)(nil).EditFolder), userID, folderSlug, form)
+}
+
+// GetAttach mocks base method.
+func (m *MockUseCaseI) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttach", attachID, userID)
+	ret0, _ := ret[0].(*models.AttachmentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAttach indicates an expected call of GetAttach.
+func (mr *MockUseCaseIMockRecorder) GetAttach(attachID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttach", reflect.TypeOf((*MockUseCaseI)(nil).GetAttach), attachID, userID)
+}
+
+// GetAttachInfo mocks base method.
+func (m *MockUseCaseI) GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttachInfo", attachID, userID)
+	ret0, _ := ret[0].(*models.AttachmentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAttachInfo indicates an expected call of GetAttachInfo.
+func (mr *MockUseCaseIMockRecorder) GetAttachInfo(attachID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttachInfo", reflect.TypeOf((*MockUseCaseI)(nil).GetAttachInfo), attachID, userID)
 }
 
 // GetCustomFolders mocks base method.
@@ -198,47 +228,47 @@ func (mr *MockUseCaseIMockRecorder) GetMessage(userID, messageID interface{}) *g
 }
 
 // MarkMessageAsSeen mocks base method.
-func (m *MockUseCaseI) MarkMessageAsSeen(userID, messageID uint64) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) MarkMessageAsSeen(userID, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MarkMessageAsSeen", userID, messageID)
+	ret := m.ctrl.Call(m, "MarkMessageAsSeen", userID, messageID, folderSlug)
 	ret0, _ := ret[0].(*models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // MarkMessageAsSeen indicates an expected call of MarkMessageAsSeen.
-func (mr *MockUseCaseIMockRecorder) MarkMessageAsSeen(userID, messageID interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) MarkMessageAsSeen(userID, messageID, folderSlug interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkMessageAsSeen", reflect.TypeOf((*MockUseCaseI)(nil).MarkMessageAsSeen), userID, messageID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkMessageAsSeen", reflect.TypeOf((*MockUseCaseI)(nil).MarkMessageAsSeen), userID, messageID, folderSlug)
 }
 
 // MarkMessageAsUnseen mocks base method.
-func (m *MockUseCaseI) MarkMessageAsUnseen(userID, messageID uint64) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) MarkMessageAsUnseen(userID, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MarkMessageAsUnseen", userID, messageID)
+	ret := m.ctrl.Call(m, "MarkMessageAsUnseen", userID, messageID, folderSlug)
 	ret0, _ := ret[0].(*models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // MarkMessageAsUnseen indicates an expected call of MarkMessageAsUnseen.
-func (mr *MockUseCaseIMockRecorder) MarkMessageAsUnseen(userID, messageID interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) MarkMessageAsUnseen(userID, messageID, folderSlug interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkMessageAsUnseen", reflect.TypeOf((*MockUseCaseI)(nil).MarkMessageAsUnseen), userID, messageID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkMessageAsUnseen", reflect.TypeOf((*MockUseCaseI)(nil).MarkMessageAsUnseen), userID, messageID, folderSlug)
 }
 
 // MoveMessageToFolder mocks base method.
-func (m *MockUseCaseI) MoveMessageToFolder(userID, messageID uint64, folderSlug string) error {
+func (m *MockUseCaseI) MoveMessageToFolder(userID, messageID uint64, fromFolder, toFolder string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveMessageToFolder", userID, messageID, folderSlug)
+	ret := m.ctrl.Call(m, "MoveMessageToFolder", userID, messageID, fromFolder, toFolder)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // MoveMessageToFolder indicates an expected call of MoveMessageToFolder.
-func (mr *MockUseCaseIMockRecorder) MoveMessageToFolder(userID, messageID, folderSlug interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) MoveMessageToFolder(userID, messageID, fromFolder, toFolder interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveMessageToFolder", reflect.TypeOf((*MockUseCaseI)(nil).MoveMessageToFolder), userID, messageID, folderSlug)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveMessageToFolder", reflect.TypeOf((*MockUseCaseI)(nil).MoveMessageToFolder), userID, messageID, fromFolder, toFolder)
 }
 
 // SaveDraft mocks base method.
@@ -256,12 +286,43 @@ func (mr *MockUseCaseIMockRecorder) SaveDraft(userID, message interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveDraft", reflect.TypeOf((*MockUseCaseI)(nil).SaveDraft), userID, message)
 }
 
+// SearchMessages mocks base method.
+func (m *MockUseCaseI) SearchMessages(userID uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchMessages", userID, fromUser, toUser, folder, filter)
+	ret0, _ := ret[0].([]models.MessageInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchMessages indicates an expected call of SearchMessages.
+func (mr *MockUseCaseIMockRecorder) SearchMessages(userID, fromUser, toUser, folder, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockUseCaseI)(nil).SearchMessages), userID, fromUser, toUser, folder, filter)
+}
+
+// SearchRecipients mocks base method.
+func (m *MockUseCaseI) SearchRecipients(userID uint64) ([]models.UserInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchRecipients", userID)
+	ret0, _ := ret[0].([]models.UserInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchRecipients indicates an expected call of SearchRecipients.
+func (mr *MockUseCaseIMockRecorder) SearchRecipients(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchRecipients", reflect.TypeOf((*MockUseCaseI)(nil).SearchRecipients), userID)
+}
+
 // SendFailedSendingMessage mocks base method.
-func (m *MockUseCaseI) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) error {
+func (m *MockUseCaseI) SendFailedSendingMessage(recipientEmail string, invalidEmails []string) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendFailedSendingMessage", recipientEmail, invalidEmails)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*models.MessageInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SendFailedSendingMessage indicates an expected call of SendFailedSendingMessage.
@@ -271,18 +332,18 @@ func (mr *MockUseCaseIMockRecorder) SendFailedSendingMessage(recipientEmail, inv
 }
 
 // SendMessage mocks base method.
-func (m *MockUseCaseI) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+func (m *MockUseCaseI) SendMessage(userId uint64, message models.FormMessage) (*models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendMessage", userID, message)
+	ret := m.ctrl.Call(m, "SendMessage", userId, message)
 	ret0, _ := ret[0].(*models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendMessage indicates an expected call of SendMessage.
-func (mr *MockUseCaseIMockRecorder) SendMessage(userID, message interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) SendMessage(userId, message interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCaseI)(nil).SendMessage), userID, message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCaseI)(nil).SendMessage), userId, message)
 }
 
 // SendWelcomeMessage mocks base method.

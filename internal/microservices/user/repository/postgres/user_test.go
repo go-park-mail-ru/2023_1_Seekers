@@ -57,8 +57,8 @@ func TestRepository_CreateAlreadyExists(t *testing.T) {
 	var fakeUser *models.User
 	generateFakeData(&fakeUser)
 	fakeUser.UserID = 10
-	fakeUser.IsExternal = true
-	fakeUser.Email = "mock_valid@example.com"
+	fakeUser.IsExternal = false
+	fakeUser.Email = "mock_valid@mailbx.ru"
 
 	fakeDBUser := User{}
 	fakeDBUser.FromModel(fakeUser)
@@ -75,62 +75,51 @@ func TestRepository_CreateAlreadyExists(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1 LIMIT 1`)).WithArgs(fakeUser.Email).
 		WillReturnRows(rows)
 
-	rows = sqlmock.NewRows([]string{"user_id"}).AddRow(fakeUser.UserID)
+	userRepo := New(cfg, gormDB)
+	_, err = userRepo.Create(fakeUser)
+	causeErr := pkgErr.Cause(err)
+
+	require.Equal(t, errors.ErrUserExists, causeErr)
+}
+
+func TestRepository_Create(t *testing.T) {
+	cfg := createConfig()
+
+	var fakeUser *models.User
+	generateFakeData(&fakeUser)
+	fakeUser.UserID = 10
+	fakeUser.IsExternal = false
+	fakeUser.Email = "mock_valid@mailbx.ru"
+
+	fakeDBUser := User{}
+	fakeDBUser.FromModel(fakeUser)
+
+	db, gormDB, mock, err := mockDB()
+	if err != nil {
+		t.Fatalf("error while mocking database: %s", err)
+	}
+	defer db.Close()
+
+	createUserRow := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar", "is_external"}).
+		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName, fakeUser.Avatar, fakeUser.IsExternal)
+
+	rows := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar", "is_external"})
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1 LIMIT 1`)).WithArgs(fakeUser.Email).
+		WillReturnRows(rows)
+
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("email","password","first_name","last_name","avatar","is_external")
-	VALUES ($1,$2,$3,$4,$5, $6) RETURNING "user_id"`)).WithArgs(fakeDBUser.Email, fakeDBUser.Password, fakeDBUser.FirstName, fakeDBUser.LastName,
-		fakeDBUser.Avatar, fakeUser.IsExternal).WillReturnRows(rows)
+	VALUES ($1,$2,$3,$4,$5,$6) RETURNING "user_id"`)).WithArgs(fakeDBUser.Email, fakeDBUser.Password, fakeDBUser.FirstName, fakeDBUser.LastName,
+		fakeDBUser.Avatar, fakeUser.IsExternal).WillReturnRows(createUserRow)
 	mock.ExpectCommit()
 
 	userRepo := New(cfg, gormDB)
 	_, err = userRepo.Create(fakeUser)
 	causeErr := pkgErr.Cause(err)
 
-	require.Equal(t, causeErr, errors.ErrUserExists)
+	require.Equal(t, nil, causeErr)
 }
-
-//
-//func TestRepository_Create(t *testing.T) {
-//	cfg := createConfig()
-//
-//	var fakeUser *models.User
-//	generateFakeData(&fakeUser)
-//	fakeUser.UserID = 10
-//	fakeUser.IsExternal = true
-//	fakeUser.Email = "mock_valid@example.com"
-//
-//	fakeDBUser := User{}
-//	fakeDBUser.FromModel(fakeUser)
-//
-//	db, gormDB, mock, err := mockDB()
-//	if err != nil {
-//		t.Fatalf("error while mocking database: %s", err)
-//	}
-//	defer db.Close()
-//
-//	rows := sqlmock.NewRows([]string{"user_id", "email", "password", "first_name", "last_name", "avatar", "is_external"}).
-//		AddRow(fakeUser.UserID, fakeUser.Email, fakeUser.Password, fakeUser.FirstName, fakeUser.LastName, fakeUser.Avatar, fakeUser.IsExternal)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "mail"."users" WHERE email = $1 LIMIT 1`)).WithArgs(fakeUser.Email).
-//		WillReturnRows(rows)
-//
-//	rows = sqlmock.NewRows([]string{"user_id"}).AddRow(fakeUser.UserID)
-//	mock.ExpectBegin()
-//	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("email","password","first_name","last_name","avatar","is_external")
-//	VALUES ($1,$2,$3,$4,$5, $6) RETURNING "user_id"`)).WithArgs(fakeDBUser.Email, fakeDBUser.Password, fakeDBUser.FirstName, fakeDBUser.LastName,
-//		fakeDBUser.Avatar, fakeUser.IsExternal).WillReturnRows(rows)
-//	mock.ExpectCommit()
-//
-//	userRepo := New(cfg, gormDB)
-//	response, err := userRepo.Create(fakeUser)
-//	causeErr := pkgErr.Cause(err)
-//
-//	if causeErr != errors.ErrUserExists {
-//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
-//	} else {
-//		require.Equal(t, fakeUser, response)
-//	}
-//}
 
 func TestRepository_EditInfo(t *testing.T) {
 	cfg := createConfig()

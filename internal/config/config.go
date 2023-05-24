@@ -8,9 +8,13 @@ import (
 
 type Config struct {
 	Api struct {
-		Port        string `yaml:"port" env-default:"8001"`
-		MetricsPort string `yaml:"metrics_port" env-default:"9001"`
-		MetricsName string `yaml:"metrics_name" env-default:"api"`
+		Port              string `yaml:"port" env-default:"8001"`
+		MetricsPort       string `yaml:"metrics_port" env-default:"9001"`
+		MetricsName       string `yaml:"metrics_name" env-default:"api"`
+		MailHubCtx        string `yaml:"mail_hub_ctx" env-default:"hub"`
+		MailTplDir        string `yaml:"mail_tpl_dir" env-default:"./internal/api/http/templates/"`
+		Host              string `yaml:"host" env-default:"https://mailbx.ru"`
+		MailPreviewMaxLen int    `yaml:"mail_preview_max_len" env-default:"60"`
 	} `yaml:"api"`
 
 	Project struct {
@@ -61,7 +65,7 @@ type Config struct {
 		Domain             string        `yaml:"domain" env-default:"mailbx"`
 		ReadTimeout        time.Duration `yaml:"read_timeout" env-default:"10s"`
 		WriteTimeout       time.Duration `yaml:"write_timeout_timeout" env-default:"10s"`
-		MaxMessageBytes    int           `yaml:"max_message_bytes" env-default:"1048576"` //1024 * 1024
+		MaxMessageBytes    int           `yaml:"max_message_bytes" env-default:"104857600"`
 		MaxRecipients      int           `yaml:"max_recipients" env-default:"50"`
 		AllowInsecureAuth  bool          `yaml:"allow_insecure_auth" env-default:"false"`
 		CertFile           string        `yaml:"cert_file"`
@@ -93,6 +97,7 @@ type Config struct {
 		//-----VK cloud solutions--------
 		S3Endpoint     string `yaml:"s3_endpoint"`
 		S3AvatarBucket string `yaml:"s3_avatar_bucket"`
+		S3AttachBucket string `yaml:"s3_attach_bucket"`
 	} `yaml:"s3"`
 
 	Sessions struct {
@@ -114,18 +119,29 @@ type Config struct {
 		RouteCSRF   string `yaml:"route_csrf" env-default:"/csrf"`
 
 		// MailRoutes
-		RouteMessage                     string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
-		RouteSendMessage                 string `yaml:"route_send_message" env-default:"/message/send"`
-		RouteSaveDraftMessage            string `yaml:"route_save_draft_message" env-default:"/message/save"`
-		RouteReadMessage                 string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`
-		RouteUnreadMessage               string `yaml:"route_unread_message" env-default:"/message/{id:[0-9]+}/unread"`
-		RouteMoveToFolder                string `yaml:"route_move_to_folder" env-default:"/message/{id:[0-9]+}/move"`
-		RouteMoveToFolderQueryFolderSlug string `yaml:"route_move_to_folder_query_folder_slug" env-default:"folderSlug"`
-		RouteGetFolders                  string `yaml:"route_get_folders" env-default:"/folders"`
-		RouteFolder                      string `yaml:"route_folder" env-default:"/folder/{slug}"`
-		RouteCreateFolder                string `yaml:"route_create_folder" env-default:"/folder/create"`
-		RouteEditFolder                  string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
-		RouteGetFoldersIsCustom          string `yaml:"route_get_folders_is_custom" env-default:"custom"`
+		RouteMessage                       string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
+		RouteAttach                        string `yaml:"route_attach" env-default:"/attach/{id:[0-9]+}"`
+		RouteAttachB64                     string `yaml:"route_attach_b64" env-default:"/attach/{id:[0-9]+}/b64"`
+		RouteMessageAttaches               string `yaml:"route_message_attaches" env-default:"/message/{id:[0-9]+}/attaches"`
+		RouteExternalAttach                string `yaml:"route_external_attach" env-default:"/external/attach/{id:[0-9]+}"`
+		RoutePreviewAttach                 string `yaml:"route_preview_attach" env-default:"/attach/{id:[0-9]+}/preview"`
+		RouteSendMessage                   string `yaml:"route_send_message" env-default:"/message/send"`
+		RouteSaveDraftMessage              string `yaml:"route_save_draft_message" env-default:"/message/save"`
+		RouteReadMessage                   string `yaml:"route_read_message" env-default:"/message/{id:[0-9]+}/read"`
+		RouteUnreadMessage                 string `yaml:"route_unread_message" env-default:"/message/{id:[0-9]+}/unread"`
+		RouteMoveToFolder                  string `yaml:"route_move_to_folder" env-default:"/message/{id:[0-9]+}/move"`
+		RouteQueryFromFolderSlug           string `yaml:"route_move_to_folder_query_from_folder" env-default:"fromFolder"`
+		RouteMoveToFolderQueryToFolderSlug string `yaml:"route_move_to_folder_query_to_folder" env-default:"toFolder"`
+		RouteGetFolders                    string `yaml:"route_get_folders" env-default:"/folders"`
+		RouteFolder                        string `yaml:"route_folder" env-default:"/folder/{slug}"`
+		RouteSearch                        string `yaml:"route_search" env-default:"/messages/search"`
+		RouteRecipients                    string `yaml:"route_recipients" env-default:"/recipients/search"`
+		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
+		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
+		RouteWS                            string `yaml:"route_ws" env-default:"/ws"`
+		RouteWsQueryEmail                  string `yaml:"route_ws_query_email" env-default:"email"`
+		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`
+		QueryAccessKey                     string `yaml:"query_access_key" env-default:"accessKey"`
 
 		// UserRoutes
 		RouteUser                 string `yaml:"route_user" env-default:"/user"`
@@ -141,6 +157,7 @@ type Config struct {
 		UserFormNewAvatar     string `yaml:"user_form_new_avatar" env-default:"avatar"`
 		UserDefaultAvatarSize int    `yaml:"user_default_avatar_size" env-default:"46"`
 		DefaultAvatar         string `yaml:"default_avatar" env-default:"default_avatar.png"`
+		ExternalUserPassword  string `env:"EXTERNAL_USER_PASSWORD"`
 		AvatarTTFPath         string `yaml:"avatar_ttf_path" env-default:"./cmd/config/wqy-zenhei.ttf"`
 	} `yaml:"user_service"`
 

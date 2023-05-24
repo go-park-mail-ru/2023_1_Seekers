@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"github.com/emersion/go-msgauth/dkim"
 	"github.com/pkg/errors"
+	"io"
 	"os"
 	"strings"
 )
@@ -39,4 +40,29 @@ func SignDKIM(mail []byte, domain, dkimPrivateKeyPath string) ([]byte, error) {
 		return nil, errors.Wrap(err, "failed sign dkim")
 	}
 	return b.Bytes(), nil
+}
+
+func VerifyDKIM(r io.Reader, domainFrom string) error {
+	verifications, err := dkim.Verify(r)
+	if err != nil {
+		return errors.Wrap(err, "failed to verify dkim")
+	}
+
+	var isValidSignature = false
+	for _, v := range verifications {
+		if v.Err == nil {
+			if v.Domain == domainFrom {
+				isValidSignature = true
+			}
+		} else {
+			if v.Domain == domainFrom {
+				isValidSignature = false
+			}
+		}
+	}
+	if !isValidSignature {
+		return errors.New("failed sign dkim")
+	}
+
+	return nil
 }

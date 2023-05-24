@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func GetSalt(len int) ([]byte, error) {
-	salt, err := rand.String(len)
+func GetSalt(saltLen int) ([]byte, error) {
+	salt, err := rand.String(saltLen)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,7 @@ func ComparePw2Hash(password, hash string, saultLen int) bool {
 	if len(hash) < saultLen {
 		return false
 	}
+
 	salt := hash[0:saultLen]
 	newHash := Hash([]byte(salt), password)
 	return bytes.Equal(newHash, []byte(hash))

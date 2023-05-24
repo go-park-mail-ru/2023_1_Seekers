@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	_fStorageClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/client"
 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository/postgres"
 	_mailServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/server"
 	_mailUCase "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/usecase"
@@ -50,8 +51,21 @@ func main() {
 
 	userServiceClient := _userClient.NewUserClientGRPC(userServiceCon)
 
+	size := 1024 * 1024 * 1024
+	fServiceCon, err := grpc.Dial(
+		cfg.FileGPRCService.Host+":"+cfg.FileGPRCService.Port,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(size), grpc.MaxCallSendMsgSize(size)),
+	)
+
+	if err != nil {
+		log.Fatal("failed connect to file microservice", err)
+	}
+
+	fStorageClient := _fStorageClient.NewFstorageClientGRPC(fServiceCon)
+
 	mailRepo := _mailRepo.New(cfg, db)
-	mailUC := _mailUCase.New(cfg, mailRepo, userServiceClient)
+	mailUC := _mailUCase.New(cfg, mailRepo, userServiceClient, fStorageClient)
 
 	metrics, err := promMetrics.NewMetricsGRPCServer(cfg.MailGRPCService.MetricsName)
 	if err != nil {
@@ -61,6 +75,8 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(middleware.LoggerGRPCUnaryInterceptor, middleware.MetricsGRPCUnaryInterceptor),
+		grpc.MaxRecvMsgSize(size),
+		grpc.MaxSendMsgSize(size),
 	)
 
 	go func() {

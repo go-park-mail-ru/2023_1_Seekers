@@ -78,7 +78,7 @@ func getLabelCol(col color.RGBA) color.RGBA {
 	return rgbaCol
 }
 
-func addLabel(img *image.RGBA, x, y int, face font.Face, label string, labelCol color.RGBA) error {
+func addLabel(img *image.RGBA, x, y int, face font.Face, label string, labelCol color.RGBA) {
 	point := fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
 
 	d := &font.Drawer{
@@ -88,8 +88,6 @@ func addLabel(img *image.RGBA, x, y int, face font.Face, label string, labelCol 
 		Dot:  point,
 	}
 	d.DrawString(label)
-	return nil
-
 }
 
 func NewPNG(width, height int, col color.RGBA) *image.RGBA {
@@ -124,13 +122,9 @@ func GenImage(col, label string, height, width int) ([]byte, error) {
 	}
 
 	if unicode.IsUpper(labelRune) {
-		if err := addLabel(img, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(rgbaBgCol)); err != nil {
-			return nil, err
-		}
+		addLabel(img, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(rgbaBgCol))
 	} else {
-		if err := addLabel(img, (width-runeWidth)/2, height-(height-int(fontSize))/2-3, face, string(labelRune), getLabelCol(rgbaBgCol)); err != nil {
-			return nil, err
-		}
+		addLabel(img, (width-runeWidth)/2, height-(height-int(fontSize))/2-3, face, string(labelRune), getLabelCol(rgbaBgCol))
 	}
 
 	if err := png.Encode(buffer, img); err != nil {
@@ -172,17 +166,11 @@ func UpdateImgText(img []byte, label string, height, width int) ([]byte, error) 
 		runeWidth = w.Floor()
 	}
 
-	if err = addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(col)); err != nil {
-		return nil, err
-	}
+	addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(col))
 	if unicode.IsUpper(labelRune) {
-		if err = addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(col)); err != nil {
-			return nil, err
-		}
+		addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2, face, string(labelRune), getLabelCol(col))
 	} else {
-		if err = addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2-3, face, string(labelRune), getLabelCol(col)); err != nil {
-			return nil, err
-		}
+		addLabel(resultPng, (width-runeWidth)/2, height-(height-int(fontSize))/2-3, face, string(labelRune), getLabelCol(col))
 	}
 
 	if err = png.Encode(buffer, resultPng); err != nil {

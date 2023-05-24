@@ -14,7 +14,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	pkgErrors "github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"net/mail"
 	"path/filepath"
 )
@@ -60,11 +59,21 @@ func (u *useCase) Create(user *models.User) (*models.User, error) {
 	}
 
 	col := image.GetRandColor()
-	label := common.GetFirstUtf(user.FirstName)
+	var label string
+	if len(user.FirstName) == 0 || len(user.LastName) == 0 {
+		label = common.GetFirstUtf(user.Email)
+	} else {
+		label = common.GetFirstUtf(user.FirstName + user.LastName)
+	}
+
 	img, err := image.GenImage(col, label, u.cfg.UserService.UserDefaultAvatarSize, u.cfg.UserService.UserDefaultAvatarSize)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "Create user - generate avatar")
+	}
+
 	err = u.EditAvatar(user.UserID, &models.Image{Data: img}, false)
 	if err != nil {
-		log.Warn(err, "edit avatar")
+		return nil, pkgErrors.Wrap(err, "Create user - edit avatar")
 	}
 
 	return user, nil
@@ -206,6 +215,10 @@ func (u *useCase) EditPw(ID uint64, form *models.EditPasswordRequest) error {
 	}
 
 	user, err := u.userRepo.GetByID(ID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "edit password")
+	}
+
 	if !crypto.ComparePw2Hash(form.PasswordOld, user.Password, u.cfg.Password.PasswordSaltLen) {
 		return errors.ErrWrongPw
 	}

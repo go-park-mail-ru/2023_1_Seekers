@@ -3,14 +3,17 @@ package http
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	mockUserUC "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/usecase/mocks"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
+	"github.com/stretchr/testify/require"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"testing"
 )
 
@@ -27,7 +30,7 @@ func TestDelivery_Delete(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("DELETE", "/api/user/", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodDelete, "/api/user/", bytes.NewReader([]byte{}))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
@@ -60,7 +63,7 @@ func TestDelivery_GetInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/", bytes.NewReader([]byte{}))
 	vars := map[string]string{
 		cfg.Routes.RouteUserInfoQueryEmail: email,
 	}
@@ -98,7 +101,7 @@ func TestDelivery_GetPersonalInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/info", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/info", bytes.NewReader([]byte{}))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
@@ -126,12 +129,12 @@ func TestDelivery_EditInfo(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	body, err := json.Marshal(fakeUserInfo)
+	body, err := easyjson.Marshal(fakeUserInfo)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/user/info", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/user/info", bytes.NewReader(body))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, fakeUserInfo.UserID))
 	w := httptest.NewRecorder()
 
@@ -144,49 +147,43 @@ func TestDelivery_EditInfo(t *testing.T) {
 }
 
 func TestDelivery_EditAvatar(t *testing.T) {
-	//t.Parallel()
-	//ctrl := gomock.NewController(t)
-	//defer ctrl.Finish()
-	//
-	//userUC := mockUserUC.NewMockUseCaseI(ctrl)
-	//
-	//img := []byte("sdsdjbasd;jrandombytes")
-	//body := &bytes.Buffer{}
-	//writer := multipart.NewWriter(body)
-	//metadataHeader := textproto.MIMEHeader{}
-	//metadataHeader.Add("Content-Disposition", `form-data; name="avatar"; filename="test.png"`)
-	//metadataHeader.Add("Content-Type", "image/png")
-	//part, err := writer.CreatePart(metadataHeader)
-	//require.Nil(t, err)
-	//_, err = part.Write(img)
-	//err = writer.Close()
-	//require.Nil(t, err)
-	//
-	//r := httptest.NewRequest(http.MethodPut, config.RouteUserAvatar, body)
-	//
-	//input := models.Image{
-	//	Name: "test.png",
-	//	Data: img,
-	//}
-	//
-	//r.Header.Set("Content-Type", writer.FormDataContentType())
-	//
-	//user := models.User{
-	//	UserID: 1,
-	//}
-	//
-	//r = r.WithContext(context.WithValue(r.Context(), pkg.ContextUser, user.UserID))
-	//
-	//userUC.EXPECT().EditAvatar(user.UserID, &input, true).Return(nil)
-	//
-	//w := httptest.NewRecorder()
-	//
-	//router := mux.NewRouter()
-	//handler := New(userUC)
-	//router.HandleFunc(config.RouteUserAvatar, handler.EditAvatar).Methods(http.MethodPut)
-	//handler.EditAvatar(w, r)
-	//
-	//require.Equal(t, http.StatusOK, w.Code)
+	cfg := createConfig()
+
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userUC := mockUserUC.NewMockUseCaseI(ctrl)
+
+	img := []byte("sdsdjbasd;jrandombytes")
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	metadataHeader := textproto.MIMEHeader{}
+	metadataHeader.Add("Content-Disposition", `form-data; name="avatar"; filename="test.png"`)
+	metadataHeader.Add("Content-Type", "image/png")
+	part, err := writer.CreatePart(metadataHeader)
+	require.Nil(t, err)
+	part.Write(img)
+	err = writer.Close()
+	require.Nil(t, err)
+
+	r := httptest.NewRequest(http.MethodPut, cfg.Routes.RouteUserAvatar, body)
+	r.Header.Set("Content-Type", writer.FormDataContentType())
+
+	user := models.User{
+		UserID: 1,
+	}
+
+	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, user.UserID))
+
+	w := httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	handler := NewUserHandlers(cfg, userUC)
+	router.HandleFunc(cfg.Routes.RouteUserAvatar, handler.EditAvatar).Methods(http.MethodPut)
+	handler.EditAvatar(w, r)
+
+	require.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDelivery_GetAvatar(t *testing.T) {
@@ -205,7 +202,7 @@ func TestDelivery_GetAvatar(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	r := httptest.NewRequest("GET", "/api/user/avatar", bytes.NewReader([]byte{}))
+	r := httptest.NewRequest(http.MethodGet, "/api/user/avatar", bytes.NewReader([]byte{}))
 	q := r.URL.Query()
 	q.Add(cfg.Routes.RouteUserAvatarQueryEmail, email)
 	r.URL.RawQuery = q.Encode()
@@ -235,12 +232,12 @@ func TestDelivery_EditPw(t *testing.T) {
 	userUC := mockUserUC.NewMockUseCaseI(ctrl)
 	userH := NewUserHandlers(cfg, userUC)
 
-	body, err := json.Marshal(fakeForm)
+	body, err := easyjson.Marshal(fakeForm)
 	if err != nil {
 		t.Fatalf("error while marshaling to json: %v", err)
 	}
 
-	r := httptest.NewRequest("POST", "/api/user/pw", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/api/user/pw", bytes.NewReader(body))
 	r = r.WithContext(context.WithValue(r.Context(), common.ContextUser, userID))
 	w := httptest.NewRecorder()
 
