@@ -6,6 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/errors"
+	"github.com/lib/pq"
 	pkgErrors "github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -90,9 +91,16 @@ func (m mailRepository) SelectFoldersByUser(userID uint64) ([]models.Folder, err
 	return folders, nil
 }
 
-func (m mailRepository) SearchRecipients(userId uint64) ([]models.UserInfo, error) {
+// todo?
+func (m mailRepository) SearchRecipients(userIDs []uint64) ([]models.UserInfo, error) {
 	var result []models.UserInfo
-	tx := m.db.Raw("SELECT * FROM get_recipes( $1 );", userId).Scan(&result)
+
+	var int64IDs []int64
+	for _, num := range userIDs {
+		int64IDs = append(int64IDs, int64(num))
+	}
+
+	tx := m.db.Raw("SELECT * FROM get_recipes( $1 );", pq.Array(int64IDs)).Scan(&result)
 
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
@@ -101,22 +109,10 @@ func (m mailRepository) SearchRecipients(userId uint64) ([]models.UserInfo, erro
 	return result, nil
 }
 
-func (m mailRepository) SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error) {
-	var folder models.Folder
-
-	tx := m.db.Model(Box{}).Select("folders.*").Joins("JOIN mail.folders using(folder_id)").
-		Where("boxes.user_id = ? AND message_id = ?", userID, messageID).First(&folder)
-	if err := tx.Error; err != nil {
-		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
-	}
-
-	return &folder, nil
-}
-
-func (m mailRepository) CheckExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error) {
+func (m mailRepository) CheckExistingBox(userIDs []uint64, messageID uint64, folderID uint64) (bool, error) {
 	var box Box
 
-	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).First(&box)
+	tx := m.db.Where("user_id IN ? AND message_id = ? AND folder_id = ?", userIDs, messageID, folderID).First(&box)
 	if err := tx.Error; err != nil {
 		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil
@@ -128,11 +124,11 @@ func (m mailRepository) CheckExistingBox(userID uint64, messageID uint64, folder
 	return true, nil
 }
 
-func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
+func (m mailRepository) SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
-		Where("user_id = ? AND folder_id = ? AND is_draft = ?", userID, folderID, isDraft).Order("created_at DESC").Scan(&messages)
+		Where("user_id IN ? AND folder_id = ? AND is_draft = ? AND deleted = false", userIDs, folderID, isDraft).Order("created_at DESC").Scan(&messages)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -140,17 +136,17 @@ func (m mailRepository) SelectFolderMessagesByUserNFolderID(userID uint64, folde
 	return messages, nil
 }
 
-func (m mailRepository) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+func (m mailRepository) SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 	var messagesIds []uint64
 
-	tx := m.db.Raw("SELECT * FROM get_messages($1, $2, $3, $4, $5);", userId, fromUser, toUser, folder, filter).Scan(&messagesIds)
+	tx := m.db.Raw("SELECT * FROM get_messages($1, $2, $3, $4, $5);", folderID, fromUser, toUser, filterText, isDraft).Scan(&messagesIds)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
 	for _, mid := range messagesIds {
-		mInfo, err := m.SelectMessageByUserNMessage(userId, mid)
+		mInfo, err := m.SelectMessageByUserNMessage(userIDs, mid)
 		if err != nil {
 			return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 		}
@@ -169,8 +165,19 @@ func (m mailRepository) DeleteFolder(folderID uint64) error {
 	return nil
 }
 
-func (m mailRepository) DeleteBox(userID uint64, messageID uint64, folderID uint64) error {
-	tx := m.db.Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Delete(&Box{})
+func (m mailRepository) DeleteBox(userIDs []uint64, messageID uint64, folderID uint64) error {
+	tx := m.db.Table("mail.boxes").Where("user_id IN ? AND message_id = ? AND folder_id = ?", userIDs, messageID, folderID).
+		Update("deleted", true)
+	if err := tx.Error; err != nil {
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
+}
+
+func (m mailRepository) DeleteBoxByUserNMessage(userID uint64, messageID uint64) error {
+	tx := m.db.Table("mail.boxes").Where("user_id = ? AND message_id = ?", userID, messageID).
+		Update("deleted", true)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -215,13 +222,17 @@ func (m mailRepository) SelectRecipientsByMessage(messageID uint64, fromUserID u
 	return recipientsIDs, nil
 }
 
-func (m mailRepository) SelectMessageByUserNMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
+func (m mailRepository) SelectMessageByUserNMessage(userIDs []uint64, messageID uint64) (*models.MessageInfo, error) {
 	var message *models.MessageInfo
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
-		Where("user_id = ? AND message_id = ? AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false)", userID, messageID).
-		Scan(&message)
+		Where("user_id IN ? AND message_id = ? AND deleted = false AND (from_user_id = user_id OR from_user_id != user_id AND is_draft = false)", userIDs, messageID).
+		Take(&message)
 	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, pkgErrors.WithMessage(errors.ErrMessageNotFound, "select message by user and message id")
+		}
+
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
@@ -250,7 +261,7 @@ func (m mailRepository) insertMessageToMessages(fromUserID uint64, message *mode
 }
 
 func (m mailRepository) updateMessageInMessages(message *models.MessageInfo, tx *gorm.DB) error {
-	tx = tx.Model(Message{}).Omit("message_id", "from_user_id", "size").Where("message_id = ?", message.MessageID).Updates(&message)
+	tx = tx.Model(Message{}).Omit("message_id", "size").Where("message_id = ?", message.MessageID).Updates(&message)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -372,8 +383,8 @@ func (m mailRepository) InsertFolder(folder *models.Folder) (uint64, error) {
 	return folder.FolderID, nil
 }
 
-func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, folderID).Update(stateName, stateValue)
+func (m mailRepository) UpdateMessageState(userIDs []uint64, messageID uint64, folderID uint64, stateName string, stateValue bool) error {
+	tx := m.db.Model(Box{}).Where("user_id IN ? AND message_id = ? AND folder_id = ?", userIDs, messageID, folderID).Update(stateName, stateValue)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -381,8 +392,8 @@ func (m mailRepository) UpdateMessageState(userID uint64, messageID uint64, fold
 	return nil
 }
 
-func (m mailRepository) UpdateMessageFolder(userID uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error {
-	tx := m.db.Model(Box{}).Where("user_id = ? AND message_id = ? AND folder_id = ?", userID, messageID, oldFolderID).Update("folder_id", newFolderID)
+func (m mailRepository) UpdateMessageFolder(userIDs []uint64, messageID uint64, oldFolderID uint64, newFolderID uint64) error {
+	tx := m.db.Model(Box{}).Where("user_id IN ? AND message_id = ? AND folder_id = ?", userIDs, messageID, oldFolderID).Update("folder_id", newFolderID)
 	if err := tx.Error; err != nil {
 		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -447,4 +458,86 @@ func (m mailRepository) GetMessageAttachments(messageID uint64) ([]models.Attach
 		}
 	}
 	return response, nil
+}
+
+func (m mailRepository) InsertFakeAccount(userID uint64, fakeUserID uint64) error {
+	user2fake := User2Fake{
+		UserID: userID,
+		FakeID: fakeUserID,
+	}
+
+	tx := m.db.Table(User2Fake{}.TableName(m.cfg.DB.DBSchemaName)).Create(&user2fake)
+	if err := tx.Error; err != nil {
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
+}
+
+func (m mailRepository) SelectFakeIDs(userID uint64) ([]uint64, error) {
+	var user2fakes []User2Fake
+
+	tx := m.db.Table(User2Fake{}.TableName(m.cfg.DB.DBSchemaName)).Where("user_id = ?", userID).Find(&user2fakes)
+	if err := tx.Error; err != nil {
+		return []uint64{}, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	var IDs []uint64
+
+	for _, user2fake := range user2fakes {
+		IDs = append(IDs, user2fake.FakeID)
+	}
+
+	return IDs, nil
+}
+
+func (m mailRepository) IsOwnerFakeAccount(userID uint64, fakeID uint64) error {
+	var user2fakes []User2Fake
+
+	tx := m.db.Table(User2Fake{}.TableName(m.cfg.DB.DBSchemaName)).Where("user_id = ? AND fake_id = ?", userID, fakeID).Take(&user2fakes)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return pkgErrors.WithMessage(errors.ErrAnonymousEmailNotFound, "select folder by name")
+		}
+
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
+}
+
+func (m mailRepository) DeleteFakeAccount(userID uint64, fakeID uint64) error {
+	tx := m.db.Table(User2Fake{}.TableName(m.cfg.DB.DBSchemaName)).Where("user_id = ? AND fake_id = ?", userID, fakeID).Delete(&User2Fake{})
+	if err := tx.Error; err != nil {
+		return pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return nil
+}
+
+func (m mailRepository) SelectOwnerFakeAccount(fakeID uint64) (uint64, error) {
+	var user2fakes User2Fake
+
+	tx := m.db.Table(User2Fake{}.TableName(m.cfg.DB.DBSchemaName)).Where("fake_id = ?", fakeID).Take(&user2fakes)
+	if err := tx.Error; err != nil {
+		if pkgErrors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, pkgErrors.WithMessage(errors.ErrAnonymousEmailNotFound, "select folder by name")
+		}
+
+		return 0, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return user2fakes.UserID, nil
+}
+
+func (m mailRepository) SelectMessagesByFakeAccount(fakeID uint64, isDraft bool) ([]models.MessageInfo, error) {
+	var messages []models.MessageInfo
+
+	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
+		Where("user_id = ? AND is_draft = ? AND deleted = false", fakeID, isDraft).Order("created_at DESC").Scan(&messages)
+	if err := tx.Error; err != nil {
+		return []models.MessageInfo{}, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	}
+
+	return messages, nil
 }

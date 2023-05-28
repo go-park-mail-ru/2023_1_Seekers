@@ -16,6 +16,7 @@ type User struct {
 	LastName   string `json:"lastName"`
 	Avatar     string `json:"avatar,omitempty"`
 	IsExternal bool   `json:"is_external"`
+	IsFake     bool   `json:"is_fake"`
 }
 
 type FormSignUp struct {

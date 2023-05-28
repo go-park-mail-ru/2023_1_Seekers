@@ -92,11 +92,19 @@ routes:
   route_get_folders: /folders
   route_folder: /folder/{slug}
   route_search: /messages/search
+  route_search_query_from_user: fromUser
+  route_search_query_to_user: toUser
+  route_search_query_folder: folder
+  route_search_query_filter: filter
   route_recipients: /recipients/search
   route_create_folder: /folder/create
   route_edit_folder: /folder/{slug}/edit
   route_get_folders_is_custom: custom
   query_access_key: accessKey
+  route_create_anonymous_email: /anonymous/create
+  route_anonymous_email: /anonymous
+  query_anonymous_email: email
+  route_anonymous_messages: /anonymous/messages
 
   route_user: /user
   route_user_info: /user/info
@@ -119,6 +127,8 @@ password:
 mail:
   post_domain: "mailbx.ru"
   post_at_domain: "@mailbx.ru"
+  fake_email_len: 12
+  max_count_anonymous_emails: 5
 
 cors:
   allowed_headers:

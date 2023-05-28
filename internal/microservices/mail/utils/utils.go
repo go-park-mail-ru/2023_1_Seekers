@@ -93,6 +93,7 @@ func ProtoByMessageInfo(info models.MessageInfo) *mail_proto.MessageInfo {
 		Attachments:      protoAttaches,
 		AttachmentsSize:  info.AttachmentsSize,
 		Preview:          info.Preview,
+		IsDraft:          info.IsDraft,
 	}
 }
 
@@ -148,6 +149,7 @@ func MessageInfoByProto(protoMessageInfo *mail_proto.MessageInfo) *models.Messag
 		Attachments:      attaches,
 		AttachmentsSize:  protoMessageInfo.AttachmentsSize,
 		Preview:          protoMessageInfo.Preview,
+		IsDraft:          protoMessageInfo.IsDraft,
 	}
 }
 
@@ -277,6 +279,7 @@ func ProtoSaveDraftParamsByModels(uID uint64, form *models.FormMessage) *mail_pr
 	return &mail_proto.SaveDraftParams{
 		UID: uID,
 		Message: &mail_proto.Message{
+			FromUser:         form.FromUser,
 			Recipients:       form.Recipients,
 			Title:            form.Title,
 			Text:             form.Text,
@@ -297,6 +300,7 @@ func ProtoEditDraftParamsByModels(uID, messageId uint64, form *models.FormEditMe
 		UID:       uID,
 		MessageID: messageId,
 		Message: &mail_proto.Message{
+			FromUser:         form.FromUser,
 			Recipients:       form.Recipients,
 			Title:            form.Title,
 			Text:             form.Text,

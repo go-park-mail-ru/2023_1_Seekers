@@ -69,6 +69,12 @@ func (uc *mailUC) GetFolderInfo(userID uint64, folderSlug string) (*models.Folde
 }
 
 func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
 	var messages []models.MessageInfo
 
 	folder, err := uc.GetFolderInfo(userID, folderSlug)
@@ -76,7 +82,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
-	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, folderSlug == common.FolderDrafts)
+	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, folderSlug == common.FolderDrafts)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -102,7 +108,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 				return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : get info by id")
 			}
 
-			messages[i].Recipients = append(message.Recipients, *profile)
+			messages[i].Recipients = append(messages[i].Recipients, *profile)
 		}
 
 		attaches, err := uc.mailRepo.GetMessageAttachments(messageID)
@@ -121,10 +127,21 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 	return messages, nil
 }
 
-func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string) ([]models.MessageInfo, error) {
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	folder, err := uc.GetFolderInfo(userID, folderSlug)
+	if err != nil {
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get golder info")
+	}
+
 	var messages []models.MessageInfo
 
-	messages, err := uc.mailRepo.SearchMessages(userID, fromUser, toUser, folder, filter)
+	messages, err = uc.mailRepo.SearchMessages(userIDs, folder.FolderID, fromUser, toUser, filterText, folderSlug == common.FolderDrafts)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : msg by user and folder")
 	}
@@ -150,7 +167,7 @@ func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folder, filter
 				return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
 			}
 
-			messages[i].Recipients = append(message.Recipients, *profile)
+			messages[i].Recipients = append(messages[i].Recipients, *profile)
 		}
 	}
 
@@ -158,7 +175,13 @@ func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folder, filter
 }
 
 func (uc *mailUC) SearchRecipients(userID uint64) ([]models.UserInfo, error) {
-	recipesInfo, err := uc.mailRepo.SearchRecipients(userID)
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	recipesInfo, err := uc.mailRepo.SearchRecipients(userIDs)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "search recipients")
 	}
@@ -260,12 +283,18 @@ func (uc *mailUC) DeleteFolder(userID uint64, folderSlug string) error {
 		return pkgErrors.WithMessage(errors.ErrDeleteDefaultFolder, "is default folder")
 	}
 
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
 	folder, err := uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get folder info")
 	}
 
-	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userID, folder.FolderID, false)
+	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, false)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -315,12 +344,18 @@ func (uc *mailUC) EditFolder(userID uint64, folderSlug string, form models.FormF
 }
 
 func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageInfo, error) {
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
 	var firstMessage *models.MessageInfo
 	var prevMessage *models.MessageInfo
 	replyToMsgID := &messageID
 
 	for replyToMsgID != nil {
-		curMessage, err := uc.mailRepo.SelectMessageByUserNMessage(userID, *replyToMsgID)
+		curMessage, err := uc.mailRepo.SelectMessageByUserNMessage(userIDs, *replyToMsgID)
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
 		}
@@ -373,7 +408,13 @@ func (uc *mailUC) GetMessage(userID uint64, messageID uint64) (*models.MessageIn
 }
 
 func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64, folderSlug string) error {
-	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userIDs, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
 	}
@@ -386,7 +427,7 @@ func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64, folderSlug stri
 		return pkgErrors.Wrap(err, "get folder info")
 	}
 
-	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	boxExists, err := uc.checkExistingBox(userIDs, messageID, folder.FolderID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "check existing box")
 	}
@@ -396,7 +437,7 @@ func (uc *mailUC) DeleteMessage(userID uint64, messageID uint64, folderSlug stri
 
 	switch folder.LocalName {
 	case "trash":
-		err = uc.mailRepo.DeleteBox(userID, messageID, folder.FolderID)
+		err = uc.mailRepo.DeleteBox(userIDs, messageID, folder.FolderID)
 		if err != nil {
 			return pkgErrors.Wrap(err, "delete message for user")
 		}
@@ -440,6 +481,18 @@ func (uc *mailUC) ValidateRecipients(recipients []string) ([]string, []string) {
 }
 
 func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*models.MessageInfo, error) {
+	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
+	if err != nil {
+		return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - invalid sender field")
+	}
+	if fromUser != nil {
+		err := uc.mailRepo.IsOwnerFakeAccount(fromUserID, fromUser.UserID)
+
+		if fromUser.UserID != fromUserID && err != nil {
+			return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "save draft - sender not compare")
+		}
+	}
+
 	folder, err := uc.GetFolderInfo(fromUserID, common.FolderDrafts)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
@@ -447,7 +500,7 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 
 	var user2folder []models.User2Folder
 	user2folder = append(user2folder, models.User2Folder{
-		UserID:   fromUserID,
+		UserID:   fromUser.UserID,
 		FolderID: folder.FolderID,
 	})
 
@@ -476,7 +529,7 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 	}
 
 	for _, email := range message.Recipients {
-		recipient, err := uc.userUC.GetInfoByEmail(email)
+		recipient, err := uc.userUC.GetByEmail(email)
 		if err != nil {
 			exUser, err := uc.userUC.Create(&models.User{
 				Email:      email,
@@ -484,25 +537,29 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 				IsExternal: true,
 			})
 			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : create external user")
+				return nil, pkgErrors.Wrap(err, "save draft : create external user")
 			}
 
 			_, err = uc.CreateDefaultFolders(exUser.UserID)
 			if err != nil {
-				return nil, pkgErrors.Wrap(err, "send message : create external user")
+				return nil, pkgErrors.Wrap(err, "save draft : create external user")
 			}
 
-			recipient = &models.UserInfo{
-				UserID:    exUser.UserID,
-				FirstName: exUser.FirstName,
-				LastName:  exUser.LastName,
-				Email:     exUser.Email,
+			recipient = exUser
+		}
+
+		toUserID := recipient.UserID
+
+		if recipient.IsFake {
+			toUserID, err = uc.mailRepo.SelectOwnerFakeAccount(recipient.UserID)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "save draft : get owner fake account")
 			}
 		}
 
-		folder, err = uc.GetFolderInfo(recipient.UserID, "inbox")
+		folder, err = uc.GetFolderInfo(toUserID, "inbox")
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
+			return nil, pkgErrors.Wrap(err, "save draft : get folder by UId and FolderSlug")
 		}
 
 		user2folder = append(user2folder, models.User2Folder{
@@ -522,9 +579,9 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 		IsDraft:          true,
 	}
 
-	err = uc.mailRepo.InsertMessage(fromUserID, &newMessage, user2folder)
+	err = uc.mailRepo.InsertMessage(fromUser.UserID, &newMessage, user2folder)
 	if err != nil {
-		return nil, pkgErrors.Wrap(err, "send message : insert message")
+		return nil, pkgErrors.Wrap(err, "save draft : insert message")
 	}
 
 	for _, a := range newMessage.Attachments {
@@ -533,7 +590,7 @@ func (uc *mailUC) SaveDraft(fromUserID uint64, message models.FormMessage) (*mod
 			Name:   a.S3FName,
 			Data:   a.FileData,
 		}); err != nil {
-			return nil, pkgErrors.Wrap(err, "send message : put to s3")
+			return nil, pkgErrors.Wrap(err, "save draft : put to s3")
 		}
 	}
 
@@ -559,8 +616,8 @@ func (uc *mailUC) mapRecipients(newRecipients []string, oldMessage *models.Messa
 }
 
 func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage models.FormEditMessage) (*models.MessageInfo, error) {
-	//TODO
 	message, err := uc.GetMessage(fromUserID, messageID)
+
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message")
 	}
@@ -572,13 +629,72 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 	var toInsert []models.User2Folder
 	var toDelete []models.User2Folder
 
-	for email, value := range recipients {
-		recipient, err := uc.userUC.GetInfoByEmail(email)
+	if formMessage.FromUser != message.FromUser.Email {
+		folder, err := uc.GetFolderInfo(fromUserID, common.FolderDrafts)
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "edit draft : get user info by email")
+			return nil, pkgErrors.Wrap(err, "edit draft: get folder by UId and FolderSlug")
 		}
 
-		folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
+		oldFromUser, err := uc.userUC.GetInfoByEmail(message.FromUser.Email)
+		if err != nil {
+			return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "edit draft - get user info by email")
+		}
+
+		toDelete = append(toInsert, models.User2Folder{
+			UserID:   oldFromUser.UserID,
+			FolderID: folder.FolderID,
+		})
+
+		newFromUser, err := uc.userUC.GetInfoByEmail(formMessage.FromUser)
+		if err != nil {
+			return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "edit draft - invalid sender field")
+		}
+		if newFromUser != nil {
+			err := uc.mailRepo.IsOwnerFakeAccount(fromUserID, newFromUser.UserID)
+
+			if newFromUser.UserID != fromUserID && err != nil {
+				return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "save draft - sender not compare")
+			}
+		}
+
+		toInsert = append(toInsert, models.User2Folder{
+			UserID:   newFromUser.UserID,
+			FolderID: folder.FolderID,
+		})
+
+		message.FromUser = *newFromUser
+	}
+
+	for email, value := range recipients {
+		recipient, err := uc.userUC.GetByEmail(email)
+		if err != nil {
+			exUser, err := uc.userUC.Create(&models.User{
+				Email:      email,
+				Password:   uc.cfg.UserService.ExternalUserPassword,
+				IsExternal: true,
+			})
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "edit draft : create external user")
+			}
+
+			_, err = uc.CreateDefaultFolders(exUser.UserID)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "edit draft : create external user")
+			}
+
+			recipient = exUser
+		}
+
+		toUserID := recipient.UserID
+
+		if recipient.IsFake {
+			toUserID, err = uc.mailRepo.SelectOwnerFakeAccount(recipient.UserID)
+			if err != nil {
+				return nil, pkgErrors.Wrap(err, "edit draft : get owner fake account")
+			}
+		}
+
+		folder, err := uc.GetFolderInfo(toUserID, "inbox")
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "edit draft: get folder by UId and FolderSlug")
 		}
@@ -611,12 +727,14 @@ func (uc *mailUC) EditDraft(fromUserID uint64, messageID uint64, formMessage mod
 }
 
 func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*models.MessageInfo, error) {
-	usr, err := uc.userUC.GetByEmail(message.FromUser)
+	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
 	if err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - invalid sender field")
 	}
-	if usr != nil {
-		if usr.UserID != userID {
+	if fromUser != nil {
+		err := uc.mailRepo.IsOwnerFakeAccount(userID, fromUser.UserID)
+
+		if fromUser.UserID != userID && err != nil {
 			return nil, pkgErrors.WithMessage(errors.ErrInvalidForm, "send message - sender not compare")
 		}
 	}
@@ -627,13 +745,8 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 
 	var user2folder []models.User2Folder
 
-	fromUser, err := uc.userUC.GetByEmail(message.FromUser)
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "send message")
-	}
-
 	if !fromUser.IsExternal {
-		folder, err := uc.GetFolderInfo(fromUser.UserID, "outbox")
+		folder, err := uc.GetFolderInfo(userID, "outbox")
 		if err != nil {
 			return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 		}
@@ -678,19 +791,19 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 		Preview:          common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen),
 	}
 
-	for _, recipient := range message.Recipients {
-		toDomain, err := pkgSmtp.ParseDomain(recipient)
+	for _, email := range message.Recipients {
+		toDomain, err := pkgSmtp.ParseDomain(email)
 		if err != nil {
-			return nil, pkgErrors.Wrap(err, "send message - failed get recipient domain")
+			return nil, pkgErrors.Wrap(err, "send message - failed get email domain")
 		}
 		if toDomain != uc.cfg.Mail.PostDomain {
-			if err := client.SendMail(fromUser, recipient, &newMessage, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword); err != nil {
+			if err := client.SendMail(fromUser, email, &newMessage, uc.cfg.Mail.PostDomain, uc.cfg.SmtpServer.SecretPassword); err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : to other mail service")
 			}
 			var recipientU *models.User
-			if recipientU, err = uc.userUC.GetByEmail(recipient); err != nil {
+			if recipientU, err = uc.userUC.GetByEmail(email); err != nil {
 				recipientU, err = uc.userUC.Create(&models.User{
-					Email:      recipient,
+					Email:      email,
 					Password:   uc.cfg.UserService.ExternalUserPassword,
 					FirstName:  "",
 					LastName:   "",
@@ -716,12 +829,21 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 				FolderID: folder.FolderID,
 			})
 		} else {
-			recipient, err := uc.userUC.GetInfoByEmail(recipient)
+			recipient, err := uc.userUC.GetByEmail(email)
 			if err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : get user info by email")
 			}
 
-			folder, err := uc.GetFolderInfo(recipient.UserID, "inbox")
+			toUserID := recipient.UserID
+
+			if recipient.IsFake {
+				toUserID, err = uc.mailRepo.SelectOwnerFakeAccount(recipient.UserID)
+				if err != nil {
+					return nil, pkgErrors.Wrap(err, "send message : get owner fake account")
+				}
+			}
+
+			folder, err := uc.GetFolderInfo(toUserID, "inbox")
 			if err != nil {
 				return nil, pkgErrors.Wrap(err, "send message : get folder by UId and FolderSlug")
 			}
@@ -794,8 +916,8 @@ func (uc *mailUC) getSupportAccount() (*models.UserInfo, error) {
 	return uc.userUC.GetInfoByEmail("support@mailbx.ru")
 }
 
-func (uc *mailUC) checkExistingBox(userID uint64, messageID uint64, folderID uint64) (bool, error) {
-	boxExists, err := uc.mailRepo.CheckExistingBox(userID, messageID, folderID)
+func (uc *mailUC) checkExistingBox(userIDs []uint64, messageID uint64, folderID uint64) (bool, error) {
+	boxExists, err := uc.mailRepo.CheckExistingBox(userIDs, messageID, folderID)
 	if err != nil {
 		return false, pkgErrors.Wrap(err, "check existing box")
 	}
@@ -804,7 +926,13 @@ func (uc *mailUC) checkExistingBox(userID uint64, messageID uint64, folderID uin
 }
 
 func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
-	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userIDs, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
 	}
@@ -817,7 +945,7 @@ func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug 
 		return nil, pkgErrors.Wrap(err, "get folder info")
 	}
 
-	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	boxExists, err := uc.checkExistingBox(userIDs, messageID, folder.FolderID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "check existing box")
 	}
@@ -825,7 +953,7 @@ func (uc *mailUC) MarkMessageAsSeen(userID uint64, messageID uint64, folderSlug 
 		return nil, pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
 	}
 
-	err = uc.mailRepo.UpdateMessageState(userID, messageID, folder.FolderID, "seen", true)
+	err = uc.mailRepo.UpdateMessageState(userIDs, messageID, folder.FolderID, "seen", true)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message seen : update state")
 	}
@@ -843,7 +971,13 @@ func (uc *mailUC) GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo
 }
 
 func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error) {
-	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return nil, pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userIDs, messageID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "get message : by Uid and Mid")
 	}
@@ -856,7 +990,7 @@ func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlu
 		return nil, pkgErrors.Wrap(err, "get folder info")
 	}
 
-	boxExists, err := uc.checkExistingBox(userID, messageID, folder.FolderID)
+	boxExists, err := uc.checkExistingBox(userIDs, messageID, folder.FolderID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "check existing box")
 	}
@@ -864,7 +998,7 @@ func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlu
 		return nil, pkgErrors.WithMessage(errors.ErrBoxNotFound, "box not found")
 	}
 
-	err = uc.mailRepo.UpdateMessageState(userID, messageID, folder.FolderID, "seen", false)
+	err = uc.mailRepo.UpdateMessageState(userIDs, messageID, folder.FolderID, "seen", false)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "mark message unseen : update state")
 	}
@@ -872,17 +1006,14 @@ func (uc *mailUC) MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlu
 	return uc.GetMessage(userID, messageID)
 }
 
-func (uc *mailUC) getFolderByMessage(userID uint64, messageID uint64) (*models.Folder, error) {
-	folder, err := uc.mailRepo.SelectFolderByUserNMessage(userID, messageID)
-	if err != nil {
-		return nil, pkgErrors.Wrap(err, "select folder by message")
-	}
-
-	return folder, nil
-}
-
 func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolderSlug string, toFolderSlug string) error {
-	message, err := uc.mailRepo.SelectMessageByUserNMessage(userID, messageID)
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "select fake ids")
+	}
+	userIDs := append(fakeIDs, userID)
+
+	message, err := uc.mailRepo.SelectMessageByUserNMessage(userIDs, messageID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get message : by Uid and Mid")
 	}
@@ -895,7 +1026,7 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolde
 		return pkgErrors.Wrap(err, "get fromFolder info")
 	}
 
-	boxExists, err := uc.checkExistingBox(userID, messageID, fromFolder.FolderID)
+	boxExists, err := uc.checkExistingBox(userIDs, messageID, fromFolder.FolderID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "check existing box")
 	}
@@ -920,17 +1051,17 @@ func (uc *mailUC) MoveMessageToFolder(userID uint64, messageID uint64, fromFolde
 		return pkgErrors.WithMessage(errors.ErrMoveToDraftFolder, "new fromFolder is equals draft fromFolder")
 	}
 
-	boxExists, err = uc.checkExistingBox(userID, messageID, toFolder.FolderID)
+	boxExists, err = uc.checkExistingBox(userIDs, messageID, toFolder.FolderID)
 	if err != nil {
 		return pkgErrors.Wrap(err, "check existing box")
 	}
 	if boxExists {
-		err = uc.mailRepo.DeleteBox(userID, messageID, fromFolder.FolderID)
+		err = uc.mailRepo.DeleteBox(userIDs, messageID, fromFolder.FolderID)
 		if err != nil {
 			return pkgErrors.Wrap(err, "delete message for user")
 		}
 	} else {
-		err = uc.mailRepo.UpdateMessageFolder(userID, messageID, fromFolder.FolderID, toFolder.FolderID)
+		err = uc.mailRepo.UpdateMessageFolder(userIDs, messageID, fromFolder.FolderID, toFolder.FolderID)
 		if err != nil {
 			return pkgErrors.Wrap(err, "update message fromFolder")
 		}
@@ -967,4 +1098,145 @@ func (uc *mailUC) GetAttach(attachID, userID uint64) (*models.AttachmentInfo, er
 	attach.FileData = file.Data
 
 	return attach, nil
+}
+
+func (uc *mailUC) CreateAnonymousEmail(userID uint64) (string, error) {
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "select fake ids")
+	}
+	if len(fakeIDs) >= uc.cfg.Mail.MaxCountAnonymousEmails {
+		return "", errors.ErrMaxCountAnonymousEmails
+	}
+
+	fakeStr, err := rand.String(uc.cfg.Mail.FakeEmailLen, false)
+	if err != nil {
+		return "", errors.ErrGenerateFakeEmail
+	}
+
+	fakeEmail := fakeStr + uc.cfg.Mail.PostAtDomain
+	fakeUser, err := uc.userUC.Create(&models.User{
+		Email:     fakeEmail,
+		Password:  uc.cfg.Mail.FakeUserPassword,
+		FirstName: "",
+		LastName:  "",
+		IsFake:    true,
+	})
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "create fake user")
+	}
+
+	err = uc.mailRepo.InsertFakeAccount(userID, fakeUser.UserID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "insert fake account")
+	}
+
+	return fakeEmail, nil
+}
+
+func (uc *mailUC) GetAnonymousEmails(userID uint64) ([]string, error) {
+	var fakeEmails []string
+
+	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
+	if err != nil {
+		return []string{}, pkgErrors.Wrap(err, "select fake ids")
+	}
+
+	for _, id := range fakeIDs {
+		userInfo, err := uc.userUC.GetInfo(id)
+		if err != nil {
+			return []string{}, pkgErrors.Wrap(err, "get info")
+		}
+
+		fakeEmails = append(fakeEmails, userInfo.Email)
+	}
+
+	return fakeEmails, nil
+}
+
+func (uc *mailUC) DeleteAnonymousEmail(userID uint64, fakeEmail string) error {
+	userInfo, err := uc.userUC.GetInfoByEmail(fakeEmail)
+	if err != nil {
+		return pkgErrors.Wrap(err, "get user by email")
+	}
+
+	err = uc.mailRepo.IsOwnerFakeAccount(userID, userInfo.UserID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "is owner fake account")
+	}
+
+	messages, err := uc.mailRepo.SelectMessagesByFakeAccount(userInfo.UserID, false)
+	if err != nil {
+		return pkgErrors.Wrap(err, "select messages by fake account")
+	}
+
+	for _, message := range messages {
+		err := uc.mailRepo.DeleteBoxByUserNMessage(userInfo.UserID, message.MessageID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "delete box by user and message")
+		}
+	}
+
+	draftMessages, err := uc.mailRepo.SelectMessagesByFakeAccount(userInfo.UserID, true)
+	if err != nil {
+		return pkgErrors.Wrap(err, "select messages by fake account")
+	}
+
+	for _, message := range draftMessages {
+		err = uc.mailRepo.DeleteMessageFromMessages(message.MessageID)
+		if err != nil {
+			return pkgErrors.Wrap(err, "delete message full")
+		}
+	}
+
+	err = uc.mailRepo.DeleteFakeAccount(userID, userInfo.UserID)
+	if err != nil {
+		return pkgErrors.Wrap(err, "delete fake account")
+	}
+
+	return nil
+}
+
+func (uc *mailUC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]models.MessageInfo, error) {
+	userInfo, err := uc.userUC.GetInfoByEmail(fakeEmail)
+	if err != nil {
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get user by email")
+	}
+
+	err = uc.mailRepo.IsOwnerFakeAccount(userID, userInfo.UserID)
+	if err != nil {
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "is owner fake account")
+	}
+
+	messages, err := uc.mailRepo.SelectMessagesByFakeAccount(userInfo.UserID, false)
+	if err != nil {
+		return []models.MessageInfo{}, pkgErrors.Wrap(err, "select messages by fake account")
+	}
+
+	for i, message := range messages {
+		message.Preview = common.GetInnerText(message.Text, uc.cfg.Api.MailPreviewMaxLen)
+		messageID := message.MessageID
+
+		fromUser, err := uc.userUC.GetInfo(message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+		}
+
+		messages[i].FromUser = *fromUser
+		recipientsIDs, err := uc.mailRepo.SelectRecipientsByMessage(messageID, message.FromUser.UserID)
+		if err != nil {
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get recipients by msg")
+		}
+
+		for _, recipientsID := range recipientsIDs {
+			profile, err := uc.userUC.GetInfo(recipientsID)
+			if err != nil {
+				return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+			}
+
+			messages[i].Recipients = append(messages[i].Recipients, *profile)
+		}
+	}
+
+	return messages, nil
 }

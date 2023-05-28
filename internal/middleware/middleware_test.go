@@ -50,7 +50,7 @@ func TestMiddleware_CheckAuth(t *testing.T) {
 		name string
 	}
 
-	randCookie, err := rand.String(cfg.Sessions.CookieLen)
+	randCookie, err := rand.String(cfg.Sessions.CookieLen, true)
 	if err != nil {
 		t.Errorf("failed generate rand str %v ", err)
 	}

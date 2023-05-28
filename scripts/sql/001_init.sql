@@ -12,6 +12,7 @@ CREATE TABLE mail.users
     avatar           text                     NOT NULL,
     is_custom_avatar bool                     NOT NULL DEFAULT false,
     is_external      bool                     NOT NULL DEFAULT false,
+    is_fake      bool                         NOT NULL DEFAULT false,
     CONSTRAINT pk_users PRIMARY KEY (user_id)
 );
 
@@ -102,6 +103,17 @@ CREATE TABLE mail.boxes
         REFERENCES mail.messages ON DELETE cascade,
     CONSTRAINT fk_box_messages_folder_id FOREIGN KEY (folder_id)
         REFERENCES mail.folders ON DELETE RESTRICT INITIALLY DEFERRED
+);
+
+CREATE TABLE mail.user2fake
+(
+    user_id bigint NOT NULL,
+    fake_id bigint NOT NULL,
+
+    CONSTRAINT user2fake_user FOREIGN KEY (user_id)
+        REFERENCES mail.users ON DELETE cascade,
+    CONSTRAINT user2fake_fake FOREIGN KEY (fake_id)
+        REFERENCES mail.users ON DELETE cascade
 );
 
 -- триггер на увеличение непрочитанного и общего числа сообщений
@@ -233,9 +245,17 @@ CREATE TRIGGER update_cnt_after_delete
     FOR EACH ROW
 EXECUTE PROCEDURE update_count_messages_after_delete();
 
+-- срабатывает после пометки строки из boxes как deleted
+CREATE TRIGGER update_cnt_after_mark_deleted
+    AFTER UPDATE
+    ON mail.boxes
+    FOR EACH ROW
+    WHEN (OLD.deleted IS DISTINCT FROM NEW.deleted AND NEW.deleted = true)
+EXECUTE PROCEDURE update_count_messages_after_delete();
+
 -- для поиска сообщений по тексту, получателю и отправителю
 CREATE
-    OR REPLACE FUNCTION get_messages(from_id bigint, from_email text, to_email text, folder text, filter_text text)
+OR REPLACE FUNCTION get_messages(in_folder_id bigint, from_email text, to_email text, filter_text TEXT, in_is_draft bool)
     RETURNS TABLE
             (
                 id bigint
@@ -243,28 +263,31 @@ CREATE
 AS
 $$
 BEGIN
-    RETURN QUERY (SELECT messages.message_id --, messages.text, messages.title, boxes.user_id, users.email
-                  from mail.messages
-                           JOIN mail.folders on folders.user_id = from_id
-                           JOIN mail.boxes
-                                on boxes.message_id = messages.message_id AND boxes.folder_id = folders.folder_id AND
-                                   boxes.user_id = from_id
-                           JOIN mail.users on users.user_id = messages.from_user_id
-                  WHERE (local_name ilike '%' || folder || '%' OR
-                         name ilike '%' || folder || '%')
-                    AND (email ilike '%' || from_email || '%'
-                      AND email ilike '%' || to_email || '%')
-                    AND (email ilike '%' || filter_text || '%'
-                      OR title ilike '%' || filter_text || '%'
-                      OR text ilike '%' || filter_text || '%')
-                  ORDER BY messages.message_id DESC);
+RETURN QUERY
+    (
+    SELECT DISTINCT ON (m.message_id, m.created_at) m.message_id
+		FROM mail.folders AS f
+		JOIN mail.boxes AS b ON f.folder_id = in_folder_id AND
+								f.folder_id = b.folder_id AND
+								is_draft = in_is_draft
+		JOIN mail.messages AS m ON m.message_id = b.message_id AND
+								   (m.title ILIKE '%' || filter_text || '%' OR
+								   m.text ILIKE '%' || filter_text || '%')
+		JOIN mail.users AS u_from ON m.from_user_id = u_from.user_id AND
+									 u_from.email ILIKE '%' || from_email || '%'
+		JOIN mail.boxes AS b2 ON b.message_id = b2.message_id AND
+								 b2.user_id != m.from_user_id
+		JOIN mail.users AS u_to ON b2.user_id = u_to.user_id AND
+								   u_to.email ILIKE '%' || to_email || '%'
+		ORDER BY m.created_at DESC, m.message_id
+    );
 end
 $$
-    language 'plpgsql';
+language 'plpgsql';
 
 -- для поиска получателей для конкретного пользователя, сначала недавние
 CREATE
-    OR REPLACE FUNCTION get_recipes(from_id bigint)
+    OR REPLACE FUNCTION get_recipes(from_id bigint[])
     RETURNS TABLE
             (
                 user_id    bigint,
@@ -285,8 +308,8 @@ BEGIN
                         from mail.messages
                                  join mail.boxes on boxes.message_id = messages.message_id
                                  join mail.users on boxes.user_id = users.user_id
-                        where from_user_id = from_id
-                          and users.user_id != from_id) as all_recipes
+                        where from_user_id = ANY(from_id)
+                          and users.user_id != ALL(from_id)) as all_recipes
                   order by all_recipes.message_id desc);
 end
 $$

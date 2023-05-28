@@ -127,3 +127,12 @@ type FoldersResponse struct {
 type MessageResponse struct {
 	Message MessageInfo `json:"message"`
 }
+
+type AnonymousEmailResponse struct {
+	Email string `json:"email"`
+}
+
+type AnonymousEmailsResponse struct {
+	Emails []string `json:"emails"`
+	Count  int      `json:"count"`
+}

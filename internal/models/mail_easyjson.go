@@ -1595,3 +1595,174 @@ func (v *Attachment) UnmarshalJSON(data []byte) error {
 func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels13(l, v)
 }
+func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels14(in *jlexer.Lexer, out *AnonymousEmailsResponse) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "emails":
+			if in.IsNull() {
+				in.Skip()
+				out.Emails = nil
+			} else {
+				in.Delim('[')
+				if out.Emails == nil {
+					if !in.IsDelim(']') {
+						out.Emails = make([]string, 0, 4)
+					} else {
+						out.Emails = []string{}
+					}
+				} else {
+					out.Emails = (out.Emails)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v34 string
+					v34 = string(in.String())
+					out.Emails = append(out.Emails, v34)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "count":
+			out.Count = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels14(out *jwriter.Writer, in AnonymousEmailsResponse) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"emails\":"
+		out.RawString(prefix[1:])
+		if in.Emails == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v35, v36 := range in.Emails {
+				if v35 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v36))
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"count\":"
+		out.RawString(prefix)
+		out.Int(int(in.Count))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AnonymousEmailsResponse) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels14(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AnonymousEmailsResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels14(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AnonymousEmailsResponse) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels14(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *AnonymousEmailsResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels14(l, v)
+}
+func easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels15(in *jlexer.Lexer, out *AnonymousEmailResponse) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "email":
+			out.Email = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels15(out *jwriter.Writer, in AnonymousEmailResponse) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"email\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Email))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AnonymousEmailResponse) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels15(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AnonymousEmailResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7feca409EncodeGithubComGoParkMailRu20231SeekersInternalModels15(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AnonymousEmailResponse) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels15(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *AnonymousEmailResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7feca409DecodeGithubComGoParkMailRu20231SeekersInternalModels15(l, v)
+}

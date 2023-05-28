@@ -48,5 +48,8 @@ func RegisterHTTPRoutes(r *mux.Router, cfg *config.Config, authH AuthHandlersI, 
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RoutePreviewAttach, m.CheckAuth(m.CheckCSRF(mailH.PreviewAttach))).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteExternalAttach, mailH.GetAttach).Methods(http.MethodGet)
 	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteWS, m.CheckAuth(m.CheckCSRF(mailH.WSMessageHandler))).Methods(http.MethodGet)
-	//r.HandleFunc(cfg.Routes.RoutePrefix+"/chat", mailH.File)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteCreateAnonymousEmail, m.CheckAuth(m.CheckCSRF(mailH.CreateAnonymousEmail))).Methods(http.MethodPost)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteAnonymousEmail, m.CheckAuth(m.CheckCSRF(mailH.GetAnonymousEmails))).Methods(http.MethodGet)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteAnonymousEmail, m.CheckAuth(m.CheckCSRF(mailH.DeleteAnonymousEmail))).Methods(http.MethodDelete)
+	r.HandleFunc(cfg.Routes.RoutePrefix+cfg.Routes.RouteAnonymousMessages, m.CheckAuth(m.CheckCSRF(mailH.GetAnonymousMessages))).Methods(http.MethodGet)
 }

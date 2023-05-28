@@ -121,6 +121,20 @@ func (mr *MockMailRepoIMockRecorder) GetMessageAttachments(messageID interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessageAttachments", reflect.TypeOf((*MockMailRepoI)(nil).GetMessageAttachments), messageID)
 }
 
+// InsertFakeAccount mocks base method.
+func (m *MockMailRepoI) InsertFakeAccount(userID, fakeUserID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertFakeAccount", userID, fakeUserID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertFakeAccount indicates an expected call of InsertFakeAccount.
+func (mr *MockMailRepoIMockRecorder) InsertFakeAccount(userID, fakeUserID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertFakeAccount", reflect.TypeOf((*MockMailRepoI)(nil).InsertFakeAccount), userID, fakeUserID)
+}
+
 // InsertFolder mocks base method.
 func (m *MockMailRepoI) InsertFolder(folder *models.Folder) (uint64, error) {
 	m.ctrl.T.Helper()

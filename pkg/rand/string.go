@@ -3,12 +3,18 @@ package rand
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"path/filepath"
 )
 
-func String(length int) (string, error) {
-	charSet := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+func String(length int, withUpper bool) (string, error) {
+	charSet := "0123456789abcdefghijklmnopqrstuvwxyz"
+	if withUpper {
+		charSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	}
+	fmt.Println(charSet)
+
 	randBytes := make([]byte, length)
 	for i := range randBytes {
 		res, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))

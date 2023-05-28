@@ -289,3 +289,45 @@ func (g MailClientGRPC) GetAttach(attachID, userID uint64) (*models.AttachmentIn
 
 	return utils.ModelAttachByProto(protoAttach), nil
 }
+
+func (g MailClientGRPC) CreateAnonymousEmail(userID uint64) (string, error) {
+	email, err := g.mailClient.CreateAnonymousEmail(context.TODO(), &mail_proto.UID{UID: userID})
+	if err != nil {
+		return "", pkgGrpc.CauseError(errors.Wrap(err, "mail client - CreateAnonymousEmail"))
+	}
+
+	return email.Email, nil
+}
+
+func (g MailClientGRPC) GetAnonymousEmails(userID uint64) ([]string, error) {
+	emails, err := g.mailClient.GetAnonymousEmails(context.TODO(), &mail_proto.UID{UID: userID})
+	if err != nil {
+		return []string{}, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetAnonymousEmails"))
+	}
+
+	return emails.Emails, nil
+}
+
+func (g MailClientGRPC) DeleteAnonymousEmail(userID uint64, fakeEmail string) error {
+	_, err := g.mailClient.DeleteAnonymousEmail(context.TODO(), &mail_proto.Anonymous{
+		UserID:    userID,
+		FakeEmail: fakeEmail,
+	})
+	if err != nil {
+		return pkgGrpc.CauseError(errors.Wrap(err, "mail client - DeleteAnonymousEmail"))
+	}
+
+	return nil
+}
+
+func (g MailClientGRPC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]models.MessageInfo, error) {
+	messages, err := g.mailClient.GetMessagesByFakeEmail(context.TODO(), &mail_proto.Anonymous{
+		UserID:    userID,
+		FakeEmail: fakeEmail,
+	})
+	if err != nil {
+		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetMessagesByFakeEmail"))
+	}
+
+	return utils.MessagesInfoModelByProto(messages), nil
+}

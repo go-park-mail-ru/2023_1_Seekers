@@ -247,3 +247,43 @@ func (g *MailServerGRPC) GetAttach(ctx context.Context, protoAttach *mail_proto.
 
 	return utils.ProtoAttachByModel(attach), nil
 }
+
+func (g *MailServerGRPC) CreateAnonymousEmail(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.CreateAnonymous, error) {
+	email, err := g.mailUC.CreateAnonymousEmail(protoUid.UID)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return &mail_proto.CreateAnonymous{
+		Email: email,
+	}, nil
+}
+
+func (g *MailServerGRPC) GetAnonymousEmails(ctx context.Context, protoUid *mail_proto.UID) (*mail_proto.GetAnonymous, error) {
+	emails, err := g.mailUC.GetAnonymousEmails(protoUid.UID)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return &mail_proto.GetAnonymous{
+		Emails: emails,
+	}, nil
+}
+
+func (g *MailServerGRPC) DeleteAnonymousEmail(ctx context.Context, protoAnon *mail_proto.Anonymous) (*mail_proto.Nothing, error) {
+	err := g.mailUC.DeleteAnonymousEmail(protoAnon.UserID, protoAnon.FakeEmail)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return &mail_proto.Nothing{}, nil
+}
+
+func (g *MailServerGRPC) GetMessagesByFakeEmail(ctx context.Context, protoAnon *mail_proto.Anonymous) (*mail_proto.MessagesInfoResponse, error) {
+	messages, err := g.mailUC.GetMessagesByFakeEmail(protoAnon.UserID, protoAnon.FakeEmail)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return utils.ProtoMsgInfoResponseByModels(messages), nil
+}

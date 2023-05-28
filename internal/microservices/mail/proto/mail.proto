@@ -138,9 +138,10 @@ message MessageInfo {
   bool Seen = 9;
   bool Favorite = 10;
   bool Deleted = 11;
-  repeated AttachmentInfo Attachments = 12;
-  string  AttachmentsSize = 13;
-  string Preview = 14;
+  bool IsDraft = 12;
+  repeated AttachmentInfo Attachments = 13;
+  string  AttachmentsSize = 14;
+  string Preview = 15;
 }
 
 message ValidateRecipientsResponse {
@@ -169,6 +170,19 @@ message Nothing {
   bool dummy = 1;
 }
 
+message CreateAnonymous {
+  string email = 1;
+}
+
+message GetAnonymous {
+  repeated string emails = 1;
+}
+
+message Anonymous {
+  uint64 UserID = 1;
+  string fakeEmail = 2;
+}
+
 service MailService {
   rpc GetFolders(UID) returns (FoldersResponse) {}
   rpc GetFolderInfo(UserFolder) returns (Folder){}
@@ -193,4 +207,8 @@ service MailService {
   rpc MoveMessageToFolder(MoveToFolderParams) returns (Nothing) {}
   rpc GetCustomFolders(UID) returns (FoldersResponse) {}
   rpc GetAttach(AttNUser) returns (AttachmentInfo) {}
+  rpc CreateAnonymousEmail(UID) returns (CreateAnonymous) {}
+  rpc GetAnonymousEmails(UID) returns (GetAnonymous) {}
+  rpc DeleteAnonymousEmail(Anonymous) returns (Nothing) {}
+  rpc GetMessagesByFakeEmail(Anonymous) returns (MessagesInfoResponse) {}
 }

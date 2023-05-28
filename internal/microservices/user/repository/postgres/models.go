@@ -14,6 +14,7 @@ type User struct {
 	LastName   string
 	Avatar     string
 	IsExternal bool
+	IsFake     bool
 	//IsCustomAvatar bool
 }
 
@@ -28,6 +29,7 @@ func (u *User) FromModel(user *models.User) {
 	u.LastName = user.LastName
 	u.Avatar = user.Avatar
 	u.IsExternal = user.IsExternal
+	u.IsFake = user.IsFake
 }
 
 type IsCustomAvatar struct {

@@ -135,6 +135,8 @@ func easyjson9e1087fdDecodeGithubComGoParkMailRu20231SeekersInternalModels1(in *
 			out.Avatar = string(in.String())
 		case "is_external":
 			out.IsExternal = bool(in.Bool())
+		case "is_fake":
+			out.IsFake = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -183,6 +185,11 @@ func easyjson9e1087fdEncodeGithubComGoParkMailRu20231SeekersInternalModels1(out 
 		const prefix string = ",\"is_external\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.IsExternal))
+	}
+	{
+		const prefix string = ",\"is_fake\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.IsFake))
 	}
 	out.RawByte('}')
 }

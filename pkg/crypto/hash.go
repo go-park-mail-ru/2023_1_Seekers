@@ -8,7 +8,7 @@ import (
 )
 
 func GetSalt(saltLen int) ([]byte, error) {
-	salt, err := rand.String(saltLen)
+	salt, err := rand.String(saltLen, true)
 	if err != nil {
 		return nil, err
 	}

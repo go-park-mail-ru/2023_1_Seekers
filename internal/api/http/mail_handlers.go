@@ -50,7 +50,10 @@ type MailHandlersI interface {
 	WSMessageHandler(w http.ResponseWriter, r *http.Request)
 	DeleteDraftAttach(w http.ResponseWriter, r *http.Request)
 	GetAttachB64(w http.ResponseWriter, r *http.Request)
-	//File(w http.ResponseWriter, r *http.Request)
+	CreateAnonymousEmail(w http.ResponseWriter, r *http.Request)
+	GetAnonymousEmails(w http.ResponseWriter, r *http.Request)
+	DeleteAnonymousEmail(w http.ResponseWriter, r *http.Request)
+	GetAnonymousMessages(w http.ResponseWriter, r *http.Request)
 }
 
 type mailHandlers struct {
@@ -121,7 +124,7 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 // @Tags     	 folders
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} MessagesResponse "success get filtered messages"
+// @Success  200 {object} models.MessagesResponse "success get filtered messages"
 // @Failure 400 {object} errors.JSONError "failed to get user"
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /messages/search [get]
@@ -132,10 +135,12 @@ func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filter := r.URL.Query().Get("filter")
-	folder := r.URL.Query().Get("folder")
+	fromUser := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFromUser)
+	toUser := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryToUser)
+	filterText := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFilter)
+	folder := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFolder)
 
-	messages, err := h.uc.SearchMessages(userID, "", "", folder, filter)
+	messages, err := h.uc.SearchMessages(userID, fromUser, toUser, folder, filterText)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -152,7 +157,7 @@ func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
 // @Tags     	 recipients
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} []UserInfo "success get recipients"
+// @Success  200 {object} []models.UserInfo "success get recipients"
 // @Failure 400 {object} errors.JSONError "failed to get user"
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /recipients/search [get]
@@ -740,13 +745,13 @@ func (h *mailHandlers) EditDraft(w http.ResponseWriter, r *http.Request) {
 
 	form.Sanitize()
 
-	validEmails, invalidEmails := h.uc.ValidateRecipients(form.Recipients)
-	if len(invalidEmails) != 0 {
-		pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
-		return
+	for _, email := range form.Recipients {
+		if err := validation.ValidateEmail(email); err != nil {
+			pkgHttp.HandleError(w, r, pkgErrors.Wrap(errors.ErrSomeEmailsAreInvalid, "validate recipients"))
+			return
+		}
 	}
 
-	form.Recipients = validEmails
 	message, err := h.uc.EditDraft(userID, messageID, form)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
@@ -1076,6 +1081,119 @@ func (h *mailHandlers) WSMessageHandler(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Upgrade", "websocket")
 }
 
-//func (h *mailHandlers) File(w http.ResponseWriter, r *http.Request) {
-//	http.ServeFile(w, r, "cmd/index.html")
-//}
+// CreateAnonymousEmail godoc
+// @Summary      CreateAnonymousEmail
+// @Description  creating anonymous email
+// @Tags     	 anonymous
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.AnonymousEmailResponse "success create anon email"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 400 {object} errors.JSONError "max count anonymous emails is 5"
+// @Failure 500 {object} errors.JSONError "error while generating fake email"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /anonymous/create [post]
+func (h *mailHandlers) CreateAnonymousEmail(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	fakeEmail, err := h.uc.CreateAnonymousEmail(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.AnonymousEmailResponse{Email: fakeEmail})
+}
+
+// GetAnonymousEmails godoc
+// @Summary      GetAnonymousEmails
+// @Description  get anonymous email by user
+// @Tags     	 anonymous
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.AnonymousEmailsResponse "success get anon emails"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /anonymous [get]
+func (h *mailHandlers) GetAnonymousEmails(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	fakeEmails, err := h.uc.GetAnonymousEmails(userID)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.AnonymousEmailsResponse{
+		Emails: fakeEmails,
+		Count:  len(fakeEmails),
+	})
+}
+
+// DeleteAnonymousEmail godoc
+// @Summary      DeleteAnonymousEmail
+// @Description  delete anonymous email
+// @Tags     	 anonymous
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 "success delete anonymous email"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "your anonymous email not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /anonymous [delete]
+func (h *mailHandlers) DeleteAnonymousEmail(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	fakeEmail := r.URL.Query().Get(h.cfg.Routes.QueryAnonymousEmail)
+
+	err := h.uc.DeleteAnonymousEmail(userID, fakeEmail)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// GetAnonymousMessages godoc
+// @Summary      GetAnonymousMessages
+// @Description  List of messages depends on anonymous email
+// @Tags     	 anonymous
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessagesResponse "success get list of messages depends on anonymous email"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 404 {object} errors.JSONError "your anonymous email not found"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /anonymous/messages [get]
+func (h *mailHandlers) GetAnonymousMessages(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	fakeEmail := r.URL.Query().Get(h.cfg.Routes.QueryAnonymousEmail)
+
+	messages, err := h.uc.GetMessagesByFakeEmail(userID, fakeEmail)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessagesResponse{
+		Messages: messages,
+	})
+}

@@ -15,6 +15,7 @@ message User {
   string LastName = 5;
   string Avatar = 6;
   bool IsExternal = 7;
+  bool IsFake = 8;
 }
 
 message Email {

@@ -12,7 +12,7 @@ type UseCaseI interface {
 	GetFolderInfo(userID uint64, folderSlug string) (*models.Folder, error)
 	GetAttachInfo(attachID, userID uint64) (*models.AttachmentInfo, error)
 	GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error)
-	SearchMessages(userID uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error)
+	SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string) ([]models.MessageInfo, error)
 	SearchRecipients(userID uint64) ([]models.UserInfo, error)
 	CreateDefaultFolders(userID uint64) ([]models.Folder, error)
 	CreateFolder(userID uint64, form models.FormFolder) (*models.Folder, error)
@@ -30,4 +30,8 @@ type UseCaseI interface {
 	MarkMessageAsUnseen(userID uint64, messageID uint64, folderSlug string) (*models.MessageInfo, error)
 	MoveMessageToFolder(userID uint64, messageID uint64, fromFolder string, toFolder string) error
 	GetAttach(attachID, userID uint64) (*models.AttachmentInfo, error)
+	CreateAnonymousEmail(userID uint64) (string, error)
+	GetAnonymousEmails(userID uint64) ([]string, error)
+	DeleteAnonymousEmail(userID uint64, fakeEmail string) error
+	GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]models.MessageInfo, error)
 }

@@ -31,7 +31,7 @@ func NewSessionRepo(c *config.Config, redisClient *redis.Client) repository.Sess
 }
 
 func (sDb *sessionsDB) CreateSession(uID uint64) (*models.Session, error) {
-	value, err := rand.String(sDb.cfg.Sessions.CookieLen)
+	value, err := rand.String(sDb.cfg.Sessions.CookieLen, true)
 	if err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, "cant generate cookie")
 	}

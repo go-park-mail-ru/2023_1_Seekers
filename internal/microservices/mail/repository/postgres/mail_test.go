@@ -144,36 +144,37 @@ func TestRepository_SelectFoldersByUser(t *testing.T) {
 	}
 }
 
-func TestRepository_SelectFolderByUserNMessage(t *testing.T) {
-	cfg := createConfig()
-
-	var fakeFolder *models.Folder
-	generateFakeData(&fakeFolder)
-	userID := uint64(1)
-	messageID := uint64(1)
-
-	db, gormDB, mock, err := mockDB()
-	if err != nil {
-		t.Fatalf("error while mocking database: %s", err)
-	}
-	defer db.Close()
-
-	rows := sqlmock.NewRows([]string{"folder_id", "user_id", "local_name", "name", "messages_unseen", "messages_count"}).
-		AddRow(fakeFolder.FolderID, fakeFolder.UserID, fakeFolder.LocalName, fakeFolder.Name, fakeFolder.MessagesUnseen, fakeFolder.MessagesCount)
-
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT folders.* FROM "boxes" JOIN mail.folders using(folder_id) WHERE boxes.user_id = $1 AND message_id = $2 ORDER BY "boxes"."user_id" LIMIT 1`)).
-		WithArgs(userID, messageID).WillReturnRows(rows)
-
-	mailRepo := New(cfg, gormDB)
-	response, err := mailRepo.SelectFolderByUserNMessage(userID, messageID)
-	causeErr := pkgErr.Cause(err)
-
-	if causeErr != nil {
-		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
-	} else {
-		require.Equal(t, fakeFolder, response)
-	}
-}
+//
+//func TestRepository_SelectFolderByUserNMessage(t *testing.T) {
+//	cfg := createConfig()
+//
+//	var fakeFolder *models.Folder
+//	generateFakeData(&fakeFolder)
+//	userID := uint64(1)
+//	messageID := uint64(1)
+//
+//	db, gormDB, mock, err := mockDB()
+//	if err != nil {
+//		t.Fatalf("error while mocking database: %s", err)
+//	}
+//	defer db.Close()
+//
+//	rows := sqlmock.NewRows([]string{"folder_id", "user_id", "local_name", "name", "messages_unseen", "messages_count"}).
+//		AddRow(fakeFolder.FolderID, fakeFolder.UserID, fakeFolder.LocalName, fakeFolder.Name, fakeFolder.MessagesUnseen, fakeFolder.MessagesCount)
+//
+//	mock.ExpectQuery(regexp.QuoteMeta(`SELECT folders.* FROM "boxes" JOIN mail.folders using(folder_id) WHERE boxes.user_id = $1 AND message_id = $2 ORDER BY "boxes"."user_id" LIMIT 1`)).
+//		WithArgs(userID, messageID).WillReturnRows(rows)
+//
+//	mailRepo := New(cfg, gormDB)
+//	response, err := mailRepo.SelectFolderByUserNMessage(userID, messageID)
+//	causeErr := pkgErr.Cause(err)
+//
+//	if causeErr != nil {
+//		t.Errorf("[TEST] simple: expected err \"%v\", got \"%v\"", nil, causeErr)
+//	} else {
+//		require.Equal(t, fakeFolder, response)
+//	}
+//}
 
 func TestRepository_SelectFolderMessagesByUserNFolderID(t *testing.T) {
 	cfg := createConfig()

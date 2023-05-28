@@ -135,6 +135,10 @@ type Config struct {
 		RouteGetFolders                    string `yaml:"route_get_folders" env-default:"/folders"`
 		RouteFolder                        string `yaml:"route_folder" env-default:"/folder/{slug}"`
 		RouteSearch                        string `yaml:"route_search" env-default:"/messages/search"`
+		RouteSearchQueryFromUser           string `yaml:"route_search_query_from_user" env-default:"fromUser"`
+		RouteSearchQueryToUser             string `yaml:"route_search_query_to_user" env-default:"toUser"`
+		RouteSearchQueryFolder             string `yaml:"route_search_query_folder" env-default:"folder"`
+		RouteSearchQueryFilter             string `yaml:"route_search_query_filter" env-default:"filter"`
 		RouteRecipients                    string `yaml:"route_recipients" env-default:"/recipients/search"`
 		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
 		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
@@ -142,6 +146,10 @@ type Config struct {
 		RouteWsQueryEmail                  string `yaml:"route_ws_query_email" env-default:"email"`
 		RouteGetFoldersIsCustom            string `yaml:"route_get_folders_is_custom" env-default:"custom"`
 		QueryAccessKey                     string `yaml:"query_access_key" env-default:"accessKey"`
+		RouteCreateAnonymousEmail          string `yaml:"route_create_anonymous_email" env-default:"/anonymous/create"`
+		RouteAnonymousEmail                string `yaml:"route_anonymous_email" env-default:"/anonymous"`
+		QueryAnonymousEmail                string `yaml:"query_anonymous_email" env-default:"email"`
+		RouteAnonymousMessages             string `yaml:"route_anonymous_messages" env-default:"/anonymous/messages"`
 
 		// UserRoutes
 		RouteUser                 string `yaml:"route_user" env-default:"/user"`
@@ -167,8 +175,11 @@ type Config struct {
 	} `yaml:"password"`
 
 	Mail struct {
-		PostDomain   string `yaml:"post_domain" env-default:"mailbx.ru"`
-		PostAtDomain string `yaml:"post_at_domain" env-default:"@mailbx.ru"`
+		PostDomain              string `yaml:"post_domain" env-default:"mailbx.ru"`
+		PostAtDomain            string `yaml:"post_at_domain" env-default:"@mailbx.ru"`
+		FakeEmailLen            int    `yaml:"fake_email_len" env-default:"12"`
+		FakeUserPassword        string `env:"FAKE_USER_PASSWORD"`
+		MaxCountAnonymousEmails int    `yaml:"max_count_anonymous_emails" env-default:"5"`
 	} `yaml:"mail"`
 
 	Cors struct {

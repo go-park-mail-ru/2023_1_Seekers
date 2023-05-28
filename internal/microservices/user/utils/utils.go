@@ -14,6 +14,7 @@ func UserModelByProto(proto *user_proto.User) *models.User {
 		LastName:   proto.LastName,
 		Avatar:     proto.Avatar,
 		IsExternal: proto.IsExternal,
+		IsFake:     proto.IsFake,
 	}
 }
 
@@ -26,6 +27,7 @@ func ProtoByUserModel(user *models.User) *user_proto.User {
 		LastName:   user.LastName,
 		Avatar:     user.Avatar,
 		IsExternal: user.IsExternal,
+		IsFake:     user.IsFake,
 	}
 }
 
