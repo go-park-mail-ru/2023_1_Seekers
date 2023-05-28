@@ -16,6 +16,235 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/anonymous": {
+            "get": {
+                "description": "get anonymous email by user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "anonymous"
+                ],
+                "summary": "GetAnonymousEmails",
+                "responses": {
+                    "200": {
+                        "description": "success get anon emails",
+                        "schema": {
+                            "$ref": "#/definitions/models.AnonymousEmailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete anonymous email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "anonymous"
+                ],
+                "summary": "DeleteAnonymousEmail",
+                "responses": {
+                    "200": {
+                        "description": "success delete anonymous email"
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "your anonymous email not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/anonymous/create": {
+            "post": {
+                "description": "creating anonymous email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "anonymous"
+                ],
+                "summary": "CreateAnonymousEmail",
+                "responses": {
+                    "200": {
+                        "description": "success create anon email",
+                        "schema": {
+                            "$ref": "#/definitions/models.AnonymousEmailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "max count anonymous emails is 5",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/anonymous/messages": {
+            "get": {
+                "description": "List of messages depends on anonymous email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "anonymous"
+                ],
+                "summary": "GetAnonymousMessages",
+                "responses": {
+                    "200": {
+                        "description": "success get list of messages depends on anonymous email",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "your anonymous email not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/attach/{id}": {
+            "get": {
+                "description": "get attach in base64",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetAttachB64",
+                "responses": {
+                    "200": {
+                        "description": "success download attach",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "attach not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/attach/{id}/preview": {
+            "get": {
+                "description": "preview with attachID, returns html page",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "PreviewAttach",
+                "responses": {
+                    "200": {
+                        "description": "success preview",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "attach not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth": {
             "get": {
                 "description": "check is user authorised",
@@ -55,6 +284,47 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "failed get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/external/attach/{id}": {
+            "get": {
+                "description": "get attach with attachID, gets access key, then validate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "GetAttach",
+                "responses": {
+                    "200": {
+                        "description": "success get attach",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "attach not found",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -325,6 +595,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/message/attach/{id}": {
+            "delete": {
+                "description": "delete draft attach with attachID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "DeleteDraftAttach",
+                "responses": {
+                    "200": {
+                        "description": "success get attach",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "attach not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/message/save": {
             "post": {
                 "description": "save draft message",
@@ -559,8 +870,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/message/{id}/attaches": {
+            "get": {
+                "description": "download all attaches as zip, get messageID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "DownloadAllAttaches",
+                "responses": {
+                    "200": {
+                        "description": "success download attach",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "404": {
+                        "description": "attach not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
         "/message/{id}/move": {
-            "post": {
+            "put": {
                 "description": "move message to folder",
                 "consumes": [
                     "application/json"
@@ -693,6 +1045,79 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "message not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/search": {
+            "get": {
+                "description": "list of filtered messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "folders"
+                ],
+                "summary": "SearchMessages",
+                "responses": {
+                    "200": {
+                        "description": "success get filtered messages",
+                        "schema": {
+                            "$ref": "#/definitions/models.MessagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.JSONError"
+                        }
+                    }
+                }
+            }
+        },
+        "/recipients/search": {
+            "get": {
+                "description": "list recipients for user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "SearchRecipients",
+                "responses": {
+                    "200": {
+                        "description": "success get recipients",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.UserInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "failed to get user",
                         "schema": {
                             "$ref": "#/definitions/errors.JSONError"
                         }
@@ -1136,6 +1561,48 @@ const docTemplate = `{
                 }
             }
         },
+        "models.AnonymousEmailResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AnonymousEmailsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.AttachmentInfo": {
+            "type": "object",
+            "properties": {
+                "attachID": {
+                    "type": "integer"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "sizeCount": {
+                    "type": "integer"
+                },
+                "sizeStr": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "models.AuthResponse": {
             "type": "object",
             "required": [
@@ -1263,6 +1730,15 @@ const docTemplate = `{
         "models.MessageInfo": {
             "type": "object",
             "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AttachmentInfo"
+                    }
+                },
+                "attachmentsSize": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1277,6 +1753,9 @@ const docTemplate = `{
                 },
                 "message_id": {
                     "type": "integer"
+                },
+                "preview": {
+                    "type": "string"
                 },
                 "recipients": {
                     "type": "array",
@@ -1303,6 +1782,17 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "$ref": "#/definitions/models.MessageInfo"
+                }
+            }
+        },
+        "models.MessagesResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MessageInfo"
+                    }
                 }
             }
         },
@@ -1334,7 +1824,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8001",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "MailBox Swagger API",
+	Title:            "MailBx Swagger API",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

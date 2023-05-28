@@ -7,6 +7,33 @@ definitions:
       message:
         type: string
     type: object
+  models.AnonymousEmailResponse:
+    properties:
+      email:
+        type: string
+    type: object
+  models.AnonymousEmailsResponse:
+    properties:
+      count:
+        type: integer
+      emails:
+        items:
+          type: string
+        type: array
+    type: object
+  models.AttachmentInfo:
+    properties:
+      attachID:
+        type: integer
+      fileName:
+        type: string
+      sizeCount:
+        type: integer
+      sizeStr:
+        type: string
+      type:
+        type: string
+    type: object
   models.AuthResponse:
     properties:
       email:
@@ -92,6 +119,12 @@ definitions:
     type: object
   models.MessageInfo:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.AttachmentInfo'
+        type: array
+      attachmentsSize:
+        type: string
       created_at:
         type: string
       favorite:
@@ -102,6 +135,8 @@ definitions:
         type: boolean
       message_id:
         type: integer
+      preview:
+        type: string
       recipients:
         items:
           $ref: '#/definitions/models.UserInfo'
@@ -120,6 +155,13 @@ definitions:
       message:
         $ref: '#/definitions/models.MessageInfo'
     type: object
+  models.MessagesResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/models.MessageInfo'
+        type: array
+    type: object
   models.UserInfo:
     properties:
       email:
@@ -136,9 +178,160 @@ definitions:
 host: localhost:8001
 info:
   contact: {}
-  title: MailBox Swagger API
+  title: MailBx Swagger API
   version: "1.0"
 paths:
+  /anonymous:
+    delete:
+      consumes:
+      - application/json
+      description: delete anonymous email
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete anonymous email
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: your anonymous email not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: DeleteAnonymousEmail
+      tags:
+      - anonymous
+    get:
+      consumes:
+      - application/json
+      description: get anonymous email by user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get anon emails
+          schema:
+            $ref: '#/definitions/models.AnonymousEmailsResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetAnonymousEmails
+      tags:
+      - anonymous
+  /anonymous/create:
+    post:
+      consumes:
+      - application/json
+      description: creating anonymous email
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success create anon email
+          schema:
+            $ref: '#/definitions/models.AnonymousEmailResponse'
+        "400":
+          description: max count anonymous emails is 5
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: CreateAnonymousEmail
+      tags:
+      - anonymous
+  /anonymous/messages:
+    get:
+      consumes:
+      - application/json
+      description: List of messages depends on anonymous email
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get list of messages depends on anonymous email
+          schema:
+            $ref: '#/definitions/models.MessagesResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: your anonymous email not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetAnonymousMessages
+      tags:
+      - anonymous
+  /attach/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get attach in base64
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success download attach
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: attach not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetAttachB64
+      tags:
+      - messages
+  /attach/{id}/preview:
+    get:
+      consumes:
+      - application/json
+      description: preview with attachID, returns html page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success preview
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: attach not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: PreviewAttach
+      tags:
+      - messages
   /auth:
     get:
       consumes:
@@ -173,6 +366,33 @@ paths:
       summary: GetCSRF
       tags:
       - auth
+  /external/attach/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get attach with attachID, gets access key, then validate
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get attach
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: attach not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: GetAttach
+      tags:
+      - messages
   /folder/{slug}:
     delete:
       consumes:
@@ -437,8 +657,35 @@ paths:
       summary: EditDraft
       tags:
       - messages
+  /message/{id}/attaches:
+    get:
+      consumes:
+      - application/json
+      description: download all attaches as zip, get messageID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success download attach
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: attach not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: DownloadAllAttaches
+      tags:
+      - messages
   /message/{id}/move:
-    post:
+    put:
       consumes:
       - application/json
       description: move message to folder
@@ -534,6 +781,33 @@ paths:
       summary: UnreadMessage
       tags:
       - messages
+  /message/attach/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete draft attach with attachID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get attach
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "404":
+          description: attach not found
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: DeleteDraftAttach
+      tags:
+      - messages
   /message/save:
     post:
       consumes:
@@ -596,6 +870,54 @@ paths:
       summary: SendMessage
       tags:
       - messages
+  /messages/search:
+    get:
+      consumes:
+      - application/json
+      description: list of filtered messages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get filtered messages
+          schema:
+            $ref: '#/definitions/models.MessagesResponse'
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: SearchMessages
+      tags:
+      - folders
+  /recipients/search:
+    get:
+      consumes:
+      - application/json
+      description: list recipients for user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get recipients
+          schema:
+            items:
+              $ref: '#/definitions/models.UserInfo'
+            type: array
+        "400":
+          description: failed to get user
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/errors.JSONError'
+      summary: SearchRecipients
+      tags:
+      - recipients
   /signin:
     post:
       consumes:
