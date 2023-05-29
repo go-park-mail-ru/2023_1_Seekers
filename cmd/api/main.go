@@ -83,9 +83,11 @@ func main() {
 	hub := ws.NewHub(cfg)
 	go hub.Run()
 
-	if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
-		log.Fatal("smtp server stopped", err)
-	}
+	go func() {
+		if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
+			log.Fatal("smtp server stopped", err)
+		}
+	}()
 
 	authH := _api.NewAuthHandlers(cfg, authServiceClient, mailServiceClient, userServiceClient)
 	mailH := _api.NewMailHandlers(cfg, mailServiceClient, hub)
