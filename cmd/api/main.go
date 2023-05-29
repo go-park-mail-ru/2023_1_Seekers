@@ -84,8 +84,10 @@ func main() {
 	go hub.Run()
 
 	go func() {
-		if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
-			log.Fatal("smtp server stopped", err)
+		for {
+			if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
+				log.Fatal("smtp server stopped", err)
+			}
 		}
 	}()
 
