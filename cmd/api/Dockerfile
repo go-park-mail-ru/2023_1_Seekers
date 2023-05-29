@@ -5,3 +5,4 @@ COPY . .
 RUN go mod download
 
 EXPOSE 8001
+EXPOSE 25
