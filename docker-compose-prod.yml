@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/api/Dockerfile
-    command: sh -c "./main -config=./cmd/config/prod.yml"
+    command: sh -c "go run ./cmd/api/main.go -config=./cmd/config/prod.yml"
     networks:
       my_network:
         ipv4_address: 172.28.0.2
