@@ -3,7 +3,6 @@ package rand
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"path/filepath"
 )
@@ -13,7 +12,6 @@ func String(length int, withUpper bool) (string, error) {
 	if withUpper {
 		charSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	}
-	fmt.Println(charSet)
 
 	randBytes := make([]byte, length)
 	for i := range randBytes {

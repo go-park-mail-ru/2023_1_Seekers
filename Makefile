@@ -49,7 +49,7 @@ build-prod:
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
-	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
+	sudo docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 

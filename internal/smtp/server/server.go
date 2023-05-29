@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/tls"
 	"github.com/emersion/go-smtp"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
@@ -12,8 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI) error {
-	smtpBackend := backend.NewSmtpBackend(cfg, mailClient, userClient, authClient)
+func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI, h *ws.Hub) error {
+	smtpBackend := backend.NewSmtpBackend(cfg, mailClient, userClient, authClient, h)
 
 	s := smtp.NewServer(smtpBackend)
 

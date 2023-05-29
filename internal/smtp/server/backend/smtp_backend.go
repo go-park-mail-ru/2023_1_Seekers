@@ -3,6 +3,7 @@ package backend
 import (
 	"bytes"
 	"github.com/emersion/go-smtp"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth"
 	_mail "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
@@ -21,10 +22,11 @@ type SmtpBackend struct {
 	mailClient _mail.UseCaseI
 	userClient user.UseCaseI
 	authClient auth.UseCaseI
+	hub        *ws.Hub
 }
 
-func NewSmtpBackend(c *config.Config, mailC _mail.UseCaseI, userC user.UseCaseI, authC auth.UseCaseI) *SmtpBackend {
-	return &SmtpBackend{cfg: c, mailClient: mailC, userClient: userC, authClient: authC}
+func NewSmtpBackend(c *config.Config, mailC _mail.UseCaseI, userC user.UseCaseI, authC auth.UseCaseI, h *ws.Hub) *SmtpBackend {
+	return &SmtpBackend{cfg: c, mailClient: mailC, userClient: userC, authClient: authC, hub: h}
 }
 
 type Session struct {
@@ -32,6 +34,7 @@ type Session struct {
 	mailClient _mail.UseCaseI
 	userClient user.UseCaseI
 	authClient auth.UseCaseI
+	hub        *ws.Hub
 	username   string
 	password   string
 	isAuth     bool
@@ -42,7 +45,7 @@ type Session struct {
 }
 
 func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
-	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, userClient: bkd.userClient, authClient: bkd.authClient}, nil
+	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, userClient: bkd.userClient, authClient: bkd.authClient, hub: bkd.hub}, nil
 }
 
 func (s *Session) AuthPlain(username, password string) error {
@@ -184,10 +187,11 @@ func (s *Session) Data(r io.Reader) error {
 			Attachments:      msgData.Attaches,
 		}
 
-		_, err = s.mailClient.SendMessage(fromUser.UserID, message)
+		msgInfo, err := s.mailClient.SendMessage(fromUser.UserID, message)
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}
+		s.hub.SendNotifications(msgInfo)
 	}
 	return nil
 }

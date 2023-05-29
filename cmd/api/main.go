@@ -5,11 +5,13 @@ import (
 	"flag"
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_api "github.com/go-park-mail-ru/2023_1_Seekers/internal/api/http"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	_authClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/client"
 	_mailClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/client"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/server"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	"github.com/gorilla/mux"
@@ -78,8 +80,15 @@ func main() {
 		log.Fatal("failed create metrics server", err)
 	}
 
+	hub := ws.NewHub(cfg)
+	go hub.Run()
+
+	if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
+		log.Fatal("smtp server stopped", err)
+	}
+
 	authH := _api.NewAuthHandlers(cfg, authServiceClient, mailServiceClient, userServiceClient)
-	mailH := _api.NewMailHandlers(cfg, mailServiceClient)
+	mailH := _api.NewMailHandlers(cfg, mailServiceClient, hub)
 	userH := _api.NewUserHandlers(cfg, userServiceClient)
 	middleware := _middleware.NewHttpMiddleware(cfg, authServiceClient, globalLogger, metrics)
 

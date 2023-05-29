@@ -62,14 +62,11 @@ type mailHandlers struct {
 	hub *ws.Hub
 }
 
-func NewMailHandlers(c *config.Config, uc mail.UseCaseI) MailHandlersI {
-	hub := ws.NewHub(c)
-	go hub.Run()
-
+func NewMailHandlers(c *config.Config, uc mail.UseCaseI, h *ws.Hub) MailHandlersI {
 	return &mailHandlers{
 		cfg: c,
 		uc:  uc,
-		hub: hub,
+		hub: h,
 	}
 }
 
