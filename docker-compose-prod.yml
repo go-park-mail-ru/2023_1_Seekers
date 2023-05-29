@@ -29,7 +29,8 @@ services:
       - "25:25"
       - "8001:8001"
       - "9001:9001"
-    restart: no
+    restart: "no"
+#    restart: always
 
   db:
     env_file:
