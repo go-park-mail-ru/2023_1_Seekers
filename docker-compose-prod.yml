@@ -15,8 +15,7 @@ services:
         condition: service_started
     volumes:
       # - ${VENDOR}:/go/pkg/
-      - /etc/letsencrypt/live/mailbx.ru:/etc/letsencrypt/live/mailbx.ru
-      - /home/ubuntu/dkim/priv.key:/etc/letsencrypt/live/mailbx.ru/priv.key
+      - /etc/letsencrypt/live/mailbx.ru:/app/certs
       - ./logs/app:/app/logs/app
     build:
       context: .

@@ -51,9 +51,9 @@ smtp_server:
   max_message_bytes: 104857600
   max_recipients: 50
   allow_insecure_auth: false
-  cert_file: /etc/letsencrypt/live/mailbx.ru/fullchain.pem
-  key_file: /etc/letsencrypt/live/mailbx.ru/privkey.pem
-  dkim_private_key_file: /etc/letsencrypt/live/mailbx.ru/priv.key
+  cert_file: /app/certs/fullchain.pem
+  key_file: /app/certs/privkey.pem
+  dkim_private_key_file: /app/certs/priv.key
 
 s3:
   s3_region: eu-west-2
