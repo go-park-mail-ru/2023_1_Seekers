@@ -11,7 +11,6 @@ import (
 	_mailClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/client"
 	_userClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user/client"
 	_middleware "github.com/go-park-mail-ru/2023_1_Seekers/internal/middleware"
-	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/server"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	promMetrics "github.com/go-park-mail-ru/2023_1_Seekers/pkg/metrics/prometheus"
 	"github.com/gorilla/mux"
@@ -83,13 +82,13 @@ func main() {
 	hub := ws.NewHub(cfg)
 	go hub.Run()
 
-	go func() {
-		for {
-			if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
-				log.Fatal("smtp server stopped", err)
-			}
-		}
-	}()
+	//go func() {
+	//	for {
+	//		if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
+	//			log.Fatal("smtp server stopped", err)
+	//		}
+	//	}
+	//}()
 
 	authH := _api.NewAuthHandlers(cfg, authServiceClient, mailServiceClient, userServiceClient)
 	mailH := _api.NewMailHandlers(cfg, mailServiceClient, hub)
