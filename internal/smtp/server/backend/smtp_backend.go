@@ -191,7 +191,34 @@ func (s *Session) Data(r io.Reader) error {
 		if err != nil {
 			return errors.Wrap(err, "failed send message to mailbx service")
 		}
-		s.hub.SendNotifications(msgInfo)
+		usr, _ := s.userClient.GetInfo(fromUser.UserID)
+		var recipes []models.UserInfo
+		for _, u := range batchRecipients {
+			rec, err := s.userClient.GetInfoByEmail(u)
+			if err != nil {
+				return errors.Wrap(err, "failed send message to mailbx service - get internal user")
+			}
+			recipes = append(recipes, *rec)
+		}
+
+		notification := &models.MessageInfo{
+			MessageID:        msgInfo.MessageID,
+			FromUser:         *usr,
+			Recipients:       recipes,
+			Attachments:      msgInfo.Attachments,
+			AttachmentsSize:  msgInfo.AttachmentsSize,
+			Title:            msgInfo.Title,
+			Preview:          common.GetInnerText(msgInfo.Text, s.cfg.Api.MailPreviewMaxLen),
+			CreatedAt:        msgInfo.CreatedAt,
+			Text:             msgInfo.Text,
+			ReplyToMessageID: msgInfo.ReplyToMessageID,
+			ReplyTo:          msgInfo.ReplyTo,
+			Seen:             msgInfo.Seen,
+			Favorite:         msgInfo.Favorite,
+			Deleted:          msgInfo.Deleted,
+			IsDraft:          msgInfo.IsDraft,
+		}
+		s.hub.SendNotifications(notification)
 	}
 	return nil
 }

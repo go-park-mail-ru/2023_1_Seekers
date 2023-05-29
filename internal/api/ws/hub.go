@@ -3,6 +3,7 @@ package ws
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 )
 
@@ -72,6 +73,7 @@ func (h *Hub) Run() {
 }
 
 func (h *Hub) SendNotifications(message *models.MessageInfo) {
+	message.Preview = common.GetInnerText(message.Text, h.cfg.Api.MailPreviewMaxLen)
 	item := WsItem{
 		messageInfo: *message,
 		userEmail:   message.FromUser.Email,
