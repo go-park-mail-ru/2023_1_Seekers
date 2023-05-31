@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
@@ -79,6 +80,7 @@ func (s *Session) Rcpt(to string) error {
 
 func (s *Session) Data(r io.Reader) error {
 	bytesMail, err := io.ReadAll(r)
+	fmt.Println(string(bytesMail))
 	if err != nil {
 		return errors.Wrap(err, "failed read message")
 	}
