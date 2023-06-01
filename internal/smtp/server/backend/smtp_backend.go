@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"time"
 )
 
 type SmtpBackend struct {
@@ -209,7 +210,7 @@ func (s *Session) Data(r io.Reader) error {
 			AttachmentsSize:  msgInfo.AttachmentsSize,
 			Title:            msgInfo.Title,
 			Preview:          common.GetInnerText(msgInfo.Text, s.cfg.Api.MailPreviewMaxLen),
-			CreatedAt:        common.GetCurrentTime(s.cfg.Logger.LogsTimeFormat),
+			CreatedAt:        time.Now().In(time.UTC).Format("2006-01-02T15:04:05Z"),
 			Text:             msgInfo.Text,
 			ReplyToMessageID: msgInfo.ReplyToMessageID,
 			ReplyTo:          msgInfo.ReplyTo,
