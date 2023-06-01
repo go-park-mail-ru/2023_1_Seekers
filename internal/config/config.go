@@ -120,6 +120,7 @@ type Config struct {
 
 		// MailRoutes
 		RouteMessage                       string `yaml:"route_message" env-default:"/message/{id:[0-9]+}"`
+		RouteFilterMessages                string `yaml:"route_filter_messages" env-default:"/messages/filter"`
 		RouteAttach                        string `yaml:"route_attach" env-default:"/attach/{id:[0-9]+}"`
 		RouteAttachB64                     string `yaml:"route_attach_b64" env-default:"/attach/{id:[0-9]+}/b64"`
 		RouteMessageAttaches               string `yaml:"route_message_attaches" env-default:"/message/{id:[0-9]+}/attaches"`

@@ -78,6 +78,7 @@ routes:
   route_csrf: /csrf
 
   route_message: /message/{id:[0-9]+}
+  route_filter_messages: /messages/filter
   route_attach: /attach/{id:[0-9]+}
   route_attach_b64: /attach/{id:[0-9]+}/b64
   route_message_attaches: /message/{id:[0-9]+}/attaches

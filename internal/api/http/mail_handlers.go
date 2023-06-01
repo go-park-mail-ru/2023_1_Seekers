@@ -29,6 +29,7 @@ import (
 
 type MailHandlersI interface {
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
+	FilterMessages(w http.ResponseWriter, r *http.Request)
 	SearchMessages(w http.ResponseWriter, r *http.Request)
 	SearchRecipients(w http.ResponseWriter, r *http.Request)
 	GetFolders(w http.ResponseWriter, r *http.Request)
@@ -114,6 +115,57 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.FolderResponse{
 		Folder:   *folder,
+		Messages: messages,
+	})
+}
+
+// FilterMessages godoc
+// @Summary      FilterMessages
+// @Description  list of filtered messages
+// @Tags     	 folders
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} models.MessagesResponse "success get filtered messages"
+// @Failure 400 {object} errors.JSONError "failed to get user"
+// @Failure 500 {object} errors.JSONError "internal server error"
+// @Router   /messages/filter [get]
+func (h *mailHandlers) FilterMessages(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+	if !ok {
+		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+		return
+	}
+
+	sort := r.URL.Query().Get("sort")
+	folder := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFolder)
+
+	if folder == "" {
+		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+		return
+	}
+
+	folderInfo, err := h.uc.GetFolderInfo(userID, folder)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	messages, err := h.uc.GetFolderMessages(userID, folder)
+	if err != nil {
+		pkgHttp.HandleError(w, r, err)
+		return
+	}
+
+	if sort == "old" {
+		var sortedMessages []models.MessageInfo
+		for i := range messages {
+			sortedMessages = append(sortedMessages, messages[len(messages)-1-i])
+		}
+		messages = sortedMessages
+	}
+
+	pkgHttp.SendJSON(w, r, http.StatusOK, models.FolderResponse{
+		Folder:   *folderInfo,
 		Messages: messages,
 	})
 }
