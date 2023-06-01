@@ -8,7 +8,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/pkg/errors"
-	"io"
 	"strings"
 	"time"
 )
@@ -68,8 +67,6 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 	if err != nil {
 		return errors.Wrap(err, "failed create part of message")
 	}
-
-	io.WriteString(partWriter, message.Text+"\n<div>--\n<br>Отправлено из сервиса <a href=\"https://mailbx.ru\" target=\"_blank\" rel=\" noopener noreferrer\" style=\"border-color: rgb(35, 35, 35) !important;\">MailBX.ru<div></div></a></br>\n</div>")
 
 	partWriter.Close()
 	textWriter.Close()
