@@ -869,7 +869,9 @@ func (uc *mailUC) SendMessage(userID uint64, message models.FormMessage) (*model
 			return nil, pkgErrors.Wrap(err, "send message : put to s3")
 		}
 	}
+
 	if fromUser.IsExternal {
+		newMessage.CreatedAt = common.GetCurrentTime(uc.cfg.Logger.LogsTimeFormat)
 		return &newMessage, nil
 	} else {
 		return uc.GetMessage(userID, newMessage.MessageID)

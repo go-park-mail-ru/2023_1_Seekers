@@ -209,7 +209,7 @@ func (s *Session) Data(r io.Reader) error {
 			AttachmentsSize:  msgInfo.AttachmentsSize,
 			Title:            msgInfo.Title,
 			Preview:          common.GetInnerText(msgInfo.Text, s.cfg.Api.MailPreviewMaxLen),
-			CreatedAt:        msgInfo.CreatedAt,
+			CreatedAt:        common.GetCurrentTime(s.cfg.Logger.LogsTimeFormat),
 			Text:             msgInfo.Text,
 			ReplyToMessageID: msgInfo.ReplyToMessageID,
 			ReplyTo:          msgInfo.ReplyTo,
