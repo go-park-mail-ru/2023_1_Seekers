@@ -405,14 +405,14 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.hub.SendNotifications(failedMessage)
+		h.hub.SendNotifications(failedMessage, h.uc)
 	}
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{
 		Message: *message,
 	})
 
-	h.hub.SendNotifications(message)
+	h.hub.SendNotifications(message, h.uc)
 }
 
 // SaveDraft godoc

@@ -331,3 +331,14 @@ func (g MailClientGRPC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) 
 
 	return utils.MessagesInfoModelByProto(messages), nil
 }
+
+func (g MailClientGRPC) GetOwnerEmailByFakeEmail(fakeEmail string) (string, error) {
+	protoEmail, err := g.mailClient.GetOwnerEmailByFakeEmail(context.TODO(), &mail_proto.GetOwnerAnonymousParams{
+		FakeEmail: fakeEmail,
+	})
+	if err != nil {
+		return "", pkgGrpc.CauseError(errors.Wrap(err, "mail client - DeleteAnonymousEmail"))
+	}
+
+	return protoEmail.Email, nil
+}

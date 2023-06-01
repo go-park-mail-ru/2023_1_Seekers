@@ -1240,3 +1240,26 @@ func (uc *mailUC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]mod
 
 	return messages, nil
 }
+
+func (uc *mailUC) GetOwnerEmailByFakeEmail(fakeEmail string) (string, error) {
+	fakeInfo, err := uc.userUC.GetByEmail(fakeEmail)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "get user by email")
+	}
+
+	if !fakeInfo.IsFake {
+		return fakeEmail, nil
+	}
+
+	userID, err := uc.mailRepo.SelectOwnerFakeAccount(fakeInfo.UserID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "select owner fake account")
+	}
+
+	userInfo, err := uc.userUC.GetInfo(userID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "select owner fake account")
+	}
+
+	return userInfo.Email, nil
+}

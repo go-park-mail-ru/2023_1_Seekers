@@ -34,4 +34,5 @@ type UseCaseI interface {
 	GetAnonymousEmails(userID uint64) ([]string, error)
 	DeleteAnonymousEmail(userID uint64, fakeEmail string) error
 	GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]models.MessageInfo, error)
+	GetOwnerEmailByFakeEmail(fakeEmail string) (string, error)
 }

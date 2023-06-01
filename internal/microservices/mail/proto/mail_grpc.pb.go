@@ -46,6 +46,7 @@ const (
 	MailService_GetAnonymousEmails_FullMethodName       = "/mail_proto.MailService/GetAnonymousEmails"
 	MailService_DeleteAnonymousEmail_FullMethodName     = "/mail_proto.MailService/DeleteAnonymousEmail"
 	MailService_GetMessagesByFakeEmail_FullMethodName   = "/mail_proto.MailService/GetMessagesByFakeEmail"
+	MailService_GetOwnerEmailByFakeEmail_FullMethodName = "/mail_proto.MailService/GetOwnerEmailByFakeEmail"
 )
 
 // MailServiceClient is the client API for MailService service.
@@ -79,6 +80,7 @@ type MailServiceClient interface {
 	GetAnonymousEmails(ctx context.Context, in *UID, opts ...grpc.CallOption) (*GetAnonymous, error)
 	DeleteAnonymousEmail(ctx context.Context, in *Anonymous, opts ...grpc.CallOption) (*Nothing, error)
 	GetMessagesByFakeEmail(ctx context.Context, in *Anonymous, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
+	GetOwnerEmailByFakeEmail(ctx context.Context, in *GetOwnerAnonymousParams, opts ...grpc.CallOption) (*GetOwnerAnonymousResponse, error)
 }
 
 type mailServiceClient struct {
@@ -332,6 +334,15 @@ func (c *mailServiceClient) GetMessagesByFakeEmail(ctx context.Context, in *Anon
 	return out, nil
 }
 
+func (c *mailServiceClient) GetOwnerEmailByFakeEmail(ctx context.Context, in *GetOwnerAnonymousParams, opts ...grpc.CallOption) (*GetOwnerAnonymousResponse, error) {
+	out := new(GetOwnerAnonymousResponse)
+	err := c.cc.Invoke(ctx, MailService_GetOwnerEmailByFakeEmail_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility
@@ -363,6 +374,7 @@ type MailServiceServer interface {
 	GetAnonymousEmails(context.Context, *UID) (*GetAnonymous, error)
 	DeleteAnonymousEmail(context.Context, *Anonymous) (*Nothing, error)
 	GetMessagesByFakeEmail(context.Context, *Anonymous) (*MessagesInfoResponse, error)
+	GetOwnerEmailByFakeEmail(context.Context, *GetOwnerAnonymousParams) (*GetOwnerAnonymousResponse, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -450,6 +462,9 @@ func (UnimplementedMailServiceServer) DeleteAnonymousEmail(context.Context, *Ano
 }
 func (UnimplementedMailServiceServer) GetMessagesByFakeEmail(context.Context, *Anonymous) (*MessagesInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessagesByFakeEmail not implemented")
+}
+func (UnimplementedMailServiceServer) GetOwnerEmailByFakeEmail(context.Context, *GetOwnerAnonymousParams) (*GetOwnerAnonymousResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOwnerEmailByFakeEmail not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 
@@ -950,6 +965,24 @@ func _MailService_GetMessagesByFakeEmail_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_GetOwnerEmailByFakeEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOwnerAnonymousParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).GetOwnerEmailByFakeEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MailService_GetOwnerEmailByFakeEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).GetOwnerEmailByFakeEmail(ctx, req.(*GetOwnerAnonymousParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1064,6 +1097,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMessagesByFakeEmail",
 			Handler:    _MailService_GetMessagesByFakeEmail_Handler,
+		},
+		{
+			MethodName: "GetOwnerEmailByFakeEmail",
+			Handler:    _MailService_GetOwnerEmailByFakeEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

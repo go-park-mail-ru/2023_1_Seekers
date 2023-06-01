@@ -287,3 +287,14 @@ func (g *MailServerGRPC) GetMessagesByFakeEmail(ctx context.Context, protoAnon *
 
 	return utils.ProtoMsgInfoResponseByModels(messages), nil
 }
+
+func (g *MailServerGRPC) GetOwnerEmailByFakeEmail(ctx context.Context, protoAnon *mail_proto.GetOwnerAnonymousParams) (*mail_proto.GetOwnerAnonymousResponse, error) {
+	email, err := g.mailUC.GetOwnerEmailByFakeEmail(protoAnon.FakeEmail)
+	if err != nil {
+		return nil, pkgGrpc.HandleError(ctx, err)
+	}
+
+	return &mail_proto.GetOwnerAnonymousResponse{
+		Email: email,
+	}, nil
+}

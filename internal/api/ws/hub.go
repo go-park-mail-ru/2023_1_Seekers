@@ -2,6 +2,7 @@ package ws
 
 import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
+	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 )
@@ -71,7 +72,7 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) SendNotifications(message *models.MessageInfo) {
+func (h *Hub) SendNotifications(message *models.MessageInfo, mailUC mail.UseCaseI) {
 	item := WsItem{
 		messageInfo: *message,
 		userEmail:   message.FromUser.Email,
@@ -94,7 +95,12 @@ func (h *Hub) SendNotifications(message *models.MessageInfo) {
 		}
 
 		if domain == h.cfg.Mail.PostDomain {
-			item.userEmail = recipient.Email
+			toEmail, err := mailUC.GetOwnerEmailByFakeEmail(recipient.Email)
+			if err != nil {
+				return
+			}
+
+			item.userEmail = toEmail
 			h.broadcast <- item
 		}
 	}
