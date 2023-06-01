@@ -50,6 +50,7 @@ func ParseMail(bytesMail []byte) (*Message, error) {
 	}
 
 	resultMessage.Attaches = msgData.Attaches
+	resultMessage.FromName = msgData.FromName
 
 	return &resultMessage, nil
 }
