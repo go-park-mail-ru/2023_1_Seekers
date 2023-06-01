@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/pkg/errors"
+	"io"
 	"strings"
 	"time"
 )
@@ -67,6 +68,8 @@ func SendMail(from *models.User, to string, message *models.MessageInfo, smtpDom
 	if err != nil {
 		return errors.Wrap(err, "failed create part of message")
 	}
+
+	io.WriteString(partWriter, message.Text)
 
 	partWriter.Close()
 	textWriter.Close()
