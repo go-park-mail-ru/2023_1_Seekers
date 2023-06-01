@@ -47,9 +47,21 @@ func GetMessageData(mailBody []byte) (*Message, error) {
 		return nil, errors.Wrap(err, "failed parse email message")
 	}
 
-	res.Subject = email.Subject
+	decodedSubject, err := base64.StdEncoding.DecodeString(email.Subject)
+	if err == nil {
+		res.FromName = string(decodedSubject)
+	} else {
+		res.Subject = email.Subject
+	}
+
 	res.FromEmail = email.From[0].Address
-	res.FromName = email.From[0].Name
+
+	decodedName, err := base64.StdEncoding.DecodeString(email.From[0].Name)
+	if err == nil {
+		res.FromName = string(decodedName)
+	} else {
+		res.FromName = email.From[0].Name
+	}
 
 	htmlBody := email.HTMLBody
 
