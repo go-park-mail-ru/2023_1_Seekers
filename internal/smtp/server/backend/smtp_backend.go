@@ -214,7 +214,7 @@ func (s *Session) Data(r io.Reader) error {
 			Text:             msgInfo.Text,
 			ReplyToMessageID: msgInfo.ReplyToMessageID,
 			ReplyTo:          msgInfo.ReplyTo,
-			Seen:             msgInfo.Seen,
+			Seen:             false,
 			Favorite:         msgInfo.Favorite,
 			Deleted:          msgInfo.Deleted,
 			IsDraft:          msgInfo.IsDraft,
