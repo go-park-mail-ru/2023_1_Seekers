@@ -275,10 +275,10 @@ RETURN QUERY
 								   m.text ILIKE '%' || filter_text || '%')
 		JOIN mail.users AS u_from ON m.from_user_id = u_from.user_id AND
 									 u_from.email ILIKE '%' || from_email || '%'
-		JOIN mail.boxes AS b2 ON b.message_id = b2.message_id AND
+		LEFT JOIN mail.boxes AS b2 ON b.message_id = b2.message_id AND
 								 (b2.user_id != m.from_user_id OR
 								  b2.folder_id != in_folder_id)
-		JOIN mail.users AS u_to ON b2.user_id = u_to.user_id AND
+		LEFT JOIN mail.users AS u_to ON b2.user_id = u_to.user_id AND
 								   u_to.email ILIKE '%' || to_email || '%'
 		ORDER BY m.created_at, m.message_id
     );
