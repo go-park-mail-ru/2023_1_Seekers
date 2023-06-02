@@ -12,6 +12,12 @@ message UserFolder {
   string FolderSlug = 2;
 }
 
+message FolderMessagesParams {
+  uint64 UID = 1;
+  string FolderSlug = 2;
+  bool Reverse = 3;
+}
+
 message UIDMessageID {
   uint64 UID = 1;
   uint64 MessageID = 2;
@@ -159,6 +165,7 @@ message SearchMailParams{
   string ToUser = 3;
   string Folder = 4;
   string Filter = 5;
+  bool Reverse = 6;
 }
 
 message AttNUser {
@@ -180,13 +187,21 @@ message GetAnonymous {
 
 message Anonymous {
   uint64 UserID = 1;
-  string fakeEmail = 2;
+  string FakeEmail = 2;
+}
+
+message GetOwnerAnonymousParams {
+  string FakeEmail = 1;
+}
+
+message GetOwnerAnonymousResponse {
+  string Email = 1;
 }
 
 service MailService {
   rpc GetFolders(UID) returns (FoldersResponse) {}
   rpc GetFolderInfo(UserFolder) returns (Folder){}
-  rpc GetFolderMessages(UserFolder) returns (MessagesInfoResponse) {}
+  rpc GetFolderMessages(FolderMessagesParams) returns (MessagesInfoResponse) {}
   rpc SearchMessages(SearchMailParams) returns (MessagesInfoResponse) {}
   rpc SearchRecipients(UID) returns (SearchRecipientsResponse) {}
   rpc CreateDefaultFolders(UID) returns (FoldersResponse) {}
@@ -211,4 +226,5 @@ service MailService {
   rpc GetAnonymousEmails(UID) returns (GetAnonymous) {}
   rpc DeleteAnonymousEmail(Anonymous) returns (Nothing) {}
   rpc GetMessagesByFakeEmail(Anonymous) returns (MessagesInfoResponse) {}
+  rpc GetOwnerEmailByFakeEmail(GetOwnerAnonymousParams) returns (GetOwnerAnonymousResponse) {}
 }

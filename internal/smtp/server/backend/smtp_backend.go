@@ -219,7 +219,7 @@ func (s *Session) Data(r io.Reader) error {
 			Deleted:          msgInfo.Deleted,
 			IsDraft:          msgInfo.IsDraft,
 		}
-		s.hub.SendNotifications(notification)
+		s.hub.SendNotifications(notification, s.mailClient)
 	}
 	return nil
 }

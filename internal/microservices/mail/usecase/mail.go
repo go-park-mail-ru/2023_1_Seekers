@@ -68,7 +68,7 @@ func (uc *mailUC) GetFolderInfo(userID uint64, folderSlug string) (*models.Folde
 	return folder, nil
 }
 
-func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
+func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string, reverse bool) ([]models.MessageInfo, error) {
 	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "select fake ids")
@@ -82,7 +82,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages")
 	}
 
-	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, folderSlug == common.FolderDrafts)
+	messages, err = uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, folderSlug == common.FolderDrafts, reverse)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -127,7 +127,7 @@ func (uc *mailUC) GetFolderMessages(userID uint64, folderSlug string) ([]models.
 	return messages, nil
 }
 
-func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string) ([]models.MessageInfo, error) {
+func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string, reverse bool) ([]models.MessageInfo, error) {
 	fakeIDs, err := uc.mailRepo.SelectFakeIDs(userID)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "select fake ids")
@@ -141,7 +141,7 @@ func (uc *mailUC) SearchMessages(userID uint64, fromUser, toUser, folderSlug, fi
 
 	var messages []models.MessageInfo
 
-	messages, err = uc.mailRepo.SearchMessages(userIDs, folder.FolderID, fromUser, toUser, filterText, folderSlug == common.FolderDrafts)
+	messages, err = uc.mailRepo.SearchMessages(userIDs, folder.FolderID, fromUser, toUser, filterText, folderSlug == common.FolderDrafts, reverse)
 	if err != nil {
 		return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : msg by user and folder")
 	}
@@ -294,7 +294,7 @@ func (uc *mailUC) DeleteFolder(userID uint64, folderSlug string) error {
 		return pkgErrors.Wrap(err, "get folder info")
 	}
 
-	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, false)
+	messages, err := uc.mailRepo.SelectFolderMessagesByUserNFolderID(userIDs, folder.FolderID, false, false)
 	if err != nil {
 		return pkgErrors.Wrap(err, "get folder messages : msg by user and folder")
 	}
@@ -1221,19 +1221,19 @@ func (uc *mailUC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]mod
 
 		fromUser, err := uc.userUC.GetInfo(message.FromUser.UserID)
 		if err != nil {
-			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "GetMessagesByFakeEmail : get info by id")
 		}
 
 		messages[i].FromUser = *fromUser
 		recipientsIDs, err := uc.mailRepo.SelectRecipientsByMessage(messageID, message.FromUser.UserID)
 		if err != nil {
-			return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get recipients by msg")
+			return []models.MessageInfo{}, pkgErrors.Wrap(err, "GetMessagesByFakeEmail : get recipients by msg")
 		}
 
 		for _, recipientsID := range recipientsIDs {
 			profile, err := uc.userUC.GetInfo(recipientsID)
 			if err != nil {
-				return []models.MessageInfo{}, pkgErrors.Wrap(err, "SearchMessages : get info by id")
+				return []models.MessageInfo{}, pkgErrors.Wrap(err, "GetMessagesByFakeEmail : get info by id")
 			}
 
 			messages[i].Recipients = append(messages[i].Recipients, *profile)
@@ -1241,4 +1241,27 @@ func (uc *mailUC) GetMessagesByFakeEmail(userID uint64, fakeEmail string) ([]mod
 	}
 
 	return messages, nil
+}
+
+func (uc *mailUC) GetOwnerEmailByFakeEmail(fakeEmail string) (string, error) {
+	fakeInfo, err := uc.userUC.GetByEmail(fakeEmail)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "get user by email")
+	}
+
+	if !fakeInfo.IsFake {
+		return fakeEmail, nil
+	}
+
+	userID, err := uc.mailRepo.SelectOwnerFakeAccount(fakeInfo.UserID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "select owner fake account")
+	}
+
+	userInfo, err := uc.userUC.GetInfo(userID)
+	if err != nil {
+		return "", pkgErrors.Wrap(err, "select owner fake account")
+	}
+
+	return userInfo.Email, nil
 }

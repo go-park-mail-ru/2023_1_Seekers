@@ -29,7 +29,7 @@ import (
 
 type MailHandlersI interface {
 	GetFolderMessages(w http.ResponseWriter, r *http.Request)
-	FilterMessages(w http.ResponseWriter, r *http.Request)
+	//FilterMessages(w http.ResponseWriter, r *http.Request)
 	SearchMessages(w http.ResponseWriter, r *http.Request)
 	SearchRecipients(w http.ResponseWriter, r *http.Request)
 	GetFolders(w http.ResponseWriter, r *http.Request)
@@ -98,13 +98,15 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	reverse, _ := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryReverse))
+
 	folder, err := h.uc.GetFolderInfo(userID, folderSlug)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
 	}
 
-	messages, err := h.uc.GetFolderMessages(userID, folderSlug)
+	messages, err := h.uc.GetFolderMessages(userID, folderSlug, reverse)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -126,46 +128,46 @@ func (h *mailHandlers) GetFolderMessages(w http.ResponseWriter, r *http.Request)
 // @Failure 400 {object} errors.JSONError "failed to get user"
 // @Failure 500 {object} errors.JSONError "internal server error"
 // @Router   /messages/filter [get]
-func (h *mailHandlers) FilterMessages(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(common.ContextUser).(uint64)
-	if !ok {
-		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
-		return
-	}
-
-	sort := r.URL.Query().Get("sort")
-	folder := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFolder)
-
-	if folder == "" {
-		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
-		return
-	}
-
-	folderInfo, err := h.uc.GetFolderInfo(userID, folder)
-	if err != nil {
-		pkgHttp.HandleError(w, r, err)
-		return
-	}
-
-	messages, err := h.uc.GetFolderMessages(userID, folder)
-	if err != nil {
-		pkgHttp.HandleError(w, r, err)
-		return
-	}
-
-	if sort == "old" {
-		var sortedMessages []models.MessageInfo
-		for i := range messages {
-			sortedMessages = append(sortedMessages, messages[len(messages)-1-i])
-		}
-		messages = sortedMessages
-	}
-
-	pkgHttp.SendJSON(w, r, http.StatusOK, models.FolderResponse{
-		Folder:   *folderInfo,
-		Messages: messages,
-	})
-}
+//func (h *mailHandlers) FilterMessages(w http.ResponseWriter, r *http.Request) {
+//	userID, ok := r.Context().Value(common.ContextUser).(uint64)
+//	if !ok {
+//		pkgHttp.HandleError(w, r, errors.ErrFailedGetUser)
+//		return
+//	}
+//
+//	sort := r.URL.Query().Get("sort")
+//	folder := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFolder)
+//
+//	if folder == "" {
+//		pkgHttp.HandleError(w, r, errors.ErrInvalidURL)
+//		return
+//	}
+//
+//	folderInfo, err := h.uc.GetFolderInfo(userID, folder)
+//	if err != nil {
+//		pkgHttp.HandleError(w, r, err)
+//		return
+//	}
+//
+//	messages, err := h.uc.GetFolderMessages(userID, folder, false)
+//	if err != nil {
+//		pkgHttp.HandleError(w, r, err)
+//		return
+//	}
+//
+//	if sort == "old" {
+//		var sortedMessages []models.MessageInfo
+//		for i := range messages {
+//			sortedMessages = append(sortedMessages, messages[len(messages)-1-i])
+//		}
+//		messages = sortedMessages
+//	}
+//
+//	pkgHttp.SendJSON(w, r, http.StatusOK, models.FolderResponse{
+//		Folder:   *folderInfo,
+//		Messages: messages,
+//	})
+//}
 
 // SearchMessages godoc
 // @Summary      SearchMessages
@@ -188,8 +190,9 @@ func (h *mailHandlers) SearchMessages(w http.ResponseWriter, r *http.Request) {
 	toUser := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryToUser)
 	filterText := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFilter)
 	folder := r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryFolder)
+	reverse, _ := strconv.ParseBool(r.URL.Query().Get(h.cfg.Routes.RouteSearchQueryReverse))
 
-	messages, err := h.uc.SearchMessages(userID, fromUser, toUser, folder, filterText)
+	messages, err := h.uc.SearchMessages(userID, fromUser, toUser, folder, filterText, reverse)
 	if err != nil {
 		pkgHttp.HandleError(w, r, err)
 		return
@@ -402,14 +405,14 @@ func (h *mailHandlers) SendMessage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.hub.SendNotifications(failedMessage)
+		h.hub.SendNotifications(failedMessage, h.uc)
 	}
 
 	pkgHttp.SendJSON(w, r, http.StatusOK, models.MessageResponse{
 		Message: *message,
 	})
 
-	h.hub.SendNotifications(message)
+	h.hub.SendNotifications(message, h.uc)
 }
 
 // SaveDraft godoc
