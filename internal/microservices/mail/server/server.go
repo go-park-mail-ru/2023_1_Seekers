@@ -51,8 +51,8 @@ func (g *MailServerGRPC) GetFolderInfo(ctx context.Context, protoFolder *mail_pr
 	return utils.ProtoByFolder(folder), nil
 }
 
-func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mail_proto.UserFolder) (*mail_proto.MessagesInfoResponse, error) {
-	msfInfos, err := g.mailUC.GetFolderMessages(protoFolder.UID, protoFolder.FolderSlug)
+func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mail_proto.FolderMessagesParams) (*mail_proto.MessagesInfoResponse, error) {
+	msfInfos, err := g.mailUC.GetFolderMessages(protoFolder.UID, protoFolder.FolderSlug, protoFolder.Reverse)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}
@@ -61,7 +61,7 @@ func (g *MailServerGRPC) GetFolderMessages(ctx context.Context, protoFolder *mai
 }
 
 func (g *MailServerGRPC) SearchMessages(ctx context.Context, protoParams *mail_proto.SearchMailParams) (*mail_proto.MessagesInfoResponse, error) {
-	msfInfos, err := g.mailUC.SearchMessages(protoParams.UID, protoParams.FromUser, protoParams.ToUser, protoParams.Folder, protoParams.Filter)
+	msfInfos, err := g.mailUC.SearchMessages(protoParams.UID, protoParams.FromUser, protoParams.ToUser, protoParams.Folder, protoParams.Filter, protoParams.Reverse)
 	if err != nil {
 		return nil, pkgGrpc.HandleError(ctx, err)
 	}

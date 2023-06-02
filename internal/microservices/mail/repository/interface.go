@@ -11,8 +11,8 @@ type MailRepoI interface {
 	SelectCustomFoldersByUser(userID uint64, defaultLocalNames []string) ([]models.Folder, error)
 	//SelectFolderByUserNMessage(userID uint64, messageID uint64) (*models.Folder, error)
 	CheckExistingBox(userIDs []uint64, messageID uint64, folderID uint64) (bool, error)
-	SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error)
-	SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool) ([]models.MessageInfo, error)
+	SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool, reverse bool) ([]models.MessageInfo, error)
+	SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool, reverse bool) ([]models.MessageInfo, error)
 	SearchRecipients(userIDs []uint64) ([]models.UserInfo, error)
 	DeleteFolder(folderID uint64) error
 	DeleteMessageFromMessages(messageID uint64) error

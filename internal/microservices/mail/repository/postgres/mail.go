@@ -124,11 +124,16 @@ func (m mailRepository) CheckExistingBox(userIDs []uint64, messageID uint64, fol
 	return true, nil
 }
 
-func (m mailRepository) SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
+func (m mailRepository) SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool, reverse bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
+	var reverseParam string
+
+	if reverse {
+		reverseParam = " DESC"
+	}
 
 	tx := m.db.Model(Box{}).Select("*").Joins("JOIN "+Message{}.TableName(m.cfg.DB.DBSchemaName)+" using(message_id)").
-		Where("user_id IN ? AND folder_id = ? AND is_draft = ? AND deleted = false", userIDs, folderID, isDraft).Order("created_at DESC").Scan(&messages)
+		Where("user_id IN ? AND folder_id = ? AND is_draft = ? AND deleted = false", userIDs, folderID, isDraft).Order("created_at" + reverseParam).Scan(&messages)
 	if err := tx.Error; err != nil {
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
@@ -136,7 +141,7 @@ func (m mailRepository) SelectFolderMessagesByUserNFolderID(userIDs []uint64, fo
 	return messages, nil
 }
 
-func (m mailRepository) SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool) ([]models.MessageInfo, error) {
+func (m mailRepository) SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool, reverse bool) ([]models.MessageInfo, error) {
 	var messages []models.MessageInfo
 	var messagesIds []uint64
 
@@ -145,12 +150,22 @@ func (m mailRepository) SearchMessages(userIDs []uint64, folderID uint64, fromUs
 		return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
 	}
 
-	for _, mid := range messagesIds {
-		mInfo, err := m.SelectMessageByUserNMessage(userIDs, mid)
-		if err != nil {
-			return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+	if reverse {
+		for i := len(messagesIds) - 1; i >= 0; i-- {
+			mInfo, err := m.SelectMessageByUserNMessage(userIDs, messagesIds[i])
+			if err != nil {
+				return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+			}
+			messages = append(messages, *mInfo)
 		}
-		messages = append(messages, *mInfo)
+	} else {
+		for _, mid := range messagesIds {
+			mInfo, err := m.SelectMessageByUserNMessage(userIDs, mid)
+			if err != nil {
+				return nil, pkgErrors.WithMessage(errors.ErrInternal, err.Error())
+			}
+			messages = append(messages, *mInfo)
+		}
 	}
 
 	return messages, nil

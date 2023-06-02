@@ -55,7 +55,7 @@ const (
 type MailServiceClient interface {
 	GetFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
 	GetFolderInfo(ctx context.Context, in *UserFolder, opts ...grpc.CallOption) (*Folder, error)
-	GetFolderMessages(ctx context.Context, in *UserFolder, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
+	GetFolderMessages(ctx context.Context, in *FolderMessagesParams, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
 	SearchMessages(ctx context.Context, in *SearchMailParams, opts ...grpc.CallOption) (*MessagesInfoResponse, error)
 	SearchRecipients(ctx context.Context, in *UID, opts ...grpc.CallOption) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(ctx context.Context, in *UID, opts ...grpc.CallOption) (*FoldersResponse, error)
@@ -109,7 +109,7 @@ func (c *mailServiceClient) GetFolderInfo(ctx context.Context, in *UserFolder, o
 	return out, nil
 }
 
-func (c *mailServiceClient) GetFolderMessages(ctx context.Context, in *UserFolder, opts ...grpc.CallOption) (*MessagesInfoResponse, error) {
+func (c *mailServiceClient) GetFolderMessages(ctx context.Context, in *FolderMessagesParams, opts ...grpc.CallOption) (*MessagesInfoResponse, error) {
 	out := new(MessagesInfoResponse)
 	err := c.cc.Invoke(ctx, MailService_GetFolderMessages_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -349,7 +349,7 @@ func (c *mailServiceClient) GetOwnerEmailByFakeEmail(ctx context.Context, in *Ge
 type MailServiceServer interface {
 	GetFolders(context.Context, *UID) (*FoldersResponse, error)
 	GetFolderInfo(context.Context, *UserFolder) (*Folder, error)
-	GetFolderMessages(context.Context, *UserFolder) (*MessagesInfoResponse, error)
+	GetFolderMessages(context.Context, *FolderMessagesParams) (*MessagesInfoResponse, error)
 	SearchMessages(context.Context, *SearchMailParams) (*MessagesInfoResponse, error)
 	SearchRecipients(context.Context, *UID) (*SearchRecipientsResponse, error)
 	CreateDefaultFolders(context.Context, *UID) (*FoldersResponse, error)
@@ -388,7 +388,7 @@ func (UnimplementedMailServiceServer) GetFolders(context.Context, *UID) (*Folder
 func (UnimplementedMailServiceServer) GetFolderInfo(context.Context, *UserFolder) (*Folder, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolderInfo not implemented")
 }
-func (UnimplementedMailServiceServer) GetFolderMessages(context.Context, *UserFolder) (*MessagesInfoResponse, error) {
+func (UnimplementedMailServiceServer) GetFolderMessages(context.Context, *FolderMessagesParams) (*MessagesInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolderMessages not implemented")
 }
 func (UnimplementedMailServiceServer) SearchMessages(context.Context, *SearchMailParams) (*MessagesInfoResponse, error) {
@@ -516,7 +516,7 @@ func _MailService_GetFolderInfo_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _MailService_GetFolderMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserFolder)
+	in := new(FolderMessagesParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -528,7 +528,7 @@ func _MailService_GetFolderMessages_Handler(srv interface{}, ctx context.Context
 		FullMethod: MailService_GetFolderMessages_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MailServiceServer).GetFolderMessages(ctx, req.(*UserFolder))
+		return srv.(MailServiceServer).GetFolderMessages(ctx, req.(*FolderMessagesParams))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -97,6 +97,7 @@ routes:
   route_search_query_to_user: toUser
   route_search_query_folder: folder
   route_search_query_filter: filter
+  route_search_query_reverse: reverse
   route_recipients: /recipients/search
   route_create_folder: /folder/create
   route_edit_folder: /folder/{slug}/edit

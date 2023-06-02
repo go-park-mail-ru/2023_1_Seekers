@@ -42,10 +42,11 @@ func (g MailClientGRPC) GetFolderInfo(userID uint64, folderSlug string) (*models
 	return utils.FolderModelByProto(protoFolder), nil
 }
 
-func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
-	protoMsgInfo, err := g.mailClient.GetFolderMessages(context.TODO(), &mail_proto.UserFolder{
+func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string, reverse bool) ([]models.MessageInfo, error) {
+	protoMsgInfo, err := g.mailClient.GetFolderMessages(context.TODO(), &mail_proto.FolderMessagesParams{
 		UID:        userID,
 		FolderSlug: folderSlug,
+		Reverse:    reverse,
 	})
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - GetFolderMessages"))
@@ -54,13 +55,14 @@ func (g MailClientGRPC) GetFolderMessages(userID uint64, folderSlug string) ([]m
 	return utils.MessagesInfoModelByProto(protoMsgInfo), nil
 }
 
-func (g MailClientGRPC) SearchMessages(userId uint64, fromUser, toUser, folder, filter string) ([]models.MessageInfo, error) {
+func (g MailClientGRPC) SearchMessages(userId uint64, fromUser, toUser, folder, filter string, reverse bool) ([]models.MessageInfo, error) {
 	protoMsgInfo, err := g.mailClient.SearchMessages(context.TODO(), &mail_proto.SearchMailParams{
 		UID:      userId,
 		FromUser: fromUser,
 		ToUser:   toUser,
 		Folder:   folder,
 		Filter:   filter,
+		Reverse:  reverse,
 	})
 	if err != nil {
 		return nil, pkgGrpc.CauseError(errors.Wrap(err, "mail client - SearchMessages"))

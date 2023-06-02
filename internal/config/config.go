@@ -140,6 +140,7 @@ type Config struct {
 		RouteSearchQueryToUser             string `yaml:"route_search_query_to_user" env-default:"toUser"`
 		RouteSearchQueryFolder             string `yaml:"route_search_query_folder" env-default:"folder"`
 		RouteSearchQueryFilter             string `yaml:"route_search_query_filter" env-default:"filter"`
+		RouteSearchQueryReverse            string `yaml:"route_search_query_reverse" env-default:"reverse"`
 		RouteRecipients                    string `yaml:"route_recipients" env-default:"/recipients/search"`
 		RouteCreateFolder                  string `yaml:"route_create_folder" env-default:"/folder/create"`
 		RouteEditFolder                    string `yaml:"route_edit_folder" env-default:"/folder/{slug}/edit"`
