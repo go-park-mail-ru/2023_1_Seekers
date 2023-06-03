@@ -255,7 +255,7 @@ EXECUTE PROCEDURE update_count_messages_after_delete();
 
 -- для поиска сообщений по тексту, получателю и отправителю
 CREATE
-OR REPLACE FUNCTION get_messages(in_folder_id bigint, from_email text, to_email text, filter_text TEXT, in_is_draft bool)
+    OR REPLACE FUNCTION get_messages(in_folder_id bigint, from_email text, to_email text, filter_text TEXT, in_is_draft bool)
     RETURNS TABLE
             (
                 id bigint
@@ -263,28 +263,31 @@ OR REPLACE FUNCTION get_messages(in_folder_id bigint, from_email text, to_email 
 AS
 $$
 BEGIN
-RETURN QUERY
-    (
-    SELECT DISTINCT ON (m.message_id, m.created_at) m.message_id
-		FROM mail.folders AS f
-		JOIN mail.boxes AS b ON f.folder_id = in_folder_id AND
-								f.folder_id = b.folder_id AND
-								is_draft = in_is_draft
-		JOIN mail.messages AS m ON m.message_id = b.message_id AND
-								   (m.title ILIKE '%' || filter_text || '%' OR
-								   m.text ILIKE '%' || filter_text || '%')
-		JOIN mail.users AS u_from ON m.from_user_id = u_from.user_id AND
-									 u_from.email ILIKE '%' || from_email || '%'
-		LEFT JOIN mail.boxes AS b2 ON b.message_id = b2.message_id AND
-								 (b2.user_id != m.from_user_id OR
-								  b2.folder_id != in_folder_id)
-		LEFT JOIN mail.users AS u_to ON b2.user_id = u_to.user_id AND
-								   u_to.email ILIKE '%' || to_email || '%'
-		ORDER BY m.created_at, m.message_id
-    );
+    RETURN QUERY
+        (
+            SELECT DISTINCT ON (m.message_id, m.created_at) m.message_id
+            FROM mail.folders AS f
+                     JOIN mail.boxes AS b ON f.folder_id = in_folder_id AND
+                                             f.folder_id = b.folder_id AND
+                                             is_draft = in_is_draft
+                     JOIN mail.messages AS m ON m.message_id = b.message_id
+                     JOIN mail.users AS u_from ON m.from_user_id = u_from.user_id
+                     LEFT JOIN mail.boxes AS b2 ON b.message_id = b2.message_id AND
+                                                   (b2.user_id != m.from_user_id OR
+                                                    b2.folder_id != in_folder_id)
+                     LEFT JOIN mail.users AS u_to ON b2.user_id = u_to.user_id
+            WHERE (filter_text = '' AND from_email = '' AND to_email = '') or (filter_text != '' AND
+                                                                               (m.title ILIKE '%' || filter_text || '%' OR
+                                                                                m.text ILIKE '%' || filter_text || '%')) OR (from_email != '' AND
+                                                                                                                             u_from.email ILIKE '%' || from_email || '%') OR (to_email != '' AND
+                                                                                                                                                                              u_to.email ILIKE '%' || to_email || '%')
+            ORDER BY
+                m.created_at,
+                m.message_id
+        );
 end
 $$
-language 'plpgsql';
+    language 'plpgsql';
 
 -- для поиска получателей для конкретного пользователя, сначала недавние
 CREATE

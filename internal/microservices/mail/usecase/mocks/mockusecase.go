@@ -227,18 +227,18 @@ func (mr *MockUseCaseIMockRecorder) GetFolderInfo(userID, folderSlug interface{}
 }
 
 // GetFolderMessages mocks base method.
-func (m *MockUseCaseI) GetFolderMessages(userID uint64, folderSlug string) ([]models.MessageInfo, error) {
+func (m *MockUseCaseI) GetFolderMessages(userID uint64, folderSlug string, reverse bool) ([]models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFolderMessages", userID, folderSlug)
+	ret := m.ctrl.Call(m, "GetFolderMessages", userID, folderSlug, reverse)
 	ret0, _ := ret[0].([]models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetFolderMessages indicates an expected call of GetFolderMessages.
-func (mr *MockUseCaseIMockRecorder) GetFolderMessages(userID, folderSlug interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) GetFolderMessages(userID, folderSlug, reverse interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFolderMessages", reflect.TypeOf((*MockUseCaseI)(nil).GetFolderMessages), userID, folderSlug)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFolderMessages", reflect.TypeOf((*MockUseCaseI)(nil).GetFolderMessages), userID, folderSlug, reverse)
 }
 
 // GetFolders mocks base method.
@@ -284,6 +284,21 @@ func (m *MockUseCaseI) GetMessagesByFakeEmail(userID uint64, fakeEmail string) (
 func (mr *MockUseCaseIMockRecorder) GetMessagesByFakeEmail(userID, fakeEmail interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessagesByFakeEmail", reflect.TypeOf((*MockUseCaseI)(nil).GetMessagesByFakeEmail), userID, fakeEmail)
+}
+
+// GetOwnerEmailByFakeEmail mocks base method.
+func (m *MockUseCaseI) GetOwnerEmailByFakeEmail(fakeEmail string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOwnerEmailByFakeEmail", fakeEmail)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOwnerEmailByFakeEmail indicates an expected call of GetOwnerEmailByFakeEmail.
+func (mr *MockUseCaseIMockRecorder) GetOwnerEmailByFakeEmail(fakeEmail interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOwnerEmailByFakeEmail", reflect.TypeOf((*MockUseCaseI)(nil).GetOwnerEmailByFakeEmail), fakeEmail)
 }
 
 // MarkMessageAsSeen mocks base method.
@@ -346,18 +361,18 @@ func (mr *MockUseCaseIMockRecorder) SaveDraft(userID, message interface{}) *gomo
 }
 
 // SearchMessages mocks base method.
-func (m *MockUseCaseI) SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string) ([]models.MessageInfo, error) {
+func (m *MockUseCaseI) SearchMessages(userID uint64, fromUser, toUser, folderSlug, filterText string, reverse bool) ([]models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchMessages", userID, fromUser, toUser, folderSlug, filterText)
+	ret := m.ctrl.Call(m, "SearchMessages", userID, fromUser, toUser, folderSlug, filterText, reverse)
 	ret0, _ := ret[0].([]models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchMessages indicates an expected call of SearchMessages.
-func (mr *MockUseCaseIMockRecorder) SearchMessages(userID, fromUser, toUser, folderSlug, filterText interface{}) *gomock.Call {
+func (mr *MockUseCaseIMockRecorder) SearchMessages(userID, fromUser, toUser, folderSlug, filterText, reverse interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockUseCaseI)(nil).SearchMessages), userID, fromUser, toUser, folderSlug, filterText)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockUseCaseI)(nil).SearchMessages), userID, fromUser, toUser, folderSlug, filterText, reverse)
 }
 
 // SearchRecipients mocks base method.

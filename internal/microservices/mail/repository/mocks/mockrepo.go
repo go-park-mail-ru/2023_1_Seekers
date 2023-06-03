@@ -207,18 +207,18 @@ func (mr *MockMailRepoIMockRecorder) IsOwnerFakeAccount(userID, fakeID interface
 }
 
 // SearchMessages mocks base method.
-func (m *MockMailRepoI) SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft bool) ([]models.MessageInfo, error) {
+func (m *MockMailRepoI) SearchMessages(userIDs []uint64, folderID uint64, fromUser, toUser, filterText string, isDraft, reverse bool) ([]models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchMessages", userIDs, folderID, fromUser, toUser, filterText, isDraft)
+	ret := m.ctrl.Call(m, "SearchMessages", userIDs, folderID, fromUser, toUser, filterText, isDraft, reverse)
 	ret0, _ := ret[0].([]models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchMessages indicates an expected call of SearchMessages.
-func (mr *MockMailRepoIMockRecorder) SearchMessages(userIDs, folderID, fromUser, toUser, filterText, isDraft interface{}) *gomock.Call {
+func (mr *MockMailRepoIMockRecorder) SearchMessages(userIDs, folderID, fromUser, toUser, filterText, isDraft, reverse interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockMailRepoI)(nil).SearchMessages), userIDs, folderID, fromUser, toUser, filterText, isDraft)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchMessages", reflect.TypeOf((*MockMailRepoI)(nil).SearchMessages), userIDs, folderID, fromUser, toUser, filterText, isDraft, reverse)
 }
 
 // SearchRecipients mocks base method.
@@ -297,18 +297,18 @@ func (mr *MockMailRepoIMockRecorder) SelectFolderByUserNFolderSlug(userID, folde
 }
 
 // SelectFolderMessagesByUserNFolderID mocks base method.
-func (m *MockMailRepoI) SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft bool) ([]models.MessageInfo, error) {
+func (m *MockMailRepoI) SelectFolderMessagesByUserNFolderID(userIDs []uint64, folderID uint64, isDraft, reverse bool) ([]models.MessageInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SelectFolderMessagesByUserNFolderID", userIDs, folderID, isDraft)
+	ret := m.ctrl.Call(m, "SelectFolderMessagesByUserNFolderID", userIDs, folderID, isDraft, reverse)
 	ret0, _ := ret[0].([]models.MessageInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SelectFolderMessagesByUserNFolderID indicates an expected call of SelectFolderMessagesByUserNFolderID.
-func (mr *MockMailRepoIMockRecorder) SelectFolderMessagesByUserNFolderID(userIDs, folderID, isDraft interface{}) *gomock.Call {
+func (mr *MockMailRepoIMockRecorder) SelectFolderMessagesByUserNFolderID(userIDs, folderID, isDraft, reverse interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderMessagesByUserNFolderID", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderMessagesByUserNFolderID), userIDs, folderID, isDraft)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectFolderMessagesByUserNFolderID", reflect.TypeOf((*MockMailRepoI)(nil).SelectFolderMessagesByUserNFolderID), userIDs, folderID, isDraft, reverse)
 }
 
 // SelectFoldersByUser mocks base method.
