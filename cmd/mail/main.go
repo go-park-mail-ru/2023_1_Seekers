@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	_fStorageClient "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/file_storage/client"
 	_mailRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail/repository/postgres"
@@ -32,11 +33,11 @@ func main() {
 	globalLogger := logger.Init(log.InfoLevel, *cfg.Logger.LogsUseStdOut, cfg.Logger.LogsMailFileName, cfg.Logger.LogsTimeFormat, cfg.Project.ProjectBaseDir, cfg.Logger.LogsDir)
 
 	var connStr = fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
-		cfg.DB.DBUser, cfg.DB.DBPassword, cfg.DB.DBHost, cfg.DB.DBPort, cfg.DB.DBName, cfg.DB.DBSSLMode)
+		cfg.DB.DBMailServiceUserName, cfg.DB.DBMailServicePw, cfg.DB.DBHost, cfg.DB.DBPort, cfg.DB.DBName, cfg.DB.DBSSLMode)
 
 	tablePrefix := cfg.DB.DBSchemaName + "."
 
-	db, err := connectors.NewGormDb(connStr, tablePrefix)
+	db, err := connectors.NewGormDb(connStr, tablePrefix, cfg.DB.DBMaxOpenConnections)
 	if err != nil {
 		log.Fatalf("db connection error %v", err)
 	}

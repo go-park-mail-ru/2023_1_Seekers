@@ -9,6 +9,10 @@ api:
 
 project:
   project_base_dir: 2023_1_Seekers
+
+db:
+  db_max_open_connections: 10
+
 logger:
   logs_dir: logs/app/
   logs_api_file_name: api/dev_

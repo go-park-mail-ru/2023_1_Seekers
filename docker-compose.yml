@@ -2,13 +2,14 @@ version: "3.8"
 
 services:
   db:
+    container_name: postgres
     env_file:
       - .env
     image: postgres:latest
-    command: [ "postgres",
-               "-c", "log_directory=/var/log/postgresql",
-               "-c", "logging_collector=on",
-               "-c", "log_statement=all" ]
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+#    && psql -U ${POSTGRES_USER} -W ${POSTGRES_PASSWORD} -v db_mail_service_user_pw=${DB_MAIL_SERVICE_USER_PW} -v db_user_service_user_pw=${DB_USER_SERVICE_USER_PW}
+
+
     networks:
       my_network:
         ipv4_address: 172.28.0.3
@@ -21,11 +22,13 @@ services:
       retries: 3
     volumes:
       - ./scripts/sql:/docker-entrypoint-initdb.d
+      - ./scripts/setup_user_sql:/setup_user_sql
       - ./logs/postgres:/var/log/postgresql
+      - ./conf/postgres/postgres_dev.conf:/etc/postgresql/postgresql.conf
     restart: "no"
 
-
   admin_db:
+    container_name: admin_db
     env_file:
       - .env
     image: dpage/pgadmin4:latest
@@ -39,6 +42,7 @@ services:
     restart: "no"
 
   cache:
+    container_name: redis
     env_file:
       - .env
     image: redis:6.2-alpine
@@ -63,6 +67,7 @@ services:
 #    restart: "no"
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:latest
     network_mode: "host"
     #    networks:
@@ -83,48 +88,48 @@ services:
     #      - api
     restart: "no"
 
-  node_exporter:
-    image: quay.io/prometheus/node-exporter:latest
-    networks:
-      my_network:
-        ipv4_address: 172.28.0.17
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-      - /:/host:ro,rslave
-    command:
-      - '--path.rootfs=/host'
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-    user: root
-    privileged: true
-    deploy:
-      mode: global
-    ports:
-      - "9100:9100"
-    restart: "no"
+#  node_exporter:
+#    image: quay.io/prometheus/node-exporter:latest
+#    networks:
+#      my_network:
+#        ipv4_address: 172.28.0.17
+#    volumes:
+#      - /proc:/host/proc:ro
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#      - /:/host:ro,rslave
+#    command:
+#      - '--path.rootfs=/host'
+#      - '--path.procfs=/host/proc'
+#      - '--path.sysfs=/host/sys'
+#      - --collector.filesystem.ignored-mount-points
+#      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+#    user: root
+#    privileged: true
+#    deploy:
+#      mode: global
+#    ports:
+#      - "9100:9100"
+#    restart: "no"
 
-  grafana:
-    image: grafana/grafana:latest
-    depends_on:
-      - prometheus
-    volumes:
-      - ./metrics/data/grafana:/var/lib/grafana
-      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
-      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
-    env_file:
-      - .env
-    network_mode: "host"
-    #    ports:
-    #      - "3000:3000"
-    #    networks:
-    #      my_network:
-    #        ipv4_address: 172.28.0.18
-    restart: "no"
-
+#  grafana:
+#    image: grafana/grafana:latest
+#    depends_on:
+#      - prometheus
+#    volumes:
+#      - ./metrics/data/grafana:/var/lib/grafana
+#      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
+#      - ./metrics/config/grafana/grafana.ini:/etc/grafana/grafana.ini
+#    env_file:
+#      - .env
+#    network_mode: "host"
+#    #    ports:
+#    #      - "3000:3000"
+#    #    networks:
+#    #      my_network:
+#    #        ipv4_address: 172.28.0.18
+#    restart: "no"
+#
 
 volumes:
   cache:

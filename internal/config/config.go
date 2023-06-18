@@ -1,9 +1,10 @@
 package config
 
 import (
+	"time"
+
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type Config struct {
@@ -75,13 +76,18 @@ type Config struct {
 	} `yaml:"smtp_server"`
 
 	DB struct {
-		DBUser       string `env:"POSTGRES_USER"`
-		DBPassword   string `env:"POSTGRES_PASSWORD"`
-		DBHost       string `env:"POSTGRES_HOST"`
-		DBPort       string `env:"POSTGRES_PORT"`
-		DBName       string `env:"POSTGRES_DB"`
-		DBSchemaName string `env:"POSTGRES_SCHEMA"`
-		DBSSLMode    string `env:"POSTGRES_SSL_MODE"`
+		DBUser                string `env:"POSTGRES_USER"`
+		DBPassword            string `env:"POSTGRES_PASSWORD"`
+		DBUserServiceUserName string `env:"DB_USER_SERVICE_USER_NAME"`
+		DBUserServicePw       string `env:"DB_USER_SERVICE_USER_PW"`
+		DBMailServiceUserName string `env:"DB_MAIL_SERVICE_USER_NAME"`
+		DBMailServicePw       string `env:"DB_MAIL_SERVICE_USER_PW"`
+		DBHost                string `env:"POSTGRES_HOST"`
+		DBPort                string `env:"POSTGRES_PORT"`
+		DBName                string `env:"POSTGRES_DB"`
+		DBSchemaName          string `env:"POSTGRES_SCHEMA"`
+		DBSSLMode             string `env:"POSTGRES_SSL_MODE"`
+		DBMaxOpenConnections  int    `yaml:"db_max_open_connections" env-default:"10"`
 	} `yaml:"db"`
 
 	Redis struct {

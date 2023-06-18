@@ -54,13 +54,17 @@ build-prod:
 	sudo systemctl restart nginx
 
 build-dev-env:
-	sudo systemctl stop nginx.service || true 
-	sudo systemctl stop postgresql || true 
+	sudo systemctl stop nginx.service || sudo launchctl nginx || true
+	sudo systemctl stop postgresql || sudo launchctl stop postgresql-15 ||  true
 	mkdir -p -m 777 logs/postgres
 	mkdir -p -m 777 logs/app
-	docker-compose up -d --build --remove-orphans
-	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
-	sudo systemctl restart nginx
+	make docker-stop-back
+	make docker-rm-volumes || true
+	docker-compose up -d --build --remove-orphans db
+	sudo docker exec -it postgres psql -U ${POSTGRES_USER} -W ${POSTGRES_PASSWORD} -d ${POSTGRES_DB} -a -f /setup_user_sql/000_setup_users.sql -v db_mail_service_user_pw="'${DB_MAIL_SERVICE_USER_PW}'" -v db_user_service_user_pw="'${DB_USER_SERVICE_USER_PW}'"
+	docker-compose up -d --remove-orphans
+#	sudo cp ./nginx/nginx.conf /etc/nginx/nginx.conf
+#	sudo systemctl restart nginx
 
 run-dev:
 	@make build-dev-env
@@ -91,17 +95,17 @@ docker-prune:
 	@bash -c 'docker system prune -f'
 
 docker-stop-back:
-	docker container stop 2023_1_seekers_grafana_1 || true
-	docker container stop 2023_1_seekers_prometheus_1 || true
+	docker container stop grafana || true
+	docker container stop prometheus || true
 	docker container stop 2023_1_seekers_api_1 || true
 	docker container stop 2023_1_seekers_mail_1 || true
 	docker container stop 2023_1_seekers_auth_1 || true
 	docker container stop 2023_1_seekers_user_1 || true
-	docker container stop 2023_1_seekers_admin_db_1 || true
-	docker container stop 2023_1_seekers_db_1 || true
-	docker container stop 2023_1_seekers_cache_1 || true
-	docker container stop 2023_1_seekers_file_storage_1 || true
-	docker container stop 2023_1_seekers_node_exporter_1 || true
+	docker container stop admin_db || true
+	docker container stop postgres || true
+	docker container stop cache || true
+	docker container stop redis || true
+	docker container stop node_exporter || true
 	make docker-prune
 
 docker-stop-all:

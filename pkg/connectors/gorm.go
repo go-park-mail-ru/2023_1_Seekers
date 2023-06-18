@@ -7,10 +7,21 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func NewGormDb(connStr, tablePrefix string) (*gorm.DB, error) {
-	return gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
+func NewGormDb(connStr, tablePrefix string, maxOpenCons int) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: connStr}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
 		TablePrefix:   tablePrefix,
 		SingularTable: false,
 	},
-		Logger: logger.Default.LogMode(logger.Silent)})
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		return nil, err
+	}
+	pgDb, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	pgDb.SetMaxOpenConns(maxOpenCons)
+	return db, nil
 }

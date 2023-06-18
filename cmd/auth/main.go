@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
 	_authRepo "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/repository/redis"
 	_authServer "github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/auth/server"

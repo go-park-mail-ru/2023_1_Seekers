@@ -33,9 +33,9 @@ services:
       - .env
     image: postgres:latest
     command: [ "postgres",
-               "-c", "log_directory=/var/log/postgresql",
-               "-c", "logging_collector=on",
-               "-c", "log_statement=all" ]
+               "-c", "config_file=/etc/postgresql/postgresql.conf",
+               "-c", "db_mail_service_user_pw=${DB_MAIL_SERVICE_USER_PW}",
+               "-c", "db_user_service_user_pw=${DB_USER_SERVICE_USER_PW}"]
     networks:
       my_network:
         ipv4_address: 172.28.0.3
@@ -50,6 +50,7 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./scripts/sql:/docker-entrypoint-initdb.d
       - ./logs/postgres:/var/log/postgresql
+      - ./conf/postgres/postgres_prod.conf:/etc/postgresql/postgresql.conf
     restart: always
 
   admin_db:
