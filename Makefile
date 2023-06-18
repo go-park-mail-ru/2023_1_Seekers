@@ -49,7 +49,11 @@ build-prod:
 	sudo systemctl stop postgresql || true
 	mkdir -p -m 777 logs/app
 	mkdir -p -m 777 logs/postgres
-	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
+	make docker-stop-back
+	make docker-rm-volumes || true
+	docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans db
+	sudo docker exec -it postgres psql -U ${POSTGRES_USER} -W ${POSTGRES_PASSWORD} -d ${POSTGRES_DB} -a -f /setup_user_sql/000_setup_users.sql -v db_mail_service_user_pw="'${DB_MAIL_SERVICE_USER_PW}'" -v db_user_service_user_pw="'${DB_USER_SERVICE_USER_PW}'"
+	docker-compose -f docker-compose-prod.yml up -d --remove-orphans
 	sudo cp ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
