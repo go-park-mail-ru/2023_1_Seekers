@@ -50,31 +50,31 @@ values (1, 'inbox', 'Входящие', 0, 0), --1
 select *
 from mail.folders;
 
-insert into mail.messages(from_user_id, size, title, created_at, text)
-values (3, 100, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
-       (4, 100, 'Spam letter', '2023-01-02',
+insert into mail.messages(from_user_id, title, created_at, text)
+values (3, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
+       (4, 'Spam letter', '2023-01-02',
         'Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis'),
-       (3, 100, 'Lorem', '2023-01-04',
+       (3, 'Lorem', '2023-01-04',
         'Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus.'),
-       (4, 100, 'Very interesting letter', '2023-01-05',
+       (4, 'Very interesting letter', '2023-01-05',
         'Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'),
-       (3, 100, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
-       (4, 100, 'Do you like to read books?', '2023-01-06', 'We have a lot of new books that may interest you'),
-       (3, 100, 'Advertisement', '2023-01-07', 'Hi, visit our shop!'),
-       (4, 100, 'Let’s get acquainted', '2023-01-29',
+       (3, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
+       (4, 'Do you like to read books?', '2023-01-06', 'We have a lot of new books that may interest you'),
+       (3, 'Advertisement', '2023-01-07', 'Hi, visit our shop!'),
+       (4, 'Let’s get acquainted', '2023-01-29',
         'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout'),
-       (2, 100, 'Not spam', '2023-01-29', 'Open this letter please'),
-       (2, 100, 'Vacancy', '2023-01-01', 'We will be glad to offer you this job'),
-       (2, 100, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
-       (2, 100, 'Spam letter', '2023-01-02',
+       (2, 'Not spam', '2023-01-29', 'Open this letter please'),
+       (2, 'Vacancy', '2023-01-01', 'We will be glad to offer you this job'),
+       (2, 'Invitation', '2023-01-01', 'Hello, we decided to invite you to our party, lets go it will be fine!'),
+       (2, 'Spam letter', '2023-01-02',
         'Nunc non velit commodo, vestibulum enim ullamcorper, lobortis mi. Integer eu elit nibh. Integer bibendum semper arcu, eget consectetur nisi gravida eu. Suspendisse maximus id urna a volutpat. Quisque nec iaculis purus, non facilisis massa. Maecenas finibus dui ipsum, ut tempor sapien tincidunt blandit. Ut at iaculis eros, ultrices iaculis nibh. Mauris fermentum elit erat, at cursus urna euismod vel. In congue, ipsum a fermentum semper, dolor sem scelerisque leo, a tempus risus orci eu leo. Fusce vulputate venenatis imperdiet. Vestibulum interdum pellentesque facilisis'),
-       (2, 100, 'Lorem', '2023-01-04',
+       (2, 'Lorem', '2023-01-04',
         'Mauris imperdiet massa ante. Pellentesque feugiat nisl nec ultrices laoreet. Aenean a mauris mi. Sed auctor egestas nulla et vulputate. Praesent lobortis nulla ante, vel dignissim odio aliquet et. Suspendisse potenti. Donec venenatis nibh a sem consectetur, bibendum consectetur metus venenatis. Mauris lorem tellus, finibus id dui sit amet, facilisis fermentum orci. Mauris arcu ante, lacinia vitae orci in, tempus elementum lacus. Donec eu augue vulputate, tempor neque nec, efficitur purus. Mauris ut lorem non sapien placerat mattis. In in lacus a lorem viverra laoreet ut et orci. Maecenas auctor, justo nec hendrerit interdum, nibh nisi consectetur sapien, id ultrices lacus mi sed risus.'),
-       (2, 100, 'Very interesting letter', '2023-01-05',
+       (2, 'Very interesting letter', '2023-01-05',
         'Morbi sit amet porttitor sapien, eget venenatis est. Suspendisse sollicitudin elit velit, quis sodales dolor maximus id. Vestibulum gravida scelerisque nibh, sit amet tincidunt augue gravida nec. Maecenas non placerat justo, at feugiat nulla. Phasellus dapibus a mi ut interdum. Aliquam nec quam feugiat, rutrum urna ut, cursus purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'),
-       (2, 100, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
-       (2, 100, 'Not spam', '2023-01-06', 'Open this letter please'),
-       (2, 100, 'Advertisement', '2023-01-07', 'Hi, visit our shop!');
+       (2, 'Small text letter', '2023-01-06', 'Hi! how are you?'),
+       (2, 'Not spam', '2023-01-06', 'Open this letter please'),
+       (2, 'Advertisement', '2023-01-07', 'Hi, visit our shop!');
 
 select *
 from mail.messages;
