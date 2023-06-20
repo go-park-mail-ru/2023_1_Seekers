@@ -252,13 +252,13 @@ RETURN QUERY (SELECT messages.message_id --, messages.text, messages.title, boxe
                                 on boxes.message_id = messages.message_id AND boxes.folder_id = folders.folder_id AND
                                    boxes.user_id = from_id
                            JOIN mail.users on users.user_id = messages.from_user_id
-                  WHERE (local_name ilike '%' || folder || '%' OR
-                         name ilike '%' || folder || '%')
-                    AND (email ilike '%' || from_email || '%'
-                      AND email ilike '%' || to_email || '%')
-                    AND (email ilike '%' || filter_text || '%'
-                      OR title ilike '%' || filter_text || '%'
-                      OR text ilike '%' || filter_text || '%')
+                  WHERE (lower(local_name) ilike '%' || lower(folder) || '%' OR
+                         lower(name) like '%' || lower(folder) || '%')
+                    AND (email like '%' || from_email || '%'
+                      AND email like '%' || to_email || '%')
+                    AND (lower(email) like '%' || lower(filter_text) || '%'
+                      OR lower(title) like '%' || lower(filter_text) || '%'
+                      OR lower(TEXT) like '%' || lower(filter_text) || '%')
                   ORDER BY messages.message_id DESC);
 end
 $$
@@ -293,5 +293,45 @@ RETURN QUERY (SELECT user_id, first_name, last_name, email
 end
 $$
 language 'plpgsql';
+
+-- Индексы
+-- PostgreSQL автоматически строит индексы на первичные ключи и unique
+-- В проекте одно поле unique - email в таблице users, так как у каждого пользователя должен быть свой почтовый адрес
+
+-- На внешние ключи необходимы индексы, так как они помогают при запросах с джойнами по
+-- этим внешним ключам, а также при фильтрации по ним
+-- Внешний ключ user_id в таблице folders
+CREATE INDEX index_fk_folders_user_id ON mail.folders (user_id);
+
+-- Внешний ключ from_user_id в таблице messages
+CREATE INDEX index_fk_messages_from_user_id ON mail.messages (from_user_id);
+
+-- Внешний ключ message_id в таблице attaches
+CREATE INDEX index_fk_attaches_message_id ON mail.attaches (message_id);
+
+-- Внешние ключи user_id, message_id и folder_id в таблице boxes
+CREATE INDEX index_fk_boxes_user_id ON mail.boxes (user_id);
+CREATE INDEX index_fk_boxes_message_id ON mail.boxes (message_id);
+CREATE INDEX index_fk_boxes_folder_id ON mail.boxes (folder_id);
+
+
+-- Индексы для фильтрации
+-- Фильтрация по name и local_name в таблице folders
+-- internal/microservices/mail/repository/postgres/mail.go:52
+CREATE INDEX index_filter_folders_local_name ON mail.folders (local_name);
+-- internal/microservices/mail/repository/postgres/mail.go:67
+CREATE INDEX index_filter_folders_name ON mail.folders (name);
+
+-- Фильтрация по title, text в таблице messages
+-- (запросы по поиску сообщений ((internal/microservices/mail/repository/postgres/mail.go:143)))
+CREATE INDEX index_filter_messages_title ON mail.messages (lower(title));
+CREATE INDEX index_filter_messages_text ON mail.messages (lower(text));
+
+
+-- Индексы для сортировки
+-- Сортировка по created_at в таблице messages
+-- (запросы по выборке сообщений из папки (internal/microservices/mail/repository/postgres/mail.go:131)
+-- или поиск по сообщениям (internal/microservices/mail/repository/postgres/mail.go:143))
+CREATE INDEX index_order_messages_created_at ON mail.messages (created_at);
 
 VACUUM ANALYZE;
