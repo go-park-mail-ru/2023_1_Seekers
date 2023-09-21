@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	_ "github.com/go-park-mail-ru/2023_1_Seekers/docs"
 	_api "github.com/go-park-mail-ru/2023_1_Seekers/internal/api/http"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
@@ -19,10 +24,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 // @title MailBx Swagger API
@@ -85,7 +86,7 @@ func main() {
 
 	go func() {
 		for {
-			if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub); err != nil {
+			if err = server.RunSmtpServer(cfg, mailServiceClient, userServiceClient, authServiceClient, hub, globalLogger); err != nil {
 				log.Fatal("smtp server stopped", err)
 			}
 		}

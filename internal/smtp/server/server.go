@@ -10,12 +10,13 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/mail"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/smtp/server/backend"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI, h *ws.Hub) error {
-	smtpBackend := backend.NewSmtpBackend(cfg, mailClient, userClient, authClient, h)
+func RunSmtpServer(cfg *config.Config, mailClient mail.UseCaseI, userClient user.UseCaseI, authClient auth.UseCaseI, h *ws.Hub, l *logger.Logger) error {
+	smtpBackend := backend.NewSmtpBackend(cfg, mailClient, userClient, authClient, h, l)
 
 	s := smtp.NewServer(smtpBackend)
 

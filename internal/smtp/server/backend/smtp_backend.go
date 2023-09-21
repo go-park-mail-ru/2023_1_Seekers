@@ -13,10 +13,10 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/models"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/common"
+	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/logger"
 	pkgSmtp "github.com/go-park-mail-ru/2023_1_Seekers/pkg/smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 type SmtpBackend struct {
@@ -25,10 +25,11 @@ type SmtpBackend struct {
 	userClient user.UseCaseI
 	authClient auth.UseCaseI
 	hub        *ws.Hub
+	logger     *logger.Logger
 }
 
-func NewSmtpBackend(c *config.Config, mailC _mail.UseCaseI, userC user.UseCaseI, authC auth.UseCaseI, h *ws.Hub) *SmtpBackend {
-	return &SmtpBackend{cfg: c, mailClient: mailC, userClient: userC, authClient: authC, hub: h}
+func NewSmtpBackend(c *config.Config, mailC _mail.UseCaseI, userC user.UseCaseI, authC auth.UseCaseI, h *ws.Hub, l *logger.Logger) *SmtpBackend {
+	return &SmtpBackend{cfg: c, mailClient: mailC, userClient: userC, authClient: authC, hub: h, logger: l}
 }
 
 type Session struct {
@@ -37,6 +38,7 @@ type Session struct {
 	userClient user.UseCaseI
 	authClient auth.UseCaseI
 	hub        *ws.Hub
+	logger     *logger.Logger
 	username   string
 	password   string
 	isAuth     bool
@@ -47,7 +49,7 @@ type Session struct {
 }
 
 func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
-	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, userClient: bkd.userClient, authClient: bkd.authClient, hub: bkd.hub}, nil
+	return &Session{cfg: bkd.cfg, mailClient: bkd.mailClient, userClient: bkd.userClient, authClient: bkd.authClient, hub: bkd.hub, logger: bkd.logger}, nil
 }
 
 func (s *Session) AuthPlain(username, password string) error {
@@ -81,7 +83,7 @@ func (s *Session) Rcpt(to string) error {
 }
 
 func (s *Session) Data(r io.Reader) error {
-	log.Infof("[SMTP] send_mail from: %s to: %v", s.from, s.to)
+	s.logger.Infof("[SMTP] send_mail from: %s to: %v", s.from, s.to)
 	bytesMail, err := io.ReadAll(r)
 	if err != nil {
 		return errors.Wrap(err, "failed read message")
@@ -249,6 +251,6 @@ func (s *Session) DialAndSend(email []byte, to string) error {
 		return errors.Wrap(err, "failed dial and send")
 	}
 
-	log.Debug("success send email")
+	s.logger.Info("success send email")
 	return nil
 }
