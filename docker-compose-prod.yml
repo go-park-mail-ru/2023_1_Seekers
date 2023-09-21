@@ -15,7 +15,7 @@ services:
         condition: service_started
     volumes:
       # - ${VENDOR}:/go/pkg/
-      - /etc/letsencrypt/archive/mailbx/mailbx.ru:/app/certs
+      - /etc/letsencrypt/live/mailbx/mailbx.ru:/app/certs
       - ./logs/app:/app/logs/app
     build:
       context: .
