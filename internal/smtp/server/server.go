@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"

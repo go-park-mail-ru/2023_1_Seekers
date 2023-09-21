@@ -2,6 +2,9 @@ package backend
 
 import (
 	"bytes"
+	"io"
+	"time"
+
 	"github.com/emersion/go-smtp"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/api/ws"
 	"github.com/go-park-mail-ru/2023_1_Seekers/internal/config"
@@ -14,8 +17,6 @@ import (
 	"github.com/go-park-mail-ru/2023_1_Seekers/pkg/validation"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"time"
 )
 
 type SmtpBackend struct {
@@ -50,6 +51,7 @@ func (bkd *SmtpBackend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 }
 
 func (s *Session) AuthPlain(username, password string) error {
+	// зашита от дурака
 	if password != s.cfg.SmtpServer.SecretPassword {
 		_, _, err := s.authClient.SignIn(&models.FormLogin{
 			Login:    username,
@@ -79,6 +81,7 @@ func (s *Session) Rcpt(to string) error {
 }
 
 func (s *Session) Data(r io.Reader) error {
+	log.Infof("[SMTP] send_mail from: %s to: %v", s.from, s.to)
 	bytesMail, err := io.ReadAll(r)
 	if err != nil {
 		return errors.Wrap(err, "failed read message")
