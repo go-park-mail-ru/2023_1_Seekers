@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type logHook struct {
@@ -60,7 +61,7 @@ func Init(level logrus.Level, toStdout bool, logsFileName, timeFormat, baseDir, 
 	l.SetReportCaller(true)
 	l.SetFormatter(&Formatter{
 		TimeFormat:  timeFormat,
-		Colors:      true,
+		Colors:      false,
 		Caller:      true,
 		FieldsSpace: true,
 		LevelFirst:  false,
