@@ -135,7 +135,7 @@ cors:
     - http://localhost:8002
     - http://localhost
     - http://127.0.0.1
-    - http://89.208.197.150:8002
+    - http://89.208.222.33:8002
     - https://mailbx.ru
     - https://www.mailbx.ru
   allowed_methods:
